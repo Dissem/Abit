@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="connection_modes">
+        <item>full</item>
+        <item>trusted</item>
+        <item>offline</item>
+    </string-array>
+    <string-array name="connection_mode_values">
+        <item>A full node, receiving and relaying objects all the time.</item>
+        <item>Connect to a trusted node from time to time to get new objects.</item>
+        <item>Don\'t connect to the network.</item>
+    </string-array>
+</resources>

@@ -1,0 +1,24 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme.Base" parent="MaterialDrawerTheme.Light.DarkToolbar.TranslucentStatus">
+
+        <item name="android:activatedBackgroundIndicator">@color/primary_light</item>
+
+        <!-- MaterialDrawer specific values -->
+        <item name="material_drawer_background">@color/primary_dark</item>
+        <item name="material_drawer_icons">@color/icons</item>
+        <item name="material_drawer_primary_icon">@color/icons</item>
+        <item name="material_drawer_primary_text">@color/icons</item>
+        <item name="material_drawer_secondary_text">@color/icons</item>
+        <item name="material_drawer_hint_text">@color/icons</item>
+        <item name="material_drawer_divider">@color/icons</item>
+        <item name="material_drawer_selected">@color/primary</item>
+        <item name="material_drawer_selected_text">@color/icons</item>
+        <item name="material_drawer_header_selection_text">@color/icons</item>
+
+    </style>
+
+    <style name="AppTheme" parent="AppTheme.Base"/>
+
+</resources>

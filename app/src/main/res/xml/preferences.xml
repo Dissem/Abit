@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+    <ListPreference
+            android:key="wifi_mode"
+            android:title="@string/wifi_mode"
+            android:dialogTitle="@string/wifi_mode"
+            android:entries="@array/connection_modes"
+            android:entryValues="@array/connection_mode_values"/>
+    -->
+    <SwitchPreference
+            android:key="wifi_only"
+            android:title="@string/wifi_only"
+            android:summary="@string/wifi_only_summary"
+            android:defaultValue="true"/>
+</PreferenceScreen>

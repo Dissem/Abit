@@ -1,0 +1,51 @@
+apply plugin: 'idea'
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        applicationId "ch.dissem.apps.abit"
+        minSdkVersion 15
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support:support-v4:22.2.1'
+    compile 'com.android.support:design:22.2.1'
+
+    compile 'ch.dissem.jabit:jabit-domain:0.2.1-SNAPSHOT'
+    compile 'ch.dissem.jabit:jabit-networking:0.2.1-SNAPSHOT'
+    compile 'ch.dissem.jabit:jabit-repositories:0.2.1-SNAPSHOT'
+    compile 'ch.dissem.jabit:jabit-security-spongy:0.2.1-SNAPSHOT'
+
+    compile 'org.sqldroid:sqldroid:1.0.3'
+    compile 'org.slf4j:slf4j-android:1.7.12'
+
+    compile('com.mikepenz:materialdrawer:3.1.0@aar') {
+        transitive = true
+    }
+}
+
+idea.module {
+    downloadJavadoc = true
+    downloadSources = true
+}
+
+android {
+    lintOptions {
+        abortOnError false
+    }
+}
