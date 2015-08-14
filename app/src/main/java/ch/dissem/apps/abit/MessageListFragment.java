@@ -1,6 +1,7 @@
 package ch.dissem.apps.abit;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ListFragment;
@@ -9,8 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.Plaintext;
@@ -97,7 +96,7 @@ public class MessageListFragment extends ListFragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MessageListFragment.this.getActivity(), "TODO", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(getActivity().getApplicationContext(), ComposeMessageActivity.class));
             }
         });
 

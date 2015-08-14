@@ -5,13 +5,16 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Toast;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
+import com.mikepenz.community_material_typeface_library.CommunityMaterial;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.Drawer;
@@ -59,6 +62,7 @@ public class MessageListActivity extends AppCompatActivity
     private AccountHeader accountHeader;
     private BitmessageContext bmc;
     private Label selectedLabel;
+    private Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +72,7 @@ public class MessageListActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_message_list);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         if (findViewById(R.id.message_detail_container) != null) {
@@ -109,7 +113,7 @@ public class MessageListActivity extends AppCompatActivity
                         .withIdentifier(ADD_IDENTITY)
         );
         profiles.add(new ProfileSettingDrawerItem()
-                        .withName("Manage Account")
+                        .withName(getString(R.string.manage_identity))
                         .withIcon(GoogleMaterial.Icon.gmd_settings)
         );
         // Create the AccountHeader
@@ -151,6 +155,9 @@ public class MessageListActivity extends AppCompatActivity
                 .withDrawerItems(drawerItems)
                 .addStickyDrawerItems(
                         new SecondaryDrawerItem()
+                                .withName(getString(R.string.subscriptions))
+                                .withIcon(CommunityMaterial.Icon.cmd_rss),
+                        new SecondaryDrawerItem()
                                 .withName(R.string.settings)
                                 .withIcon(GoogleMaterial.Icon.gmd_settings)
                 )
@@ -162,6 +169,9 @@ public class MessageListActivity extends AppCompatActivity
                         } else if (item instanceof Nameable<?>) {
                             Nameable<?> ni = (Nameable<?>) item;
                             switch (ni.getNameRes()) {
+                                case R.string.subscriptions:
+                                    // TODO
+                                    break;
                                 case R.string.settings:
                                     startActivity(new Intent(MessageListActivity.this, SettingsActivity.class));
                                     break;
@@ -176,10 +186,37 @@ public class MessageListActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        this.menu = menu;
+        updateMenu();
+        return true;
+    }
+
+    private void updateMenu() {
         boolean running = bmc.isRunning();
         menu.findItem(R.id.sync_enabled).setVisible(running);
         menu.findItem(R.id.sync_disabled).setVisible(!running);
-        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.sync_disabled:
+                bmc.startup(new BitmessageContext.Listener() {
+                    @Override
+                    public void receive(Plaintext plaintext) {
+                        // TODO
+                        Toast.makeText(MessageListActivity.this, plaintext.getSubject(), Toast.LENGTH_LONG).show();
+                    }
+                });
+                updateMenu();
+                return true;
+            case R.id.sync_enabled:
+                bmc.shutdown();
+                updateMenu();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     /**

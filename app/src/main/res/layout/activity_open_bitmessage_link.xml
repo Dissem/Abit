@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="BM-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:id="@+id/address"/>
+
+    <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/label_wrapper"
+            android:layout_below="@+id/address">
+
+        <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:hint="@string/label"
+                android:id="@+id/label"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <Switch
+            android:id="@+id/import_contact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/import_contact"
+            android:layout_below="@+id/label_wrapper"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"/>
+
+    <Switch
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/subscribe"
+            android:id="@+id/subscribe"
+            android:layout_below="@+id/import_contact"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"/>
+
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/do_import"
+            android:id="@+id/do_import"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"/>
+
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            android:id="@+id/cancel"
+            android:layout_alignParentBottom="true"
+            android:layout_toLeftOf="@id/do_import"/>
+
+</RelativeLayout>

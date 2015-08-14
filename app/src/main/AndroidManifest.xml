@@ -31,11 +31,44 @@
                     android:value=".MessageListActivity"/>
         </activity>
         <activity
+                android:name=".ComposeMessageActivity"
+                android:label="Compose"
+                android:parentActivityName=".MessageListActivity">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".MessageListActivity"/>
+
+            <intent-filter>
+                <action android:name="android.intent.action.SENDTO"/>
+
+                <data android:scheme="bitmessage"/>
+                <data android:scheme="bitmsg"/>
+                <data android:scheme="bm"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+
+                <data android:mimeType="text/plain"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+
+                <data android:mimeType="text/plain"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity
                 android:name=".SettingsActivity"
                 android:label="@string/settings"
                 android:parentActivityName=".MessageListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE"/>
+
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
@@ -46,6 +79,22 @@
                 android:exported="true"
                 android:permission="">
         </service>
+
+        <activity
+                android:name=".OpenBitmessageLinkActivity"
+                android:label="@string/title_activity_open_bitmessage_link"
+                android:theme="@style/Theme.AppCompat.Light.Dialog">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <data android:scheme="bitmessage"/>
+                <data android:scheme="bitmsg"/>
+                <data android:scheme="bm"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
