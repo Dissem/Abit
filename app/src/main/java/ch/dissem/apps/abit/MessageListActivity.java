@@ -166,6 +166,8 @@ public class MessageListActivity extends AppCompatActivity
                     public boolean onItemClick(AdapterView<?> adapterView, View view, int i, long l, IDrawerItem item) {
                         if (item.getTag() instanceof Label) {
                             selectedLabel = (Label) item.getTag();
+                            ((MessageListFragment) getSupportFragmentManager()
+                                    .findFragmentById(R.id.message_list)).updateList(selectedLabel);
                         } else if (item instanceof Nameable<?>) {
                             Nameable<?> ni = (Nameable<?>) item;
                             switch (ni.getNameRes()) {
@@ -203,9 +205,14 @@ public class MessageListActivity extends AppCompatActivity
             case R.id.sync_disabled:
                 bmc.startup(new BitmessageContext.Listener() {
                     @Override
-                    public void receive(Plaintext plaintext) {
+                    public void receive(final Plaintext plaintext) {
                         // TODO
-                        Toast.makeText(MessageListActivity.this, plaintext.getSubject(), Toast.LENGTH_LONG).show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MessageListActivity.this, plaintext.getSubject(), Toast.LENGTH_LONG).show();
+                            }
+                        });
                     }
                 });
                 updateMenu();

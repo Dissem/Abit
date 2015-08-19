@@ -28,10 +28,8 @@ dependencies {
 
     compile 'ch.dissem.jabit:jabit-domain:0.2.1-SNAPSHOT'
     compile 'ch.dissem.jabit:jabit-networking:0.2.1-SNAPSHOT'
-    compile 'ch.dissem.jabit:jabit-repositories:0.2.1-SNAPSHOT'
     compile 'ch.dissem.jabit:jabit-security-spongy:0.2.1-SNAPSHOT'
 
-    compile 'org.sqldroid:sqldroid:1.0.3'
     compile 'org.slf4j:slf4j-android:1.7.12'
 
     compile('com.mikepenz:materialdrawer:3.1.0@aar') {

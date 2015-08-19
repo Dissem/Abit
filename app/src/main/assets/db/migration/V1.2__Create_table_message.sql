@@ -1,5 +1,5 @@
 CREATE TABLE Message (
-  id                      INTEGER PRIMARY KEY,
+  id                      INTEGER PRIMARY KEY AUTOINCREMENT,
   iv                      BINARY(32)    UNIQUE,
   type                    VARCHAR(20)   NOT NULL,
   sender                  VARCHAR(40)   NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE Message (
 );
 
 CREATE TABLE Label (
-  id                      INTEGER PRIMARY KEY,
+  id                      INTEGER PRIMARY KEY AUTOINCREMENT,
   label                   VARCHAR(255)  NOT NULL,
   type                    VARCHAR(20),
   color                   INT NOT NULL DEFAULT 4278190080, -- FF000000
@@ -36,5 +36,6 @@ CREATE TABLE Message_Label (
 INSERT INTO Label(label, type, color, ord) VALUES ('Inbox', 'INBOX', 4278190335, 0);
 INSERT INTO Label(label, type, color, ord) VALUES ('Drafts', 'DRAFT', 4294940928, 10);
 INSERT INTO Label(label, type, color, ord) VALUES ('Sent', 'SENT', 4294967040, 20);
+INSERT INTO Label(label, type, ord) VALUES ('Broadcast', 'BROADCAST', 50);
 INSERT INTO Label(label, type, ord) VALUES ('Unread', 'UNREAD', 90);
 INSERT INTO Label(label, type, ord) VALUES ('Trash', 'TRASH', 100);

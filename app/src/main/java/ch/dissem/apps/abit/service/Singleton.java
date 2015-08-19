@@ -1,10 +1,13 @@
 package ch.dissem.apps.abit.service;
 
 import android.content.Context;
-import ch.dissem.apps.abit.SQLiteConfig;
+import ch.dissem.apps.abit.repositories.AndroidAddressRepository;
+import ch.dissem.apps.abit.repositories.AndroidInventory;
+import ch.dissem.apps.abit.repositories.AndroidMessageRepository;
+import ch.dissem.apps.abit.repositories.SqlHelper;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.networking.DefaultNetworkHandler;
-import ch.dissem.bitmessage.repository.*;
+import ch.dissem.bitmessage.ports.MemoryNodeRegistry;
 import ch.dissem.bitmessage.security.sc.SpongySecurity;
 
 /**
@@ -17,13 +20,14 @@ public class Singleton {
         if (bitmessageContext == null) {
             synchronized (Singleton.class) {
                 if (bitmessageContext == null) {
-                    JdbcConfig config = new SQLiteConfig(ctx);
+                    ctx = ctx.getApplicationContext();
+                    SqlHelper sqlHelper = new SqlHelper(ctx);
                     bitmessageContext = new BitmessageContext.Builder()
                             .security(new SpongySecurity())
                             .nodeRegistry(new MemoryNodeRegistry())
-                            .inventory(new JdbcInventory(config))
-                            .addressRepo(new JdbcAddressRepository(config))
-                            .messageRepo(new JdbcMessageRepository(config))
+                            .inventory(new AndroidInventory(sqlHelper))
+                            .addressRepo(new AndroidAddressRepository(sqlHelper))
+                            .messageRepo(new AndroidMessageRepository(sqlHelper, ctx))
                             .networkHandler(new DefaultNetworkHandler())
                             .build();
                 }

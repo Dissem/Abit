@@ -13,6 +13,7 @@ import android.widget.ListView;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.Plaintext;
+import ch.dissem.bitmessage.entity.valueobject.Label;
 
 /**
  * A list fragment representing a list of Messages. This fragment
@@ -79,12 +80,15 @@ public class MessageListFragment extends ListFragment {
 
         bmc = Singleton.getBitmessageContext(getActivity());
 
-        // TODO: replace with a real list adapter.
+        updateList(((MessageListActivity) getActivity()).getSelectedLabel());
+    }
+
+    public void updateList(Label label) {
         setListAdapter(new ArrayAdapter<>(
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
-                bmc.messages().findMessages(((MessageListActivity) getActivity()).getSelectedLabel())));
+                bmc.messages().findMessages(label)));
     }
 
     @Override
