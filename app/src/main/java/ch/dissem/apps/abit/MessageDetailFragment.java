@@ -5,8 +5,14 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+import ch.dissem.apps.abit.service.Singleton;
+import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
+import ch.dissem.bitmessage.entity.valueobject.Label;
+
+import java.util.Iterator;
 
 
 /**
@@ -53,9 +59,29 @@ public class MessageDetailFragment extends Fragment {
 
         // Show the dummy content as text in a TextView.
         if (item != null) {
-            ((TextView) rootView.findViewById(R.id.message_detail)).setText(item.getText());
+            ((TextView) rootView.findViewById(R.id.subject)).setText(item.getSubject());
+            BitmessageAddress sender = item.getFrom();
+            ((ImageView) rootView.findViewById(R.id.avatar)).setImageDrawable(new Identicon(sender));
+            ((TextView) rootView.findViewById(R.id.sender)).setText(sender.toString());
+            if (item.getTo() != null) {
+                ((TextView) rootView.findViewById(R.id.recipient)).setText(item.getTo().toString());
+            } else if (item.getType() == Plaintext.Type.BROADCAST) {
+                ((TextView) rootView.findViewById(R.id.recipient)).setText(R.string.broadcast);
+            }
+            ((TextView) rootView.findViewById(R.id.text)).setText(item.getText());
         }
 
+        boolean removed = false;
+        Iterator<Label> labels = item.getLabels().iterator();
+        while (labels.hasNext()) {
+            if (labels.next().getType() == Label.Type.UNREAD) {
+                labels.remove();
+                removed = true;
+            }
+        }
+        if (removed) {
+            Singleton.getBitmessageContext(inflater.getContext()).messages().save(item);
+        }
         return rootView;
     }
 }

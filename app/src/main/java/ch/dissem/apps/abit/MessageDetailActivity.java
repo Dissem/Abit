@@ -2,8 +2,10 @@ package ch.dissem.apps.abit;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 
@@ -16,13 +18,15 @@ import android.view.MenuItem;
  * This activity is mostly just a 'shell' activity containing nothing
  * more than a {@link MessageDetailFragment}.
  */
-public class MessageDetailActivity extends ActionBarActivity {
+public class MessageDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_message_detail);
+        setContentView(R.layout.toolbar_layout);
 
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         // Show the Up button in the action bar.
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -39,12 +43,12 @@ public class MessageDetailActivity extends ActionBarActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(MessageDetailFragment.ARG_ITEM,
-                    getIntent().getStringExtra(MessageDetailFragment.ARG_ITEM));
+            arguments.putSerializable(MessageDetailFragment.ARG_ITEM,
+                    getIntent().getSerializableExtra(MessageDetailFragment.ARG_ITEM));
             MessageDetailFragment fragment = new MessageDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.message_detail_container, fragment)
+                    .add(R.id.content, fragment)
                     .commit();
         }
     }

@@ -8,7 +8,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Toast;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
@@ -28,6 +27,8 @@ import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
@@ -51,6 +52,9 @@ import java.util.ArrayList;
  */
 public class MessageListActivity extends AppCompatActivity
         implements MessageListFragment.Callbacks {
+    public static final String EXTRA_SHOW_MESSAGE = "show_message";
+
+    private static final Logger LOG = LoggerFactory.getLogger(MessageListActivity.class);
     private static final int ADD_IDENTITY = 1;
 
     /**
@@ -97,6 +101,7 @@ public class MessageListActivity extends AppCompatActivity
     private void createDrawer(Toolbar toolbar) {
         final ArrayList<IProfile> profiles = new ArrayList<>();
         for (BitmessageAddress identity : bmc.addresses().getIdentities()) {
+            LOG.info("Adding identity " + identity.getAddress());
             profiles.add(new ProfileDrawerItem()
                             .withName(identity.toString())
                             .withEmail(identity.getAddress())
@@ -203,18 +208,7 @@ public class MessageListActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sync_disabled:
-                bmc.startup(new BitmessageContext.Listener() {
-                    @Override
-                    public void receive(final Plaintext plaintext) {
-                        // TODO
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(MessageListActivity.this, plaintext.getSubject(), Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-                });
+                bmc.startup(Singleton.getMessageListener(this));
                 updateMenu();
                 return true;
             case R.id.sync_enabled:
@@ -256,4 +250,5 @@ public class MessageListActivity extends AppCompatActivity
     public Label getSelectedLabel() {
         return selectedLabel;
     }
+
 }

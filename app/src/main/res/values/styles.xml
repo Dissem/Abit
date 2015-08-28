@@ -4,18 +4,20 @@
     <style name="AppTheme.Base" parent="MaterialDrawerTheme.Light.DarkToolbar.TranslucentStatus">
 
         <item name="android:activatedBackgroundIndicator">@color/primary_light</item>
+        <item name="android:textColor">@color/primary_text</item>
+        <item name="android:textColorSecondary">@color/secondary_text</item>
 
         <!-- MaterialDrawer specific values -->
         <item name="material_drawer_background">@color/primary_dark</item>
-        <item name="material_drawer_icons">@color/icons</item>
+        <item name="material_drawer_icons">@color/primary_text</item>
         <item name="material_drawer_primary_icon">@color/icons</item>
-        <item name="material_drawer_primary_text">@color/icons</item>
-        <item name="material_drawer_secondary_text">@color/icons</item>
-        <item name="material_drawer_hint_text">@color/icons</item>
-        <item name="material_drawer_divider">@color/icons</item>
+        <item name="material_drawer_primary_text">@color/primary_text</item>
+        <item name="material_drawer_secondary_text">@color/secondary_text</item>
+        <item name="material_drawer_hint_text">@color/secondary_text</item>
+        <item name="material_drawer_divider">@color/divider</item>
         <item name="material_drawer_selected">@color/primary</item>
-        <item name="material_drawer_selected_text">@color/icons</item>
-        <item name="material_drawer_header_selection_text">@color/icons</item>
+        <item name="material_drawer_selected_text">@color/primary_text</item>
+        <item name="material_drawer_header_selection_text">@color/primary_text</item>
 
     </style>
 

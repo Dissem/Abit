@@ -2,6 +2,7 @@ package ch.dissem.apps.abit;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ListFragment;
@@ -9,7 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.Plaintext;
@@ -84,11 +87,34 @@ public class MessageListFragment extends ListFragment {
     }
 
     public void updateList(Label label) {
-        setListAdapter(new ArrayAdapter<>(
+        setListAdapter(new ArrayAdapter<Plaintext>(
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
-                bmc.messages().findMessages(label)));
+                bmc.messages().findMessages(label)) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                if (convertView == null) {
+                    LayoutInflater inflater = LayoutInflater.from(getContext());
+                    convertView = inflater.inflate(R.layout.message_row, null, false);
+                }
+                Plaintext item = getItem(position);
+                ((ImageView) convertView.findViewById(R.id.avatar)).setImageDrawable(new Identicon(item.getFrom()));
+                TextView sender = (TextView) convertView.findViewById(R.id.sender);
+                sender.setText(item.getFrom().toString());
+                TextView subject = (TextView) convertView.findViewById(R.id.subject);
+                subject.setText(item.getSubject());
+                ((TextView) convertView.findViewById(R.id.text)).setText(item.getText());
+                if (item.isUnread()) {
+                    sender.setTypeface(Typeface.DEFAULT_BOLD);
+                    subject.setTypeface(Typeface.DEFAULT_BOLD);
+                } else {
+                    sender.setTypeface(Typeface.DEFAULT);
+                    subject.setTypeface(Typeface.DEFAULT);
+                }
+                return convertView;
+            }
+        });
     }
 
     @Override

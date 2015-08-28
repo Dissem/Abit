@@ -138,7 +138,7 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
                 text = ctx.getString(R.string.trash);
                 break;
             case BROADCAST:
-                text = ctx.getString(R.string.broadcast);
+                text = ctx.getString(R.string.broadcasts);
                 break;
             default:
                 text = c.getString(c.getColumnIndex(LBL_COLUMN_LABEL));
@@ -192,7 +192,8 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
             Cursor c = db.query(
                     TABLE_NAME, projection,
                     where,
-                    null, null, null, null
+                    null, null, null,
+                    COLUMN_RECEIVED + " DESC"
             );
             c.moveToFirst();
             while (!c.isAfterLast()) {
@@ -224,8 +225,8 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
 
     @Override
     public void save(Plaintext message) {
+        SQLiteDatabase db = sql.getWritableDatabase();
         try {
-            SQLiteDatabase db = sql.getWritableDatabase();
             db.beginTransaction();
 
             // save from address if necessary
@@ -256,9 +257,11 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
                 values.put(JT_COLUMN_MESSAGE, (Long) message.getId());
                 db.insertOrThrow(JOIN_TABLE_NAME, null, values);
             }
-            db.endTransaction();
+            db.setTransactionSuccessful();
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
+        } finally {
+            db.endTransaction();
         }
     }
 

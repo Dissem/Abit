@@ -184,7 +184,13 @@ public class AndroidAddressRepository implements AddressRepository {
             // Create a new map of values, where column names are the keys
             ContentValues values = new ContentValues();
             values.put(COLUMN_ALIAS, address.getAlias());
-            values.put(COLUMN_PUBLIC_KEY, Encode.bytes(address.getPubkey()));
+            if (address.getPubkey() != null) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                address.getPubkey().writeUnencrypted(out);
+                values.put(COLUMN_PUBLIC_KEY, out.toByteArray());
+            } else {
+                values.put(COLUMN_PUBLIC_KEY, (byte[]) null);
+            }
             values.put(COLUMN_PRIVATE_KEY, Encode.bytes(address.getPrivateKey()));
             values.put(COLUMN_SUBSCRIBED, address.isSubscribed());
 

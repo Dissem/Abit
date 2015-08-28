@@ -33,7 +33,6 @@ public class SqlHelper extends SQLiteOpenHelper {
 
     public SqlHelper(Context ctx) {
         super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
-        setWriteAheadLoggingEnabled(true);
         this.ctx = ctx;
     }
 

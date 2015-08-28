@@ -18,6 +18,7 @@ package ch.dissem.apps.abit.repositories;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import ch.dissem.bitmessage.entity.ObjectMessage;
 import ch.dissem.bitmessage.entity.payload.ObjectType;
@@ -168,10 +169,9 @@ public class AndroidInventory implements Inventory {
             values.put(COLUMN_TYPE, object.getType());
             values.put(COLUMN_VERSION, object.getVersion());
 
-            long insert = db.insert(TABLE_NAME, null, values);
-            if (insert < 0) {
-                LOG.trace("Error while inserting object. Most probably it was requested twice.");
-            }
+            db.insertOrThrow(TABLE_NAME, null, values);
+        } catch (SQLiteConstraintException e) {
+            LOG.trace(e.getMessage(), e);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         }

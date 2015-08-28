@@ -1,9 +1,82 @@
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          android:id="@+id/message_detail"
-          style="?android:attr/textAppearanceLarge"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          android:padding="16dp"
-          android:textIsSelectable="true"
-          tools:context=".MessageDetailFragment"/>
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+
+    <RelativeLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true">
+
+        <TextView
+                android:id="@+id/subject"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:gravity="center_vertical"
+                android:text="Subject"
+                android:padding="16dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:elegantTextHeight="false"
+                android:enabled="false"/>
+
+        <View
+                android:id="@+id/divider"
+                android:layout_width="fill_parent"
+                android:layout_height="2dip"
+                android:layout_below="@id/subject"
+                android:background="@color/divider"/>
+
+        <ImageView
+                android:id="@+id/avatar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_below="@+id/divider"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:src="@color/accent"
+                android:layout_margin="16dp"/>
+
+        <TextView
+                android:id="@+id/sender"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:text="Sender"
+                android:layout_alignTop="@+id/avatar"
+                android:layout_toRightOf="@+id/avatar"
+                android:layout_toEndOf="@+id/avatar"
+                android:gravity="center_vertical"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:textStyle="bold"/>
+
+        <TextView
+                android:id="@+id/recipient"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:text="Recipient"
+                android:gravity="center_vertical"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:layout_alignBottom="@+id/avatar"
+                android:layout_toRightOf="@+id/avatar"
+                android:layout_toEndOf="@+id/avatar"/>
+
+        <TextView
+                android:id="@+id/text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="New Text"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="32dp"
+                android:paddingBottom="64dp"
+                android:layout_below="@+id/avatar"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"/>
+    </RelativeLayout>
+</ScrollView>
