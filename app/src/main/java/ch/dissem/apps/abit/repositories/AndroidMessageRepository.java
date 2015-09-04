@@ -19,6 +19,7 @@ package ch.dissem.apps.abit.repositories;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import ch.dissem.apps.abit.R;
 import ch.dissem.bitmessage.InternalContext;
@@ -152,6 +153,24 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
     }
 
     @Override
+    public int countUnread(Label label) {
+        String where;
+        if (label != null) {
+            where = "id IN (SELECT message_id FROM Message_Label WHERE label_id=" + label.getId() + ") AND ";
+        } else {
+            where = "";
+        }
+        SQLiteDatabase db = sql.getReadableDatabase();
+        Cursor c = db.query(
+                TABLE_NAME, new String[]{COLUMN_ID},
+                where + "id IN (SELECT message_id FROM Message_Label WHERE label_id IN (" +
+                        "SELECT id FROM Label WHERE type = '" + Label.Type.UNREAD.name() + "'))",
+                null, null, null, null
+        );
+        return c.getColumnCount();
+    }
+
+    @Override
     public List<Plaintext> findMessages(Label label) {
         if (label != null) {
             return find("id IN (SELECT message_id FROM Message_Label WHERE label_id=" + label.getId() + ")");
@@ -258,6 +277,8 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
                 db.insertOrThrow(JOIN_TABLE_NAME, null, values);
             }
             db.setTransactionSuccessful();
+        } catch (SQLiteConstraintException e) {
+            LOG.trace(e.getMessage(), e);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         } finally {

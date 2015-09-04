@@ -52,7 +52,8 @@ import java.util.ArrayList;
  */
 public class MessageListActivity extends AppCompatActivity
         implements MessageListFragment.Callbacks {
-    public static final String EXTRA_SHOW_MESSAGE = "show_message";
+    public static final String EXTRA_SHOW_MESSAGE = "ch.dissem.abit.ShowMessage";
+    public static final String ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox";
 
     private static final Logger LOG = LoggerFactory.getLogger(MessageListActivity.class);
     private static final int ADD_IDENTITY = 1;
@@ -95,7 +96,12 @@ public class MessageListActivity extends AppCompatActivity
 
         createDrawer(toolbar);
 
-        // TODO: If exposing deep links into your app, handle intents here.
+        Singleton.getMessageListener(this).resetNotification();
+
+        // handle intents
+        if (getIntent().hasExtra(EXTRA_SHOW_MESSAGE)) {
+            onItemSelected((Plaintext) getIntent().getSerializableExtra(EXTRA_SHOW_MESSAGE));
+        }
     }
 
     private void createDrawer(Toolbar toolbar) {
@@ -103,6 +109,7 @@ public class MessageListActivity extends AppCompatActivity
         for (BitmessageAddress identity : bmc.addresses().getIdentities()) {
             LOG.info("Adding identity " + identity.getAddress());
             profiles.add(new ProfileDrawerItem()
+                            .withIcon(new Identicon(identity))
                             .withName(identity.toString())
                             .withEmail(identity.getAddress())
                             .withTag(identity)
@@ -173,6 +180,7 @@ public class MessageListActivity extends AppCompatActivity
                             selectedLabel = (Label) item.getTag();
                             ((MessageListFragment) getSupportFragmentManager()
                                     .findFragmentById(R.id.message_list)).updateList(selectedLabel);
+                            return true;
                         } else if (item instanceof Nameable<?>) {
                             Nameable<?> ni = (Nameable<?>) item;
                             switch (ni.getNameRes()) {
@@ -237,7 +245,6 @@ public class MessageListActivity extends AppCompatActivity
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.message_detail_container, fragment)
                     .commit();
-
         } else {
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.

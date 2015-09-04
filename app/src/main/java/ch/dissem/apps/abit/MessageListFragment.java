@@ -82,6 +82,11 @@ public class MessageListFragment extends ListFragment {
         super.onCreate(savedInstanceState);
 
         bmc = Singleton.getBitmessageContext(getActivity());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
 
         updateList(((MessageListActivity) getActivity()).getSelectedLabel());
     }

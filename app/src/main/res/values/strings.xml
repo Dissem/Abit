@@ -24,4 +24,7 @@
     <string name="do_import">Import</string>
     <string name="cancel">Cancel</string>
     <string name="broadcast">Broadcast</string>
+    <string name="n_new_messages">%d new messages</string>
+    <string name="reply">Reply</string>
+    <string name="delete">Delete</string>
 </resources>

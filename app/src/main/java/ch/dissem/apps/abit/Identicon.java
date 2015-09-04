@@ -29,6 +29,9 @@ public class Identicon extends Drawable {
     private static final int CENTER_COLUMN = 5;
 
     private final Paint paint;
+    private float width;
+    private float height;
+
     private float cellWidth;
     private float cellHeight;
     private byte[] hash;
@@ -54,15 +57,11 @@ public class Identicon extends Drawable {
         }
     }
 
-    protected byte getByte(int index) {
-        return hash[index % hash.length];
-    }
-
     @Override
     public void draw(Canvas canvas) {
         float x, y;
         paint.setColor(background);
-        canvas.drawPaint(paint);
+        canvas.drawCircle(width/2, height/2, width/2, paint);
         paint.setColor(color);
         for (int row = 0; row < SIZE; row++) {
             for (int column = 0; column < SIZE; column++) {
@@ -88,12 +87,15 @@ public class Identicon extends Drawable {
 
     @Override
     public int getOpacity() {
-        return PixelFormat.OPAQUE;
+        return PixelFormat.TRANSPARENT;
     }
 
     @Override
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
+
+        width = bounds.width();
+        height = bounds.height();
 
         cellWidth = bounds.width() / (float) SIZE;
         cellHeight = bounds.height() / (float) SIZE;
