@@ -24,4 +24,10 @@
     <string name="manage_identity">Identität verwalten</string>
     <string name="subscribe">Abonnieren</string>
     <string name="title_activity_open_bitmessage_link">Kontakt importieren</string>
+    <string name="delete">Löschen</string>
+    <string name="reply">Antworten</string>
+    <string name="n_new_messages">%d neue Nachrichten</string>
+    <string name="archive">Archiv</string>
+    <string name="empty_trash">Papierkorb leeren</string>
+    <string name="mark_unread">Als ungelesen markieren</string>
 </resources>

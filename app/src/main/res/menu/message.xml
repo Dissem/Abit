@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+            android:id="@+id/reply"
+            app:showAsAction="ifRoom"
+            android:icon="@drawable/ic_action_placeholder"
+            android:title="@string/reply"/>
+    <item
+            android:id="@+id/delete"
+            app:showAsAction="ifRoom"
+            android:icon="@drawable/ic_action_placeholder"
+            android:title="@string/delete"/>
+    <item
+            android:id="@+id/mark_unread"
+            app:showAsAction="ifRoom"
+            android:icon="@drawable/ic_action_placeholder"
+            android:title="@string/mark_unread"/>
+    <item
+            android:id="@+id/archive"
+            app:showAsAction="ifRoom"
+            android:icon="@drawable/ic_action_placeholder"
+            android:title="@string/archive"/>
+</menu>

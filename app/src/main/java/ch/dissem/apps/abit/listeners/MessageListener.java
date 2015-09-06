@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package ch.dissem.apps.abit;
+package ch.dissem.apps.abit.listeners;
 
 import android.annotation.TargetApi;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -33,6 +34,9 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.StyleSpan;
+import ch.dissem.apps.abit.Identicon;
+import ch.dissem.apps.abit.MessageListActivity;
+import ch.dissem.apps.abit.R;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.Plaintext;
 

@@ -27,4 +27,7 @@
     <string name="n_new_messages">%d new messages</string>
     <string name="reply">Reply</string>
     <string name="delete">Delete</string>
+    <string name="mark_unread">Mark unread</string>
+    <string name="archive">Archive</string>
+    <string name="empty_trash">Empty Trash</string>
 </resources>

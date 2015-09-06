@@ -9,19 +9,13 @@ import android.widget.Toast;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 
+import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_IDENTITY;
+import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_RECIPIENT;
+
 /**
  * Compose a new message.
  */
 public class ComposeMessageFragment extends Fragment {
-    /**
-     * The fragment argument representing the sender identity.
-     */
-    public static final String ARG_IDENTITY = "from";
-    /**
-     * The fragment argument representing the recipient.
-     */
-    public static final String ARG_RECIPIENT = "to";
-
     private BitmessageContext bmCtx;
     private BitmessageAddress identity;
     private BitmessageAddress recipient;
@@ -37,11 +31,11 @@ public class ComposeMessageFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            if (getArguments().containsKey(ARG_IDENTITY)) {
-                identity = (BitmessageAddress) getArguments().getSerializable(ARG_IDENTITY);
+            if (getArguments().containsKey(EXTRA_IDENTITY)) {
+                identity = (BitmessageAddress) getArguments().getSerializable(EXTRA_IDENTITY);
             }
-            if (getArguments().containsKey(ARG_RECIPIENT)) {
-                recipient = (BitmessageAddress) getArguments().getSerializable(ARG_RECIPIENT);
+            if (getArguments().containsKey(EXTRA_RECIPIENT)) {
+                recipient = (BitmessageAddress) getArguments().getSerializable(EXTRA_RECIPIENT);
             }
         }
         setHasOptionsMenu(true);
@@ -51,6 +45,10 @@ public class ComposeMessageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_compose_message, container, false);
+        if (recipient != null) {
+            EditText recipientInput = (EditText) rootView.findViewById(R.id.recipient);
+            recipientInput.setText(recipient.toString());
+        }
         EditText body = (EditText) rootView.findViewById(R.id.body);
         body.setInputType(EditorInfo.TYPE_TEXT_VARIATION_SHORT_MESSAGE | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
         body.setImeOptions(EditorInfo.IME_ACTION_SEND | EditorInfo.IME_FLAG_NO_ENTER_ACTION);

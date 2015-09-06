@@ -1,7 +1,7 @@
 package ch.dissem.apps.abit.service;
 
 import android.content.Context;
-import ch.dissem.apps.abit.MessageListener;
+import ch.dissem.apps.abit.listeners.MessageListener;
 import ch.dissem.apps.abit.repositories.AndroidAddressRepository;
 import ch.dissem.apps.abit.repositories.AndroidInventory;
 import ch.dissem.apps.abit.repositories.AndroidMessageRepository;

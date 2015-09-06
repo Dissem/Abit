@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import ch.dissem.apps.abit.listeners.ActionBarListener;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
@@ -51,7 +52,7 @@ import java.util.ArrayList;
  * </p>
  */
 public class MessageListActivity extends AppCompatActivity
-        implements MessageListFragment.Callbacks {
+        implements MessageListFragment.Callbacks, ActionBarListener {
     public static final String EXTRA_SHOW_MESSAGE = "ch.dissem.abit.ShowMessage";
     public static final String ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox";
 
@@ -157,7 +158,30 @@ public class MessageListActivity extends AppCompatActivity
 
         ArrayList<IDrawerItem> drawerItems = new ArrayList<>();
         for (Label label : bmc.messages().getLabels()) {
-            drawerItems.add(new PrimaryDrawerItem().withName(label.toString()).withTag(label));
+            PrimaryDrawerItem item = new PrimaryDrawerItem().withName(label.toString()).withTag(label);
+            switch (label.getType()) {
+                case INBOX:
+                    item.withIcon(GoogleMaterial.Icon.gmd_inbox);
+                    break;
+                case DRAFT:
+                    item.withIcon(CommunityMaterial.Icon.cmd_file);
+                    break;
+                case SENT:
+                    item.withIcon(CommunityMaterial.Icon.cmd_send);
+                    break;
+                case BROADCAST:
+                    item.withIcon(CommunityMaterial.Icon.cmd_rss);
+                    break;
+                case UNREAD:
+                    item.withIcon(GoogleMaterial.Icon.gmd_markunread_mailbox);
+                    break;
+                case TRASH:
+                    item.withIcon(GoogleMaterial.Icon.gmd_delete);
+                    break;
+                default:
+                    item.withIcon(CommunityMaterial.Icon.cmd_label);
+            }
+            drawerItems.add(item);
         }
 
         new DrawerBuilder()
@@ -168,7 +192,7 @@ public class MessageListActivity extends AppCompatActivity
                 .addStickyDrawerItems(
                         new SecondaryDrawerItem()
                                 .withName(getString(R.string.subscriptions))
-                                .withIcon(CommunityMaterial.Icon.cmd_rss),
+                                .withIcon(CommunityMaterial.Icon.cmd_rss_box),
                         new SecondaryDrawerItem()
                                 .withName(R.string.settings)
                                 .withIcon(GoogleMaterial.Icon.gmd_settings)
@@ -252,6 +276,11 @@ public class MessageListActivity extends AppCompatActivity
             detailIntent.putExtra(MessageDetailFragment.ARG_ITEM, plaintext);
             startActivity(detailIntent);
         }
+    }
+
+    @Override
+    public void updateTitle(CharSequence title) {
+        getSupportActionBar().setTitle(title);
     }
 
     public Label getSelectedLabel() {

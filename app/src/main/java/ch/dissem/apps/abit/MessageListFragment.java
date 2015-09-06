@@ -6,17 +6,17 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ListFragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import ch.dissem.apps.abit.listeners.ActionBarListener;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
+import ch.dissem.bitmessage.ports.MessageRepository;
 
 /**
  * A list fragment representing a list of Messages. This fragment
@@ -39,12 +39,15 @@ public class MessageListFragment extends ListFragment {
      * The fragment's current callback object, which is notified of list item
      * clicks.
      */
-    private Callbacks mCallbacks = sDummyCallbacks;
+    private Callbacks callbacks = dummyCallbacks;
 
     /**
      * The current activated item position. Only used on tablets.
      */
-    private int mActivatedPosition = ListView.INVALID_POSITION;
+    private int activatedPosition = ListView.INVALID_POSITION;
+
+    private Label currentLabel;
+    private MenuItem emptyTrashMenuItem;
 
     private BitmessageContext bmc;
 
@@ -64,7 +67,7 @@ public class MessageListFragment extends ListFragment {
      * A dummy implementation of the {@link Callbacks} interface that does
      * nothing. Used only when this fragment is not attached to an activity.
      */
-    private static Callbacks sDummyCallbacks = new Callbacks() {
+    private static Callbacks dummyCallbacks = new Callbacks() {
         @Override
         public void onItemSelected(Plaintext plaintext) {
         }
@@ -82,6 +85,7 @@ public class MessageListFragment extends ListFragment {
         super.onCreate(savedInstanceState);
 
         bmc = Singleton.getBitmessageContext(getActivity());
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -92,6 +96,7 @@ public class MessageListFragment extends ListFragment {
     }
 
     public void updateList(Label label) {
+        currentLabel = label;
         setListAdapter(new ArrayAdapter<Plaintext>(
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,
@@ -120,6 +125,12 @@ public class MessageListFragment extends ListFragment {
                 return convertView;
             }
         });
+        if (getActivity() instanceof ActionBarListener) {
+            ((ActionBarListener) getActivity()).updateTitle(label.toString());
+        }
+        if (emptyTrashMenuItem != null) {
+            emptyTrashMenuItem.setVisible(label != null && label.getType() == Label.Type.TRASH);
+        }
     }
 
     @Override
@@ -158,7 +169,7 @@ public class MessageListFragment extends ListFragment {
             throw new IllegalStateException("Activity must implement fragment's callbacks.");
         }
 
-        mCallbacks = (Callbacks) activity;
+        callbacks = (Callbacks) activity;
     }
 
     @Override
@@ -166,7 +177,31 @@ public class MessageListFragment extends ListFragment {
         super.onDetach();
 
         // Reset the active callbacks interface to the dummy implementation.
-        mCallbacks = sDummyCallbacks;
+        callbacks = dummyCallbacks;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.message_list, menu);
+        emptyTrashMenuItem = menu.findItem(R.id.empty_trash);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.empty_trash:
+                if (currentLabel.getType() != Label.Type.TRASH) return true;
+
+                MessageRepository repo = bmc.messages();
+                for (Plaintext message : repo.findMessages(currentLabel)) {
+                    repo.remove(message);
+                }
+                updateList(currentLabel);
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override
@@ -175,15 +210,15 @@ public class MessageListFragment extends ListFragment {
 
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
-        mCallbacks.onItemSelected((Plaintext) listView.getItemAtPosition(position));
+        callbacks.onItemSelected((Plaintext) listView.getItemAtPosition(position));
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mActivatedPosition != ListView.INVALID_POSITION) {
+        if (activatedPosition != ListView.INVALID_POSITION) {
             // Serialize and persist the activated item position.
-            outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition);
+            outState.putInt(STATE_ACTIVATED_POSITION, activatedPosition);
         }
     }
 
@@ -201,11 +236,11 @@ public class MessageListFragment extends ListFragment {
 
     private void setActivatedPosition(int position) {
         if (position == ListView.INVALID_POSITION) {
-            getListView().setItemChecked(mActivatedPosition, false);
+            getListView().setItemChecked(activatedPosition, false);
         } else {
             getListView().setItemChecked(position, true);
         }
 
-        mActivatedPosition = position;
+        activatedPosition = position;
     }
 }
