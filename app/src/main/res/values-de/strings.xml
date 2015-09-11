@@ -30,4 +30,7 @@
     <string name="archive">Archiv</string>
     <string name="empty_trash">Papierkorb leeren</string>
     <string name="mark_unread">Als ungelesen markieren</string>
+    <string name="stream_number">Stream #%d</string>
+    <string name="enabled">Aktiv</string>
+    <string name="title_subscription_detail">Abonnement</string>
 </resources>

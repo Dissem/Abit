@@ -2,6 +2,7 @@ package ch.dissem.apps.abit;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -9,10 +10,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import ch.dissem.apps.abit.listeners.ActionBarListener;
+import ch.dissem.apps.abit.listeners.ListSelectionListener;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
+import ch.dissem.bitmessage.entity.Streamable;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 import com.mikepenz.community_material_typeface_library.CommunityMaterial;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -31,6 +34,7 @@ import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 
@@ -47,12 +51,12 @@ import java.util.ArrayList;
  * (if present) is a {@link MessageDetailFragment}.
  * </p><p>
  * This activity also implements the required
- * {@link MessageListFragment.Callbacks} interface
+ * {@link ListSelectionListener} interface
  * to listen for item selections.
  * </p>
  */
 public class MessageListActivity extends AppCompatActivity
-        implements MessageListFragment.Callbacks, ActionBarListener {
+        implements ListSelectionListener<Serializable>, ActionBarListener {
     public static final String EXTRA_SHOW_MESSAGE = "ch.dissem.abit.ShowMessage";
     public static final String ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox";
 
@@ -81,6 +85,9 @@ public class MessageListActivity extends AppCompatActivity
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        MessageListFragment listFragment = new MessageListFragment();
+        getSupportFragmentManager().beginTransaction().replace(R.id.item_list, listFragment).commit();
+
         if (findViewById(R.id.message_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-large and
@@ -90,9 +97,7 @@ public class MessageListActivity extends AppCompatActivity
 
             // In two-pane mode, list items should be given the
             // 'activated' state when touched.
-            ((MessageListFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.message_list))
-                    .setActivateOnItemClick(true);
+            listFragment.setActivateOnItemClick(true);
         }
 
         createDrawer(toolbar);
@@ -102,6 +107,20 @@ public class MessageListActivity extends AppCompatActivity
         // handle intents
         if (getIntent().hasExtra(EXTRA_SHOW_MESSAGE)) {
             onItemSelected((Plaintext) getIntent().getSerializableExtra(EXTRA_SHOW_MESSAGE));
+        }
+    }
+
+    private void changeList(AbstractItemListFragment<?> listFragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.item_list, listFragment)
+                .addToBackStack(null)
+                .commit();
+
+        if (twoPane) {
+            // In two-pane mode, list items should be given the
+            // 'activated' state when touched.
+            listFragment.setActivateOnItemClick(true);
         }
     }
 
@@ -191,7 +210,7 @@ public class MessageListActivity extends AppCompatActivity
                 .withDrawerItems(drawerItems)
                 .addStickyDrawerItems(
                         new SecondaryDrawerItem()
-                                .withName(getString(R.string.subscriptions))
+                                .withName(R.string.subscriptions)
                                 .withIcon(CommunityMaterial.Icon.cmd_rss_box),
                         new SecondaryDrawerItem()
                                 .withName(R.string.settings)
@@ -202,14 +221,25 @@ public class MessageListActivity extends AppCompatActivity
                     public boolean onItemClick(AdapterView<?> adapterView, View view, int i, long l, IDrawerItem item) {
                         if (item.getTag() instanceof Label) {
                             selectedLabel = (Label) item.getTag();
-                            ((MessageListFragment) getSupportFragmentManager()
-                                    .findFragmentById(R.id.message_list)).updateList(selectedLabel);
-                            return true;
+                            if (!(getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof MessageListFragment)) {
+                                MessageListFragment listFragment = new MessageListFragment();
+                                changeList(listFragment);
+                                listFragment.updateList(selectedLabel);
+                            } else {
+                                ((MessageListFragment) getSupportFragmentManager()
+                                        .findFragmentById(R.id.item_list)).updateList(selectedLabel);
+                            }
+                            return false;
                         } else if (item instanceof Nameable<?>) {
                             Nameable<?> ni = (Nameable<?>) item;
                             switch (ni.getNameRes()) {
                                 case R.string.subscriptions:
-                                    // TODO
+                                    if (!(getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof SubscriptionListFragment)) {
+                                        changeList(new SubscriptionListFragment());
+                                    } else {
+                                        ((SubscriptionListFragment) getSupportFragmentManager()
+                                                .findFragmentById(R.id.item_list)).updateList();
+                                    }
                                     break;
                                 case R.string.settings:
                                     startActivity(new Intent(MessageListActivity.this, SettingsActivity.class));
@@ -219,6 +249,7 @@ public class MessageListActivity extends AppCompatActivity
                         return false;
                     }
                 })
+                .withCloseOnClick(true)
                 .build();
     }
 
@@ -253,18 +284,25 @@ public class MessageListActivity extends AppCompatActivity
     }
 
     /**
-     * Callback method from {@link MessageListFragment.Callbacks}
+     * Callback method from {@link ListSelectionListener}
      * indicating that the item with the given ID was selected.
      */
     @Override
-    public void onItemSelected(Plaintext plaintext) {
+    public void onItemSelected(Serializable item) {
         if (twoPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
             // fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putSerializable(MessageDetailFragment.ARG_ITEM, plaintext);
-            MessageDetailFragment fragment = new MessageDetailFragment();
+            arguments.putSerializable(MessageDetailFragment.ARG_ITEM, item);
+            Fragment fragment;
+            if (item instanceof Plaintext)
+                fragment = new MessageDetailFragment();
+            else if (item instanceof BitmessageAddress)
+                fragment = new SubscriptionDetailFragment();
+            else
+                throw new IllegalArgumentException("Plaintext or BitmessageAddress expected, but was "
+                        + item.getClass().getSimpleName());
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.message_detail_container, fragment)
@@ -272,8 +310,16 @@ public class MessageListActivity extends AppCompatActivity
         } else {
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
-            Intent detailIntent = new Intent(this, MessageDetailActivity.class);
-            detailIntent.putExtra(MessageDetailFragment.ARG_ITEM, plaintext);
+            Intent detailIntent;
+            if (item instanceof Plaintext)
+                detailIntent = new Intent(this, MessageDetailActivity.class);
+            else if (item instanceof BitmessageAddress)
+                detailIntent = new Intent(this, SubscriptionDetailActivity.class);
+            else
+                throw new IllegalArgumentException("Plaintext or BitmessageAddress expected, but was "
+                        + item.getClass().getSimpleName());
+
+            detailIntent.putExtra(MessageDetailFragment.ARG_ITEM, item);
             startActivity(detailIntent);
         }
     }

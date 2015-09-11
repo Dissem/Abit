@@ -119,6 +119,7 @@ public class MessageDetailFragment extends Fragment {
                     item.addLabels(bmc.messages().getLabels(Label.Type.TRASH));
                     bmc.messages().save(item);
                 }
+                getActivity().onBackPressed();
                 return true;
             case R.id.mark_unread:
                 item.addLabels(bmc.messages().getLabels(Label.Type.UNREAD));

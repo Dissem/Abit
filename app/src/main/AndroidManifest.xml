@@ -33,6 +33,15 @@
                     android:value=".MessageListActivity"/>
         </activity>
         <activity
+                android:name=".SubscriptionDetailActivity"
+                android:label="@string/title_subscription_detail"
+                android:parentActivityName=".MessageListActivity"
+                tools:ignore="UnusedAttribute">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".MessageListActivity"/>
+        </activity>
+        <activity
                 android:name=".ComposeMessageActivity"
                 android:label="Compose"
                 android:parentActivityName=".MessageListActivity">

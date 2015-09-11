@@ -29,9 +29,8 @@
 
         -->
 
-        <fragment
-                android:id="@+id/message_list"
-                android:name="ch.dissem.apps.abit.MessageListFragment"
+        <FrameLayout
+                android:id="@+id/item_list"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

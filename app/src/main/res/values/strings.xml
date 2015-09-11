@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Abit</string>
     <string name="title_message_detail">Message Detail</string>
+    <string name="title_subscription_detail">Subscription Detail</string>
     <string name="disable_sync">Disable Sync</string>
     <string name="enable_sync">Enable Sync</string>
     <string name="bitmessage_active">Bitmessage active</string>
@@ -30,4 +31,6 @@
     <string name="mark_unread">Mark unread</string>
     <string name="archive">Archive</string>
     <string name="empty_trash">Empty Trash</string>
+    <string name="stream_number">Stream #%d</string>
+    <string name="enabled">Enabled</string>
 </resources>
