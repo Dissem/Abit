@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+
 import ch.dissem.apps.abit.listeners.ActionBarListener;
 import ch.dissem.apps.abit.listeners.ListSelectionListener;
 import ch.dissem.apps.abit.service.Singleton;
@@ -17,6 +18,7 @@ import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.Streamable;
 import ch.dissem.bitmessage.entity.valueobject.Label;
+
 import com.mikepenz.community_material_typeface_library.CommunityMaterial;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -31,6 +33,7 @@ import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,10 +97,6 @@ public class MessageListActivity extends AppCompatActivity
             // res/values-sw600dp). If this view is present, then the
             // activity should be in two-pane mode.
             twoPane = true;
-
-            // In two-pane mode, list items should be given the
-            // 'activated' state when touched.
-            listFragment.setActivateOnItemClick(true);
         }
 
         createDrawer(toolbar);
@@ -106,7 +105,18 @@ public class MessageListActivity extends AppCompatActivity
 
         // handle intents
         if (getIntent().hasExtra(EXTRA_SHOW_MESSAGE)) {
-            onItemSelected((Plaintext) getIntent().getSerializableExtra(EXTRA_SHOW_MESSAGE));
+            onItemSelected(getIntent().getSerializableExtra(EXTRA_SHOW_MESSAGE));
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (twoPane) {
+            // In two-pane mode, list items should be given the
+            // 'activated' state when touched.
+            ((MessageListFragment) getSupportFragmentManager().findFragmentById(R.id.item_list))
+                    .setActivateOnItemClick(true);
         }
     }
 
@@ -271,7 +281,7 @@ public class MessageListActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sync_disabled:
-                bmc.startup(Singleton.getMessageListener(this));
+                bmc.startup();
                 updateMenu();
                 return true;
             case R.id.sync_enabled:

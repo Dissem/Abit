@@ -21,6 +21,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
+
 import ch.dissem.apps.abit.R;
 import ch.dissem.bitmessage.InternalContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
@@ -29,6 +30,7 @@ import ch.dissem.bitmessage.entity.valueobject.InventoryVector;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 import ch.dissem.bitmessage.ports.MessageRepository;
 import ch.dissem.bitmessage.utils.Encode;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,6 +184,11 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
     @Override
     public List<Plaintext> findMessages(Plaintext.Status status, BitmessageAddress recipient) {
         return find("status='" + status.name() + "' AND recipient='" + recipient.getAddress() + "'");
+    }
+
+    @Override
+    public List<Plaintext> findMessages(BitmessageAddress sender) {
+        return find("sender=" + sender.getAddress());
     }
 
     @Override

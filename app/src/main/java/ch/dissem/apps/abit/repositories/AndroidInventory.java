@@ -20,12 +20,14 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
+
 import ch.dissem.bitmessage.entity.ObjectMessage;
 import ch.dissem.bitmessage.entity.payload.ObjectType;
 import ch.dissem.bitmessage.entity.valueobject.InventoryVector;
 import ch.dissem.bitmessage.factory.Factory;
 import ch.dissem.bitmessage.ports.Inventory;
 import ch.dissem.bitmessage.utils.Encode;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,6 +177,17 @@ public class AndroidInventory implements Inventory {
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public boolean contains(ObjectMessage object) {
+        SQLiteDatabase db = sql.getReadableDatabase();
+        Cursor c = db.query(
+                TABLE_NAME, new String[]{COLUMN_STREAM},
+                "hash = X'" + object.getInventoryVector() + "'",
+                null, null, null, null
+        );
+        return c.getColumnCount() > 0;
     }
 
     @Override

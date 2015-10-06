@@ -1,6 +1,8 @@
 package ch.dissem.apps.abit.service;
 
+import android.app.NotificationManager;
 import android.content.Context;
+
 import ch.dissem.apps.abit.listeners.MessageListener;
 import ch.dissem.apps.abit.repositories.AndroidAddressRepository;
 import ch.dissem.apps.abit.repositories.AndroidInventory;
@@ -18,11 +20,11 @@ public class Singleton {
     private static BitmessageContext bitmessageContext;
     private static MessageListener messageListener;
 
-    public static BitmessageContext getBitmessageContext(Context ctx) {
+    public static BitmessageContext getBitmessageContext(Context context) {
         if (bitmessageContext == null) {
             synchronized (Singleton.class) {
                 if (bitmessageContext == null) {
-                    ctx = ctx.getApplicationContext();
+                    final Context ctx = context.getApplicationContext();
                     SqlHelper sqlHelper = new SqlHelper(ctx);
                     bitmessageContext = new BitmessageContext.Builder()
                             .security(new SpongySecurity())
@@ -31,6 +33,7 @@ public class Singleton {
                             .addressRepo(new AndroidAddressRepository(sqlHelper))
                             .messageRepo(new AndroidMessageRepository(sqlHelper, ctx))
                             .networkHandler(new DefaultNetworkHandler())
+                            .listener(getMessageListener(ctx))
                             .build();
                 }
             }

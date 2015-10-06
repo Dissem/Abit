@@ -84,13 +84,6 @@
             </intent-filter>
         </activity>
 
-        <service
-                android:name=".service.BitmessageService"
-                android:enabled="true"
-                android:exported="true"
-                android:permission="">
-        </service>
-
         <activity
                 android:name=".OpenBitmessageLinkActivity"
                 android:label="@string/title_activity_open_bitmessage_link"
