@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ListView;
+
 import ch.dissem.apps.abit.listeners.ListSelectionListener;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
@@ -54,6 +55,7 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
      * The current activated item position. Only used on tablets.
      */
     private int activatedPosition = ListView.INVALID_POSITION;
+    private boolean activateOnItemClick;
 
     abstract void updateList(Label label);
 
@@ -73,6 +75,17 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
                 && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // When setting CHOICE_MODE_SINGLE, ListView will automatically
+        // give items the 'activated' state when touched.
+        getListView().setChoiceMode(activateOnItemClick
+                ? ListView.CHOICE_MODE_SINGLE
+                : ListView.CHOICE_MODE_NONE);
     }
 
     @Override
@@ -118,11 +131,15 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
      * given the 'activated' state when touched.
      */
     public void setActivateOnItemClick(boolean activateOnItemClick) {
-        // When setting CHOICE_MODE_SINGLE, ListView will automatically
-        // give items the 'activated' state when touched.
-        getListView().setChoiceMode(activateOnItemClick
-                ? ListView.CHOICE_MODE_SINGLE
-                : ListView.CHOICE_MODE_NONE);
+        this.activateOnItemClick = activateOnItemClick;
+
+        if (isVisible()) {
+            // When setting CHOICE_MODE_SINGLE, ListView will automatically
+            // give items the 'activated' state when touched.
+            getListView().setChoiceMode(activateOnItemClick
+                    ? ListView.CHOICE_MODE_SINGLE
+                    : ListView.CHOICE_MODE_NONE);
+        }
     }
 
     private void setActivatedPosition(int position) {

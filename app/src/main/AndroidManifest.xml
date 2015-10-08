@@ -1,104 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="ch.dissem.apps.abit">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="ch.dissem.apps.abit">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
-    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 
     <application
-            android:allowBackup="true"
-            android:icon="@mipmap/ic_launcher"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme">
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
         <activity
-                android:name=".MessageListActivity"
-                android:label="@string/app_name">
+            android:name=".MessageListActivity"
+            android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-                android:name=".MessageDetailActivity"
-                android:label="@string/title_message_detail"
-                android:parentActivityName=".MessageListActivity"
-                tools:ignore="UnusedAttribute">
+            android:name=".MessageDetailActivity"
+            android:label="@string/title_message_detail"
+            android:parentActivityName=".MessageListActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".MessageListActivity"/>
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MessageListActivity" />
         </activity>
         <activity
-                android:name=".SubscriptionDetailActivity"
-                android:label="@string/title_subscription_detail"
-                android:parentActivityName=".MessageListActivity"
-                tools:ignore="UnusedAttribute">
+            android:name=".SubscriptionDetailActivity"
+            android:label="@string/title_subscription_detail"
+            android:parentActivityName=".MessageListActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".MessageListActivity"/>
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MessageListActivity" />
         </activity>
         <activity
-                android:name=".ComposeMessageActivity"
-                android:label="Compose"
-                android:parentActivityName=".MessageListActivity">
+            android:name=".ComposeMessageActivity"
+            android:label="Compose"
+            android:parentActivityName=".MessageListActivity">
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".MessageListActivity"/>
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MessageListActivity" />
 
             <intent-filter>
-                <action android:name="android.intent.action.SENDTO"/>
+                <action android:name="android.intent.action.SENDTO" />
 
-                <data android:scheme="bitmessage"/>
-                <data android:scheme="bitmsg"/>
-                <data android:scheme="bm"/>
+                <data android:scheme="bitmessage" />
+                <data android:scheme="bitmsg" />
+                <data android:scheme="bm" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
+                <action android:name="android.intent.action.SEND" />
 
-                <data android:mimeType="text/plain"/>
+                <data android:mimeType="text/plain" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
 
-                <data android:mimeType="text/plain"/>
+                <data android:mimeType="text/plain" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
-                android:name=".SettingsActivity"
-                android:label="@string/settings"
-                android:parentActivityName=".MessageListActivity">
+            android:name=".SettingsActivity"
+            android:label="@string/settings"
+            android:parentActivityName=".MessageListActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MANAGE_NETWORK_USAGE"/>
+                <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
         <activity
-                android:name=".OpenBitmessageLinkActivity"
-                android:label="@string/title_activity_open_bitmessage_link"
-                android:theme="@style/Theme.AppCompat.Light.Dialog">
+            android:name=".OpenBitmessageLinkActivity"
+            android:label="@string/title_activity_open_bitmessage_link"
+            android:theme="@style/Theme.AppCompat.Light.Dialog">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
+                <action android:name="android.intent.action.VIEW" />
 
-                <data android:scheme="bitmessage"/>
-                <data android:scheme="bitmsg"/>
-                <data android:scheme="bm"/>
+                <data android:scheme="bitmessage" />
+                <data android:scheme="bitmsg" />
+                <data android:scheme="bm" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name=".synchronization.StubProvider"
+            android:authorities="ch.dissem.bitmessage.provider"
+            android:exported="false"
+            android:syncable="true" />
+        <service android:name=".synchronization.AuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+        <service
+            android:name=".synchronization.SyncService"
+            android:exported="true"
+            android:process=":sync">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter"/>
+            </intent-filter>
+            <meta-data android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
     </application>
 
 </manifest>

@@ -33,4 +33,9 @@
     <string name="empty_trash">Empty Trash</string>
     <string name="stream_number">Stream #%d</string>
     <string name="enabled">Enabled</string>
+    <string name="trusted_node">Trusted node</string>
+    <string name="trusted_node_summary">Use this node for synchronization</string>
+    <string name="sync_timeout">Synchronization Timeout</string>
+    <string name="sync_timeout_summary">Timeout in seconds</string>
+    <string name="write_message">Write message</string>
 </resources>

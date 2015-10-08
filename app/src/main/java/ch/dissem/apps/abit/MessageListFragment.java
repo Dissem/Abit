@@ -1,6 +1,7 @@
 package ch.dissem.apps.abit;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import ch.dissem.apps.abit.listeners.ActionBarListener;
 import ch.dissem.apps.abit.listeners.ListSelectionListener;
 import ch.dissem.apps.abit.service.Singleton;
@@ -41,6 +43,10 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
     public MessageListFragment() {
     }
 
+    public MessageListFragment(Context ctx) {
+        bmc = Singleton.getBitmessageContext(ctx);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +64,9 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
     @Override
     public void updateList(Label label) {
         currentLabel = label;
+
+        if (!isVisible()) return;
+
         setListAdapter(new ArrayAdapter<Plaintext>(
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,

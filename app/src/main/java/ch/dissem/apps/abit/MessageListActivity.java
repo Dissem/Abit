@@ -1,5 +1,8 @@
 package ch.dissem.apps.abit;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,6 +16,8 @@ import android.widget.AdapterView;
 import ch.dissem.apps.abit.listeners.ActionBarListener;
 import ch.dissem.apps.abit.listeners.ListSelectionListener;
 import ch.dissem.apps.abit.service.Singleton;
+import ch.dissem.apps.abit.synchronization.Authenticator;
+import ch.dissem.apps.abit.synchronization.SyncAdapter;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
@@ -66,6 +71,8 @@ public class MessageListActivity extends AppCompatActivity
     private static final Logger LOG = LoggerFactory.getLogger(MessageListActivity.class);
     private static final int ADD_IDENTITY = 1;
 
+    private Account account;
+
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -97,6 +104,10 @@ public class MessageListActivity extends AppCompatActivity
             // res/values-sw600dp). If this view is present, then the
             // activity should be in two-pane mode.
             twoPane = true;
+
+            // In two-pane mode, list items should be given the
+            // 'activated' state when touched.
+            listFragment.setActivateOnItemClick(true);
         }
 
         createDrawer(toolbar);
@@ -107,17 +118,40 @@ public class MessageListActivity extends AppCompatActivity
         if (getIntent().hasExtra(EXTRA_SHOW_MESSAGE)) {
             onItemSelected(getIntent().getSerializableExtra(EXTRA_SHOW_MESSAGE));
         }
+
+        account = createSyncAccount(this);
+        getContentResolver().setSyncAutomatically(account, SyncAdapter.AUTHORITY, true);
+    }
+
+    private Account createSyncAccount(Context context) {
+        // Create the account type and default account
+        Account newAccount = new Account(Authenticator.ACCOUNT_NAME, Authenticator.ACCOUNT_TYPE);
+        // Get an instance of the Android account manager
+        AccountManager accountManager = (AccountManager) context.getSystemService(ACCOUNT_SERVICE);
+        /*
+         * Add the account and account type, no password or user data
+         * If successful, return the Account object, otherwise report an error.
+         */
+        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
+            /*
+             * If you don't set android:syncable="true" in
+             * in your <provider> element in the manifest,
+             * then call context.setIsSyncable(account, AUTHORITY, 1)
+             * here.
+             */
+        } else {
+            /*
+             * The account exists or some other error occurred. Log this, report it,
+             * or handle it internally.
+             */
+            LOG.error("Couldn't add account");
+        }
+        return newAccount;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (twoPane) {
-            // In two-pane mode, list items should be given the
-            // 'activated' state when touched.
-            ((MessageListFragment) getSupportFragmentManager().findFragmentById(R.id.item_list))
-                    .setActivateOnItemClick(true);
-        }
     }
 
     private void changeList(AbstractItemListFragment<?> listFragment) {
@@ -232,7 +266,7 @@ public class MessageListActivity extends AppCompatActivity
                         if (item.getTag() instanceof Label) {
                             selectedLabel = (Label) item.getTag();
                             if (!(getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof MessageListFragment)) {
-                                MessageListFragment listFragment = new MessageListFragment();
+                                MessageListFragment listFragment = new MessageListFragment(getApplicationContext());
                                 changeList(listFragment);
                                 listFragment.updateList(selectedLabel);
                             } else {

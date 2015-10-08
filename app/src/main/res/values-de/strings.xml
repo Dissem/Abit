@@ -33,4 +33,8 @@
     <string name="stream_number">Stream #%d</string>
     <string name="enabled">Aktiv</string>
     <string name="title_subscription_detail">Abonnement</string>
+    <string name="sync_timeout">Zeitbeschränkung der Synchronisierung</string>
+    <string name="sync_timeout_summary">Timeout in Sekunden</string>
+    <string name="trusted_node">Vertrauenswürdiger Knoten</string>
+    <string name="trusted_node_summary">Diese Adresse wird für die Synchronisation verwendet</string>
 </resources>
