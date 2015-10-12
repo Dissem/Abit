@@ -1,6 +1,5 @@
 package ch.dissem.apps.abit.service;
 
-import android.app.NotificationManager;
 import android.content.Context;
 
 import ch.dissem.apps.abit.listeners.MessageListener;

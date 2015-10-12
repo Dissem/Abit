@@ -103,9 +103,10 @@
             </intent-filter>
         </activity>
 
+        <!-- Synchronization -->
         <provider
             android:name=".synchronization.StubProvider"
-            android:authorities="ch.dissem.bitmessage.provider"
+            android:authorities="ch.dissem.apps.abit.provider"
             android:exported="false"
             android:syncable="true" />
         <service android:name=".synchronization.AuthenticatorService">

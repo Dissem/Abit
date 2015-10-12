@@ -25,17 +25,32 @@ import ch.dissem.bitmessage.BitmessageContext;
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final static Logger LOG = LoggerFactory.getLogger(SyncAdapter.class);
 
-    public static final String AUTHORITY = "ch.dissem.bitmessage.provider";
-
     private final BitmessageContext bmc;
 
-    public SyncAdapter(Context context) {
-        super(context, true, false);
+    /**
+     * Set up the sync adapter
+     */
+    public SyncAdapter(Context context, boolean autoInitialize) {
+        super(context, autoInitialize);
+        bmc = Singleton.getBitmessageContext(context);
+    }
+
+    /**
+     * Set up the sync adapter. This form of the
+     * constructor maintains compatibility with Android 3.0
+     * and later platform versions
+     */
+    public SyncAdapter(
+            Context context,
+            boolean autoInitialize,
+            boolean allowParallelSyncs) {
+        super(context, autoInitialize, allowParallelSyncs);
         bmc = Singleton.getBitmessageContext(context);
     }
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+        LOG.info("Synchronizing Bitmessage");
         // If the Bitmessage context acts as a full node, synchronization isn't necessary
         if (bmc.isRunning()) return;
 
@@ -52,7 +67,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             String portString = trustedNode.substring(index + 1);
             trustedNode = trustedNode.substring(0, index);
             try {
-                port = Integer.parseInt(portString);// FIXME
+                port = Integer.parseInt(portString);
             } catch (NumberFormatException e) {
                 LOG.error("Invalid port " + portString);
                 // TODO: show error as notification

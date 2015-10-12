@@ -2,27 +2,15 @@ package ch.dissem.apps.abit;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.content.Context;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-
-import ch.dissem.apps.abit.listeners.ActionBarListener;
-import ch.dissem.apps.abit.listeners.ListSelectionListener;
-import ch.dissem.apps.abit.service.Singleton;
-import ch.dissem.apps.abit.synchronization.Authenticator;
-import ch.dissem.apps.abit.synchronization.SyncAdapter;
-import ch.dissem.bitmessage.BitmessageContext;
-import ch.dissem.bitmessage.entity.BitmessageAddress;
-import ch.dissem.bitmessage.entity.Plaintext;
-import ch.dissem.bitmessage.entity.Streamable;
-import ch.dissem.bitmessage.entity.valueobject.Label;
+import android.widget.CompoundButton;
 
 import com.mikepenz.community_material_typeface_library.CommunityMaterial;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -34,16 +22,28 @@ import com.mikepenz.materialdrawer.accountswitcher.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
-import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SwitchDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
+import com.mikepenz.materialdrawer.model.interfaces.OnCheckedChangeListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+
+import ch.dissem.apps.abit.listeners.ActionBarListener;
+import ch.dissem.apps.abit.listeners.ListSelectionListener;
+import ch.dissem.apps.abit.service.Singleton;
+import ch.dissem.apps.abit.synchronization.Authenticator;
+import ch.dissem.bitmessage.BitmessageContext;
+import ch.dissem.bitmessage.entity.BitmessageAddress;
+import ch.dissem.bitmessage.entity.Plaintext;
+import ch.dissem.bitmessage.entity.valueobject.Label;
+
+import static ch.dissem.apps.abit.synchronization.StubProvider.AUTHORITY;
 
 
 /**
@@ -69,9 +69,8 @@ public class MessageListActivity extends AppCompatActivity
     public static final String ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox";
 
     private static final Logger LOG = LoggerFactory.getLogger(MessageListActivity.class);
+    private static final long SYNC_FREQUENCY = 15 * 60; // seconds
     private static final int ADD_IDENTITY = 1;
-
-    private Account account;
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -82,7 +81,6 @@ public class MessageListActivity extends AppCompatActivity
     private AccountHeader accountHeader;
     private BitmessageContext bmc;
     private Label selectedLabel;
-    private Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,39 +117,22 @@ public class MessageListActivity extends AppCompatActivity
             onItemSelected(getIntent().getSerializableExtra(EXTRA_SHOW_MESSAGE));
         }
 
-        account = createSyncAccount(this);
-        getContentResolver().setSyncAutomatically(account, SyncAdapter.AUTHORITY, true);
+        createSyncAccount();
     }
 
-    private Account createSyncAccount(Context context) {
-        // Create the account type and default account
-        Account newAccount = new Account(Authenticator.ACCOUNT_NAME, Authenticator.ACCOUNT_TYPE);
-        // Get an instance of the Android account manager
-        AccountManager accountManager = (AccountManager) context.getSystemService(ACCOUNT_SERVICE);
-        /*
-         * Add the account and account type, no password or user data
-         * If successful, return the Account object, otherwise report an error.
-         */
-        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
-            /*
-             * If you don't set android:syncable="true" in
-             * in your <provider> element in the manifest,
-             * then call context.setIsSyncable(account, AUTHORITY, 1)
-             * here.
-             */
-        } else {
-            /*
-             * The account exists or some other error occurred. Log this, report it,
-             * or handle it internally.
-             */
-            LOG.error("Couldn't add account");
+    private void createSyncAccount() {
+        // Create account, if it's missing. (Either first run, or user has deleted account.)
+        Account account = new Account(Authenticator.ACCOUNT_NAME, Authenticator.ACCOUNT_TYPE);
+
+        if (AccountManager.get(this).addAccountExplicitly(account, null, null)) {
+            // Inform the system that this account supports sync
+            ContentResolver.setIsSyncable(account, AUTHORITY, 1);
+            // Inform the system that this account is eligible for auto sync when the network is up
+            ContentResolver.setSyncAutomatically(account, AUTHORITY, true);
+            // Recommend a schedule for automatic synchronization. The system may modify this based
+            // on other scheduled syncs and network utilization.
+            ContentResolver.addPeriodicSync(account, AUTHORITY, new Bundle(), SYNC_FREQUENCY);
         }
-        return newAccount;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
     }
 
     private void changeList(AbstractItemListFragment<?> listFragment) {
@@ -253,12 +234,24 @@ public class MessageListActivity extends AppCompatActivity
                 .withAccountHeader(accountHeader)
                 .withDrawerItems(drawerItems)
                 .addStickyDrawerItems(
-                        new SecondaryDrawerItem()
+                        new PrimaryDrawerItem()
                                 .withName(R.string.subscriptions)
                                 .withIcon(CommunityMaterial.Icon.cmd_rss_box),
-                        new SecondaryDrawerItem()
+                        new PrimaryDrawerItem()
                                 .withName(R.string.settings)
-                                .withIcon(GoogleMaterial.Icon.gmd_settings)
+                                .withIcon(GoogleMaterial.Icon.gmd_settings),
+                        new SwitchDrawerItem()
+                                .withName(R.string.full_node)
+                                .withIcon(CommunityMaterial.Icon.cmd_cloud_outline)
+                                .withOnCheckedChangeListener(new OnCheckedChangeListener() {
+                                    @Override
+                                    public void onCheckedChanged(IDrawerItem drawerItem, CompoundButton buttonView, boolean isChecked) {
+                                        // TODO: warn user, option to restrict to WiFi
+                                        if (isChecked && !bmc.isRunning()) bmc.startup();
+                                        else if (bmc.isRunning()) bmc.shutdown();
+                                    }
+                                })
+                                .withChecked(bmc.isRunning())
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
@@ -288,6 +281,8 @@ public class MessageListActivity extends AppCompatActivity
                                 case R.string.settings:
                                     startActivity(new Intent(MessageListActivity.this, SettingsActivity.class));
                                     break;
+                                case R.string.full_node:
+                                    return true;
                             }
                         }
                         return false;
@@ -295,36 +290,6 @@ public class MessageListActivity extends AppCompatActivity
                 })
                 .withCloseOnClick(true)
                 .build();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        this.menu = menu;
-        updateMenu();
-        return true;
-    }
-
-    private void updateMenu() {
-        boolean running = bmc.isRunning();
-        menu.findItem(R.id.sync_enabled).setVisible(running);
-        menu.findItem(R.id.sync_disabled).setVisible(!running);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.sync_disabled:
-                bmc.startup();
-                updateMenu();
-                return true;
-            case R.id.sync_enabled:
-                bmc.shutdown();
-                updateMenu();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
     /**

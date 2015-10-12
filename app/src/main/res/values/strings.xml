@@ -2,8 +2,6 @@
     <string name="app_name">Abit</string>
     <string name="title_message_detail">Message Detail</string>
     <string name="title_subscription_detail">Subscription Detail</string>
-    <string name="disable_sync">Disable Sync</string>
-    <string name="enable_sync">Enable Sync</string>
     <string name="bitmessage_active">Bitmessage active</string>
     <string name="wifi_mode">Wi-Fi Connection Mode</string>
     <string name="settings">Settings</string>
@@ -38,4 +36,6 @@
     <string name="sync_timeout">Synchronization Timeout</string>
     <string name="sync_timeout_summary">Timeout in seconds</string>
     <string name="write_message">Write message</string>
+    <string name="full_node">Full node</string>
+    <string name="send">Send</string>
 </resources>
