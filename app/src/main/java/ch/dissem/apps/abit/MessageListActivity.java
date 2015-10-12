@@ -227,6 +227,12 @@ public class MessageListActivity extends AppCompatActivity
             }
             drawerItems.add(item);
         }
+        drawerItems.add(new PrimaryDrawerItem()
+                        .withName(R.string.archive)
+                        .withTag(null)
+                        .withIcon(CommunityMaterial.Icon.cmd_archive)
+        );
+
 
         new DrawerBuilder()
                 .withActivity(this)
