@@ -1,21 +1,15 @@
 package ch.dissem.apps.abit;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ListFragment;
 import android.view.*;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
-import ch.dissem.apps.abit.listeners.ActionBarListener;
-import ch.dissem.apps.abit.listeners.ListSelectionListener;
-import ch.dissem.apps.abit.service.Singleton;
-import ch.dissem.bitmessage.BitmessageContext;
-import ch.dissem.bitmessage.entity.BitmessageAddress;
+import ch.dissem.apps.abit.listener.ActionBarListener;
+import ch.dissem.apps.abit.listener.ListSelectionListener;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 import ch.dissem.bitmessage.ports.MessageRepository;

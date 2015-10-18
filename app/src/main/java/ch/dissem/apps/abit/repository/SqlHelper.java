@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package ch.dissem.apps.abit.repositories;
+package ch.dissem.apps.abit.repository;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import ch.dissem.apps.abit.utils.Assets;
+import ch.dissem.apps.abit.util.Assets;
 
 /**
  * Handles database migration and provides access.

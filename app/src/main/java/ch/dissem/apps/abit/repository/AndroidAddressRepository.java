@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.dissem.apps.abit.repositories;
+package ch.dissem.apps.abit.repository;
 
 import android.content.ContentValues;
 import android.database.Cursor;

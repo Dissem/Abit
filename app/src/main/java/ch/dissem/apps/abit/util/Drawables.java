@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package ch.dissem.apps.abit.utils;
+package ch.dissem.apps.abit.util;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.view.Menu;
+
+import ch.dissem.apps.abit.Identicon;
 import ch.dissem.apps.abit.R;
+
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 
@@ -28,5 +33,17 @@ import com.mikepenz.iconics.IconicsDrawable;
 public class Drawables {
     public static void addIcon(Context ctx, Menu menu, int menuItem, GoogleMaterial.Icon icon) {
         menu.findItem(menuItem).setIcon(new IconicsDrawable(ctx, icon).colorRes(R.color.primary_text_default_material_dark).actionBar());
+    }
+
+    public static Bitmap toBitmap(Identicon identicon, int size) {
+        return toBitmap(identicon, size, size);
+    }
+
+    public static Bitmap toBitmap(Identicon identicon, int width, int height) {
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        identicon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        identicon.draw(canvas);
+        return bitmap;
     }
 }

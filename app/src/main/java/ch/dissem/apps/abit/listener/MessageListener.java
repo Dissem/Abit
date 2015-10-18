@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package ch.dissem.apps.abit.listeners;
+package ch.dissem.apps.abit.listener;
 
 import android.annotation.TargetApi;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -34,9 +33,11 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.StyleSpan;
+
 import ch.dissem.apps.abit.Identicon;
 import ch.dissem.apps.abit.MessageListActivity;
 import ch.dissem.apps.abit.R;
+import ch.dissem.apps.abit.notification.NewMessageNotification;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.Plaintext;
 
@@ -50,18 +51,17 @@ import java.util.LinkedList;
  * </p>
  */
 public class MessageListener implements BitmessageContext.Listener {
-    private static final StyleSpan SPAN_EMPHASIS = new StyleSpan(Typeface.BOLD);
     private final Context ctx;
     private final NotificationManager manager;
     private final LinkedList<Plaintext> unacknowledged = new LinkedList<>();
-    private final int pictureSize;
     private int numberOfUnacknowledgedMessages = 0;
+    private final NewMessageNotification notification;
 
     public MessageListener(Context ctx) {
         this.ctx = ctx.getApplicationContext();
         this.manager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        this.pictureSize = getMaxContactPhotoSize(ctx);
+        this.notification = new NewMessageNotification(ctx);
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -94,57 +94,15 @@ public class MessageListener implements BitmessageContext.Listener {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx);
         if (numberOfUnacknowledgedMessages == 1) {
-            Spannable bigText = new SpannableString(plaintext.getSubject() + "\n" + plaintext.getText());
-            bigText.setSpan(SPAN_EMPHASIS, 0, plaintext.getSubject().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-            builder.setSmallIcon(R.drawable.ic_notification_new_message)
-                    .setLargeIcon(toBitmap(new Identicon(plaintext.getFrom())))
-                    .setContentTitle(plaintext.getFrom().toString())
-                    .setContentText(plaintext.getSubject())
-                    .setStyle(new NotificationCompat.BigTextStyle().bigText(bigText))
-                    .setContentInfo("Info");
-
-            Intent showMessageIntent = new Intent(ctx, MessageListActivity.class);
-            showMessageIntent.putExtra(MessageListActivity.EXTRA_SHOW_MESSAGE, plaintext);
-            PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 0, showMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            builder.setContentIntent(pendingIntent);
-
-            builder.addAction(R.drawable.ic_action_reply, ctx.getString(R.string.reply), pendingIntent);
-            builder.addAction(R.drawable.ic_action_delete, ctx.getString(R.string.delete), pendingIntent);
+            notification.singleNotification(plaintext);
         } else {
-            builder.setSmallIcon(R.drawable.ic_notification_new_message)
-                    .setContentTitle(ctx.getString(R.string.n_new_messages, this.unacknowledged.size()))
-                    .setContentText(ctx.getString(R.string.app_name));
-
-            NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-            synchronized (unacknowledged) {
-                inboxStyle.setBigContentTitle(ctx.getString(R.string.n_new_messages, numberOfUnacknowledgedMessages));
-                for (Plaintext msg : unacknowledged) {
-                    Spannable sb = new SpannableString(msg.getFrom() + " " + msg.getSubject());
-                    sb.setSpan(SPAN_EMPHASIS, 0, String.valueOf(msg.getFrom()).length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                    inboxStyle.addLine(sb);
-                }
-            }
-            builder.setStyle(inboxStyle);
-
-            Intent intent = new Intent(ctx, MessageListActivity.class);
-            intent.setAction(MessageListActivity.ACTION_SHOW_INBOX);
-            PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 1, intent, 0);
-            builder.setContentIntent(pendingIntent);
+            notification.multiNotification(unacknowledged, numberOfUnacknowledgedMessages);
         }
-
-        manager.notify(0, builder.build());
-    }
-
-    private Bitmap toBitmap(Identicon identicon) {
-        Bitmap bitmap = Bitmap.createBitmap(pictureSize, pictureSize, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        identicon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        identicon.draw(canvas);
-        return bitmap;
+        notification.show();
     }
 
     public void resetNotification() {
-        manager.cancel(0);
+        notification.hide();
         synchronized (unacknowledged) {
             unacknowledged.clear();
             numberOfUnacknowledgedMessages = 0;

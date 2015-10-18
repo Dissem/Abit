@@ -18,6 +18,8 @@
     <string name="title_activity_open_bitmessage_link">Import Contact</string>
 
     <string name="action_settings">Settings</string>
+    <string name="connection_info_1">Stream #%1$d: one connection</string>
+    <string name="connection_info_n">Stream #%1$d: %2$d connections</string>
     <string name="import_address">Import Address</string>
     <string name="import_contact">Add to contacts</string>
     <string name="label">Label</string>
@@ -33,4 +35,6 @@
     <string name="empty_trash">Empty Trash</string>
     <string name="stream_number">Stream #%d</string>
     <string name="enabled">Enabled</string>
+    <string name="connection_info_disconnected">Disconnected</string>
+    <string name="connection_info_pending">Connecting…</string>
 </resources>

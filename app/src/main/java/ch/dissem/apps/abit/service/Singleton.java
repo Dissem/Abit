@@ -1,13 +1,12 @@
 package ch.dissem.apps.abit.service;
 
-import android.app.NotificationManager;
 import android.content.Context;
 
-import ch.dissem.apps.abit.listeners.MessageListener;
-import ch.dissem.apps.abit.repositories.AndroidAddressRepository;
-import ch.dissem.apps.abit.repositories.AndroidInventory;
-import ch.dissem.apps.abit.repositories.AndroidMessageRepository;
-import ch.dissem.apps.abit.repositories.SqlHelper;
+import ch.dissem.apps.abit.listener.MessageListener;
+import ch.dissem.apps.abit.repository.AndroidAddressRepository;
+import ch.dissem.apps.abit.repository.AndroidInventory;
+import ch.dissem.apps.abit.repository.AndroidMessageRepository;
+import ch.dissem.apps.abit.repository.SqlHelper;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.networking.DefaultNetworkHandler;
 import ch.dissem.bitmessage.ports.MemoryNodeRegistry;

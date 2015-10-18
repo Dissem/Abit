@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.dissem.apps.abit.utils;
+package ch.dissem.apps.abit.util;
 
 import android.content.Context;
 

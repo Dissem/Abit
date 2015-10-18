@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.dissem.apps.abit.repositories;
+package ch.dissem.apps.abit.repository;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import static ch.dissem.apps.abit.repositories.SqlHelper.join;
+import static ch.dissem.apps.abit.repository.SqlHelper.join;
 import static ch.dissem.bitmessage.utils.UnixTime.now;
 
 /**

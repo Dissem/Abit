@@ -21,7 +21,7 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ListView;
-import ch.dissem.apps.abit.listeners.ListSelectionListener;
+import ch.dissem.apps.abit.listener.ListSelectionListener;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.valueobject.Label;

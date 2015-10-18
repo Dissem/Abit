@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package ch.dissem.apps.abit.listeners;
+package ch.dissem.apps.abit.listener;
 
 /**
- * Created by chris on 06.09.15.
+ * A callback interface that all activities containing this fragment must
+ * implement. This mechanism allows activities to be notified of item
+ * selections.
  */
-public interface ActionBarListener {
-    void updateTitle(CharSequence title);
+public interface ListSelectionListener<T> {
+    /**
+     * Callback for when an item has been selected.
+     */
+    void onItemSelected(T item);
 }

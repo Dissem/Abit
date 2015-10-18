@@ -10,13 +10,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 
-import ch.dissem.apps.abit.listeners.ActionBarListener;
-import ch.dissem.apps.abit.listeners.ListSelectionListener;
+import ch.dissem.apps.abit.listener.ActionBarListener;
+import ch.dissem.apps.abit.listener.ListSelectionListener;
+import ch.dissem.apps.abit.notification.NetworkNotification;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
-import ch.dissem.bitmessage.entity.Streamable;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 
 import com.mikepenz.community_material_typeface_library.CommunityMaterial;
@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 /**
@@ -288,6 +290,7 @@ public class MessageListActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.sync_disabled:
                 bmc.startup();
+                new NetworkNotification(this).show();
                 updateMenu();
                 return true;
             case R.id.sync_enabled:
