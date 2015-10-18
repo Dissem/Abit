@@ -24,11 +24,11 @@ public class NetworkNotification extends AbstractNotification {
 
     public NetworkNotification(Context ctx) {
         super(ctx);
-        builder = new NotificationCompat.Builder(ctx);
-        builder.setSmallIcon(R.drawable.ic_notification_new_message)
-                .setContentTitle(ctx.getString(R.string.bitmessage_active));
-        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
         bmc = Singleton.getBitmessageContext(ctx);
+        builder = new NotificationCompat.Builder(ctx);
+        builder.setSmallIcon(R.drawable.ic_notification_full_node)
+                .setContentTitle(ctx.getString(R.string.bitmessage_active))
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
     }
 
     @SuppressLint("StringFormatMatches")
