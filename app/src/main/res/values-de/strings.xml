@@ -28,7 +28,7 @@
     <string name="archive">Archiv</string>
     <string name="empty_trash">Papierkorb leeren</string>
     <string name="mark_unread">Als ungelesen markieren</string>
-    <string name="stream_number">Stream #%d</string>
+    <string name="stream_number">Stream %d</string>
     <string name="enabled">Aktiv</string>
     <string name="title_subscription_detail">Abonnement</string>
     <string name="sync_timeout">Zeitbeschränkung der Synchronisierung</string>
@@ -38,4 +38,8 @@
     <string name="full_node">Aktiver Knoten</string>
     <string name="send">Senden</string>
     <string name="write_message">Schreiben</string>
+    <string name="connection_info_1">Stream %1$d: eine Verbindung</string>
+    <string name="connection_info_n">Stream %1$d: %2$d Verbindungen</string>
+    <string name="connection_info_disconnected">Getrennt</string>
+    <string name="connection_info_pending">Verbindung wird aufgebaut…</string>
 </resources>

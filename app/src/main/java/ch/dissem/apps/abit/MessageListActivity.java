@@ -12,6 +12,15 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CompoundButton;
 
+import ch.dissem.apps.abit.listener.ActionBarListener;
+import ch.dissem.apps.abit.listener.ListSelectionListener;
+import ch.dissem.apps.abit.notification.NetworkNotification;
+import ch.dissem.apps.abit.service.Singleton;
+import ch.dissem.bitmessage.BitmessageContext;
+import ch.dissem.bitmessage.entity.BitmessageAddress;
+import ch.dissem.bitmessage.entity.Plaintext;
+import ch.dissem.bitmessage.entity.valueobject.Label;
+
 import com.mikepenz.community_material_typeface_library.CommunityMaterial;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -33,6 +42,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import ch.dissem.apps.abit.listeners.ActionBarListener;
 import ch.dissem.apps.abit.listeners.ListSelectionListener;
@@ -253,8 +264,10 @@ public class MessageListActivity extends AppCompatActivity
                                     @Override
                                     public void onCheckedChanged(IDrawerItem drawerItem, CompoundButton buttonView, boolean isChecked) {
                                         // TODO: warn user, option to restrict to WiFi
-                                        if (isChecked && !bmc.isRunning()) bmc.startup();
-                                        else if (bmc.isRunning()) bmc.shutdown();
+                                        if (isChecked && !bmc.isRunning()) {
+                                            bmc.startup();
+                                            new NetworkNotification(MessageListActivity.this).show();
+                                        } else if (bmc.isRunning()) bmc.shutdown();
                                     }
                                 })
                                 .withChecked(bmc.isRunning())

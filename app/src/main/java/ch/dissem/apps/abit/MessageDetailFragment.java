@@ -7,7 +7,7 @@ import android.view.*;
 import android.widget.ImageView;
 import android.widget.TextView;
 import ch.dissem.apps.abit.service.Singleton;
-import ch.dissem.apps.abit.utils.Drawables;
+import ch.dissem.apps.abit.util.Drawables;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
