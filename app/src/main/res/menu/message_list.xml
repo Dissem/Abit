@@ -5,7 +5,7 @@
     <item
             android:id="@+id/empty_trash"
             app:showAsAction="never"
-            android:icon="@drawable/ic_action_placeholder"
+            android:icon="@drawable/ic_action_delete"
             android:title="@string/empty_trash"
             android:visible="false"/>
 </menu>
