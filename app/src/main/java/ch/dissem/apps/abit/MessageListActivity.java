@@ -12,15 +12,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CompoundButton;
 
-import ch.dissem.apps.abit.listener.ActionBarListener;
-import ch.dissem.apps.abit.listener.ListSelectionListener;
-import ch.dissem.apps.abit.notification.NetworkNotification;
-import ch.dissem.apps.abit.service.Singleton;
-import ch.dissem.bitmessage.BitmessageContext;
-import ch.dissem.bitmessage.entity.BitmessageAddress;
-import ch.dissem.bitmessage.entity.Plaintext;
-import ch.dissem.bitmessage.entity.valueobject.Label;
-
 import com.mikepenz.community_material_typeface_library.CommunityMaterial;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -42,11 +33,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import ch.dissem.apps.abit.listeners.ActionBarListener;
-import ch.dissem.apps.abit.listeners.ListSelectionListener;
+import ch.dissem.apps.abit.listener.ActionBarListener;
+import ch.dissem.apps.abit.listener.ListSelectionListener;
+import ch.dissem.apps.abit.notification.NetworkNotification;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.Authenticator;
 import ch.dissem.bitmessage.BitmessageContext;
@@ -277,14 +267,7 @@ public class MessageListActivity extends AppCompatActivity
                     public boolean onItemClick(AdapterView<?> adapterView, View view, int i, long l, IDrawerItem item) {
                         if (item.getTag() instanceof Label) {
                             selectedLabel = (Label) item.getTag();
-                            if (!(getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof MessageListFragment)) {
-                                MessageListFragment listFragment = new MessageListFragment(getApplicationContext());
-                                changeList(listFragment);
-                                listFragment.updateList(selectedLabel);
-                            } else {
-                                ((MessageListFragment) getSupportFragmentManager()
-                                        .findFragmentById(R.id.item_list)).updateList(selectedLabel);
-                            }
+                            showSelectedLabel();
                             return false;
                         } else if (item instanceof Nameable<?>) {
                             Nameable<?> ni = (Nameable<?>) item;
@@ -300,6 +283,10 @@ public class MessageListActivity extends AppCompatActivity
                                 case R.string.settings:
                                     startActivity(new Intent(MessageListActivity.this, SettingsActivity.class));
                                     break;
+                                case R.string.archive:
+                                    selectedLabel = null;
+                                    showSelectedLabel();
+                                    break;
                                 case R.string.full_node:
                                     return true;
                             }
@@ -309,6 +296,17 @@ public class MessageListActivity extends AppCompatActivity
                 })
                 .withCloseOnClick(true)
                 .build();
+    }
+
+    private void showSelectedLabel() {
+        if (getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof MessageListFragment) {
+            ((MessageListFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.item_list)).updateList(selectedLabel);
+        } else {
+            MessageListFragment listFragment = new MessageListFragment(getApplicationContext());
+            changeList(listFragment);
+            listFragment.updateList(selectedLabel);
+        }
     }
 
     /**
@@ -354,6 +352,7 @@ public class MessageListActivity extends AppCompatActivity
 
     @Override
     public void updateTitle(CharSequence title) {
+        //noinspection ConstantConditions
         getSupportActionBar().setTitle(title);
     }
 

@@ -1,25 +1,24 @@
 package ch.dissem.apps.abit;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ListFragment;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
+
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
-
-import ch.dissem.apps.abit.listeners.ActionBarListener;
-import ch.dissem.apps.abit.listeners.ListSelectionListener;
 import ch.dissem.apps.abit.service.Singleton;
-import ch.dissem.bitmessage.BitmessageContext;
-import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 import ch.dissem.bitmessage.ports.MessageRepository;
@@ -45,6 +44,7 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
     public MessageListFragment() {
     }
 
+    @SuppressLint("ValidFragment")
     public MessageListFragment(Context ctx) {
         bmc = Singleton.getBitmessageContext(ctx);
     }
@@ -98,7 +98,11 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
             }
         });
         if (getActivity() instanceof ActionBarListener) {
-            ((ActionBarListener) getActivity()).updateTitle(label.toString());
+            if (label != null) {
+                ((ActionBarListener) getActivity()).updateTitle(label.toString());
+            } else {
+                ((ActionBarListener) getActivity()).updateTitle(getString(R.string.archive));
+            }
         }
         if (emptyTrashMenuItem != null) {
             emptyTrashMenuItem.setVisible(label != null && label.getType() == Label.Type.TRASH);
