@@ -2,7 +2,7 @@
     <string name="app_name">Abit</string>
     <string name="title_message_detail">Message Detail</string>
     <string name="title_subscription_detail">Subscription Detail</string>
-    <string name="bitmessage_active">Bitmessage active</string>
+    <string name="bitmessage_full_node">Bitmessage Node</string>
     <string name="wifi_mode">Wi-Fi Connection Mode</string>
     <string name="settings">Settings</string>
     <string name="wifi_only">Wi-Fi only</string>

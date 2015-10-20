@@ -4,7 +4,7 @@
     <string name="settings">Einstellungen</string>
     <string name="wifi_only">Nur WLAN</string>
     <string name="wifi_only_summary">Nicht mit Mobilfunknetz verbinden</string>
-    <string name="bitmessage_active">Bitmessage ist aktiv</string>
+    <string name="bitmessage_full_node">Bitmessage Netzknoten</string>
     <string name="subject">Betreff</string>
     <string name="to">An</string>
     <string name="title_message_detail">Nachricht</string>
