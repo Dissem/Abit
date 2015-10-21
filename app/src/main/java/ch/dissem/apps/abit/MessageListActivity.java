@@ -36,9 +36,9 @@ import java.util.ArrayList;
 
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
-import ch.dissem.apps.abit.notification.NetworkNotification;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.Authenticator;
+import ch.dissem.apps.abit.synchronization.SyncService;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
@@ -70,7 +70,7 @@ public class MessageListActivity extends AppCompatActivity
     public static final String ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox";
 
     private static final Logger LOG = LoggerFactory.getLogger(MessageListActivity.class);
-    private static final long SYNC_FREQUENCY = 15 * 60; // seconds
+    private static final long SYNC_FREQUENCY = 15;// FIXME * 60; // seconds
     private static final int ADD_IDENTITY = 1;
 
     /**
@@ -253,14 +253,14 @@ public class MessageListActivity extends AppCompatActivity
                                 .withOnCheckedChangeListener(new OnCheckedChangeListener() {
                                     @Override
                                     public void onCheckedChanged(IDrawerItem drawerItem, CompoundButton buttonView, boolean isChecked) {
-                                        // TODO: warn user, option to restrict to WiFi
-                                        if (isChecked && !bmc.isRunning()) {
-                                            bmc.startup();
-                                            new NetworkNotification(MessageListActivity.this).show();
-                                        } else if (bmc.isRunning()) bmc.shutdown();
+                                        if (isChecked) {
+                                            startService(new Intent(MessageListActivity.this, SyncService.class));
+                                        } else {
+                                            stopService(new Intent(MessageListActivity.this, SyncService.class));
+                                        }
                                     }
                                 })
-                                .withChecked(bmc.isRunning())
+                                .withChecked(SyncService.isRunning())
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override

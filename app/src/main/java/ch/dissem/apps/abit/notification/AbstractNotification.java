@@ -10,7 +10,7 @@ import android.content.Context;
 public abstract class AbstractNotification {
     protected final Context ctx;
     protected final NotificationManager manager;
-    public Notification notification;
+    protected Notification notification;
 
 
     public AbstractNotification(Context ctx) {

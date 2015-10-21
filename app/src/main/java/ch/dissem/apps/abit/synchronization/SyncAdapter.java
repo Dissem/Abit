@@ -30,22 +30,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     /**
      * Set up the sync adapter
      */
-    public SyncAdapter(Context context, boolean autoInitialize) {
-        super(context, autoInitialize);
-        bmc = Singleton.getBitmessageContext(context);
-    }
-
-    /**
-     * Set up the sync adapter. This form of the
-     * constructor maintains compatibility with Android 3.0
-     * and later platform versions
-     */
-    public SyncAdapter(
-            Context context,
-            boolean autoInitialize,
-            boolean allowParallelSyncs) {
-        super(context, autoInitialize, allowParallelSyncs);
-        bmc = Singleton.getBitmessageContext(context);
+    public SyncAdapter(Context context, BitmessageContext bitmessageContext) {
+        super(context, true);
+        bmc = bitmessageContext;
     }
 
     @Override

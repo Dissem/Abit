@@ -1,6 +1,7 @@
 package ch.dissem.apps.abit.notification;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,8 @@ import ch.dissem.bitmessage.utils.Property;
  * Shows the network status (as long as the client is connected as a full node)
  */
 public class NetworkNotification extends AbstractNotification {
+    public static final int ONGOING_NOTIFICATION_ID = 2;
+
     private final BitmessageContext bmc;
     private NotificationCompat.Builder builder;
 
@@ -29,6 +32,11 @@ public class NetworkNotification extends AbstractNotification {
         builder.setSmallIcon(R.drawable.ic_notification_full_node)
                 .setContentTitle(ctx.getString(R.string.bitmessage_full_node))
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+    }
+
+    public Notification getNotification() {
+        update();
+        return notification;
     }
 
     @SuppressLint("StringFormatMatches")
@@ -82,6 +90,6 @@ public class NetworkNotification extends AbstractNotification {
 
     @Override
     protected int getNotificationId() {
-        return 2;
+        return ONGOING_NOTIFICATION_ID;
     }
 }
