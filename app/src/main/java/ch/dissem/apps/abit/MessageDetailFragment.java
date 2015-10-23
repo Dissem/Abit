@@ -6,12 +6,15 @@ import android.support.v4.app.Fragment;
 import android.view.*;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.util.Drawables;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
+import ch.dissem.bitmessage.ports.MessageRepository;
+
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 
 import java.util.Iterator;
@@ -84,7 +87,7 @@ public class MessageDetailFragment extends Fragment {
             }
         }
         if (removed) {
-            Singleton.getBitmessageContext(inflater.getContext()).messages().save(item);
+            Singleton.getMessageRepository(inflater.getContext()).save(item);
         }
         return rootView;
     }
@@ -103,7 +106,7 @@ public class MessageDetailFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
-        BitmessageContext bmc = Singleton.getBitmessageContext(getActivity());
+        MessageRepository messageRepo = Singleton.getMessageRepository(getContext());
         switch (menuItem.getItemId()) {
             case R.id.reply:
                 Intent replyIntent = new Intent(getActivity().getApplicationContext(), ComposeMessageActivity.class);
@@ -113,21 +116,21 @@ public class MessageDetailFragment extends Fragment {
                 return true;
             case R.id.delete:
                 if (isInTrash(item)) {
-                    bmc.messages().remove(item);
+                    messageRepo.remove(item);
                 } else {
                     item.getLabels().clear();
-                    item.addLabels(bmc.messages().getLabels(Label.Type.TRASH));
-                    bmc.messages().save(item);
+                    item.addLabels(messageRepo.getLabels(Label.Type.TRASH));
+                    messageRepo.save(item);
                 }
                 getActivity().onBackPressed();
                 return true;
             case R.id.mark_unread:
-                item.addLabels(bmc.messages().getLabels(Label.Type.UNREAD));
-                bmc.messages().save(item);
+                item.addLabels(messageRepo.getLabels(Label.Type.UNREAD));
+                messageRepo.save(item);
                 return true;
             case R.id.archive:
                 item.getLabels().clear();
-                bmc.messages().save(item);
+                messageRepo.save(item);
                 return true;
             default:
                 return false;

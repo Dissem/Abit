@@ -17,14 +17,13 @@
 package ch.dissem.apps.abit;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ListView;
 
 import ch.dissem.apps.abit.listener.ListSelectionListener;
-import ch.dissem.apps.abit.service.Singleton;
-import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 
 /**
@@ -45,7 +44,6 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
         public void onItemSelected(Object plaintext) {
         }
     };
-    protected BitmessageContext bmc;
     /**
      * The fragment's current callback object, which is notified of list item
      * clicks.
@@ -58,13 +56,6 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
     private boolean activateOnItemClick;
 
     abstract void updateList(Label label);
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        bmc = Singleton.getBitmessageContext(getActivity());
-    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -89,15 +80,15 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
         // Activities containing this fragment must implement its callbacks.
-        if (!(activity instanceof ListSelectionListener)) {
+        if (!(context instanceof ListSelectionListener)) {
             throw new IllegalStateException("Activity must implement fragment's callbacks.");
         }
 
-        callbacks = (ListSelectionListener) activity;
+        callbacks = (ListSelectionListener) context;
     }
 
     @Override

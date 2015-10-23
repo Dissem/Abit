@@ -23,11 +23,13 @@ import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 
 import ch.dissem.apps.abit.R;
+import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.InternalContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.InventoryVector;
 import ch.dissem.bitmessage.entity.valueobject.Label;
+import ch.dissem.bitmessage.ports.AddressRepository;
 import ch.dissem.bitmessage.ports.MessageRepository;
 import ch.dissem.bitmessage.utils.Encode;
 
@@ -45,7 +47,7 @@ import static ch.dissem.apps.abit.repository.SqlHelper.join;
 /**
  * {@link MessageRepository} implementation using the Android SQL API.
  */
-public class AndroidMessageRepository implements MessageRepository, InternalContext.ContextHolder {
+public class AndroidMessageRepository implements MessageRepository {
     private static final Logger LOG = LoggerFactory.getLogger(AndroidMessageRepository.class);
 
     private static final String TABLE_NAME = "Message";
@@ -71,16 +73,13 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
     private static final String LBL_COLUMN_ORDER = "ord";
     private final SqlHelper sql;
     private final Context ctx;
-    private InternalContext bmc;
+
+    private final AddressRepository addressRepo;
 
     public AndroidMessageRepository(SqlHelper sql, Context ctx) {
         this.sql = sql;
         this.ctx = ctx;
-    }
-
-    @Override
-    public void setContext(InternalContext context) {
-        bmc = context;
+        this.addressRepo = Singleton.getAddressRepository(ctx);
     }
 
     @Override
@@ -230,8 +229,8 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
                 long id = c.getLong(c.getColumnIndex(COLUMN_ID));
                 builder.id(id);
                 builder.IV(new InventoryVector(iv));
-                builder.from(bmc.getAddressRepo().getAddress(c.getString(c.getColumnIndex(COLUMN_SENDER))));
-                builder.to(bmc.getAddressRepo().getAddress(c.getString(c.getColumnIndex(COLUMN_RECIPIENT))));
+                builder.from(addressRepo.getAddress(c.getString(c.getColumnIndex(COLUMN_SENDER))));
+                builder.to(addressRepo.getAddress(c.getString(c.getColumnIndex(COLUMN_RECIPIENT))));
                 builder.sent(c.getLong(c.getColumnIndex(COLUMN_SENT)));
                 builder.received(c.getLong(c.getColumnIndex(COLUMN_RECEIVED)));
                 builder.status(Plaintext.Status.valueOf(c.getString(c.getColumnIndex(COLUMN_STATUS))));
@@ -257,12 +256,12 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
 
             // save from address if necessary
             if (message.getId() == null) {
-                BitmessageAddress savedAddress = bmc.getAddressRepo().getAddress(message.getFrom().getAddress());
+                BitmessageAddress savedAddress = addressRepo.getAddress(message.getFrom().getAddress());
                 if (savedAddress == null || savedAddress.getPrivateKey() == null) {
                     if (savedAddress != null && savedAddress.getAlias() != null) {
                         message.getFrom().setAlias(savedAddress.getAlias());
                     }
-                    bmc.getAddressRepo().save(message.getFrom());
+                    addressRepo.save(message.getFrom());
                 }
             }
 

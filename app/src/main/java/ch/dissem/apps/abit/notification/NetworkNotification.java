@@ -25,9 +25,9 @@ public class NetworkNotification extends AbstractNotification {
     private final BitmessageContext bmc;
     private NotificationCompat.Builder builder;
 
-    public NetworkNotification(Context ctx) {
-        super(ctx);
-        bmc = Singleton.getBitmessageContext(ctx);
+    public NetworkNotification(Context ctx, BitmessageContext bmc) {
+        super(ctx.getApplicationContext());
+        this.bmc = bmc;
         builder = new NotificationCompat.Builder(ctx);
         builder.setSmallIcon(R.drawable.ic_notification_full_node)
                 .setContentTitle(ctx.getString(R.string.bitmessage_full_node))

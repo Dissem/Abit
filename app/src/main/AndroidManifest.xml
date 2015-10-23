@@ -102,6 +102,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
+        <service android:name=".synchronization.BitmessageService" />
 
         <!-- Synchronization -->
         <provider

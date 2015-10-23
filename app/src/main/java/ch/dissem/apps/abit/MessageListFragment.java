@@ -44,11 +44,6 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
     public MessageListFragment() {
     }
 
-    @SuppressLint("ValidFragment")
-    public MessageListFragment(Context ctx) {
-        bmc = Singleton.getBitmessageContext(ctx);
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,7 +68,7 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
-                bmc.messages().findMessages(label)) {
+                Singleton.getMessageRepository(getContext()).findMessages(label)) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 if (convertView == null) {
@@ -138,7 +133,7 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
             case R.id.empty_trash:
                 if (currentLabel.getType() != Label.Type.TRASH) return true;
 
-                MessageRepository repo = bmc.messages();
+                MessageRepository repo = Singleton.getMessageRepository(getContext());
                 for (Plaintext message : repo.findMessages(currentLabel)) {
                     repo.remove(message);
                 }
