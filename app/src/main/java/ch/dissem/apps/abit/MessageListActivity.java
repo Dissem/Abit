@@ -280,25 +280,27 @@ public class MessageListActivity extends AppCompatActivity
                         new SwitchDrawerItem()
                                 .withName(R.string.full_node)
                                 .withIcon(CommunityMaterial.Icon.cmd_cloud_outline)
+                                .withChecked(BitmessageService.isRunning())
                                 .withOnCheckedChangeListener(new OnCheckedChangeListener() {
                                     @Override
                                     public void onCheckedChanged(IDrawerItem drawerItem, CompoundButton buttonView, boolean isChecked) {
-                                        if (isChecked) {
-                                            try {
-                                                service.send(Message.obtain(null, MSG_START_NODE));
-                                            } catch (RemoteException e) {
-                                                LOG.error(e.getMessage(), e);
-                                            }
-                                        } else {
-                                            try {
-                                                service.send(Message.obtain(null, MSG_STOP_NODE));
-                                            } catch (RemoteException e) {
-                                                LOG.error(e.getMessage(), e);
+                                        if (messenger != null) {
+                                            if (isChecked) {
+                                                try {
+                                                    service.send(Message.obtain(null, MSG_START_NODE));
+                                                } catch (RemoteException e) {
+                                                    LOG.error(e.getMessage(), e);
+                                                }
+                                            } else {
+                                                try {
+                                                    service.send(Message.obtain(null, MSG_STOP_NODE));
+                                                } catch (RemoteException e) {
+                                                    LOG.error(e.getMessage(), e);
+                                                }
                                             }
                                         }
                                     }
                                 })
-                                .withChecked(BitmessageService.isRunning())
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override

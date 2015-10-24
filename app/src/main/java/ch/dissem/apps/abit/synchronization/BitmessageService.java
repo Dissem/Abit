@@ -91,7 +91,7 @@ public class BitmessageService extends Service {
 
     @Override
     public void onDestroy() {
-        bmc.shutdown();
+        if (bmc.isRunning()) bmc.shutdown();
         running = false;
     }
 
