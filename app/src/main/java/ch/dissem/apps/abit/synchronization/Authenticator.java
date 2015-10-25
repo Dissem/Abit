@@ -13,7 +13,7 @@ import android.os.Bundle;
  */
 public class Authenticator extends AbstractAccountAuthenticator {
     public static final String ACCOUNT_NAME = "Bitmessage";
-    public static final String ACCOUNT_TYPE = "bitmessage.dissem.ch";
+    public static final String ACCOUNT_TYPE = "ch.dissem.bitmessage";
 
     // Simple constructor
     public Authenticator(Context context) {

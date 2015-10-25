@@ -37,9 +37,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        LOG.info("Synchronizing Bitmessage");
         // If the Bitmessage context acts as a full node, synchronization isn't necessary
-        if (bmc.isRunning()) return;
+        if (bmc.isRunning()) {
+            LOG.info("Synchronization skipped, Abit is acting as a full node");
+            return;
+        }
+        LOG.info("Synchronizing Bitmessage");
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
@@ -63,7 +66,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         } else {
             port = 8444;
         }
-        long timeoutInSeconds = preferences.getInt("sync_timeout", 120);
+        long timeoutInSeconds = Long.parseLong(preferences.getString("sync_timeout", "120"));
         try {
             LOG.info("Synchronization started");
             bmc.synchronize(InetAddress.getByName(trustedNode), port, timeoutInSeconds, true);

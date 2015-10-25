@@ -4,6 +4,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.dissem.apps.abit.listener.MessageListener;
 import ch.dissem.apps.abit.notification.NetworkNotification;
 import ch.dissem.apps.abit.repository.AndroidInventory;
@@ -22,6 +25,7 @@ import static ch.dissem.apps.abit.notification.NetworkNotification.ONGOING_NOTIF
  * onPerformSync().
  */
 public class SyncService extends Service {
+    private static final Logger LOG = LoggerFactory.getLogger(SyncService.class);
     // Storage for an instance of the sync adapter
     private static SyncAdapter syncAdapter = null;
     // Object to use as a thread-safe lock
