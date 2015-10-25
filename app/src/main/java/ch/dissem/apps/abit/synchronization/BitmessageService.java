@@ -14,19 +14,14 @@ import android.preference.PreferenceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import ch.dissem.apps.abit.listener.MessageListener;
 import ch.dissem.apps.abit.notification.NetworkNotification;
-import ch.dissem.apps.abit.repository.AndroidInventory;
-import ch.dissem.apps.abit.repository.SqlHelper;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
-import ch.dissem.bitmessage.networking.DefaultNetworkHandler;
-import ch.dissem.bitmessage.ports.MemoryNodeRegistry;
-import ch.dissem.bitmessage.security.sc.SpongySecurity;
 
 import static ch.dissem.apps.abit.notification.NetworkNotification.ONGOING_NOTIFICATION_ID;
 
@@ -43,15 +38,19 @@ public class BitmessageService extends Service {
     public static final int MSG_SUBSCRIBE = 20;
     public static final int MSG_ADD_CONTACT = 21;
     public static final int MSG_SUBSCRIBE_AND_ADD_CONTACT = 23;
+    public static final int MSG_SEND_MESSAGE = 30;
+    public static final int MSG_SEND_BROADCAST = 31;
     public static final int MSG_START_NODE = 100;
     public static final int MSG_STOP_NODE = 101;
 
+    public static final String DATA_FIELD_IDENTITY = "identity";
     public static final String DATA_FIELD_ADDRESS = "address";
+    public static final String DATA_FIELD_SUBJECT = "subject";
+    public static final String DATA_FIELD_MESSAGE = "message";
 
     // Object to use as a thread-safe lock
     private static final Object lock = new Object();
 
-    private static MessageListener messageListener = null;
     private static NetworkNotification notification = null;
     private static BitmessageContext bmc = null;
 
@@ -67,17 +66,7 @@ public class BitmessageService extends Service {
     public void onCreate() {
         synchronized (lock) {
             if (bmc == null) {
-                messageListener = Singleton.getMessageListener(this);
-                SqlHelper sqlHelper = Singleton.getSqlHelper(this);
-                bmc = new BitmessageContext.Builder()
-                        .security(new SpongySecurity())
-                        .nodeRegistry(new MemoryNodeRegistry())
-                        .inventory(new AndroidInventory(sqlHelper))
-                        .addressRepo(Singleton.getAddressRepository(this))
-                        .messageRepo(Singleton.getMessageRepository(this))
-                        .networkHandler(new DefaultNetworkHandler())
-                        .listener(messageListener)
-                        .build();
+                bmc = Singleton.getBitmessageContext(this);
                 notification = new NetworkNotification(this, bmc);
                 messenger = new Messenger(new IncomingHandler());
             }
@@ -108,13 +97,13 @@ public class BitmessageService extends Service {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_CREATE_IDENTITY:
+                case MSG_CREATE_IDENTITY: {
                     BitmessageAddress identity = bmc.createIdentity(false);
                     if (msg.replyTo != null) {
                         try {
                             Message message = Message.obtain(this, MSG_CREATE_IDENTITY);
                             Bundle bundle = new Bundle();
-                            bundle.putSerializable(DATA_FIELD_ADDRESS, identity);
+                            bundle.putSerializable(DATA_FIELD_IDENTITY, identity);
                             message.setData(bundle);
                             msg.replyTo.send(message);
                         } catch (RemoteException e) {
@@ -122,11 +111,15 @@ public class BitmessageService extends Service {
                         }
                     }
                     break;
-                case MSG_SUBSCRIBE:
-                    BitmessageAddress address = (BitmessageAddress) msg.getData().getSerializable(DATA_FIELD_ADDRESS);
-                    bmc.addSubscribtion(address);
+                }
+                case MSG_SUBSCRIBE: {
+                    Serializable data = msg.getData().getSerializable(DATA_FIELD_ADDRESS);
+                    if (data instanceof BitmessageAddress) {
+                        bmc.addSubscribtion((BitmessageAddress) data);
+                    }
                     break;
-                case MSG_SYNC:
+                }
+                case MSG_SYNC: {
                     LOG.info("Synchronizing Bitmessage");
                     // If the Bitmessage context acts as a full node, synchronization isn't necessary
                     if (bmc.isRunning()) break;
@@ -164,9 +157,32 @@ public class BitmessageService extends Service {
                         // TODO: show error as notification
                     }
                     break;
+                }
+                case MSG_SEND_MESSAGE: {
+                    Serializable identity = msg.getData().getSerializable(DATA_FIELD_IDENTITY);
+                    Serializable address = msg.getData().getSerializable(DATA_FIELD_ADDRESS);
+                    if (identity instanceof BitmessageAddress
+                            && address instanceof BitmessageAddress) {
+                        String subject = msg.getData().getString(DATA_FIELD_SUBJECT);
+                        String message = msg.getData().getString(DATA_FIELD_MESSAGE);
+                        bmc.send((BitmessageAddress) identity, (BitmessageAddress) address,
+                                subject, message);
+                    }
+                    break;
+                }
+                case MSG_SEND_BROADCAST: {
+                    Serializable data = msg.getData().getSerializable(DATA_FIELD_IDENTITY);
+                    if (data instanceof BitmessageAddress) {
+                        String subject = msg.getData().getString(DATA_FIELD_SUBJECT);
+                        String message = msg.getData().getString(DATA_FIELD_MESSAGE);
+                        bmc.broadcast((BitmessageAddress) data, subject, message);
+                    }
+                    break;
+                }
                 case MSG_START_NODE:
-                    startService(new Intent(BitmessageService.this, BitmessageService.class));
                     // TODO: warn user, option to restrict to WiFi
+                    // (I'm not quite sure this can be done here, though)
+                    startService(new Intent(BitmessageService.this, BitmessageService.class));
                     running = true;
                     startForeground(ONGOING_NOTIFICATION_ID, notification.getNotification());
                     bmc.startup();

@@ -47,14 +47,13 @@ import ch.dissem.apps.abit.listener.ListSelectionListener;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.Authenticator;
 import ch.dissem.apps.abit.synchronization.BitmessageService;
-import ch.dissem.apps.abit.synchronization.SyncService;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 import ch.dissem.bitmessage.ports.AddressRepository;
 import ch.dissem.bitmessage.ports.MessageRepository;
 
-import static ch.dissem.apps.abit.synchronization.BitmessageService.DATA_FIELD_ADDRESS;
+import static ch.dissem.apps.abit.synchronization.BitmessageService.DATA_FIELD_IDENTITY;
 import static ch.dissem.apps.abit.synchronization.BitmessageService.MSG_START_NODE;
 import static ch.dissem.apps.abit.synchronization.BitmessageService.MSG_STOP_NODE;
 import static ch.dissem.apps.abit.synchronization.StubProvider.AUTHORITY;
@@ -419,19 +418,23 @@ public class MessageListActivity extends AppCompatActivity
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case BitmessageService.MSG_CREATE_IDENTITY:
-                    BitmessageAddress identity = (BitmessageAddress) msg.getData().getSerializable(DATA_FIELD_ADDRESS);
-                    IProfile newProfile = new ProfileDrawerItem()
-                            .withName(identity.toString())
-                            .withEmail(identity.getAddress())
-                            .withTag(identity);
-                    if (accountHeader.getProfiles() != null) {
-                        //we know that there are 2 setting elements. set the new profile above them ;)
-                        accountHeader.addProfile(newProfile, accountHeader.getProfiles().size() - 2);
-                    } else {
-                        accountHeader.addProfiles(newProfile);
+                case BitmessageService.MSG_CREATE_IDENTITY: {
+                    Serializable data = msg.getData().getSerializable(DATA_FIELD_IDENTITY);
+                    if (data instanceof BitmessageAddress) {
+                        BitmessageAddress identity = (BitmessageAddress) data;
+                        IProfile newProfile = new ProfileDrawerItem()
+                                .withName(identity.toString())
+                                .withEmail(identity.getAddress())
+                                .withTag(identity);
+                        if (accountHeader.getProfiles() != null) {
+                            //we know that there are 2 setting elements. set the new profile above them ;)
+                            accountHeader.addProfile(newProfile, accountHeader.getProfiles().size() - 2);
+                        } else {
+                            accountHeader.addProfiles(newProfile);
+                        }
                     }
                     break;
+                }
                 default:
                     super.handleMessage(msg);
             }

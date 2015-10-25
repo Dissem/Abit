@@ -2,6 +2,8 @@ package ch.dissem.apps.abit.service;
 
 import android.content.Context;
 
+import java.util.Objects;
+
 import ch.dissem.apps.abit.MessageListActivity;
 import ch.dissem.apps.abit.listener.MessageListener;
 import ch.dissem.apps.abit.repository.AndroidAddressRepository;
@@ -20,14 +22,29 @@ import ch.dissem.bitmessage.security.sc.SpongySecurity;
  * Provides singleton objects across the application.
  */
 public class Singleton {
-    private static SqlHelper sqlHelper;
-    private static Security security;
-    private static MessageRepository messageRepository;
+    public static final Object lock = new Object();
+    private static BitmessageContext bitmessageContext;
     private static MessageListener messageListener;
-    private static AddressRepository addressRepository;
 
-    static {
-        ch.dissem.bitmessage.utils.Singleton.initialize(new SpongySecurity());
+    public static BitmessageContext getBitmessageContext(Context context) {
+        if (bitmessageContext == null) {
+            synchronized (lock) {
+                if (bitmessageContext == null) {
+                    final Context ctx = context.getApplicationContext();
+                    SqlHelper sqlHelper = new SqlHelper(ctx);
+                    bitmessageContext = new BitmessageContext.Builder()
+                            .security(new SpongySecurity())
+                            .nodeRegistry(new MemoryNodeRegistry())
+                            .inventory(new AndroidInventory(sqlHelper))
+                            .addressRepo(new AndroidAddressRepository(sqlHelper))
+                            .messageRepo(new AndroidMessageRepository(sqlHelper, ctx))
+                            .networkHandler(new DefaultNetworkHandler())
+                            .listener(getMessageListener(ctx))
+                            .build();
+                }
+            }
+        }
+        return bitmessageContext;
     }
 
     public static MessageListener getMessageListener(Context ctx) {
@@ -41,40 +58,11 @@ public class Singleton {
         return messageListener;
     }
 
-    public static SqlHelper getSqlHelper(Context ctx) {
-        if (sqlHelper == null) {
-            synchronized (Singleton.class) {
-                if (sqlHelper == null) {
-                    sqlHelper = new SqlHelper(ctx.getApplicationContext());
-                }
-            }
-        }
-        return sqlHelper;
-    }
-
     public static MessageRepository getMessageRepository(Context ctx) {
-        if (messageRepository == null) {
-            ctx = ctx.getApplicationContext();
-            getSqlHelper(ctx);
-            synchronized (Singleton.class) {
-                if (messageRepository == null) {
-                    messageRepository = new AndroidMessageRepository(sqlHelper, ctx);
-                }
-            }
-        }
-        return messageRepository;
+        return getBitmessageContext(ctx).messages();
     }
 
     public static AddressRepository getAddressRepository(Context ctx) {
-        if (addressRepository == null) {
-            ctx = ctx.getApplicationContext();
-            getSqlHelper(ctx);
-            synchronized (Singleton.class) {
-                if (addressRepository == null) {
-                    addressRepository = new AndroidAddressRepository(sqlHelper);
-                }
-            }
-        }
-        return addressRepository;
+        return getBitmessageContext(ctx).addresses();
     }
 }

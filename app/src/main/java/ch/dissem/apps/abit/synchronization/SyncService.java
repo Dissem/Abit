@@ -39,7 +39,7 @@ public class SyncService extends Service {
          */
         synchronized (syncAdapterLock) {
             if (syncAdapter == null) {
-                syncAdapter = new SyncAdapter(this, null); // FIXME
+                syncAdapter = new SyncAdapter(this, true);
             }
         }
     }

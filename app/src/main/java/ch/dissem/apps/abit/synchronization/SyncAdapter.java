@@ -30,9 +30,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     /**
      * Set up the sync adapter
      */
-    public SyncAdapter(Context context, BitmessageContext bitmessageContext) {
-        super(context, true);
-        bmc = bitmessageContext;
+    public SyncAdapter(Context context, boolean autoInitialize) {
+        super(context, autoInitialize);
+        bmc = Singleton.getBitmessageContext(context);
     }
 
     @Override
