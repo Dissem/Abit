@@ -40,22 +40,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
+import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.Authenticator;
-import ch.dissem.apps.abit.synchronization.BitmessageService;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 import ch.dissem.bitmessage.ports.AddressRepository;
 import ch.dissem.bitmessage.ports.MessageRepository;
 
-import static ch.dissem.apps.abit.synchronization.BitmessageService.DATA_FIELD_IDENTITY;
-import static ch.dissem.apps.abit.synchronization.BitmessageService.MSG_START_NODE;
-import static ch.dissem.apps.abit.synchronization.BitmessageService.MSG_STOP_NODE;
+import static ch.dissem.apps.abit.service.BitmessageService.DATA_FIELD_IDENTITY;
+import static ch.dissem.apps.abit.service.BitmessageService.MSG_START_NODE;
+import static ch.dissem.apps.abit.service.BitmessageService.MSG_STOP_NODE;
 import static ch.dissem.apps.abit.synchronization.StubProvider.AUTHORITY;
 
 
@@ -82,7 +83,7 @@ public class MessageListActivity extends AppCompatActivity
     public static final String ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox";
 
     private static final Logger LOG = LoggerFactory.getLogger(MessageListActivity.class);
-    private static final long SYNC_FREQUENCY = 15;// FIXME * 60; // seconds
+    private static final long SYNC_FREQUENCY = 15 * 60; // seconds
     private static final int ADD_IDENTITY = 1;
 
     /**
@@ -91,14 +92,15 @@ public class MessageListActivity extends AppCompatActivity
      */
     private boolean twoPane;
 
-    private Messenger messenger = new Messenger(new IncomingHandler());
-    private Messenger service;
-    private boolean bound;
-    private ServiceConnection connection = new ServiceConnection() {
+    private static IncomingHandler incomingHandler = new IncomingHandler();
+    private static Messenger messenger = new Messenger(incomingHandler);
+    private static Messenger service;
+    private static boolean bound;
+    private static ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            MessageListActivity.this.service = new Messenger(service);
-            MessageListActivity.this.bound = true;
+            MessageListActivity.service = new Messenger(service);
+            MessageListActivity.bound = true;
         }
 
         @Override
@@ -108,7 +110,6 @@ public class MessageListActivity extends AppCompatActivity
         }
     };
 
-    private AccountHeader accountHeader;
     private Label selectedLabel;
 
     private MessageRepository messageRepo;
@@ -208,7 +209,7 @@ public class MessageListActivity extends AppCompatActivity
                         .withIcon(GoogleMaterial.Icon.gmd_settings)
         );
         // Create the AccountHeader
-        accountHeader = new AccountHeaderBuilder()
+        AccountHeader accountHeader = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.drawable.header)
                 .withProfiles(profiles)
@@ -229,6 +230,7 @@ public class MessageListActivity extends AppCompatActivity
                     }
                 })
                 .build();
+        incomingHandler.updateAccountHeader(accountHeader);
 
         ArrayList<IDrawerItem> drawerItems = new ArrayList<>();
         for (Label label : messageRepo.getLabels()) {
@@ -414,11 +416,24 @@ public class MessageListActivity extends AppCompatActivity
         super.onStop();
     }
 
-    private class IncomingHandler extends Handler {
+    private static class IncomingHandler extends Handler {
+        private WeakReference<AccountHeader> accountHeaderRef;
+
+        private IncomingHandler() {
+            accountHeaderRef = new WeakReference<>(null);
+        }
+
+        public void updateAccountHeader(AccountHeader accountHeader){
+            accountHeaderRef = new WeakReference<>(accountHeader);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case BitmessageService.MSG_CREATE_IDENTITY: {
+                    AccountHeader accountHeader = accountHeaderRef.get();
+                    if (accountHeader == null) break;
+
                     Serializable data = msg.getData().getSerializable(DATA_FIELD_IDENTITY);
                     if (data instanceof BitmessageAddress) {
                         BitmessageAddress identity = (BitmessageAddress) data;

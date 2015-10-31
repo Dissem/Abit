@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import ch.dissem.apps.abit.R;
+import ch.dissem.apps.abit.notification.ErrorNotification;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 
@@ -59,8 +61,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             try {
                 port = Integer.parseInt(portString);
             } catch (NumberFormatException e) {
-                LOG.error("Invalid port " + portString);
-                // TODO: show error as notification
+                new ErrorNotification(getContext())
+                        .setError(R.string.error_invalid_sync_port, portString)
+                        .show();
                 return;
             }
         } else {
@@ -72,8 +75,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             bmc.synchronize(InetAddress.getByName(trustedNode), port, timeoutInSeconds, true);
             LOG.info("Synchronization finished");
         } catch (UnknownHostException e) {
-            LOG.error("Couldn't synchronize", e);
-            // TODO: show error as notification
+            new ErrorNotification(getContext())
+                    .setError(R.string.error_invalid_sync_host)
+                    .show();
+        } catch (RuntimeException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 }

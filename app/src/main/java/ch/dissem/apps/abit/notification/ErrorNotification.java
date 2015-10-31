@@ -1,6 +1,7 @@
 package ch.dissem.apps.abit.notification;
 
 import android.content.Context;
+import android.support.annotation.StringRes;
 import android.support.v7.app.NotificationCompat;
 
 import ch.dissem.apps.abit.R;
@@ -20,14 +21,14 @@ public class ErrorNotification extends AbstractNotification {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
     }
 
-    public ErrorNotification setWarning(int resId, Object... args) {
+    public ErrorNotification setWarning(@StringRes int resId, Object... args) {
         builder.setSmallIcon(R.drawable.ic_notification_warning)
                 .setContentText(ctx.getString(resId, args));
         notification = builder.build();
         return this;
     }
 
-    public ErrorNotification setError(int resId, Object... args) {
+    public ErrorNotification setError(@StringRes int resId, Object... args) {
         builder.setSmallIcon(R.drawable.ic_notification_error)
                 .setContentText(ctx.getString(resId, args));
         notification = builder.build();

@@ -42,4 +42,8 @@
     <string name="connection_info_n">Stream %1$d: %2$d Verbindungen</string>
     <string name="connection_info_disconnected">Getrennt</string>
     <string name="connection_info_pending">Verbindung wird aufgebaut…</string>
+    <string name="proof_of_work_text">Warnung: dies könnte das Gerät erwärmen bis die Batterie leer ist.</string>
+    <string name="proof_of_work_title">Proof of Work</string>
+    <string name="error_invalid_sync_host">Synchronisation fehlgeschlagen: der vertrauenswürdige Knoten konnte nicht erreicht werden.</string>
+    <string name="error_invalid_sync_port">Ungültiger Port in den Synchronisationseinstellungen: %s</string>
 </resources>

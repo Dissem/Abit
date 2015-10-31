@@ -1,25 +1,21 @@
-package ch.dissem.apps.abit.synchronization;
+package ch.dissem.apps.abit.service;
 
 import android.app.Service;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.lang.ref.WeakReference;
 
 import ch.dissem.apps.abit.notification.NetworkNotification;
-import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 
@@ -33,7 +29,6 @@ import static ch.dissem.apps.abit.notification.NetworkNotification.ONGOING_NOTIF
 public class BitmessageService extends Service {
     public static final Logger LOG = LoggerFactory.getLogger(BitmessageService.class);
 
-    public static final int MSG_SYNC = 2;
     public static final int MSG_CREATE_IDENTITY = 10;
     public static final int MSG_SUBSCRIBE = 20;
     public static final int MSG_ADD_CONTACT = 21;
@@ -68,7 +63,7 @@ public class BitmessageService extends Service {
             if (bmc == null) {
                 bmc = Singleton.getBitmessageContext(this);
                 notification = new NetworkNotification(this, bmc);
-                messenger = new Messenger(new IncomingHandler());
+                messenger = new Messenger(new IncomingHandler(this));
             }
         }
     }
@@ -93,7 +88,13 @@ public class BitmessageService extends Service {
         return messenger.getBinder();
     }
 
-    private class IncomingHandler extends Handler {
+    private static class IncomingHandler extends Handler {
+        private WeakReference<BitmessageService> service;
+
+        private IncomingHandler(BitmessageService service) {
+            this.service = new WeakReference<>(service);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -116,45 +117,6 @@ public class BitmessageService extends Service {
                     Serializable data = msg.getData().getSerializable(DATA_FIELD_ADDRESS);
                     if (data instanceof BitmessageAddress) {
                         bmc.addSubscribtion((BitmessageAddress) data);
-                    }
-                    break;
-                }
-                case MSG_SYNC: {
-                    LOG.info("Synchronizing Bitmessage");
-                    // If the Bitmessage context acts as a full node, synchronization isn't necessary
-                    if (bmc.isRunning()) break;
-
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(
-                            BitmessageService.this);
-
-                    String trustedNode = preferences.getString("trusted_node", null);
-                    if (trustedNode == null) break;
-                    trustedNode = trustedNode.trim();
-                    if (trustedNode.isEmpty()) break;
-
-                    int port;
-                    if (trustedNode.matches("^(?![0-9a-fA-F]*:[0-9a-fA-F]*:).*(:[0-9]+)$")) {
-                        int index = trustedNode.lastIndexOf(':');
-                        String portString = trustedNode.substring(index + 1);
-                        trustedNode = trustedNode.substring(0, index);
-                        try {
-                            port = Integer.parseInt(portString);
-                        } catch (NumberFormatException e) {
-                            LOG.error("Invalid port " + portString);
-                            // TODO: show error as notification
-                            return;
-                        }
-                    } else {
-                        port = 8444;
-                    }
-                    long timeoutInSeconds = preferences.getInt("sync_timeout", 120);
-                    try {
-                        LOG.info("Synchronization started");
-                        bmc.synchronize(InetAddress.getByName(trustedNode), port, timeoutInSeconds, true);
-                        LOG.info("Synchronization finished");
-                    } catch (UnknownHostException e) {
-                        LOG.error("Couldn't synchronize", e);
-                        // TODO: show error as notification
                     }
                     break;
                 }
@@ -182,17 +144,17 @@ public class BitmessageService extends Service {
                 case MSG_START_NODE:
                     // TODO: warn user, option to restrict to WiFi
                     // (I'm not quite sure this can be done here, though)
-                    startService(new Intent(BitmessageService.this, BitmessageService.class));
+                    service.get().startService(new Intent(service.get(), BitmessageService.class));
                     running = true;
-                    startForeground(ONGOING_NOTIFICATION_ID, notification.getNotification());
+                    service.get().startForeground(ONGOING_NOTIFICATION_ID, notification.getNotification());
                     bmc.startup();
                     notification.show();
                     break;
                 case MSG_STOP_NODE:
                     bmc.shutdown();
                     running = false;
-                    stopForeground(false);
-                    stopService(new Intent(BitmessageService.this, BitmessageService.class));
+                    service.get().stopForeground(false);
+                    service.get().stopSelf();
                     break;
                 default:
                     super.handleMessage(msg);

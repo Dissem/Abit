@@ -12,7 +12,6 @@ import java.util.TimerTask;
 
 import ch.dissem.apps.abit.MessageListActivity;
 import ch.dissem.apps.abit.R;
-import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.utils.Property;
 
@@ -26,7 +25,7 @@ public class NetworkNotification extends AbstractNotification {
     private NotificationCompat.Builder builder;
 
     public NetworkNotification(Context ctx, BitmessageContext bmc) {
-        super(ctx.getApplicationContext());
+        super(ctx);
         this.bmc = bmc;
         builder = new NotificationCompat.Builder(ctx);
         builder.setSmallIcon(R.drawable.ic_notification_full_node)
@@ -34,6 +33,7 @@ public class NetworkNotification extends AbstractNotification {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
     }
 
+    @Override
     public Notification getNotification() {
         update();
         return notification;
