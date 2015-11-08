@@ -24,6 +24,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 
@@ -32,7 +34,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Created by chris on 06.09.15.
+ * Fragment that shows a list of all contacts, the ones we subscribed to first.
  */
 public class SubscriptionListFragment extends AbstractItemListFragment<BitmessageAddress> {
     @Override
@@ -43,7 +45,7 @@ public class SubscriptionListFragment extends AbstractItemListFragment<Bitmessag
     }
 
     public void updateList() {
-        List<BitmessageAddress> addresses = bmc.addresses().getContacts();
+        List<BitmessageAddress> addresses = Singleton.getAddressRepository(getContext()).getContacts();
         Collections.sort(addresses, new Comparator<BitmessageAddress>() {
             /**
              * Yields the following order:

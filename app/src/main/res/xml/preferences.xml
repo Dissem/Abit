@@ -9,8 +9,19 @@
             android:entryValues="@array/connection_mode_values"/>
     -->
     <SwitchPreference
-            android:key="wifi_only"
-            android:title="@string/wifi_only"
-            android:summary="@string/wifi_only_summary"
-            android:defaultValue="true"/>
+        android:defaultValue="true"
+        android:key="wifi_only"
+        android:summary="@string/wifi_only_summary"
+        android:title="@string/wifi_only" />
+    <EditTextPreference
+        android:inputType="textUri"
+        android:key="trusted_node"
+        android:summary="@string/trusted_node_summary"
+        android:title="@string/trusted_node" />
+    <EditTextPreference
+        android:defaultValue="120"
+        android:inputType="number"
+        android:key="sync_timeout"
+        android:summary="@string/sync_timeout_summary"
+        android:title="@string/sync_timeout" />
 </PreferenceScreen>

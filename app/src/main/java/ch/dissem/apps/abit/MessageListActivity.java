@@ -1,23 +1,24 @@
 package ch.dissem.apps.abit;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-
-import ch.dissem.apps.abit.listener.ActionBarListener;
-import ch.dissem.apps.abit.listener.ListSelectionListener;
-import ch.dissem.apps.abit.notification.NetworkNotification;
-import ch.dissem.apps.abit.service.Singleton;
-import ch.dissem.bitmessage.BitmessageContext;
-import ch.dissem.bitmessage.entity.BitmessageAddress;
-import ch.dissem.bitmessage.entity.Plaintext;
-import ch.dissem.bitmessage.entity.valueobject.Label;
+import android.widget.CompoundButton;
 
 import com.mikepenz.community_material_typeface_library.CommunityMaterial;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -29,18 +30,34 @@ import com.mikepenz.materialdrawer.accountswitcher.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
-import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SwitchDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
+import com.mikepenz.materialdrawer.model.interfaces.OnCheckedChangeListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
+
+import ch.dissem.apps.abit.listener.ActionBarListener;
+import ch.dissem.apps.abit.listener.ListSelectionListener;
+import ch.dissem.apps.abit.service.BitmessageService;
+import ch.dissem.apps.abit.service.Singleton;
+import ch.dissem.apps.abit.synchronization.Authenticator;
+import ch.dissem.bitmessage.entity.BitmessageAddress;
+import ch.dissem.bitmessage.entity.Plaintext;
+import ch.dissem.bitmessage.entity.valueobject.Label;
+import ch.dissem.bitmessage.ports.AddressRepository;
+import ch.dissem.bitmessage.ports.MessageRepository;
+
+import static ch.dissem.apps.abit.service.BitmessageService.DATA_FIELD_IDENTITY;
+import static ch.dissem.apps.abit.service.BitmessageService.MSG_START_NODE;
+import static ch.dissem.apps.abit.service.BitmessageService.MSG_STOP_NODE;
+import static ch.dissem.apps.abit.synchronization.StubProvider.AUTHORITY;
 
 
 /**
@@ -66,6 +83,7 @@ public class MessageListActivity extends AppCompatActivity
     public static final String ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox";
 
     private static final Logger LOG = LoggerFactory.getLogger(MessageListActivity.class);
+    private static final long SYNC_FREQUENCY = 15 * 60; // seconds
     private static final int ADD_IDENTITY = 1;
 
     /**
@@ -74,16 +92,36 @@ public class MessageListActivity extends AppCompatActivity
      */
     private boolean twoPane;
 
-    private AccountHeader accountHeader;
-    private BitmessageContext bmc;
+    private static IncomingHandler incomingHandler = new IncomingHandler();
+    private static Messenger messenger = new Messenger(incomingHandler);
+    private static Messenger service;
+    private static boolean bound;
+    private static ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MessageListActivity.service = new Messenger(service);
+            MessageListActivity.bound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            service = null;
+            bound = false;
+        }
+    };
+
     private Label selectedLabel;
-    private Menu menu;
+
+    private MessageRepository messageRepo;
+    private AddressRepository addressRepo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        bmc = Singleton.getBitmessageContext(this);
-        selectedLabel = bmc.messages().getLabels().get(0);
+        messageRepo = Singleton.getMessageRepository(this);
+        addressRepo = Singleton.getAddressRepository(this);
+
+        selectedLabel = messageRepo.getLabels().get(0);
 
         setContentView(R.layout.activity_message_list);
 
@@ -99,6 +137,10 @@ public class MessageListActivity extends AppCompatActivity
             // res/values-sw600dp). If this view is present, then the
             // activity should be in two-pane mode.
             twoPane = true;
+
+            // In two-pane mode, list items should be given the
+            // 'activated' state when touched.
+            listFragment.setActivateOnItemClick(true);
         }
 
         createDrawer(toolbar);
@@ -109,16 +151,22 @@ public class MessageListActivity extends AppCompatActivity
         if (getIntent().hasExtra(EXTRA_SHOW_MESSAGE)) {
             onItemSelected(getIntent().getSerializableExtra(EXTRA_SHOW_MESSAGE));
         }
+
+        createSyncAccount();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (twoPane) {
-            // In two-pane mode, list items should be given the
-            // 'activated' state when touched.
-            ((MessageListFragment) getSupportFragmentManager().findFragmentById(R.id.item_list))
-                    .setActivateOnItemClick(true);
+    private void createSyncAccount() {
+        // Create account, if it's missing. (Either first run, or user has deleted account.)
+        Account account = new Account(Authenticator.ACCOUNT_NAME, Authenticator.ACCOUNT_TYPE);
+
+        if (AccountManager.get(this).addAccountExplicitly(account, null, null)) {
+            // Inform the system that this account supports sync
+            ContentResolver.setIsSyncable(account, AUTHORITY, 1);
+            // Inform the system that this account is eligible for auto sync when the network is up
+            ContentResolver.setSyncAutomatically(account, AUTHORITY, true);
+            // Recommend a schedule for automatic synchronization. The system may modify this based
+            // on other scheduled syncs and network utilization.
+            ContentResolver.addPeriodicSync(account, AUTHORITY, new Bundle(), SYNC_FREQUENCY);
         }
     }
 
@@ -138,7 +186,7 @@ public class MessageListActivity extends AppCompatActivity
 
     private void createDrawer(Toolbar toolbar) {
         final ArrayList<IProfile> profiles = new ArrayList<>();
-        for (BitmessageAddress identity : bmc.addresses().getIdentities()) {
+        for (BitmessageAddress identity : addressRepo.getIdentities()) {
             LOG.info("Adding identity " + identity.getAddress());
             profiles.add(new ProfileDrawerItem()
                             .withIcon(new Identicon(identity))
@@ -161,7 +209,7 @@ public class MessageListActivity extends AppCompatActivity
                         .withIcon(GoogleMaterial.Icon.gmd_settings)
         );
         // Create the AccountHeader
-        accountHeader = new AccountHeaderBuilder()
+        AccountHeader accountHeader = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.drawable.header)
                 .withProfiles(profiles)
@@ -169,16 +217,12 @@ public class MessageListActivity extends AppCompatActivity
                     @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
                         if (profile.getIdentifier() == ADD_IDENTITY) {
-                            BitmessageAddress identity = bmc.createIdentity(false);
-                            IProfile newProfile = new ProfileDrawerItem()
-                                    .withName(identity.toString())
-                                    .withEmail(identity.getAddress())
-                                    .withTag(identity);
-                            if (accountHeader.getProfiles() != null) {
-                                //we know that there are 2 setting elements. set the new profile above them ;)
-                                accountHeader.addProfile(newProfile, accountHeader.getProfiles().size() - 2);
-                            } else {
-                                accountHeader.addProfiles(newProfile);
+                            try {
+                                Message message = Message.obtain(null, BitmessageService.MSG_CREATE_IDENTITY);
+                                message.replyTo = messenger;
+                                service.send(message);
+                            } catch (RemoteException e) {
+                                LOG.error(e.getMessage(), e);
                             }
                         }
                         // false if it should close the drawer
@@ -186,9 +230,10 @@ public class MessageListActivity extends AppCompatActivity
                     }
                 })
                 .build();
+        incomingHandler.updateAccountHeader(accountHeader);
 
         ArrayList<IDrawerItem> drawerItems = new ArrayList<>();
-        for (Label label : bmc.messages().getLabels()) {
+        for (Label label : messageRepo.getLabels()) {
             PrimaryDrawerItem item = new PrimaryDrawerItem().withName(label.toString()).withTag(label);
             switch (label.getType()) {
                 case INBOX:
@@ -227,26 +272,43 @@ public class MessageListActivity extends AppCompatActivity
                 .withAccountHeader(accountHeader)
                 .withDrawerItems(drawerItems)
                 .addStickyDrawerItems(
-                        new SecondaryDrawerItem()
+                        new PrimaryDrawerItem()
                                 .withName(R.string.subscriptions)
                                 .withIcon(CommunityMaterial.Icon.cmd_rss_box),
-                        new SecondaryDrawerItem()
+                        new PrimaryDrawerItem()
                                 .withName(R.string.settings)
-                                .withIcon(GoogleMaterial.Icon.gmd_settings)
+                                .withIcon(GoogleMaterial.Icon.gmd_settings),
+                        new SwitchDrawerItem()
+                                .withName(R.string.full_node)
+                                .withIcon(CommunityMaterial.Icon.cmd_cloud_outline)
+                                .withChecked(BitmessageService.isRunning())
+                                .withOnCheckedChangeListener(new OnCheckedChangeListener() {
+                                    @Override
+                                    public void onCheckedChanged(IDrawerItem drawerItem, CompoundButton buttonView, boolean isChecked) {
+                                        if (messenger != null) {
+                                            if (isChecked) {
+                                                try {
+                                                    service.send(Message.obtain(null, MSG_START_NODE));
+                                                } catch (RemoteException e) {
+                                                    LOG.error(e.getMessage(), e);
+                                                }
+                                            } else {
+                                                try {
+                                                    service.send(Message.obtain(null, MSG_STOP_NODE));
+                                                } catch (RemoteException e) {
+                                                    LOG.error(e.getMessage(), e);
+                                                }
+                                            }
+                                        }
+                                    }
+                                })
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(AdapterView<?> adapterView, View view, int i, long l, IDrawerItem item) {
                         if (item.getTag() instanceof Label) {
                             selectedLabel = (Label) item.getTag();
-                            if (!(getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof MessageListFragment)) {
-                                MessageListFragment listFragment = new MessageListFragment();
-                                changeList(listFragment);
-                                listFragment.updateList(selectedLabel);
-                            } else {
-                                ((MessageListFragment) getSupportFragmentManager()
-                                        .findFragmentById(R.id.item_list)).updateList(selectedLabel);
-                            }
+                            showSelectedLabel();
                             return false;
                         } else if (item instanceof Nameable<?>) {
                             Nameable<?> ni = (Nameable<?>) item;
@@ -262,6 +324,12 @@ public class MessageListActivity extends AppCompatActivity
                                 case R.string.settings:
                                     startActivity(new Intent(MessageListActivity.this, SettingsActivity.class));
                                     break;
+                                case R.string.archive:
+                                    selectedLabel = null;
+                                    showSelectedLabel();
+                                    break;
+                                case R.string.full_node:
+                                    return true;
                             }
                         }
                         return false;
@@ -271,34 +339,14 @@ public class MessageListActivity extends AppCompatActivity
                 .build();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        this.menu = menu;
-        updateMenu();
-        return true;
-    }
-
-    private void updateMenu() {
-        boolean running = bmc.isRunning();
-        menu.findItem(R.id.sync_enabled).setVisible(running);
-        menu.findItem(R.id.sync_disabled).setVisible(!running);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.sync_disabled:
-                bmc.startup();
-                new NetworkNotification(this).show();
-                updateMenu();
-                return true;
-            case R.id.sync_enabled:
-                bmc.shutdown();
-                updateMenu();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+    private void showSelectedLabel() {
+        if (getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof MessageListFragment) {
+            ((MessageListFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.item_list)).updateList(selectedLabel);
+        } else {
+            MessageListFragment listFragment = new MessageListFragment();
+            changeList(listFragment);
+            listFragment.updateList(selectedLabel);
         }
     }
 
@@ -345,6 +393,7 @@ public class MessageListActivity extends AppCompatActivity
 
     @Override
     public void updateTitle(CharSequence title) {
+        //noinspection ConstantConditions
         getSupportActionBar().setTitle(title);
     }
 
@@ -352,4 +401,58 @@ public class MessageListActivity extends AppCompatActivity
         return selectedLabel;
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bindService(new Intent(this, BitmessageService.class), connection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        if (bound) {
+            unbindService(connection);
+            bound = false;
+        }
+        super.onStop();
+    }
+
+    private static class IncomingHandler extends Handler {
+        private WeakReference<AccountHeader> accountHeaderRef;
+
+        private IncomingHandler() {
+            accountHeaderRef = new WeakReference<>(null);
+        }
+
+        public void updateAccountHeader(AccountHeader accountHeader){
+            accountHeaderRef = new WeakReference<>(accountHeader);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case BitmessageService.MSG_CREATE_IDENTITY: {
+                    AccountHeader accountHeader = accountHeaderRef.get();
+                    if (accountHeader == null) break;
+
+                    Serializable data = msg.getData().getSerializable(DATA_FIELD_IDENTITY);
+                    if (data instanceof BitmessageAddress) {
+                        BitmessageAddress identity = (BitmessageAddress) data;
+                        IProfile newProfile = new ProfileDrawerItem()
+                                .withName(identity.toString())
+                                .withEmail(identity.getAddress())
+                                .withTag(identity);
+                        if (accountHeader.getProfiles() != null) {
+                            //we know that there are 2 setting elements. set the new profile above them ;)
+                            accountHeader.addProfile(newProfile, accountHeader.getProfiles().size() - 2);
+                        } else {
+                            accountHeader.addProfiles(newProfile);
+                        }
+                    }
+                    break;
+                }
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
 }

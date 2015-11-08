@@ -2,9 +2,7 @@
     <string name="app_name">Abit</string>
     <string name="title_message_detail">Message Detail</string>
     <string name="title_subscription_detail">Subscription Detail</string>
-    <string name="disable_sync">Disable Sync</string>
-    <string name="enable_sync">Enable Sync</string>
-    <string name="bitmessage_active">Bitmessage active</string>
+    <string name="bitmessage_full_node">Bitmessage Node</string>
     <string name="wifi_mode">Wi-Fi Connection Mode</string>
     <string name="settings">Settings</string>
     <string name="wifi_only">Wi-Fi only</string>
@@ -35,6 +33,17 @@
     <string name="empty_trash">Empty Trash</string>
     <string name="stream_number">Stream #%d</string>
     <string name="enabled">Enabled</string>
+    <string name="trusted_node">Trusted node</string>
+    <string name="trusted_node_summary">Use this node for synchronization</string>
+    <string name="sync_timeout">Synchronization Timeout</string>
+    <string name="sync_timeout_summary">Timeout in seconds</string>
+    <string name="write_message">Write message</string>
+    <string name="full_node">Full node</string>
+    <string name="send">Send</string>
     <string name="connection_info_disconnected">Disconnected</string>
     <string name="connection_info_pending">Connecting…</string>
+    <string name="proof_of_work_title">Proof of Work</string>
+    <string name="proof_of_work_text">Warning: This might heat your device until the battery\'s dead.</string>
+    <string name="error_invalid_sync_port">Invalid port in synchronization settings: %s</string>
+    <string name="error_invalid_sync_host">Synchronization failed: Trusted node could not be reached.</string>
 </resources>

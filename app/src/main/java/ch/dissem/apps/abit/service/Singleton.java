@@ -9,23 +9,27 @@ import ch.dissem.apps.abit.repository.AndroidMessageRepository;
 import ch.dissem.apps.abit.repository.SqlHelper;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.networking.DefaultNetworkHandler;
+import ch.dissem.bitmessage.ports.AddressRepository;
 import ch.dissem.bitmessage.ports.MemoryNodeRegistry;
+import ch.dissem.bitmessage.ports.MessageRepository;
 import ch.dissem.bitmessage.security.sc.SpongySecurity;
 
 /**
  * Provides singleton objects across the application.
  */
 public class Singleton {
+    public static final Object lock = new Object();
     private static BitmessageContext bitmessageContext;
     private static MessageListener messageListener;
 
     public static BitmessageContext getBitmessageContext(Context context) {
         if (bitmessageContext == null) {
-            synchronized (Singleton.class) {
+            synchronized (lock) {
                 if (bitmessageContext == null) {
                     final Context ctx = context.getApplicationContext();
                     SqlHelper sqlHelper = new SqlHelper(ctx);
                     bitmessageContext = new BitmessageContext.Builder()
+                            .proofOfWorkEngine(new ServicePowEngine(ctx))
                             .security(new SpongySecurity())
                             .nodeRegistry(new MemoryNodeRegistry())
                             .inventory(new AndroidInventory(sqlHelper))
@@ -49,5 +53,13 @@ public class Singleton {
             }
         }
         return messageListener;
+    }
+
+    public static MessageRepository getMessageRepository(Context ctx) {
+        return getBitmessageContext(ctx).messages();
+    }
+
+    public static AddressRepository getAddressRepository(Context ctx) {
+        return getBitmessageContext(ctx).addresses();
     }
 }

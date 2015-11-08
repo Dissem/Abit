@@ -27,6 +27,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 
@@ -115,7 +116,7 @@ public class SubscriptionDetailFragment extends Fragment {
 
     @Override
     public void onPause() {
-        Singleton.getBitmessageContext(getActivity()).addresses().save(item);
+        Singleton.getAddressRepository(getContext()).save(item);
         super.onPause();
     }
 }

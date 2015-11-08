@@ -1,15 +1,24 @@
 package ch.dissem.apps.abit;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
+import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 import ch.dissem.bitmessage.ports.MessageRepository;
@@ -52,11 +61,14 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
     @Override
     public void updateList(Label label) {
         currentLabel = label;
+
+        if (!isVisible()) return;
+
         setListAdapter(new ArrayAdapter<Plaintext>(
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
-                bmc.messages().findMessages(label)) {
+                Singleton.getMessageRepository(getContext()).findMessages(label)) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 if (convertView == null) {
@@ -81,7 +93,11 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
             }
         });
         if (getActivity() instanceof ActionBarListener) {
-            ((ActionBarListener) getActivity()).updateTitle(label.toString());
+            if (label != null) {
+                ((ActionBarListener) getActivity()).updateTitle(label.toString());
+            } else {
+                ((ActionBarListener) getActivity()).updateTitle(getString(R.string.archive));
+            }
         }
         if (emptyTrashMenuItem != null) {
             emptyTrashMenuItem.setVisible(label != null && label.getType() == Label.Type.TRASH);
@@ -117,7 +133,7 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
             case R.id.empty_trash:
                 if (currentLabel.getType() != Label.Type.TRASH) return true;
 
-                MessageRepository repo = bmc.messages();
+                MessageRepository repo = Singleton.getMessageRepository(getContext());
                 for (Plaintext message : repo.findMessages(currentLabel)) {
                     repo.remove(message);
                 }

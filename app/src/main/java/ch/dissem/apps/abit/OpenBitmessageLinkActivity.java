@@ -17,19 +17,52 @@
 package ch.dissem.apps.abit;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
-import ch.dissem.apps.abit.service.Singleton;
-import ch.dissem.bitmessage.BitmessageContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 
+import static ch.dissem.apps.abit.service.BitmessageService.DATA_FIELD_ADDRESS;
+import static ch.dissem.apps.abit.service.BitmessageService.MSG_ADD_CONTACT;
+import static ch.dissem.apps.abit.service.BitmessageService.MSG_SUBSCRIBE;
+import static ch.dissem.apps.abit.service.BitmessageService.MSG_SUBSCRIBE_AND_ADD_CONTACT;
+
 public class OpenBitmessageLinkActivity extends AppCompatActivity {
+    private static final Logger LOG = LoggerFactory.getLogger(OpenBitmessageLinkActivity.class);
+
+    private Messenger service;
+    private boolean bound;
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            OpenBitmessageLinkActivity.this.service = new Messenger(service);
+            OpenBitmessageLinkActivity.this.bound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            service = null;
+            bound = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,14 +103,29 @@ public class OpenBitmessageLinkActivity extends AppCompatActivity {
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BitmessageContext bmc = Singleton.getBitmessageContext(OpenBitmessageLinkActivity.this);
                 BitmessageAddress bmAddress = new BitmessageAddress(address);
                 bmAddress.setAlias(label.getText().toString());
-                if (subscribe.isChecked()) {
-                    bmc.addSubscribtion(bmAddress);
-                }
-                if (importContact.isChecked()) {
-                    bmc.addContact(bmAddress);
+
+                final int what;
+                if (subscribe.isChecked() && importContact.isChecked())
+                    what = MSG_SUBSCRIBE_AND_ADD_CONTACT;
+                else if (subscribe.isChecked())
+                    what = MSG_SUBSCRIBE;
+                else if (importContact.isChecked())
+                    what = MSG_ADD_CONTACT;
+                else
+                    what = 0;
+
+                if (what != 0) {
+                    try {
+                        Message message = Message.obtain(null, what);
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable(DATA_FIELD_ADDRESS, bmAddress);
+                        message.setData(bundle);
+                        service.send(message);
+                    } catch (RemoteException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
                 setResult(Activity.RESULT_OK);
                 finish();
@@ -109,5 +157,20 @@ public class OpenBitmessageLinkActivity extends AppCompatActivity {
         } else {
             return new String[0];
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bindService(new Intent(this, BitmessageService.class), connection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        if (bound) {
+            unbindService(connection);
+            bound = false;
+        }
+        super.onStop();
     }
 }

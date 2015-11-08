@@ -187,7 +187,7 @@ public class AndroidInventory implements Inventory {
                 "hash = X'" + object.getInventoryVector() + "'",
                 null, null, null, null
         );
-        return c.getColumnCount() > 0;
+        return c.getCount() > 0;
     }
 
     @Override

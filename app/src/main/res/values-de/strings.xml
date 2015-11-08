@@ -4,9 +4,7 @@
     <string name="settings">Einstellungen</string>
     <string name="wifi_only">Nur WLAN</string>
     <string name="wifi_only_summary">Nicht mit Mobilfunknetz verbinden</string>
-    <string name="bitmessage_active">Bitmessage ist aktiv</string>
-    <string name="disable_sync">Synchronisieren ausschalten</string>
-    <string name="enable_sync">Synchronisieren einschalten</string>
+    <string name="bitmessage_full_node">Bitmessage Netzknoten</string>
     <string name="subject">Betreff</string>
     <string name="to">An</string>
     <string name="title_message_detail">Nachricht</string>
@@ -33,8 +31,19 @@
     <string name="stream_number">Stream %d</string>
     <string name="enabled">Aktiv</string>
     <string name="title_subscription_detail">Abonnement</string>
+    <string name="sync_timeout">Zeitbeschränkung der Synchronisierung</string>
+    <string name="sync_timeout_summary">Timeout in Sekunden</string>
+    <string name="trusted_node">Vertrauenswürdiger Knoten</string>
+    <string name="trusted_node_summary">Diese Adresse wird für die Synchronisation verwendet</string>
+    <string name="full_node">Aktiver Knoten</string>
+    <string name="send">Senden</string>
+    <string name="write_message">Schreiben</string>
     <string name="connection_info_1">Stream %1$d: eine Verbindung</string>
     <string name="connection_info_n">Stream %1$d: %2$d Verbindungen</string>
     <string name="connection_info_disconnected">Getrennt</string>
     <string name="connection_info_pending">Verbindung wird aufgebaut…</string>
+    <string name="proof_of_work_text">Warnung: dies könnte das Gerät erwärmen bis die Batterie leer ist.</string>
+    <string name="proof_of_work_title">Proof of Work</string>
+    <string name="error_invalid_sync_host">Synchronisation fehlgeschlagen: der vertrauenswürdige Knoten konnte nicht erreicht werden.</string>
+    <string name="error_invalid_sync_port">Ungültiger Port in den Synchronisationseinstellungen: %s</string>
 </resources>

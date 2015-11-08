@@ -1,6 +1,5 @@
 package ch.dissem.apps.abit.notification;
 
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +20,7 @@ import ch.dissem.bitmessage.entity.Plaintext;
 import static ch.dissem.apps.abit.util.Drawables.toBitmap;
 
 public class NewMessageNotification extends AbstractNotification {
+    public static final int NEW_MESSAGE_NOTIFICATION_ID = 1;
     private static final StyleSpan SPAN_EMPHASIS = new StyleSpan(Typeface.BOLD);
 
     public NewMessageNotification(Context ctx) {
@@ -76,6 +76,6 @@ public class NewMessageNotification extends AbstractNotification {
 
     @Override
     protected int getNotificationId() {
-        return 1;
+        return NEW_MESSAGE_NOTIFICATION_ID;
     }
 }

@@ -10,11 +10,11 @@ import android.content.Context;
 public abstract class AbstractNotification {
     protected final Context ctx;
     protected final NotificationManager manager;
-    public Notification notification;
+    protected Notification notification;
 
 
     public AbstractNotification(Context ctx) {
-        this.ctx = ctx;
+        this.ctx = ctx.getApplicationContext();
         this.manager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
@@ -22,6 +22,10 @@ public abstract class AbstractNotification {
      * @return an id unique to this notification class
      */
     protected abstract int getNotificationId();
+
+    public Notification getNotification() {
+        return notification;
+    }
 
     public void show() {
         manager.notify(getNotificationId(), notification);
