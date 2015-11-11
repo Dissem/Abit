@@ -113,7 +113,9 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getActivity().getApplicationContext(), ComposeMessageActivity.class));
+                Intent intent = new Intent(getActivity().getApplicationContext(), ComposeMessageActivity.class);
+                intent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, ((MessageListActivity)getActivity()).getSelectedIdentity());
+                startActivity(intent);
             }
         });
 

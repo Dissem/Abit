@@ -114,6 +114,7 @@ public class MessageListActivity extends AppCompatActivity
 
     private MessageRepository messageRepo;
     private AddressRepository addressRepo;
+    private BitmessageAddress selectedIdentity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -224,38 +225,50 @@ public class MessageListActivity extends AppCompatActivity
                             } catch (RemoteException e) {
                                 LOG.error(e.getMessage(), e);
                             }
+                        } else if (profile instanceof ProfileDrawerItem) {
+                            Object tag = ((ProfileDrawerItem) profile).getTag();
+                            if (tag instanceof BitmessageAddress) {
+                                selectedIdentity = (BitmessageAddress) tag;
+                            }
                         }
                         // false if it should close the drawer
                         return false;
                     }
                 })
                 .build();
+        if (profiles.size() > 0) {
+            accountHeader.setActiveProfile(profiles.get(0), true);
+        }
         incomingHandler.updateAccountHeader(accountHeader);
 
         ArrayList<IDrawerItem> drawerItems = new ArrayList<>();
         for (Label label : messageRepo.getLabels()) {
             PrimaryDrawerItem item = new PrimaryDrawerItem().withName(label.toString()).withTag(label);
-            switch (label.getType()) {
-                case INBOX:
-                    item.withIcon(GoogleMaterial.Icon.gmd_inbox);
-                    break;
-                case DRAFT:
-                    item.withIcon(CommunityMaterial.Icon.cmd_file);
-                    break;
-                case SENT:
-                    item.withIcon(CommunityMaterial.Icon.cmd_send);
-                    break;
-                case BROADCAST:
-                    item.withIcon(CommunityMaterial.Icon.cmd_rss);
-                    break;
-                case UNREAD:
-                    item.withIcon(GoogleMaterial.Icon.gmd_markunread_mailbox);
-                    break;
-                case TRASH:
-                    item.withIcon(GoogleMaterial.Icon.gmd_delete);
-                    break;
-                default:
-                    item.withIcon(CommunityMaterial.Icon.cmd_label);
+            if (label.getType() == null) {
+                item.withIcon(CommunityMaterial.Icon.cmd_label);
+            } else {
+                switch (label.getType()) {
+                    case INBOX:
+                        item.withIcon(GoogleMaterial.Icon.gmd_inbox);
+                        break;
+                    case DRAFT:
+                        item.withIcon(CommunityMaterial.Icon.cmd_file);
+                        break;
+                    case SENT:
+                        item.withIcon(CommunityMaterial.Icon.cmd_send);
+                        break;
+                    case BROADCAST:
+                        item.withIcon(CommunityMaterial.Icon.cmd_rss);
+                        break;
+                    case UNREAD:
+                        item.withIcon(GoogleMaterial.Icon.gmd_markunread_mailbox);
+                        break;
+                    case TRASH:
+                        item.withIcon(GoogleMaterial.Icon.gmd_delete);
+                        break;
+                    default:
+                        item.withIcon(CommunityMaterial.Icon.cmd_label);
+                }
             }
             drawerItems.add(item);
         }
@@ -273,8 +286,8 @@ public class MessageListActivity extends AppCompatActivity
                 .withDrawerItems(drawerItems)
                 .addStickyDrawerItems(
                         new PrimaryDrawerItem()
-                                .withName(R.string.subscriptions)
-                                .withIcon(CommunityMaterial.Icon.cmd_rss_box),
+                                .withName(R.string.contacts_and_subscriptions)
+                                .withIcon(GoogleMaterial.Icon.gmd_contacts),
                         new PrimaryDrawerItem()
                                 .withName(R.string.settings)
                                 .withIcon(GoogleMaterial.Icon.gmd_settings),
@@ -313,7 +326,7 @@ public class MessageListActivity extends AppCompatActivity
                         } else if (item instanceof Nameable<?>) {
                             Nameable<?> ni = (Nameable<?>) item;
                             switch (ni.getNameRes()) {
-                                case R.string.subscriptions:
+                                case R.string.contacts_and_subscriptions:
                                     if (!(getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof SubscriptionListFragment)) {
                                         changeList(new SubscriptionListFragment());
                                     } else {
@@ -416,6 +429,10 @@ public class MessageListActivity extends AppCompatActivity
         super.onStop();
     }
 
+    public BitmessageAddress getSelectedIdentity() {
+        return selectedIdentity;
+    }
+
     private static class IncomingHandler extends Handler {
         private WeakReference<AccountHeader> accountHeaderRef;
 
@@ -423,7 +440,7 @@ public class MessageListActivity extends AppCompatActivity
             accountHeaderRef = new WeakReference<>(null);
         }
 
-        public void updateAccountHeader(AccountHeader accountHeader){
+        public void updateAccountHeader(AccountHeader accountHeader) {
             accountHeaderRef = new WeakReference<>(accountHeader);
         }
 

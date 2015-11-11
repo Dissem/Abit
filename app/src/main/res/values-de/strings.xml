@@ -46,4 +46,7 @@
     <string name="proof_of_work_title">Proof of Work</string>
     <string name="error_invalid_sync_host">Synchronisation fehlgeschlagen: der vertrauenswürdige Knoten konnte nicht erreicht werden.</string>
     <string name="error_invalid_sync_port">Ungültiger Port in den Synchronisationseinstellungen: %s</string>
+    <string name="compose_body_hint">Nachricht schreiben</string>
+    <string name="contacts_and_subscriptions">Kontakte</string>
+    <string name="subscribed">Abonniert</string>
 </resources>

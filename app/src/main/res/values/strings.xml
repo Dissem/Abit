@@ -46,4 +46,7 @@
     <string name="proof_of_work_text">Warning: This might heat your device until the battery\'s dead.</string>
     <string name="error_invalid_sync_port">Invalid port in synchronization settings: %s</string>
     <string name="error_invalid_sync_host">Synchronization failed: Trusted node could not be reached.</string>
+    <string name="compose_body_hint">Write message</string>
+    <string name="contacts_and_subscriptions">Contacts</string>
+    <string name="subscribed">Subscribed</string>
 </resources>

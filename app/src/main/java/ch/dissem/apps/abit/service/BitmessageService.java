@@ -1,6 +1,7 @@
 package ch.dissem.apps.abit.service;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -8,6 +9,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.widget.Toast;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,6 +131,9 @@ public class BitmessageService extends Service {
                         String message = msg.getData().getString(DATA_FIELD_MESSAGE);
                         bmc.send((BitmessageAddress) identity, (BitmessageAddress) address,
                                 subject, message);
+                    } else {
+                        Context ctx = service.get();
+                        Toast.makeText(ctx, "Could not send", Toast.LENGTH_LONG);
                     }
                     break;
                 }
