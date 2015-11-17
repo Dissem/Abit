@@ -71,7 +71,6 @@ public class OpenBitmessageLinkActivity extends AppCompatActivity {
 
         final TextView addressView = (TextView) findViewById(R.id.address);
         final EditText label = (EditText) findViewById(R.id.label);
-        final Switch importContact = (Switch) findViewById(R.id.import_contact);
         final Switch subscribe = (Switch) findViewById(R.id.subscribe);
 
         Uri uri = getIntent().getData();
@@ -83,7 +82,6 @@ public class OpenBitmessageLinkActivity extends AppCompatActivity {
                 label.setText(parameter.substring(parameter.indexOf('=') + 1).trim());
             } else if (name.startsWith("action")) {
                 parameter = parameter.toLowerCase();
-                importContact.setChecked(parameter.contains("add"));
                 subscribe.setChecked(parameter.contains("subscribe"));
             }
         }
@@ -107,26 +105,21 @@ public class OpenBitmessageLinkActivity extends AppCompatActivity {
                 bmAddress.setAlias(label.getText().toString());
 
                 final int what;
-                if (subscribe.isChecked() && importContact.isChecked())
+                if (subscribe.isChecked())
                     what = MSG_SUBSCRIBE_AND_ADD_CONTACT;
-                else if (subscribe.isChecked())
-                    what = MSG_SUBSCRIBE;
-                else if (importContact.isChecked())
-                    what = MSG_ADD_CONTACT;
                 else
-                    what = 0;
+                    what = MSG_ADD_CONTACT;
 
-                if (what != 0) {
-                    try {
-                        Message message = Message.obtain(null, what);
-                        Bundle bundle = new Bundle();
-                        bundle.putSerializable(DATA_FIELD_ADDRESS, bmAddress);
-                        message.setData(bundle);
-                        service.send(message);
-                    } catch (RemoteException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
+                try {
+                    Message message = Message.obtain(null, what);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable(DATA_FIELD_ADDRESS, bmAddress);
+                    message.setData(bundle);
+                    service.send(message);
+                } catch (RemoteException e) {
+                    LOG.error(e.getMessage(), e);
                 }
+
                 setResult(Activity.RESULT_OK);
                 finish();
             }
