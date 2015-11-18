@@ -27,19 +27,10 @@
     </android.support.design.widget.TextInputLayout>
 
     <Switch
-        android:id="@+id/import_contact"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/label_wrapper"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"
-        android:text="@string/import_contact" />
-
-    <Switch
         android:id="@+id/subscribe"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/import_contact"
+        android:layout_below="@+id/label_wrapper"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="8dp"
         android:layout_marginTop="8dp"
@@ -58,24 +49,13 @@
         android:text="@string/do_import" />
 
     <Button
-        android:id="@+id/compose_message"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/do_import"
-        android:layout_below="@+id/subscribe"
-        android:layout_toLeftOf="@+id/do_import"
-        android:layout_toStartOf="@+id/do_import"
-        android:text="@string/write_message" />
-
-    <Button
         android:id="@+id/cancel"
         style="?android:attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/compose_message"
-        android:layout_toLeftOf="@+id/compose_message"
-        android:layout_toStartOf="@+id/compose_message"
+        android:layout_alignTop="@+id/do_import"
+        android:layout_toLeftOf="@+id/do_import"
+        android:layout_toStartOf="@+id/do_import"
         android:text="@string/cancel" />
 
 </RelativeLayout>

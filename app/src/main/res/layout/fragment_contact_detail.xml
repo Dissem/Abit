@@ -70,7 +70,7 @@
     <Switch
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/enabled"
+            android:text="@string/subscribed"
             android:id="@+id/active"
             android:paddingTop="16dp"
             android:paddingLeft="16dp"

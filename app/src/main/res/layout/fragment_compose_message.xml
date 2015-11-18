@@ -1,51 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
 
     <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp">
+
+        <AutoCompleteTextView
+            android:id="@+id/recipient"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="4dp">
-
-        <EditText
-                android:id="@+id/recipient"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textNoSuggestions"
-                android:singleLine="true"
-                android:hint="@string/to"/>
+            android:hint="@string/to"
+            android:inputType="textNoSuggestions"
+            android:singleLine="true" />
 
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
         <EditText
-                android:id="@+id/subject"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textEmailSubject"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:hint="@string/subject"/>
+            android:id="@+id/subject"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/subject"
+            android:inputType="textEmailSubject"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
     </android.support.design.widget.TextInputLayout>
 
-    <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-        <EditText
-                android:id="@+id/body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textMultiLine"/>
-
-    </ScrollView>
+    <EditText
+        android:id="@+id/body"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:hint="@string/compose_body_hint"
+        android:inputType="textMultiLine|textCapSentences"
+        android:gravity="top"
+        android:isScrollContainer="true" />
 
 </LinearLayout>
