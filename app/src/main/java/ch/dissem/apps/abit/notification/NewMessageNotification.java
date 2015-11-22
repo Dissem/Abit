@@ -13,7 +13,7 @@ import android.text.style.StyleSpan;
 import java.util.LinkedList;
 
 import ch.dissem.apps.abit.Identicon;
-import ch.dissem.apps.abit.MessageListActivity;
+import ch.dissem.apps.abit.MainActivity;
 import ch.dissem.apps.abit.R;
 import ch.dissem.bitmessage.entity.Plaintext;
 
@@ -38,8 +38,8 @@ public class NewMessageNotification extends AbstractNotification {
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(bigText))
                 .setContentInfo("Info");
 
-        Intent showMessageIntent = new Intent(ctx, MessageListActivity.class);
-        showMessageIntent.putExtra(MessageListActivity.EXTRA_SHOW_MESSAGE, plaintext);
+        Intent showMessageIntent = new Intent(ctx, MainActivity.class);
+        showMessageIntent.putExtra(MainActivity.EXTRA_SHOW_MESSAGE, plaintext);
         PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 0, showMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(pendingIntent);
 
@@ -66,8 +66,8 @@ public class NewMessageNotification extends AbstractNotification {
         }
         builder.setStyle(inboxStyle);
 
-        Intent intent = new Intent(ctx, MessageListActivity.class);
-        intent.setAction(MessageListActivity.ACTION_SHOW_INBOX);
+        Intent intent = new Intent(ctx, MainActivity.class);
+        intent.setAction(MainActivity.ACTION_SHOW_INBOX);
         PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 1, intent, 0);
         builder.setContentIntent(pendingIntent);
         notification = builder.build();

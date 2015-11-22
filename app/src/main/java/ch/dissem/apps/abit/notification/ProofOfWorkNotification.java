@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.NotificationCompat;
 
-import ch.dissem.apps.abit.MessageListActivity;
+import ch.dissem.apps.abit.MainActivity;
 import ch.dissem.apps.abit.R;
 
 /**
@@ -18,7 +18,7 @@ public class ProofOfWorkNotification extends AbstractNotification {
         super(ctx);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx);
 
-        Intent showMessageIntent = new Intent(ctx, MessageListActivity.class);
+        Intent showMessageIntent = new Intent(ctx, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 0, showMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)

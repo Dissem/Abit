@@ -1,7 +1,5 @@
 package ch.dissem.apps.abit;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -55,7 +53,7 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
     public void onResume() {
         super.onResume();
 
-        updateList(((MessageListActivity) getActivity()).getSelectedLabel());
+        doUpdateList(((MainActivity) getActivity()).getSelectedLabel());
     }
 
     @Override
@@ -64,6 +62,10 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
 
         if (!isVisible()) return;
 
+        doUpdateList(label);
+    }
+
+    private void doUpdateList(Label label) {
         setListAdapter(new ArrayAdapter<Plaintext>(
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,
@@ -114,7 +116,7 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity().getApplicationContext(), ComposeMessageActivity.class);
-                intent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, ((MessageListActivity)getActivity()).getSelectedIdentity());
+                intent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, ((MainActivity) getActivity()).getSelectedIdentity());
                 startActivity(intent);
             }
         });

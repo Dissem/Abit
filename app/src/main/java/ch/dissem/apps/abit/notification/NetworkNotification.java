@@ -10,7 +10,7 @@ import android.support.v7.app.NotificationCompat;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import ch.dissem.apps.abit.MessageListActivity;
+import ch.dissem.apps.abit.MainActivity;
 import ch.dissem.apps.abit.R;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.utils.Property;
@@ -64,7 +64,7 @@ public class NetworkNotification extends AbstractNotification {
             }
             builder.setContentText(info);
         }
-        Intent showMessageIntent = new Intent(ctx, MessageListActivity.class);
+        Intent showMessageIntent = new Intent(ctx, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 1, showMessageIntent, 0);
         builder.setContentIntent(pendingIntent);
         notification = builder.build();

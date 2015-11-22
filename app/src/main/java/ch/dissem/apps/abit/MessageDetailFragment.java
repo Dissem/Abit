@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.util.Linkify;
 import android.text.util.Linkify.TransformFilter;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,7 +18,6 @@ import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 
 import java.util.Iterator;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.util.Drawables;
@@ -28,8 +26,6 @@ import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 import ch.dissem.bitmessage.ports.MessageRepository;
 
-import static android.text.util.Linkify.ALL;
-import static android.text.util.Linkify.EMAIL_ADDRESSES;
 import static android.text.util.Linkify.WEB_URLS;
 import static ch.dissem.apps.abit.util.Constants.BITMESSAGE_ADDRESS_PATTERN;
 import static ch.dissem.apps.abit.util.Constants.BITMESSAGE_URL_SCHEMA;
@@ -37,7 +33,7 @@ import static ch.dissem.apps.abit.util.Constants.BITMESSAGE_URL_SCHEMA;
 
 /**
  * A fragment representing a single Message detail screen.
- * This fragment is either contained in a {@link MessageListActivity}
+ * This fragment is either contained in a {@link MainActivity}
  * in two-pane mode (on tablets) or a {@link MessageDetailActivity}
  * on handsets.
  */

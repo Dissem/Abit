@@ -18,25 +18,13 @@ package ch.dissem.apps.abit.listener;
 
 import android.annotation.TargetApi;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.v7.app.NotificationCompat;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.StyleSpan;
 
-import ch.dissem.apps.abit.Identicon;
-import ch.dissem.apps.abit.MessageListActivity;
-import ch.dissem.apps.abit.R;
 import ch.dissem.apps.abit.notification.NewMessageNotification;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.Plaintext;
