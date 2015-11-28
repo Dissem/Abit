@@ -2,6 +2,7 @@ package ch.dissem.apps.abit.service;
 
 import android.content.Context;
 
+import ch.dissem.apps.abit.adapter.AndroidSecurity;
 import ch.dissem.apps.abit.listener.MessageListener;
 import ch.dissem.apps.abit.repository.AndroidAddressRepository;
 import ch.dissem.apps.abit.repository.AndroidInventory;
@@ -30,7 +31,7 @@ public class Singleton {
                     SqlHelper sqlHelper = new SqlHelper(ctx);
                     bitmessageContext = new BitmessageContext.Builder()
                             .proofOfWorkEngine(new ServicePowEngine(ctx))
-                            .security(new SpongySecurity())
+                            .security(new AndroidSecurity(ctx))
                             .nodeRegistry(new MemoryNodeRegistry())
                             .inventory(new AndroidInventory(sqlHelper))
                             .addressRepo(new AndroidAddressRepository(sqlHelper))

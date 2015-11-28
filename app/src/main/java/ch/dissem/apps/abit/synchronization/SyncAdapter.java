@@ -20,6 +20,9 @@ import ch.dissem.apps.abit.notification.ErrorNotification;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 
+import static ch.dissem.apps.abit.util.Constants.PREFERENCE_SYNC_TIMEOUT;
+import static ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE;
+
 /**
  * Sync Adapter to synchronize with the Bitmessage network - fetches
  * new objects and then disconnects.
@@ -48,7 +51,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
-        String trustedNode = preferences.getString("trusted_node", null);
+        String trustedNode = preferences.getString(PREFERENCE_TRUSTED_NODE, null);
         if (trustedNode == null) return;
         trustedNode = trustedNode.trim();
         if (trustedNode.isEmpty()) return;
@@ -69,7 +72,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         } else {
             port = 8444;
         }
-        long timeoutInSeconds = Long.parseLong(preferences.getString("sync_timeout", "120"));
+        long timeoutInSeconds = Long.parseLong(preferences.getString(PREFERENCE_SYNC_TIMEOUT, "120"));
         try {
             LOG.info("Synchronization started");
             bmc.synchronize(InetAddress.getByName(trustedNode), port, timeoutInSeconds, true);

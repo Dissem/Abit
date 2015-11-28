@@ -49,4 +49,6 @@
     <string name="compose_body_hint">Nachricht schreiben</string>
     <string name="contacts_and_subscriptions">Kontakte</string>
     <string name="subscribed">Abonniert</string>
+    <string name="server_pow">Server POW</string>
+    <string name="server_pow_summary">Der vertrauenswürdige Knoten macht den Proof of Work</string>
 </resources>
