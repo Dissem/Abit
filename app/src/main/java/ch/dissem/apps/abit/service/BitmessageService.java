@@ -34,7 +34,6 @@ public class BitmessageService extends Service {
     public static final int MSG_CREATE_IDENTITY = 10;
     public static final int MSG_SUBSCRIBE = 20;
     public static final int MSG_ADD_CONTACT = 21;
-    public static final int MSG_SUBSCRIBE_AND_ADD_CONTACT = 23;
     public static final int MSG_SEND_MESSAGE = 30;
     public static final int MSG_SEND_BROADCAST = 31;
     public static final int MSG_START_NODE = 100;
@@ -119,6 +118,13 @@ public class BitmessageService extends Service {
                     Serializable data = msg.getData().getSerializable(DATA_FIELD_ADDRESS);
                     if (data instanceof BitmessageAddress) {
                         bmc.addSubscribtion((BitmessageAddress) data);
+                    }
+                    break;
+                }
+                case MSG_ADD_CONTACT: {
+                    Serializable data = msg.getData().getSerializable(DATA_FIELD_ADDRESS);
+                    if (data instanceof BitmessageAddress) {
+                        bmc.addContact((BitmessageAddress) data);
                     }
                     break;
                 }

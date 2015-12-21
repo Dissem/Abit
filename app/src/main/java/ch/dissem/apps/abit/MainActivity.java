@@ -50,6 +50,8 @@ import ch.dissem.apps.abit.listener.ListSelectionListener;
 import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.Authenticator;
+import ch.dissem.apps.abit.synchronization.SyncAdapter;
+import ch.dissem.apps.abit.util.Preferences;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
@@ -85,7 +87,6 @@ public class MainActivity extends AppCompatActivity
     public static final String ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox";
 
     private static final Logger LOG = LoggerFactory.getLogger(MainActivity.class);
-    private static final long SYNC_FREQUENCY = 15 * 60; // seconds
     private static final int ADD_IDENTITY = 1;
 
     /**
@@ -134,7 +135,8 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         MessageListFragment listFragment = new MessageListFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.item_list, listFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.item_list, listFragment)
+                .commit();
 
         if (findViewById(R.id.message_detail_container) != null) {
             // The detail container view will be present only in the
@@ -157,21 +159,10 @@ public class MainActivity extends AppCompatActivity
             onItemSelected(getIntent().getSerializableExtra(EXTRA_SHOW_MESSAGE));
         }
 
-        createSyncAccount();
-    }
-
-    private void createSyncAccount() {
-        // Create account, if it's missing. (Either first run, or user has deleted account.)
-        Account account = new Account(Authenticator.ACCOUNT_NAME, Authenticator.ACCOUNT_TYPE);
-
-        if (AccountManager.get(this).addAccountExplicitly(account, null, null)) {
-            // Inform the system that this account supports sync
-            ContentResolver.setIsSyncable(account, AUTHORITY, 1);
-            // Inform the system that this account is eligible for auto sync when the network is up
-            ContentResolver.setSyncAutomatically(account, AUTHORITY, true);
-            // Recommend a schedule for automatic synchronization. The system may modify this based
-            // on other scheduled syncs and network utilization.
-            ContentResolver.addPeriodicSync(account, AUTHORITY, new Bundle(), SYNC_FREQUENCY);
+        if (Preferences.useTrustedNode(this)) {
+            SyncAdapter.startSync(this);
+        } else {
+            SyncAdapter.stopSync(this);
         }
     }
 
@@ -220,10 +211,12 @@ public class MainActivity extends AppCompatActivity
                 .withProfiles(profiles)
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
-                    public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
+                    public boolean onProfileChanged(View view, IProfile profile, boolean
+                            currentProfile) {
                         if (profile.getIdentifier() == ADD_IDENTITY) {
                             try {
-                                Message message = Message.obtain(null, BitmessageService.MSG_CREATE_IDENTITY);
+                                Message message = Message.obtain(null, BitmessageService
+                                        .MSG_CREATE_IDENTITY);
                                 message.replyTo = messenger;
                                 service.send(message);
                             } catch (RemoteException e) {
@@ -240,14 +233,15 @@ public class MainActivity extends AppCompatActivity
                     }
                 })
                 .build();
-        if (profiles.size() > 0) {
+        if (profiles.size() > 2) { // There's always the add and manage identity items
             accountHeader.setActiveProfile(profiles.get(0), true);
         }
         incomingHandler.updateAccountHeader(accountHeader);
 
         ArrayList<IDrawerItem> drawerItems = new ArrayList<>();
         for (Label label : labels) {
-            PrimaryDrawerItem item = new PrimaryDrawerItem().withName(label.toString()).withTag(label);
+            PrimaryDrawerItem item = new PrimaryDrawerItem().withName(label.toString()).withTag
+                    (label);
             if (label.getType() == null) {
                 item.withIcon(CommunityMaterial.Icon.cmd_label);
             } else {
@@ -301,17 +295,21 @@ public class MainActivity extends AppCompatActivity
                                 .withChecked(BitmessageService.isRunning())
                                 .withOnCheckedChangeListener(new OnCheckedChangeListener() {
                                     @Override
-                                    public void onCheckedChanged(IDrawerItem drawerItem, CompoundButton buttonView, boolean isChecked) {
+                                    public void onCheckedChanged(IDrawerItem drawerItem,
+                                                                 CompoundButton buttonView,
+                                                                 boolean isChecked) {
                                         if (messenger != null) {
                                             if (isChecked) {
                                                 try {
-                                                    service.send(Message.obtain(null, MSG_START_NODE));
+                                                    service.send(Message.obtain(null,
+                                                            MSG_START_NODE));
                                                 } catch (RemoteException e) {
                                                     LOG.error(e.getMessage(), e);
                                                 }
                                             } else {
                                                 try {
-                                                    service.send(Message.obtain(null, MSG_STOP_NODE));
+                                                    service.send(Message.obtain(null,
+                                                            MSG_STOP_NODE));
                                                 } catch (RemoteException e) {
                                                     LOG.error(e.getMessage(), e);
                                                 }
@@ -322,7 +320,8 @@ public class MainActivity extends AppCompatActivity
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
-                    public boolean onItemClick(AdapterView<?> adapterView, View view, int i, long l, IDrawerItem item) {
+                    public boolean onItemClick(AdapterView<?> adapterView, View view, int i, long
+                            l, IDrawerItem item) {
                         if (item.getTag() instanceof Label) {
                             selectedLabel = (Label) item.getTag();
                             showSelectedLabel();
@@ -331,15 +330,18 @@ public class MainActivity extends AppCompatActivity
                             Nameable<?> ni = (Nameable<?>) item;
                             switch (ni.getNameRes()) {
                                 case R.string.contacts_and_subscriptions:
-                                    if (!(getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof SubscriptionListFragment)) {
+                                    if (!(getSupportFragmentManager().findFragmentById(R.id
+                                            .item_list) instanceof SubscriptionListFragment)) {
                                         changeList(new SubscriptionListFragment());
                                     } else {
                                         ((SubscriptionListFragment) getSupportFragmentManager()
                                                 .findFragmentById(R.id.item_list)).updateList();
                                     }
+
                                     break;
                                 case R.string.settings:
-                                    startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                                    startActivity(new Intent(MainActivity.this, SettingsActivity
+                                            .class));
                                     break;
                                 case R.string.archive:
                                     selectedLabel = null;
@@ -357,7 +359,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void showSelectedLabel() {
-        if (getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof MessageListFragment) {
+        if (getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof
+                MessageListFragment) {
             ((MessageListFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.item_list)).updateList(selectedLabel);
         } else {
@@ -385,7 +388,8 @@ public class MainActivity extends AppCompatActivity
             else if (item instanceof BitmessageAddress)
                 fragment = new SubscriptionDetailFragment();
             else
-                throw new IllegalArgumentException("Plaintext or BitmessageAddress expected, but was "
+                throw new IllegalArgumentException("Plaintext or BitmessageAddress expected, but " +
+                        "was "
                         + item.getClass().getSimpleName());
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
@@ -400,7 +404,8 @@ public class MainActivity extends AppCompatActivity
             else if (item instanceof BitmessageAddress)
                 detailIntent = new Intent(this, SubscriptionDetailActivity.class);
             else
-                throw new IllegalArgumentException("Plaintext or BitmessageAddress expected, but was "
+                throw new IllegalArgumentException("Plaintext or BitmessageAddress expected, but " +
+                        "was "
                         + item.getClass().getSimpleName());
 
             detailIntent.putExtra(MessageDetailFragment.ARG_ITEM, item);
@@ -421,7 +426,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        bindService(new Intent(this, BitmessageService.class), connection, Context.BIND_AUTO_CREATE);
+        bindService(new Intent(this, BitmessageService.class), connection, Context
+                .BIND_AUTO_CREATE);
     }
 
     @Override
@@ -463,8 +469,10 @@ public class MainActivity extends AppCompatActivity
                                 .withEmail(identity.getAddress())
                                 .withTag(identity);
                         if (accountHeader.getProfiles() != null) {
-                            //we know that there are 2 setting elements. set the new profile above them ;)
-                            accountHeader.addProfile(newProfile, accountHeader.getProfiles().size() - 2);
+                            //we know that there are 2 setting elements. set the new profile
+                            // above them ;)
+                            accountHeader.addProfile(newProfile, accountHeader.getProfiles().size
+                                    () - 2);
                         } else {
                             accountHeader.addProfiles(newProfile);
                         }

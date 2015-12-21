@@ -74,15 +74,20 @@ public class AndroidInventory implements Inventory {
         SQLiteDatabase db = sql.getReadableDatabase();
         Cursor c = db.query(
                 TABLE_NAME, projection,
-                (includeExpired ? "" : "expires > " + now() + " AND ") + "stream IN (" + join(streams) + ")",
+                (includeExpired ? "" : "expires > " + now() + " AND ") + "stream IN (" + join
+                        (streams) + ")",
                 null, null, null, null
         );
-        c.moveToFirst();
         List<InventoryVector> result = new LinkedList<>();
-        while (!c.isAfterLast()) {
-            byte[] blob = c.getBlob(c.getColumnIndex(COLUMN_HASH));
-            result.add(new InventoryVector(blob));
-            c.moveToNext();
+        try {
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                byte[] blob = c.getBlob(c.getColumnIndex(COLUMN_HASH));
+                result.add(new InventoryVector(blob));
+                c.moveToNext();
+            }
+        } finally {
+            c.close();
         }
         return result;
     }
@@ -108,15 +113,19 @@ public class AndroidInventory implements Inventory {
                 "hash = X'" + vector + "'",
                 null, null, null, null
         );
-        c.moveToFirst();
-        if (c.isAfterLast()) {
-            LOG.info("Object requested that we don't have. IV: " + vector);
-            return null;
-        }
+        try {
+            c.moveToFirst();
+            if (c.isAfterLast()) {
+                LOG.info("Object requested that we don't have. IV: " + vector);
+                return null;
+            }
 
-        int version = c.getInt(c.getColumnIndex(COLUMN_VERSION));
-        byte[] blob = c.getBlob(c.getColumnIndex(COLUMN_DATA));
-        return Factory.getObjectMessage(version, new ByteArrayInputStream(blob), blob.length);
+            int version = c.getInt(c.getColumnIndex(COLUMN_VERSION));
+            byte[] blob = c.getBlob(c.getColumnIndex(COLUMN_DATA));
+            return Factory.getObjectMessage(version, new ByteArrayInputStream(blob), blob.length);
+        } finally {
+            c.close();
+        }
     }
 
     @Override
@@ -144,13 +153,18 @@ public class AndroidInventory implements Inventory {
                 where.toString(),
                 null, null, null, null
         );
-        c.moveToFirst();
         List<ObjectMessage> result = new LinkedList<>();
-        while (!c.isAfterLast()) {
-            int objectVersion = c.getInt(c.getColumnIndex(COLUMN_VERSION));
-            byte[] blob = c.getBlob(c.getColumnIndex(COLUMN_DATA));
-            result.add(Factory.getObjectMessage(objectVersion, new ByteArrayInputStream(blob), blob.length));
-            c.moveToNext();
+        try {
+            c.moveToFirst();
+            while (!c.isAfterLast()) {
+                int objectVersion = c.getInt(c.getColumnIndex(COLUMN_VERSION));
+                byte[] blob = c.getBlob(c.getColumnIndex(COLUMN_DATA));
+                result.add(Factory.getObjectMessage(objectVersion, new ByteArrayInputStream(blob),
+                        blob.length));
+                c.moveToNext();
+            }
+        } finally {
+            c.close();
         }
         return result;
     }
@@ -187,7 +201,11 @@ public class AndroidInventory implements Inventory {
                 "hash = X'" + object.getInventoryVector() + "'",
                 null, null, null, null
         );
-        return c.getCount() > 0;
+        try {
+            return c.getCount() > 0;
+        } finally {
+            c.close();
+        }
     }
 
     @Override

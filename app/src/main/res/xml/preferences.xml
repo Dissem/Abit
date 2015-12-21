@@ -27,7 +27,7 @@
     <SwitchPreference
         android:defaultValue="false"
         android:key="server_pow"
-        android:dependency="@string/trusted_node"
+        android:dependency="trusted_node"
         android:title="@string/server_pow"
         android:summary="@string/server_pow_summary"
         />

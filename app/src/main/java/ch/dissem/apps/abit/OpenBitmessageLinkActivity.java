@@ -43,7 +43,6 @@ import ch.dissem.bitmessage.entity.BitmessageAddress;
 import static ch.dissem.apps.abit.service.BitmessageService.DATA_FIELD_ADDRESS;
 import static ch.dissem.apps.abit.service.BitmessageService.MSG_ADD_CONTACT;
 import static ch.dissem.apps.abit.service.BitmessageService.MSG_SUBSCRIBE;
-import static ch.dissem.apps.abit.service.BitmessageService.MSG_SUBSCRIBE_AND_ADD_CONTACT;
 
 public class OpenBitmessageLinkActivity extends AppCompatActivity {
     private static final Logger LOG = LoggerFactory.getLogger(OpenBitmessageLinkActivity.class);
@@ -106,7 +105,7 @@ public class OpenBitmessageLinkActivity extends AppCompatActivity {
 
                 final int what;
                 if (subscribe.isChecked())
-                    what = MSG_SUBSCRIBE_AND_ADD_CONTACT;
+                    what = MSG_SUBSCRIBE;
                 else
                     what = MSG_ADD_CONTACT;
 
@@ -155,7 +154,8 @@ public class OpenBitmessageLinkActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        bindService(new Intent(this, BitmessageService.class), connection, Context.BIND_AUTO_CREATE);
+        bindService(new Intent(this, BitmessageService.class), connection, Context
+                .BIND_AUTO_CREATE);
     }
 
     @Override

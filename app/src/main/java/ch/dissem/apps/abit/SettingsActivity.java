@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 /**
- * Created by chris on 14.07.15.
+ * @author Christian Basler
  */
 public class SettingsActivity extends AppCompatActivity {
     @Override

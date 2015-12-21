@@ -1,27 +1,34 @@
 package ch.dissem.apps.abit.synchronization;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.util.List;
 
-import ch.dissem.apps.abit.R;
-import ch.dissem.apps.abit.notification.ErrorNotification;
 import ch.dissem.apps.abit.service.Singleton;
+import ch.dissem.apps.abit.util.Preferences;
 import ch.dissem.bitmessage.BitmessageContext;
+import ch.dissem.bitmessage.entity.BitmessageAddress;
+import ch.dissem.bitmessage.entity.CustomMessage;
+import ch.dissem.bitmessage.extensions.CryptoCustomMessage;
+import ch.dissem.bitmessage.extensions.pow.ProofOfWorkRequest;
+import ch.dissem.bitmessage.ports.ProofOfWorkRepository;
 
-import static ch.dissem.apps.abit.util.Constants.PREFERENCE_SYNC_TIMEOUT;
-import static ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE;
+import static ch.dissem.apps.abit.synchronization.Authenticator.ACCOUNT_POW;
+import static ch.dissem.apps.abit.synchronization.Authenticator.ACCOUNT_SYNC;
+import static ch.dissem.apps.abit.synchronization.StubProvider.AUTHORITY;
+import static ch.dissem.bitmessage.extensions.pow.ProofOfWorkRequest.Request.CALCULATE;
+import static ch.dissem.bitmessage.extensions.pow.ProofOfWorkRequest.Request.COMPLETE;
+import static ch.dissem.bitmessage.utils.Singleton.security;
 
 /**
  * Sync Adapter to synchronize with the Bitmessage network - fetches
@@ -29,6 +36,8 @@ import static ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE;
  */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final static Logger LOG = LoggerFactory.getLogger(SyncAdapter.class);
+
+    private static final long SYNC_FREQUENCY = 15 * 60; // seconds
 
     private final BitmessageContext bmc;
 
@@ -41,7 +50,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     @Override
-    public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+    public void onPerformSync(Account account, Bundle extras, String authority,
+                              ContentProviderClient provider, SyncResult syncResult) {
+        if (account.equals(Authenticator.ACCOUNT_SYNC))
+            syncData();
+        else if (account.equals(Authenticator.ACCOUNT_POW))
+            syncPOW();
+        else
+            throw new RuntimeException("Unknown " + account);
+    }
+
+    private void syncData() {
         // If the Bitmessage context acts as a full node, synchronization isn't necessary
         if (bmc.isRunning()) {
             LOG.info("Synchronization skipped, Abit is acting as a full node");
@@ -49,40 +68,103 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
         LOG.info("Synchronizing Bitmessage");
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-
-        String trustedNode = preferences.getString(PREFERENCE_TRUSTED_NODE, null);
-        if (trustedNode == null) return;
-        trustedNode = trustedNode.trim();
-        if (trustedNode.isEmpty()) return;
-
-        int port;
-        if (trustedNode.matches("^(?![0-9a-fA-F]*:[0-9a-fA-F]*:).*(:[0-9]+)$")) {
-            int index = trustedNode.lastIndexOf(':');
-            String portString = trustedNode.substring(index + 1);
-            trustedNode = trustedNode.substring(0, index);
-            try {
-                port = Integer.parseInt(portString);
-            } catch (NumberFormatException e) {
-                new ErrorNotification(getContext())
-                        .setError(R.string.error_invalid_sync_port, portString)
-                        .show();
-                return;
-            }
-        } else {
-            port = 8444;
-        }
-        long timeoutInSeconds = Long.parseLong(preferences.getString(PREFERENCE_SYNC_TIMEOUT, "120"));
         try {
             LOG.info("Synchronization started");
-            bmc.synchronize(InetAddress.getByName(trustedNode), port, timeoutInSeconds, true);
+            bmc.synchronize(
+                    Preferences.getTrustedNode(getContext()),
+                    Preferences.getTrustedNodePort(getContext()),
+                    Preferences.getTimeoutInSeconds(getContext()),
+                    true);
             LOG.info("Synchronization finished");
-        } catch (UnknownHostException e) {
-            new ErrorNotification(getContext())
-                    .setError(R.string.error_invalid_sync_host)
-                    .show();
         } catch (RuntimeException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    private void syncPOW() {
+        // If the Bitmessage context acts as a full node, synchronization isn't necessary
+        LOG.info("Looking for completed POW");
+
+        try {
+            BitmessageAddress identity = Singleton.getIdentity(getContext());
+            byte[] privateKey = identity.getPrivateKey().getPrivateEncryptionKey();
+            byte[] signingKey = security().createPublicKey(identity.getPublicDecryptionKey());
+            ProofOfWorkRequest.Reader reader = new ProofOfWorkRequest.Reader(identity);
+            ProofOfWorkRepository powRepo = Singleton.getProofOfWorkRepository(getContext());
+            List<byte[]> items = powRepo.getItems();
+            for (byte[] initialHash : items) {
+                ProofOfWorkRepository.Item item = powRepo.getItem(initialHash);
+                byte[] target = security().getProofOfWorkTarget(item.object, item
+                        .nonceTrialsPerByte, item.extraBytes);
+                CryptoCustomMessage<ProofOfWorkRequest> cryptoMsg = new CryptoCustomMessage<>(
+                        new ProofOfWorkRequest(identity, initialHash, CALCULATE, target));
+                cryptoMsg.signAndEncrypt(identity, signingKey);
+                CustomMessage response = bmc.send(
+                        Preferences.getTrustedNode(getContext()),
+                        Preferences.getTrustedNodePort(getContext()),
+                        cryptoMsg
+                );
+                if (response.isError()) {
+                    LOG.error("Server responded with error: " + new String(response.getData(),
+                            "UTF-8"));
+                } else {
+                    ProofOfWorkRequest decryptedResponse = CryptoCustomMessage.read(
+                            response, reader).decrypt(privateKey);
+                    if (decryptedResponse.getRequest() == COMPLETE) {
+                        bmc.internals().getProofOfWorkService().onNonceCalculated(
+                                initialHash, decryptedResponse.getData());
+                    }
+                }
+            }
+            if (items.size() == 0) {
+                stopPowSync(getContext());
+            }
+            LOG.info("Synchronization finished");
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    public static void startSync(Context ctx) {
+        // Create account, if it's missing. (Either first run, or user has deleted account.)
+        Account account = addAccount(ctx, ACCOUNT_SYNC);
+
+        // Recommend a schedule for automatic synchronization. The system may modify this based
+        // on other scheduled syncs and network utilization.
+        ContentResolver.addPeriodicSync(account, AUTHORITY, new Bundle(), SYNC_FREQUENCY);
+    }
+
+    public static void stopSync(Context ctx) {
+        // Create account, if it's missing. (Either first run, or user has deleted account.)
+        Account account = addAccount(ctx, ACCOUNT_SYNC);
+
+        ContentResolver.removePeriodicSync(account, AUTHORITY, new Bundle());
+    }
+
+
+    public static void startPowSync(Context ctx) {
+        // Create account, if it's missing. (Either first run, or user has deleted account.)
+        Account account = addAccount(ctx, ACCOUNT_POW);
+
+        // Recommend a schedule for automatic synchronization. The system may modify this based
+        // on other scheduled syncs and network utilization.
+        ContentResolver.addPeriodicSync(account, AUTHORITY, new Bundle(), SYNC_FREQUENCY);
+    }
+
+    public static void stopPowSync(Context ctx) {
+        // Create account, if it's missing. (Either first run, or user has deleted account.)
+        Account account = addAccount(ctx, ACCOUNT_POW);
+
+        ContentResolver.removePeriodicSync(account, AUTHORITY, new Bundle());
+    }
+
+    private static Account addAccount(Context ctx, Account account) {
+        if (AccountManager.get(ctx).addAccountExplicitly(account, null, null)) {
+            // Inform the system that this account supports sync
+            ContentResolver.setIsSyncable(account, AUTHORITY, 1);
+            // Inform the system that this account is eligible for auto sync when the network is up
+            ContentResolver.setSyncAutomatically(account, AUTHORITY, true);
+        }
+        return account;
     }
 }

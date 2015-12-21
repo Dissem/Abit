@@ -53,8 +53,8 @@ public class ServicePowEngine implements ProofOfWorkEngine, ProofOfWorkEngine.Ca
     }
 
     @Override
-    public void onNonceCalculated(byte[] bytes) {
-        callback.onNonceCalculated(bytes);
+    public void onNonceCalculated(byte[] initialHash, byte[] bytes) {
+        callback.onNonceCalculated(initialHash, bytes);
         ctx.unbindService(connection);
     }
 
