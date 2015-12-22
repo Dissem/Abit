@@ -24,4 +24,11 @@
         android:key="sync_timeout"
         android:summary="@string/sync_timeout_summary"
         android:title="@string/sync_timeout" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="server_pow"
+        android:dependency="trusted_node"
+        android:title="@string/server_pow"
+        android:summary="@string/server_pow_summary"
+        />
 </PreferenceScreen>

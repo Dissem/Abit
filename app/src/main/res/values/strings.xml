@@ -49,4 +49,6 @@
     <string name="compose_body_hint">Write message</string>
     <string name="contacts_and_subscriptions">Contacts</string>
     <string name="subscribed">Subscribed</string>
+    <string name="server_pow">Server POW</string>
+    <string name="server_pow_summary">Trusted node does proof of work</string>
 </resources>

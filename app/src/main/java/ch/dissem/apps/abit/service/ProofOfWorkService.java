@@ -73,9 +73,9 @@ public class ProofOfWorkService extends Service {
             service.startForeground(ONGOING_NOTIFICATION_ID, notification.getNotification());
             engine.calculateNonce(initialHash, target, new ProofOfWorkEngine.Callback() {
                 @Override
-                public void onNonceCalculated(byte[] nonce) {
+                public void onNonceCalculated(byte[] initialHash, byte[] nonce) {
                     try {
-                        callback.onNonceCalculated(nonce);
+                        callback.onNonceCalculated(initialHash, nonce);
                     } finally {
                         service.stopForeground(true);
                         service.stopSelf();

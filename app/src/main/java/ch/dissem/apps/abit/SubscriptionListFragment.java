@@ -16,6 +16,7 @@
 
 package ch.dissem.apps.abit;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -25,6 +26,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.valueobject.Label;
@@ -100,12 +102,18 @@ public class SubscriptionListFragment extends AbstractItemListFragment<Bitmessag
         });
     }
 
+    @Override
+    public void onAttach(Context ctx) {
+        super.onAttach(ctx);
+        if (ctx instanceof ActionBarListener){
+            ((ActionBarListener) ctx).updateTitle(getString(R.string.contacts_and_subscriptions));
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_contact_list, container, false);
-
-        return rootView;
+        return inflater.inflate(R.layout.fragment_contact_list, container, false);
     }
 
     @Override

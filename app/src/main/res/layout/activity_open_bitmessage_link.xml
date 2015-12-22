@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:padding="24dp">
 
     <TextView
         android:id="@+id/address"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:text="BM-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:textSize="10dp"
+        tools:ignore="SpUsage" />
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/label_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/address">
+        android:layout_alignLeft="@+id/address"
+        android:layout_alignStart="@+id/address"
+        android:layout_below="@+id/address"
+        android:layout_marginTop="16dp">
 
         <EditText
             android:id="@+id/label"
@@ -30,8 +37,9 @@
         android:id="@+id/subscribe"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/address"
+        android:layout_alignStart="@+id/address"
         android:layout_below="@+id/label_wrapper"
-        android:layout_centerHorizontal="true"
         android:layout_marginBottom="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/subscribe" />

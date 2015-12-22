@@ -18,7 +18,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MessageListActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,28 +29,28 @@
         <activity
             android:name=".MessageDetailActivity"
             android:label="@string/title_message_detail"
-            android:parentActivityName=".MessageListActivity"
+            android:parentActivityName=".MainActivity"
             tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MessageListActivity" />
+                android:value=".MainActivity" />
         </activity>
         <activity
             android:name=".SubscriptionDetailActivity"
             android:label="@string/title_subscription_detail"
-            android:parentActivityName=".MessageListActivity"
+            android:parentActivityName=".MainActivity"
             tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MessageListActivity" />
+                android:value=".MainActivity" />
         </activity>
         <activity
             android:name=".ComposeMessageActivity"
             android:label="Compose"
-            android:parentActivityName=".MessageListActivity">
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MessageListActivity" />
+                android:value=".MainActivity" />
 
             <intent-filter>
                 <action android:name="android.intent.action.SENDTO" />
@@ -79,7 +79,7 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/settings"
-            android:parentActivityName=".MessageListActivity">
+            android:parentActivityName=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
 

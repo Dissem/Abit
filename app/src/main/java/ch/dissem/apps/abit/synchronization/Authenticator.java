@@ -12,8 +12,8 @@ import android.os.Bundle;
  * of its methods
  */
 public class Authenticator extends AbstractAccountAuthenticator {
-    public static final String ACCOUNT_NAME = "Bitmessage";
-    public static final String ACCOUNT_TYPE = "ch.dissem.bitmessage";
+    public static final Account ACCOUNT_SYNC = new Account("Bitmessage", "ch.dissem.bitmessage");
+    public static final Account ACCOUNT_POW = new Account("Proof of Work ", "ch.dissem.bitmessage");
 
     // Simple constructor
     public Authenticator(Context context) {

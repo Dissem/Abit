@@ -19,6 +19,7 @@ package ch.dissem.apps.abit.repository;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.payload.Pubkey;
 import ch.dissem.bitmessage.entity.payload.V3Pubkey;
@@ -27,6 +28,7 @@ import ch.dissem.bitmessage.entity.valueobject.PrivateKey;
 import ch.dissem.bitmessage.factory.Factory;
 import ch.dissem.bitmessage.ports.AddressRepository;
 import ch.dissem.bitmessage.utils.Encode;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,27 +120,30 @@ public class AndroidAddressRepository implements AddressRepository {
                 COLUMN_SUBSCRIBED
         };
 
+        SQLiteDatabase db = sql.getReadableDatabase();
+        Cursor c = db.query(
+                TABLE_NAME, projection,
+                where,
+                null, null, null, null
+        );
         try {
-            SQLiteDatabase db = sql.getReadableDatabase();
-            Cursor c = db.query(
-                    TABLE_NAME, projection,
-                    where,
-                    null, null, null, null
-            );
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 BitmessageAddress address;
 
                 byte[] privateKeyBytes = c.getBlob(c.getColumnIndex(COLUMN_PRIVATE_KEY));
                 if (privateKeyBytes != null) {
-                    PrivateKey privateKey = PrivateKey.read(new ByteArrayInputStream(privateKeyBytes));
+                    PrivateKey privateKey = PrivateKey.read(new ByteArrayInputStream
+                            (privateKeyBytes));
                     address = new BitmessageAddress(privateKey);
                 } else {
                     address = new BitmessageAddress(c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
                     byte[] publicKeyBytes = c.getBlob(c.getColumnIndex(COLUMN_PUBLIC_KEY));
                     if (publicKeyBytes != null) {
-                        Pubkey pubkey = Factory.readPubkey(address.getVersion(), address.getStream(),
-                                new ByteArrayInputStream(publicKeyBytes), publicKeyBytes.length, false);
+                        Pubkey pubkey = Factory.readPubkey(address.getVersion(), address
+                                        .getStream(),
+                                new ByteArrayInputStream(publicKeyBytes), publicKeyBytes.length,
+                                false);
                         if (address.getVersion() == 4 && pubkey instanceof V3Pubkey) {
                             pubkey = new V4Pubkey((V3Pubkey) pubkey);
                         }
@@ -153,8 +158,9 @@ public class AndroidAddressRepository implements AddressRepository {
             }
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
+        } finally {
+            c.close();
         }
-
         return result;
     }
 
@@ -173,9 +179,14 @@ public class AndroidAddressRepository implements AddressRepository {
 
     private boolean exists(BitmessageAddress address) {
         SQLiteDatabase db = sql.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM Address WHERE address='" + address.getAddress() + "'", null);
-        cursor.moveToFirst();
-        return cursor.getInt(0) > 0;
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM Address WHERE address='" + address
+                .getAddress() + "'", null);
+        try {
+            cursor.moveToFirst();
+            return cursor.getInt(0) > 0;
+        } finally {
+            cursor.close();
+        }
     }
 
     private void update(BitmessageAddress address) throws IOException {
@@ -194,7 +205,8 @@ public class AndroidAddressRepository implements AddressRepository {
             values.put(COLUMN_PRIVATE_KEY, Encode.bytes(address.getPrivateKey()));
             values.put(COLUMN_SUBSCRIBED, address.isSubscribed());
 
-            int update = db.update(TABLE_NAME, values, "address = '" + address.getAddress() + "'", null);
+            int update = db.update(TABLE_NAME, values, "address = '" + address.getAddress() +
+                    "'", null);
             if (update < 0) {
                 LOG.error("Could not update address " + address);
             }
