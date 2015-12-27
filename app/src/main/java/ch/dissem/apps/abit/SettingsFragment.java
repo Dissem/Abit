@@ -3,8 +3,12 @@ package ch.dissem.apps.abit;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+
+import com.mikepenz.aboutlibraries.Libs;
+import com.mikepenz.aboutlibraries.LibsBuilder;
 
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
 
@@ -23,6 +27,20 @@ public class SettingsFragment
 
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
+
+        Preference about = findPreference("about");
+        about.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                new LibsBuilder()
+                        .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
+                        .withAboutIconShown(true)
+                        .withAboutVersionShown(true)
+                        .withAboutDescription(getString(R.string.about_app))
+                        .start(getActivity());
+                return true;
+            }
+        });
     }
 
     @Override

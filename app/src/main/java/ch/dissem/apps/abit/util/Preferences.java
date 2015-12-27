@@ -11,14 +11,15 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import ch.dissem.apps.abit.R;
+import ch.dissem.apps.abit.listener.WifiReceiver;
 import ch.dissem.apps.abit.notification.ErrorNotification;
 
-import static ch.dissem.apps.abit.util.Constants.PREFERENCE_SERVER_POW;
 import static ch.dissem.apps.abit.util.Constants.PREFERENCE_SYNC_TIMEOUT;
 import static ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE;
+import static ch.dissem.apps.abit.util.Constants.PREFERENCE_WIFI_ONLY;
 
 /**
- * Created by chrig on 01.12.2015.
+ * @author Christian Basler
  */
 public class Preferences {
     private static Logger LOG = LoggerFactory.getLogger(Preferences.class);
@@ -77,14 +78,18 @@ public class Preferences {
         return preference == null ? 120 : Long.parseLong(preference);
     }
 
-    public static boolean isServerPOW(Context ctx) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
-        return preferences.getBoolean(PREFERENCE_SERVER_POW, false);
-    }
-
     private static String getPreference(Context ctx, String name) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
 
         return preferences.getString(name, null);
+    }
+
+    public static boolean isConnectionAllowed(Context ctx) {
+        return !isWifiOnly(ctx) || WifiReceiver.isConnectedToWifi(ctx);
+    }
+
+    public static boolean isWifiOnly(Context ctx) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+        return preferences.getBoolean(PREFERENCE_WIFI_ONLY, true);
     }
 }

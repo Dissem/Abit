@@ -52,12 +52,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
-        if (account.equals(Authenticator.ACCOUNT_SYNC))
-            syncData();
-        else if (account.equals(Authenticator.ACCOUNT_POW))
+        if (account.equals(Authenticator.ACCOUNT_SYNC)) {
+            if (Preferences.isConnectionAllowed(getContext())) {
+                syncData();
+            }
+        } else if (account.equals(Authenticator.ACCOUNT_POW)) {
             syncPOW();
-        else
+        } else {
             throw new RuntimeException("Unknown " + account);
+        }
     }
 
     private void syncData() {
