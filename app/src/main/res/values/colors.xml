@@ -10,4 +10,9 @@
   <color name="secondary_text">#727272</color>
   <color name="icons">#212121</color>
   <color name="divider">#B6B6B6</color>
+
+  <!-- Used for AboutLibraries -->
+  <color name="colorPrimary">@color/primary</color>
+  <color name="colorPrimaryDark">@color/primary_dark</color>
+  <color name="colorAccent">@color/accent</color>
 </resources>
