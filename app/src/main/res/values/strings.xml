@@ -51,4 +51,5 @@
     <string name="subscribed">Subscribed</string>
     <string name="server_pow">Server POW</string>
     <string name="server_pow_summary">Trusted node does proof of work</string>
+    <string name="full_node_warning">Running a full Bitmessage uses a lot of traffic, which could be expensive on a mobile network. Are you sure you want to start a full node?</string>
 </resources>

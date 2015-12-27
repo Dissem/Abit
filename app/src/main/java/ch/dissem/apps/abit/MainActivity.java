@@ -1,10 +1,9 @@
 package ch.dissem.apps.abit;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
+import android.app.AlertDialog;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -49,7 +48,6 @@ import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
 import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.apps.abit.service.Singleton;
-import ch.dissem.apps.abit.synchronization.Authenticator;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
 import ch.dissem.apps.abit.util.Preferences;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
@@ -61,7 +59,6 @@ import ch.dissem.bitmessage.ports.MessageRepository;
 import static ch.dissem.apps.abit.service.BitmessageService.DATA_FIELD_IDENTITY;
 import static ch.dissem.apps.abit.service.BitmessageService.MSG_START_NODE;
 import static ch.dissem.apps.abit.service.BitmessageService.MSG_STOP_NODE;
-import static ch.dissem.apps.abit.synchronization.StubProvider.AUTHORITY;
 
 
 /**
@@ -300,12 +297,7 @@ public class MainActivity extends AppCompatActivity
                                                                  boolean isChecked) {
                                         if (messenger != null) {
                                             if (isChecked) {
-                                                try {
-                                                    service.send(Message.obtain(null,
-                                                            MSG_START_NODE));
-                                                } catch (RemoteException e) {
-                                                    LOG.error(e.getMessage(), e);
-                                                }
+                                                checkAndStartNode(buttonView);
                                             } else {
                                                 try {
                                                     service.send(Message.obtain(null,
@@ -356,6 +348,37 @@ public class MainActivity extends AppCompatActivity
                 })
                 .withCloseOnClick(true)
                 .build();
+    }
+
+    private void checkAndStartNode(final CompoundButton buttonView) {
+        if (Preferences.isConnectionAllowed(MainActivity.this)) {
+            forceStartNode();
+        } else {
+            new AlertDialog.Builder(MainActivity.this)
+                    .setMessage(R.string.full_node_warning)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            forceStartNode();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            buttonView.setChecked(false);
+                        }
+                    })
+                    .show();
+        }
+    }
+
+    private void forceStartNode() {
+        try {
+            service.send(Message.obtain(null,
+                    MSG_START_NODE));
+        } catch (RemoteException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     private void showSelectedLabel() {

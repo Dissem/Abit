@@ -157,12 +157,17 @@ public class BitmessageService extends Service {
                     // (I'm not quite sure this can be done here, though)
                     service.get().startService(new Intent(service.get(), BitmessageService.class));
                     running = true;
-                    service.get().startForeground(ONGOING_NOTIFICATION_ID, notification.getNotification());
-                    bmc.startup();
+                    service.get().startForeground(ONGOING_NOTIFICATION_ID, notification
+                            .getNotification());
+                    if (!bmc.isRunning()) {
+                        bmc.startup();
+                    }
                     notification.show();
                     break;
                 case MSG_STOP_NODE:
-                    bmc.shutdown();
+                    if (bmc.isRunning()) {
+                        bmc.shutdown();
+                    }
                     running = false;
                     service.get().stopForeground(false);
                     service.get().stopSelf();
