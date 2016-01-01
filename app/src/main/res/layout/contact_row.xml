@@ -27,7 +27,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:src="@color/accent"
+            android:src="@color/colorAccent"
             android:layout_margin="16dp"/>
 
     <TextView

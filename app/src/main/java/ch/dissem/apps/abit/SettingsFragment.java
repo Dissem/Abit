@@ -33,6 +33,7 @@ public class SettingsFragment
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 new LibsBuilder()
+                        .withActivityTitle(getActivity().getString(R.string.about))
                         .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
                         .withAboutIconShown(true)
                         .withAboutVersionShown(true)
