@@ -121,12 +121,11 @@ public class AndroidAddressRepository implements AddressRepository {
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
-        Cursor c = db.query(
+        try (Cursor c = db.query(
                 TABLE_NAME, projection,
                 where,
                 null, null, null, null
-        );
-        try {
+        )) {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 BitmessageAddress address;
@@ -158,8 +157,6 @@ public class AndroidAddressRepository implements AddressRepository {
             }
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-        } finally {
-            c.close();
         }
         return result;
     }
@@ -179,13 +176,10 @@ public class AndroidAddressRepository implements AddressRepository {
 
     private boolean exists(BitmessageAddress address) {
         SQLiteDatabase db = sql.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM Address WHERE address='" + address
-                .getAddress() + "'", null);
-        try {
+        try (Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM Address WHERE address='" + address
+                .getAddress() + "'", null)) {
             cursor.moveToFirst();
             return cursor.getInt(0) > 0;
-        } finally {
-            cursor.close();
         }
     }
 

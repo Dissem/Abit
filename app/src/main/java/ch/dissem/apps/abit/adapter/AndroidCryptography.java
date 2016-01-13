@@ -16,7 +16,7 @@ import ch.dissem.bitmessage.entity.payload.Broadcast;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 import ch.dissem.bitmessage.factory.Factory;
 import ch.dissem.bitmessage.ports.ProofOfWorkEngine;
-import ch.dissem.bitmessage.security.sc.SpongySecurity;
+import ch.dissem.bitmessage.cryptography.sc.SpongyCryptography;
 import ch.dissem.bitmessage.utils.UnixTime;
 
 import static ch.dissem.apps.abit.util.Constants.PREFERENCE_SERVER_POW;
@@ -27,8 +27,8 @@ import static ch.dissem.bitmessage.utils.UnixTime.DAY;
 /**
  * @author Christian Basler
  */
-public class AndroidSecurity extends SpongySecurity {
-    public AndroidSecurity() {
+public class AndroidCryptography extends SpongyCryptography {
+    public AndroidCryptography() {
         PRNGFixes.apply();
     }
 }

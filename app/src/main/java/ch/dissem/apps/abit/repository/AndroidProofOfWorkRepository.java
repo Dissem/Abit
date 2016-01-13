@@ -52,12 +52,11 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository {
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
-        Cursor c = db.query(
+        try (Cursor c = db.query(
                 TABLE_NAME, projection,
                 "initial_hash = X'" + Strings.hex(initialHash) + "'",
                 null, null, null, null
-        );
-        try {
+        )) {
             c.moveToFirst();
             if (!c.isAfterLast()) {
                 int version = c.getInt(c.getColumnIndex(COLUMN_VERSION));
@@ -69,8 +68,6 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository {
                         c.getLong(c.getColumnIndex(COLUMN_EXTRA_BYTES))
                 );
             }
-        } finally {
-            c.close();
         }
         throw new RuntimeException("Object requested that we don't have. Initial hash: " +
                 Strings.hex(initialHash));
@@ -85,20 +82,17 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository {
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
-        Cursor c = db.query(
+        List<byte[]> result = new LinkedList<>();
+        try (Cursor c = db.query(
                 TABLE_NAME, projection,
                 null, null, null, null, null
-        );
-        List<byte[]> result = new LinkedList<>();
-        try {
+        )) {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 byte[] initialHash = c.getBlob(c.getColumnIndex(COLUMN_INITIAL_HASH));
                 result.add(initialHash);
                 c.moveToNext();
             }
-        } finally {
-            c.close();
         }
         return result;
     }

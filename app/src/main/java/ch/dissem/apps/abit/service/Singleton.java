@@ -4,7 +4,7 @@ import android.content.Context;
 
 import java.util.List;
 
-import ch.dissem.apps.abit.adapter.AndroidSecurity;
+import ch.dissem.apps.abit.adapter.AndroidCryptography;
 import ch.dissem.apps.abit.adapter.SwitchingProofOfWorkEngine;
 import ch.dissem.apps.abit.listener.MessageListener;
 import ch.dissem.apps.abit.pow.ServerPowEngine;
@@ -47,7 +47,7 @@ public class Singleton {
                                     new ServerPowEngine(ctx),
                                     new ServicePowEngine(ctx)
                             ))
-                            .security(new AndroidSecurity())
+                            .cryptography(new AndroidCryptography())
                             .nodeRegistry(new MemoryNodeRegistry())
                             .inventory(new AndroidInventory(sqlHelper))
                             .addressRepo(new AndroidAddressRepository(sqlHelper))

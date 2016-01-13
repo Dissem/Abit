@@ -108,20 +108,17 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
-        Cursor c = db.query(
+        try (Cursor c = db.query(
                 LBL_TABLE_NAME, projection,
                 where,
                 null, null, null,
                 LBL_COLUMN_ORDER
-        );
-        try {
+        )) {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 result.add(getLabel(c));
                 c.moveToNext();
             }
-        } finally {
-            c.close();
         }
         return result;
     }
@@ -174,16 +171,13 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
             where = "";
         }
         SQLiteDatabase db = sql.getReadableDatabase();
-        Cursor c = db.query(
+        try (Cursor c = db.query(
                 TABLE_NAME, new String[]{COLUMN_ID},
                 where + "id IN (SELECT message_id FROM Message_Label WHERE label_id IN (" +
                         "SELECT id FROM Label WHERE type = '" + Label.Type.UNREAD.name() + "'))",
                 null, null, null, null
-        );
-        try {
+        )) {
             return c.getColumnCount();
-        } finally {
-            c.close();
         }
     }
 
@@ -245,13 +239,12 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
-        Cursor c = db.query(
+        try (Cursor c = db.query(
                 TABLE_NAME, projection,
                 where,
                 null, null, null,
                 COLUMN_RECEIVED + " DESC"
-        );
-        try {
+        )) {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 byte[] iv = c.getBlob(c.getColumnIndex(COLUMN_IV));
@@ -277,8 +270,6 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
             }
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-        } finally {
-            c.close();
         }
         return result;
     }

@@ -7,18 +7,6 @@ import android.os.IBinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.dissem.apps.abit.listener.MessageListener;
-import ch.dissem.apps.abit.notification.NetworkNotification;
-import ch.dissem.apps.abit.repository.AndroidInventory;
-import ch.dissem.apps.abit.repository.SqlHelper;
-import ch.dissem.apps.abit.service.Singleton;
-import ch.dissem.bitmessage.BitmessageContext;
-import ch.dissem.bitmessage.networking.DefaultNetworkHandler;
-import ch.dissem.bitmessage.ports.MemoryNodeRegistry;
-import ch.dissem.bitmessage.security.sc.SpongySecurity;
-
-import static ch.dissem.apps.abit.notification.NetworkNotification.ONGOING_NOTIFICATION_ID;
-
 /**
  * Define a Service that returns an IBinder for the
  * sync adapter class, allowing the sync adapter framework to call

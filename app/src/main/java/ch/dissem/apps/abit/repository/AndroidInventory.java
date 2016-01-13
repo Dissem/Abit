@@ -89,6 +89,7 @@ public class AndroidInventory implements Inventory {
         } finally {
             c.close();
         }
+        LOG.info("Inventory size: " + result.size());
         return result;
     }
 
