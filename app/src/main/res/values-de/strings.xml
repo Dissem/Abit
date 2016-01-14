@@ -52,4 +52,8 @@
     <string name="server_pow">Server POW</string>
     <string name="server_pow_summary">Der vertrauenswürdige Knoten macht den Proof of Work</string>
     <string name="full_node_warning">Ein aktiver Bitmessage-Knoten muss viel hoch- und herunterladen, was auf einem mobilen Netzwerk teuer sein kann. Soll tatsächlich ein aktiver Knoten gestartet werden?</string>
+    <string name="status">Debugging</string>
+    <string name="alias_default_identity">Ich</string>
+    <string name="title_activity_status">Debugging</string>
+    <string name="status_summary">Technische Infos</string>
 </resources>

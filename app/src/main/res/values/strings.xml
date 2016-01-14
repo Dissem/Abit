@@ -55,4 +55,8 @@
     <string name="full_node_warning">Running a full Bitmessage node uses a lot of traffic, which could be expensive on a mobile network. Are you sure you want to start a full node?</string>
     <string name="about">About Abit</string>
     <string name="about_summary">Open source dependencies.</string>
+    <string name="title_activity_status">Debugging</string>
+    <string name="status">Debugging</string>
+    <string name="status_summary">Technical information</string>
+    <string name="alias_default_identity">Me</string>
 </resources>

@@ -1,6 +1,7 @@
 package ch.dissem.apps.abit;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -39,6 +40,15 @@ public class SettingsFragment
                         .withAboutVersionShown(true)
                         .withAboutDescription(getString(R.string.about_app))
                         .start(getActivity());
+                return true;
+            }
+        });
+
+        Preference status = findPreference("status");
+        status.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                startActivity(new Intent(getActivity(), StatusActivity.class));
                 return true;
             }
         });

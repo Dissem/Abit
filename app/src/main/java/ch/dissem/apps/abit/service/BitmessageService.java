@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 
+import ch.dissem.apps.abit.R;
 import ch.dissem.apps.abit.notification.NetworkNotification;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
@@ -101,6 +102,8 @@ public class BitmessageService extends Service {
             switch (msg.what) {
                 case MSG_CREATE_IDENTITY: {
                     BitmessageAddress identity = bmc.createIdentity(false);
+                    identity.setAlias(service.get().getString(R.string.alias_default_identity));
+                    bmc.addresses().save(identity);
                     if (msg.replyTo != null) {
                         try {
                             Message message = Message.obtain(this, MSG_CREATE_IDENTITY);
