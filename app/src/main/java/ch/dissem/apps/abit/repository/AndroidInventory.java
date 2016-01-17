@@ -96,6 +96,7 @@ public class AndroidInventory implements Inventory {
     @Override
     public List<InventoryVector> getMissing(List<InventoryVector> offer, long... streams) {
         offer.removeAll(getInventory(true, streams));
+        LOG.info(offer.size() + " objects missing.");
         return offer;
     }
 

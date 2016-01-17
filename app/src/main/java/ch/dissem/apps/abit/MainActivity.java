@@ -43,7 +43,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
