@@ -4,6 +4,7 @@ import android.content.Context;
 
 import java.util.List;
 
+import ch.dissem.apps.abit.R;
 import ch.dissem.apps.abit.adapter.AndroidCryptography;
 import ch.dissem.apps.abit.adapter.SwitchingProofOfWorkEngine;
 import ch.dissem.apps.abit.listener.MessageListener;
@@ -92,10 +93,15 @@ public class Singleton {
         if (identity == null) {
             synchronized (Singleton.class) {
                 if (identity == null) {
-                    List<BitmessageAddress> identities = getBitmessageContext(ctx).addresses()
+                    BitmessageContext bmc = getBitmessageContext(ctx);
+                    List<BitmessageAddress> identities = bmc.addresses()
                             .getIdentities();
                     if (identities.size() > 0) {
                         identity = identities.get(0);
+                    } else {
+                        identity = bmc.createIdentity(false);
+                        identity.setAlias(ctx.getString(R.string.alias_default_identity));
+                        bmc.addresses().save(identity);
                     }
                 }
             }

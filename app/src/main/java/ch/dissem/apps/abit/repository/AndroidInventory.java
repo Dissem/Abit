@@ -33,10 +33,18 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static ch.dissem.apps.abit.repository.SqlHelper.join;
+import static ch.dissem.bitmessage.utils.UnixTime.MINUTE;
 import static ch.dissem.bitmessage.utils.UnixTime.now;
 
 /**
@@ -55,47 +63,64 @@ public class AndroidInventory implements Inventory {
 
     private final SqlHelper sql;
 
+    private final Map<Long, Map<InventoryVector, Long>> cache = new ConcurrentHashMap<>();
+
     public AndroidInventory(SqlHelper sql) {
         this.sql = sql;
     }
 
     @Override
     public List<InventoryVector> getInventory(long... streams) {
-        return getInventory(false, streams);
+        List<InventoryVector> result = new LinkedList<>();
+        long now = now();
+        for (long stream : streams) {
+            for (Map.Entry<InventoryVector, Long> e : getCache(stream).entrySet()) {
+                if (e.getValue() > now) {
+                    result.add(e.getKey());
+                }
+            }
+        }
+        return result;
     }
 
-    public List<InventoryVector> getInventory(boolean includeExpired, long... streams) {
-        // Define a projection that specifies which columns from the database
-        // you will actually use after this query.
-        String[] projection = {
-                COLUMN_HASH
-        };
+    private Map<InventoryVector, Long> getCache(long stream) {
+        Map<InventoryVector, Long> result = cache.get(stream);
+        if (result == null) {
+            synchronized (cache) {
+                if (cache.get(stream) == null) {
+                    result = new ConcurrentHashMap<>();
+                    cache.put(stream, result);
 
-        SQLiteDatabase db = sql.getReadableDatabase();
-        Cursor c = db.query(
-                TABLE_NAME, projection,
-                (includeExpired ? "" : "expires > " + now() + " AND ") + "stream IN (" + join
-                        (streams) + ")",
-                null, null, null, null
-        );
-        List<InventoryVector> result = new LinkedList<>();
-        try {
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
-                byte[] blob = c.getBlob(c.getColumnIndex(COLUMN_HASH));
-                result.add(new InventoryVector(blob));
-                c.moveToNext();
+                    String[] projection = {
+                            COLUMN_HASH, COLUMN_EXPIRES
+                    };
+
+                    SQLiteDatabase db = sql.getReadableDatabase();
+                    try (Cursor c = db.query(
+                            TABLE_NAME, projection,
+                            "stream = " + stream,
+                            null, null, null, null
+                    )) {
+                        c.moveToFirst();
+                        while (!c.isAfterLast()) {
+                            byte[] blob = c.getBlob(c.getColumnIndex(COLUMN_HASH));
+                            long expires = c.getLong(c.getColumnIndex(COLUMN_EXPIRES));
+                            result.put(new InventoryVector(blob), expires);
+                            c.moveToNext();
+                        }
+                    }
+                    LOG.info("Stream #" + stream + " inventory size: " + result.size());
+                }
             }
-        } finally {
-            c.close();
         }
-        LOG.info("Inventory size: " + result.size());
         return result;
     }
 
     @Override
     public List<InventoryVector> getMissing(List<InventoryVector> offer, long... streams) {
-        offer.removeAll(getInventory(true, streams));
+        for (long stream : streams) {
+            offer.removeAll(getCache(stream).keySet());
+        }
         LOG.info(offer.size() + " objects missing.");
         return offer;
     }
@@ -110,12 +135,11 @@ public class AndroidInventory implements Inventory {
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
-        Cursor c = db.query(
+        try (Cursor c = db.query(
                 TABLE_NAME, projection,
                 "hash = X'" + vector + "'",
                 null, null, null, null
-        );
-        try {
+        )) {
             c.moveToFirst();
             if (c.isAfterLast()) {
                 LOG.info("Object requested that we don't have. IV: " + vector);
@@ -125,8 +149,6 @@ public class AndroidInventory implements Inventory {
             int version = c.getInt(c.getColumnIndex(COLUMN_VERSION));
             byte[] blob = c.getBlob(c.getColumnIndex(COLUMN_DATA));
             return Factory.getObjectMessage(version, new ByteArrayInputStream(blob), blob.length);
-        } finally {
-            c.close();
         }
     }
 
@@ -150,13 +172,12 @@ public class AndroidInventory implements Inventory {
         }
 
         SQLiteDatabase db = sql.getReadableDatabase();
-        Cursor c = db.query(
+        List<ObjectMessage> result = new LinkedList<>();
+        try (Cursor c = db.query(
                 TABLE_NAME, projection,
                 where.toString(),
                 null, null, null, null
-        );
-        List<ObjectMessage> result = new LinkedList<>();
-        try {
+        )) {
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 int objectVersion = c.getInt(c.getColumnIndex(COLUMN_VERSION));
@@ -165,8 +186,6 @@ public class AndroidInventory implements Inventory {
                         blob.length));
                 c.moveToNext();
             }
-        } finally {
-            c.close();
         }
         return result;
     }
@@ -174,6 +193,10 @@ public class AndroidInventory implements Inventory {
     @Override
     public void storeObject(ObjectMessage object) {
         InventoryVector iv = object.getInventoryVector();
+
+        if (getCache(object.getStream()).containsKey(iv))
+            return;
+
         LOG.trace("Storing object " + iv);
 
         try {
@@ -188,6 +211,8 @@ public class AndroidInventory implements Inventory {
             values.put(COLUMN_VERSION, object.getVersion());
 
             db.insertOrThrow(TABLE_NAME, null, values);
+
+            getCache(object.getStream()).put(iv, object.getExpiresTime());
         } catch (SQLiteConstraintException e) {
             LOG.trace(e.getMessage(), e);
         } catch (IOException e) {
@@ -197,22 +222,22 @@ public class AndroidInventory implements Inventory {
 
     @Override
     public boolean contains(ObjectMessage object) {
-        SQLiteDatabase db = sql.getReadableDatabase();
-        Cursor c = db.query(
-                TABLE_NAME, new String[]{COLUMN_STREAM},
-                "hash = X'" + object.getInventoryVector() + "'",
-                null, null, null, null
-        );
-        try {
-            return c.getCount() > 0;
-        } finally {
-            c.close();
-        }
+        return getCache(object.getStream()).keySet().contains(object.getInventoryVector());
     }
 
     @Override
     public void cleanup() {
+        long fiveMinutesAgo = now() - 5 * MINUTE;
         SQLiteDatabase db = sql.getWritableDatabase();
-        db.delete(TABLE_NAME, "expires < " + (now() - 300), null);
+        db.delete(TABLE_NAME, "expires < " + fiveMinutesAgo, null);
+
+        for (Map<InventoryVector, Long> c : cache.values()) {
+            Iterator<Map.Entry<InventoryVector, Long>> iterator = c.entrySet().iterator();
+            while (iterator.hasNext()) {
+                if (iterator.next().getValue() < fiveMinutesAgo) {
+                    iterator.remove();
+                }
+            }
+        }
     }
 }

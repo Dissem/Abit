@@ -100,7 +100,8 @@ public class SubscriptionDetailFragment extends Fragment {
             TextView address = (TextView) rootView.findViewById(R.id.address);
             address.setText(item.getAddress());
             address.setSelected(true);
-            ((TextView) rootView.findViewById(R.id.stream_number)).setText(getActivity().getString(R.string.stream_number, item.getStream()));
+            ((TextView) rootView.findViewById(R.id.stream_number)).setText(getActivity()
+                    .getString(R.string.stream_number, item.getStream()));
             Switch active = (Switch) rootView.findViewById(R.id.active);
             active.setChecked(item.isSubscribed());
             active.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -109,6 +110,14 @@ public class SubscriptionDetailFragment extends Fragment {
                     item.setSubscribed(isChecked);
                 }
             });
+
+            ImageView pubkeyAvailableImg = (ImageView) rootView.findViewById(R.id.pubkey_available);
+            if (item.getPubkey() == null) {
+                pubkeyAvailableImg.setAlpha(0.3f);
+                TextView pubkeyAvailableDesc = (TextView) rootView.findViewById(R.id
+                        .pubkey_available_desc);
+                pubkeyAvailableDesc.setText(R.string.pubkey_not_available);
+            }
         }
 
         return rootView;

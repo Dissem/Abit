@@ -188,6 +188,16 @@ public class MainActivity extends AppCompatActivity
                             .withTag(identity)
             );
         }
+        if (profiles.isEmpty()){
+            // Create an initial identity
+            BitmessageAddress identity = Singleton.getIdentity(this);
+            profiles.add(new ProfileDrawerItem()
+                            .withIcon(new Identicon(identity))
+                            .withName(identity.toString())
+                            .withEmail(identity.getAddress())
+                            .withTag(identity)
+            );
+        }
         profiles.add(new ProfileSettingDrawerItem()
                         .withName("Add Identity")
                         .withDescription("Create new identity")

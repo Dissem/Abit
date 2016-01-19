@@ -16,65 +16,90 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
     <ImageView
-            android:id="@+id/avatar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:src="@color/colorAccent"
-            android:layout_margin="16dp"/>
+        android:id="@+id/avatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="16dp"
+        android:src="@color/colorAccent"
+        tools:ignore="ContentDescription"/>
 
     <EditText
-            android:id="@+id/name"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Name"
-            android:layout_alignTop="@+id/avatar"
-            android:layout_toRightOf="@+id/avatar"
-            android:layout_toEndOf="@+id/avatar"
-            android:layout_marginRight="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"/>
+        android:id="@+id/name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/avatar"
+        android:layout_marginEnd="16dp"
+        android:layout_toEndOf="@+id/avatar"
+        android:text=""
+        android:inputType="textPersonName"
+        tools:ignore="LabelFor"/>
 
     <TextView
-            android:id="@+id/address"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Address"
-            android:lines="1"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:layout_below="@+id/avatar"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:textStyle="bold"
-            />
+        android:id="@+id/address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/avatar"
+        android:lines="1"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:text="BM-XyYxXyYxXyYxXyYxXyYx"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textStyle="bold"
+        tools:ignore="HardcodedText"/>
 
     <TextView
-            android:id="@+id/stream_number"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Stream #"
-            android:lines="1"
-            android:ellipsize="end"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:layout_below="@+id/address"/>
+        android:id="@+id/stream_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/address"
+        android:ellipsize="end"
+        android:lines="1"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:text="Stream #"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        tools:ignore="HardcodedText"/>
 
     <Switch
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/subscribed"
-            android:id="@+id/active"
-            android:paddingTop="16dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:layout_below="@+id/stream_number"/>
+        android:id="@+id/active"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/stream_number"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="16dp"
+        android:text="@string/subscribed"/>
+
+    <ImageView
+        android:id="@+id/pubkey_available"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/active"
+        android:paddingStart="16dp"
+        android:paddingEnd="4dp"
+        android:paddingTop="16dp"
+        android:src="@drawable/public_key"
+        tools:ignore="ContentDescription"/>
+
+    <TextView
+        android:id="@+id/pubkey_available_desc"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="0dp"
+        android:paddingEnd="16dp"
+        android:layout_alignBottom="@id/pubkey_available"
+        android:layout_toEndOf="@id/pubkey_available"
+        android:layout_alignParentEnd="true"
+        android:text="@string/pubkey_available"
+        android:textAppearance="?android:attr/textAppearanceSmall"/>
 
 </RelativeLayout>

@@ -59,4 +59,6 @@
     <string name="status">Debugging</string>
     <string name="status_summary">Technical information</string>
     <string name="alias_default_identity">Me</string>
+    <string name="pubkey_available">Public key available</string>
+    <string name="pubkey_not_available">Public key not yet available</string>
 </resources>

@@ -56,4 +56,6 @@
     <string name="alias_default_identity">Ich</string>
     <string name="title_activity_status">Debugging</string>
     <string name="status_summary">Technische Infos</string>
+    <string name="pubkey_available">Öffentlicher Schlüssel verfügbar</string>
+    <string name="pubkey_not_available">Öffentlicher Schlüssel noch nicht verfügbar</string>
 </resources>

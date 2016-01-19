@@ -56,7 +56,7 @@ public class BitmessageService extends Service {
     private static Messenger messenger;
 
     public static boolean isRunning() {
-        return running;
+        return running && bmc.isRunning();
     }
 
     @Override
@@ -102,8 +102,6 @@ public class BitmessageService extends Service {
             switch (msg.what) {
                 case MSG_CREATE_IDENTITY: {
                     BitmessageAddress identity = bmc.createIdentity(false);
-                    identity.setAlias(service.get().getString(R.string.alias_default_identity));
-                    bmc.addresses().save(identity);
                     if (msg.replyTo != null) {
                         try {
                             Message message = Message.obtain(this, MSG_CREATE_IDENTITY);
