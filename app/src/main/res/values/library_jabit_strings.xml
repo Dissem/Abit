@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="define_jabit" translatable="false"></string>
+    <string name="define_jabit" translatable="false"/>
     <!-- Author section -->
     <string name="library_jabit_author" translatable="false">Christian Basler</string>
     <string name="library_jabit_authorWebsite" translatable="false">dissem.ch</string>

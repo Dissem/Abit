@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 Christian Basler
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ch.dissem.apps.abit;
 
 import android.app.AlertDialog;
@@ -7,11 +23,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -39,7 +51,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -47,18 +58,16 @@ import java.util.List;
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
 import ch.dissem.apps.abit.service.BitmessageService;
+import ch.dissem.apps.abit.service.BitmessageService.BitmessageBinder;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
 import ch.dissem.apps.abit.util.Preferences;
+import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
-import ch.dissem.bitmessage.ports.AddressRepository;
-import ch.dissem.bitmessage.ports.MessageRepository;
 
-import static ch.dissem.apps.abit.service.BitmessageService.DATA_FIELD_IDENTITY;
-import static ch.dissem.apps.abit.service.BitmessageService.MSG_START_NODE;
-import static ch.dissem.apps.abit.service.BitmessageService.MSG_STOP_NODE;
+import static ch.dissem.apps.abit.service.BitmessageService.isRunning;
 
 
 /**
@@ -92,14 +101,12 @@ public class MainActivity extends AppCompatActivity
      */
     private boolean twoPane;
 
-    private static IncomingHandler incomingHandler = new IncomingHandler();
-    private static Messenger messenger = new Messenger(incomingHandler);
-    private static Messenger service;
+    private static BitmessageBinder service;
     private static boolean bound;
     private static ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            MainActivity.service = new Messenger(service);
+            MainActivity.service = (BitmessageBinder) service;
             MainActivity.bound = true;
         }
 
@@ -112,16 +119,15 @@ public class MainActivity extends AppCompatActivity
 
     private Label selectedLabel;
 
-    private MessageRepository messageRepo;
-    private AddressRepository addressRepo;
+    private BitmessageContext bmc;
     private BitmessageAddress selectedIdentity;
+    private AccountHeader accountHeader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        messageRepo = Singleton.getMessageRepository(this);
-        addressRepo = Singleton.getAddressRepository(this);
-        List<Label> labels = messageRepo.getLabels();
+        bmc = Singleton.getBitmessageContext(this);
+        List<Label> labels = bmc.messages().getLabels();
         if (selectedLabel == null) {
             selectedLabel = labels.get(0);
         }
@@ -179,7 +185,7 @@ public class MainActivity extends AppCompatActivity
 
     private void createDrawer(Toolbar toolbar, Collection<Label> labels) {
         final ArrayList<IProfile> profiles = new ArrayList<>();
-        for (BitmessageAddress identity : addressRepo.getIdentities()) {
+        for (BitmessageAddress identity : bmc.addresses().getIdentities()) {
             LOG.info("Adding identity " + identity.getAddress());
             profiles.add(new ProfileDrawerItem()
                             .withIcon(new Identicon(identity))
@@ -188,7 +194,7 @@ public class MainActivity extends AppCompatActivity
                             .withTag(identity)
             );
         }
-        if (profiles.isEmpty()){
+        if (profiles.isEmpty()) {
             // Create an initial identity
             BitmessageAddress identity = Singleton.getIdentity(this);
             profiles.add(new ProfileDrawerItem()
@@ -212,7 +218,7 @@ public class MainActivity extends AppCompatActivity
                         .withIcon(GoogleMaterial.Icon.gmd_settings)
         );
         // Create the AccountHeader
-        AccountHeader accountHeader = new AccountHeaderBuilder()
+        accountHeader = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.drawable.header)
                 .withProfiles(profiles)
@@ -221,13 +227,18 @@ public class MainActivity extends AppCompatActivity
                     public boolean onProfileChanged(View view, IProfile profile, boolean
                             currentProfile) {
                         if (profile.getIdentifier() == ADD_IDENTITY) {
-                            try {
-                                Message message = Message.obtain(null, BitmessageService
-                                        .MSG_CREATE_IDENTITY);
-                                message.replyTo = messenger;
-                                service.send(message);
-                            } catch (RemoteException e) {
-                                LOG.error(e.getMessage(), e);
+                            BitmessageAddress identity = bmc.createIdentity(false);
+                            IProfile newProfile = new ProfileDrawerItem()
+                                    .withName(identity.toString())
+                                    .withEmail(identity.getAddress())
+                                    .withTag(identity);
+                            if (accountHeader.getProfiles() != null) {
+                                // we know that there are 2 setting elements.
+                                // Set the new profile above them ;)
+                                accountHeader.addProfile(
+                                        newProfile, accountHeader.getProfiles().size() - 2);
+                            } else {
+                                accountHeader.addProfiles(newProfile);
                             }
                         } else if (profile instanceof ProfileDrawerItem) {
                             Object tag = ((ProfileDrawerItem) profile).getTag();
@@ -243,7 +254,6 @@ public class MainActivity extends AppCompatActivity
         if (profiles.size() > 2) { // There's always the add and manage identity items
             accountHeader.setActiveProfile(profiles.get(0), true);
         }
-        incomingHandler.updateAccountHeader(accountHeader);
 
         ArrayList<IDrawerItem> drawerItems = new ArrayList<>();
         for (Label label : labels) {
@@ -299,23 +309,16 @@ public class MainActivity extends AppCompatActivity
                         new SwitchDrawerItem()
                                 .withName(R.string.full_node)
                                 .withIcon(CommunityMaterial.Icon.cmd_cloud_outline)
-                                .withChecked(BitmessageService.isRunning())
+                                .withChecked(isRunning())
                                 .withOnCheckedChangeListener(new OnCheckedChangeListener() {
                                     @Override
                                     public void onCheckedChanged(IDrawerItem drawerItem,
                                                                  CompoundButton buttonView,
                                                                  boolean isChecked) {
-                                        if (messenger != null) {
-                                            if (isChecked) {
-                                                checkAndStartNode(buttonView);
-                                            } else {
-                                                try {
-                                                    service.send(Message.obtain(null,
-                                                            MSG_STOP_NODE));
-                                                } catch (RemoteException e) {
-                                                    LOG.error(e.getMessage(), e);
-                                                }
-                                            }
+                                        if (isChecked) {
+                                            checkAndStartNode(buttonView);
+                                        } else {
+                                            service.shutdownNode();
                                         }
                                     }
                                 })
@@ -361,15 +364,17 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void checkAndStartNode(final CompoundButton buttonView) {
+        if (service == null) return;
+
         if (Preferences.isConnectionAllowed(MainActivity.this)) {
-            forceStartNode();
+            service.startupNode();
         } else {
             new AlertDialog.Builder(MainActivity.this)
                     .setMessage(R.string.full_node_warning)
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            forceStartNode();
+                            service.startupNode();
                         }
                     })
                     .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -379,15 +384,6 @@ public class MainActivity extends AppCompatActivity
                         }
                     })
                     .show();
-        }
-    }
-
-    private void forceStartNode() {
-        try {
-            service.send(Message.obtain(null,
-                    MSG_START_NODE));
-        } catch (RemoteException e) {
-            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -475,47 +471,5 @@ public class MainActivity extends AppCompatActivity
 
     public BitmessageAddress getSelectedIdentity() {
         return selectedIdentity;
-    }
-
-    private static class IncomingHandler extends Handler {
-        private WeakReference<AccountHeader> accountHeaderRef;
-
-        private IncomingHandler() {
-            accountHeaderRef = new WeakReference<>(null);
-        }
-
-        public void updateAccountHeader(AccountHeader accountHeader) {
-            accountHeaderRef = new WeakReference<>(accountHeader);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case BitmessageService.MSG_CREATE_IDENTITY: {
-                    AccountHeader accountHeader = accountHeaderRef.get();
-                    if (accountHeader == null) break;
-
-                    Serializable data = msg.getData().getSerializable(DATA_FIELD_IDENTITY);
-                    if (data instanceof BitmessageAddress) {
-                        BitmessageAddress identity = (BitmessageAddress) data;
-                        IProfile newProfile = new ProfileDrawerItem()
-                                .withName(identity.toString())
-                                .withEmail(identity.getAddress())
-                                .withTag(identity);
-                        if (accountHeader.getProfiles() != null) {
-                            //we know that there are 2 setting elements. set the new profile
-                            // above them ;)
-                            accountHeader.addProfile(newProfile, accountHeader.getProfiles().size
-                                    () - 2);
-                        } else {
-                            accountHeader.addProfiles(newProfile);
-                        }
-                    }
-                    break;
-                }
-                default:
-                    super.handleMessage(msg);
-            }
-        }
     }
 }

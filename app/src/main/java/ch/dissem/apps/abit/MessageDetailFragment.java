@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 Christian Basler
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ch.dissem.apps.abit;
 
 import android.content.Intent;
@@ -79,7 +95,8 @@ public class MessageDetailFragment extends Fragment {
         if (item != null) {
             ((TextView) rootView.findViewById(R.id.subject)).setText(item.getSubject());
             BitmessageAddress sender = item.getFrom();
-            ((ImageView) rootView.findViewById(R.id.avatar)).setImageDrawable(new Identicon(sender));
+            ((ImageView) rootView.findViewById(R.id.avatar)).setImageDrawable(new Identicon
+                    (sender));
             ((TextView) rootView.findViewById(R.id.sender)).setText(sender.toString());
             if (item.getTo() != null) {
                 ((TextView) rootView.findViewById(R.id.recipient)).setText(item.getTo().toString());
@@ -99,18 +116,18 @@ public class MessageDetailFragment extends Fragment {
 
             messageBody.setLinksClickable(true);
             messageBody.setTextIsSelectable(true);
-        }
 
-        boolean removed = false;
-        Iterator<Label> labels = item.getLabels().iterator();
-        while (labels.hasNext()) {
-            if (labels.next().getType() == Label.Type.UNREAD) {
-                labels.remove();
-                removed = true;
+            boolean removed = false;
+            Iterator<Label> labels = item.getLabels().iterator();
+            while (labels.hasNext()) {
+                if (labels.next().getType() == Label.Type.UNREAD) {
+                    labels.remove();
+                    removed = true;
+                }
             }
-        }
-        if (removed) {
-            Singleton.getMessageRepository(inflater.getContext()).save(item);
+            if (removed) {
+                Singleton.getMessageRepository(inflater.getContext()).save(item);
+            }
         }
         return rootView;
     }
@@ -121,7 +138,8 @@ public class MessageDetailFragment extends Fragment {
 
         Drawables.addIcon(getActivity(), menu, R.id.reply, GoogleMaterial.Icon.gmd_reply);
         Drawables.addIcon(getActivity(), menu, R.id.delete, GoogleMaterial.Icon.gmd_delete);
-        Drawables.addIcon(getActivity(), menu, R.id.mark_unread, GoogleMaterial.Icon.gmd_markunread);
+        Drawables.addIcon(getActivity(), menu, R.id.mark_unread, GoogleMaterial.Icon
+                .gmd_markunread);
         Drawables.addIcon(getActivity(), menu, R.id.archive, GoogleMaterial.Icon.gmd_archive);
 
         super.onCreateOptionsMenu(menu, inflater);
@@ -132,7 +150,8 @@ public class MessageDetailFragment extends Fragment {
         MessageRepository messageRepo = Singleton.getMessageRepository(getContext());
         switch (menuItem.getItemId()) {
             case R.id.reply:
-                Intent replyIntent = new Intent(getActivity().getApplicationContext(), ComposeMessageActivity.class);
+                Intent replyIntent = new Intent(getActivity().getApplicationContext(),
+                        ComposeMessageActivity.class);
                 replyIntent.putExtra(ComposeMessageActivity.EXTRA_RECIPIENT, item.getFrom());
                 replyIntent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, item.getTo());
                 startActivity(replyIntent);

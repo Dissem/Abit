@@ -9,9 +9,8 @@
         android:id="@+id/address"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:text="BM-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        tools:text="BM-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
         android:textSize="10dp"
         tools:ignore="SpUsage" />
 
@@ -19,7 +18,6 @@
         android:id="@+id/label_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/address"
         android:layout_alignStart="@+id/address"
         android:layout_below="@+id/address"
         android:layout_marginTop="16dp">
@@ -37,7 +35,6 @@
         android:id="@+id/subscribe"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/address"
         android:layout_alignStart="@+id/address"
         android:layout_below="@+id/label_wrapper"
         android:layout_marginBottom="8dp"
@@ -50,7 +47,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
         android:layout_below="@+id/subscribe"
         android:layout_marginBottom="12dp"
         android:layout_marginTop="12dp"
@@ -62,7 +58,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/do_import"
-        android:layout_toLeftOf="@+id/do_import"
         android:layout_toStartOf="@+id/do_import"
         android:text="@string/cancel" />
 

@@ -32,7 +32,7 @@ import com.mikepenz.iconics.IconicsDrawable;
  */
 public class Drawables {
     public static void addIcon(Context ctx, Menu menu, int menuItem, GoogleMaterial.Icon icon) {
-        menu.findItem(menuItem).setIcon(new IconicsDrawable(ctx, icon).colorRes(R.color.primary_text_default_material_dark).actionBar());
+        menu.findItem(menuItem).setIcon(new IconicsDrawable(ctx, icon).colorRes(R.color.colorPrimaryDarkText).actionBar());
     }
 
     public static Bitmap toBitmap(Identicon identicon, int size) {

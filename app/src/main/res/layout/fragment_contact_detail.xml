@@ -50,10 +50,9 @@
         android:lines="1"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:text="BM-XyYxXyYxXyYxXyYxXyYx"
+        tools:text="BM-XyYxXyYxXyYxXyYxXyYx"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textStyle="bold"
-        tools:ignore="HardcodedText"/>
+        android:textStyle="bold"/>
 
     <TextView
         android:id="@+id/stream_number"
@@ -64,9 +63,8 @@
         android:lines="1"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:text="Stream #"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        tools:ignore="HardcodedText"/>
+        tools:text="Stream #"
+        android:textAppearance="?android:attr/textAppearanceSmall"/>
 
     <Switch
         android:id="@+id/active"

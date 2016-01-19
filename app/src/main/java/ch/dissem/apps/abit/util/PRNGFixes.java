@@ -1,4 +1,3 @@
-package ch.dissem.apps.abit.util;
 /*
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will Google be held liable for any damages
@@ -8,6 +7,8 @@ package ch.dissem.apps.abit.util;
  * including commercial applications, and to alter it and redistribute it
  * freely, as long as the origin is not misrepresented.
  */
+
+package ch.dissem.apps.abit.util;
 
 import android.os.Build;
 import android.os.Process;
@@ -78,7 +79,7 @@ public final class PRNGFixes {
             // Mix in the device- and invocation-specific seed.
             Class.forName("org.apache.harmony.xnet.provider.jsse.NativeCrypto")
                     .getMethod("RAND_seed", byte[].class)
-                    .invoke(null, generateSeed());
+                    .invoke(null, (Object) generateSeed());
 
             // Mix output of Linux PRNG into OpenSSL's PRNG
             int bytesRead = (Integer) Class.forName(
@@ -169,6 +170,7 @@ public final class PRNGFixes {
      * {@link SecureRandomSpi} which passes all requests to the Linux PRNG
      * ({@code /dev/urandom}).
      */
+    @SuppressWarnings("JavaDoc")
     public static class LinuxPRNGSecureRandom extends SecureRandomSpi {
 
         /*
@@ -241,6 +243,7 @@ public final class PRNGFixes {
                 synchronized (sLock) {
                     in = getUrandomInputStream();
                 }
+                //noinspection SynchronizationOnLocalVariableOrMethodParameter
                 synchronized (in) {
                     in.readFully(bytes);
                 }

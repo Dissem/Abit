@@ -16,6 +16,7 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
     <ImageView
@@ -23,21 +24,20 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:src="@color/colorAccent"
-            android:layout_margin="16dp"/>
+            android:layout_margin="16dp"
+            tools:ignore="ContentDescription"/>
 
     <TextView
             android:id="@+id/sender"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sender"
+            tools:text="Sender"
             android:lines="1"
             android:ellipsize="end"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_alignTop="@+id/avatar"
-            android:layout_toRightOf="@+id/avatar"
             android:layout_toEndOf="@+id/avatar"
             android:layout_marginTop="-5dp"
             android:paddingTop="0dp"
@@ -51,21 +51,20 @@
             android:id="@+id/subject"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Subject"
+            tools:text="Subject"
             android:lines="1"
             android:ellipsize="end"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:layout_below="@+id/sender"
-            android:layout_toRightOf="@+id/avatar"
             android:layout_toEndOf="@+id/avatar"/>
 
     <TextView
             android:id="@+id/text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Text"
+            tools:text="Text"
             android:lines="1"
             android:ellipsize="end"
             android:textAppearance="?android:attr/textAppearanceSmall"
@@ -74,7 +73,6 @@
             android:paddingRight="8dp"
             android:paddingBottom="8dp"
             android:layout_below="@+id/subject"
-            android:layout_toRightOf="@+id/avatar"
             android:layout_toEndOf="@+id/avatar"/>
 
 </RelativeLayout>

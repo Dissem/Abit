@@ -16,13 +16,12 @@
 
 package ch.dissem.apps.abit;
 
-
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 
 /**
- *
+ * @author Christian Basler
  */
 public class Identicon extends Drawable {
     private static final int SIZE = 9;
@@ -34,7 +33,6 @@ public class Identicon extends Drawable {
 
     private float cellWidth;
     private float cellHeight;
-    private byte[] hash;
     private int color;
     private int background;
     private boolean[][] fields;
@@ -44,7 +42,7 @@ public class Identicon extends Drawable {
         paint.setStyle(Paint.Style.FILL);
         paint.setAntiAlias(true);
 
-        hash = input.getRipe();
+        byte[] hash = input.getRipe();
 
         fields = new boolean[SIZE][SIZE];
         color = Color.HSVToColor(new float[]{Math.abs(hash[0] * hash[1] + hash[2]) % 360, 0.8f, 1.0f});

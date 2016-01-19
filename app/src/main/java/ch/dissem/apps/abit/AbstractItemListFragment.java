@@ -16,7 +16,6 @@
 
 package ch.dissem.apps.abit;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -27,7 +26,7 @@ import ch.dissem.apps.abit.listener.ListSelectionListener;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 
 /**
- * Created by chris on 07.09.15.
+ * @author Christian Basler
  */
 public abstract class AbstractItemListFragment<T> extends ListFragment {
     /**
@@ -39,7 +38,8 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
      * A dummy implementation of the {@link ListSelectionListener} interface that does
      * nothing. Used only when this fragment is not attached to an activity.
      */
-    private static ListSelectionListener<Object> dummyCallbacks = new ListSelectionListener<Object>() {
+    private static ListSelectionListener<Object> dummyCallbacks = new
+            ListSelectionListener<Object>() {
         @Override
         public void onItemSelected(Object plaintext) {
         }
@@ -84,11 +84,13 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
         super.onAttach(context);
 
         // Activities containing this fragment must implement its callbacks.
-        if (!(context instanceof ListSelectionListener)) {
+        if (context instanceof ListSelectionListener) {
+            //noinspection unchecked
+            callbacks = (ListSelectionListener) context;
+        } else {
             throw new IllegalStateException("Activity must implement fragment's callbacks.");
         }
 
-        callbacks = (ListSelectionListener) context;
     }
 
     @Override
@@ -105,6 +107,7 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
 
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
+        //noinspection unchecked
         callbacks.onItemSelected((T) listView.getItemAtPosition(position));
     }
 

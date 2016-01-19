@@ -15,7 +15,7 @@
     <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
@@ -114,7 +114,9 @@
             android:exported="false"
             android:syncable="true"/>
 
-        <service android:name=".synchronization.AuthenticatorService">
+        <service
+            android:name=".synchronization.AuthenticatorService"
+            tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>
             </intent-filter>
@@ -125,7 +127,8 @@
         </service>
         <service
             android:name=".synchronization.SyncService"
-            android:exported="true">
+            android:exported="true"
+            tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter"/>
             </intent-filter>

@@ -28,15 +28,6 @@ import java.util.Scanner;
  * Helper class to work with Assets.
  */
 public class Assets {
-    public static String readToString(Context ctx, String name) {
-        try {
-            InputStream in = ctx.getAssets().open(name);
-            return new Scanner(in, "UTF-8").useDelimiter("\\A").next();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static List<String> readSqlStatements(Context ctx, String name) {
         try {
             InputStream in = ctx.getAssets().open(name);

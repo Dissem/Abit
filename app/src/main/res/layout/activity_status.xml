@@ -33,7 +33,8 @@
             android:title="@string/status"
             app:title="@string/status"
             app:layout_scrollFlags="scroll|enterAlways"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            tools:ignore="UnusedAttribute"/>
 
     </android.support.design.widget.AppBarLayout>
 
