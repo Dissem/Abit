@@ -42,7 +42,7 @@ public class Preferences {
 
     public static boolean useTrustedNode(Context ctx) {
         String trustedNode = getPreference(ctx, PREFERENCE_TRUSTED_NODE);
-        return trustedNode == null || trustedNode.trim().isEmpty();
+        return trustedNode != null && !trustedNode.trim().isEmpty();
     }
 
     /**
