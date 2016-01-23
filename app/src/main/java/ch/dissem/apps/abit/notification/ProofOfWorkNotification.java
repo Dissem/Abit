@@ -32,23 +32,30 @@ public class ProofOfWorkNotification extends AbstractNotification {
 
     public ProofOfWorkNotification(Context ctx) {
         super(ctx);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx);
-
-        Intent showMessageIntent = new Intent(ctx, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 0, showMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setUsesChronometer(true)
-                .setSmallIcon(R.drawable.ic_notification_proof_of_work)
-                .setContentTitle(ctx.getString(R.string.proof_of_work_title))
-                .setContentText(ctx.getString(R.string.proof_of_work_text))
-                .setContentIntent(pendingIntent);
-
-        notification = builder.build();
+        update(1);
     }
 
     @Override
     protected int getNotificationId() {
         return ONGOING_NOTIFICATION_ID;
+    }
+
+    public ProofOfWorkNotification update(int numberOfItems) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx);
+
+        Intent showMessageIntent = new Intent(ctx, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 0, showMessageIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setUsesChronometer(true)
+                .setOngoing(true)
+                .setSmallIcon(R.drawable.ic_notification_proof_of_work)
+                .setContentTitle(ctx.getString(R.string.proof_of_work_title))
+                .setContentText(ctx.getString(R.string.proof_of_work_text, numberOfItems))
+                .setContentIntent(pendingIntent);
+
+        notification = builder.build();
+        return this;
     }
 }

@@ -22,10 +22,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.ref.WeakReference;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import ch.dissem.apps.abit.notification.ProofOfWorkNotification;
 import ch.dissem.bitmessage.ports.MultiThreadedPOWEngine;
@@ -38,11 +36,12 @@ import static ch.dissem.apps.abit.notification.ProofOfWorkNotification.ONGOING_N
  * killed by the system before the nonce is found.
  */
 public class ProofOfWorkService extends Service {
-    public static final Logger LOG = LoggerFactory.getLogger(ProofOfWorkService.class);
-
     // Object to use as a thread-safe lock
     private static final Object lock = new Object();
     private static ProofOfWorkEngine engine;
+    private static boolean calculating;
+    private static final Queue<PowItem> queue = new LinkedList<>();
+    private static ProofOfWorkNotification notification;
 
     @Override
     public void onCreate() {
@@ -51,54 +50,74 @@ public class ProofOfWorkService extends Service {
                 engine = new MultiThreadedPOWEngine();
             }
         }
+        notification = new ProofOfWorkNotification(this);
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return new PowBinder(engine, this);
+        return new PowBinder(this);
     }
 
     public static class PowBinder extends Binder {
-        private final ProofOfWorkEngine engine;
+        private final ProofOfWorkService service;
 
-        private PowBinder(ProofOfWorkEngine engine, ProofOfWorkService service) {
-            this.engine = new EngineWrapper(engine, service);
+        private PowBinder(ProofOfWorkService service) {
+            this.service = service;
         }
 
-        public ProofOfWorkEngine getEngine() {
-            return engine;
+        public void process(PowItem item) {
+            synchronized (queue) {
+                service.startService(new Intent(service, ProofOfWorkService.class));
+                service.startForeground(ONGOING_NOTIFICATION_ID,
+                        notification.getNotification());
+                if (!calculating) {
+                    calculating = true;
+                    service.calculateNonce(item);
+                } else {
+                    queue.add(item);
+                    notification.update(queue.size()).show();
+                }
+            }
         }
     }
 
-    private static class EngineWrapper implements ProofOfWorkEngine {
-        private final ProofOfWorkNotification notification;
-        private final ProofOfWorkEngine engine;
-        private final WeakReference<ProofOfWorkService> serviceRef;
 
-        private EngineWrapper(ProofOfWorkEngine engine, ProofOfWorkService service) {
-            this.engine = engine;
-            this.serviceRef = new WeakReference<>(service);
-            this.notification = new ProofOfWorkNotification(service);
+    static class PowItem {
+        private final byte[] initialHash;
+        private final byte[] targetValue;
+        private final ProofOfWorkEngine.Callback callback;
+
+        PowItem(byte[] initialHash, byte[] targetValue, ProofOfWorkEngine.Callback callback) {
+            this.initialHash = initialHash;
+            this.targetValue = targetValue;
+            this.callback = callback;
         }
+    }
 
-        @Override
-        public void calculateNonce(byte[] initialHash, byte[] target, final Callback callback) {
-            final ProofOfWorkService service = serviceRef.get();
-            service.startService(new Intent(service, ProofOfWorkService.class));
-            service.startForeground(ONGOING_NOTIFICATION_ID, notification.getNotification());
-            engine.calculateNonce(initialHash, target, new ProofOfWorkEngine.Callback() {
-                @Override
-                public void onNonceCalculated(byte[] initialHash, byte[] nonce) {
-                    try {
-                        callback.onNonceCalculated(initialHash, nonce);
-                    } finally {
-                        service.stopForeground(true);
-                        service.stopSelf();
+    private void calculateNonce(final PowItem item) {
+        engine.calculateNonce(item.initialHash, item.targetValue, new ProofOfWorkEngine.Callback() {
+            @Override
+            public void onNonceCalculated(byte[] initialHash, byte[] nonce) {
+                try {
+                    item.callback.onNonceCalculated(initialHash, nonce);
+                } finally {
+                    PowItem item;
+                    synchronized (queue) {
+                        item = queue.poll();
+                        if (item == null) {
+                            calculating = false;
+                            stopForeground(true);
+                            stopSelf();
+                        } else {
+                            notification.update(queue.size()).show();
+                        }
+                    }
+                    if (item != null) {
+                        calculateNonce(item);
                     }
                 }
-            });
-
-        }
+            }
+        });
     }
 }

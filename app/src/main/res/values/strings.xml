@@ -44,7 +44,7 @@
     <string name="connection_info_disconnected">Disconnected</string>
     <string name="connection_info_pending">Connecting…</string>
     <string name="proof_of_work_title">Proof of Work</string>
-    <string name="proof_of_work_text">Warning: This might heat your device until the battery\'s dead.</string>
+    <string name="proof_of_work_text">Doing work to send message (%1$d queued)</string>
     <string name="error_invalid_sync_port">Invalid port in synchronization settings: %s</string>
     <string name="error_invalid_sync_host">Synchronization failed: Trusted node could not be reached.</string>
     <string name="compose_body_hint">Write message</string>
