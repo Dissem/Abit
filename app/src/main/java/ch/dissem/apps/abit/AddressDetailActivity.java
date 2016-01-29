@@ -31,9 +31,9 @@ import android.view.MenuItem;
  * in a {@link MainActivity}.
  * <p/>
  * This activity is mostly just a 'shell' activity containing nothing
- * more than a {@link SubscriptionDetailFragment}.
+ * more than a {@link AddressDetailFragment}.
  */
-public class SubscriptionDetailActivity extends AppCompatActivity {
+public class AddressDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,9 +59,9 @@ public class SubscriptionDetailActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putSerializable(SubscriptionDetailFragment.ARG_ITEM,
-                    getIntent().getSerializableExtra(SubscriptionDetailFragment.ARG_ITEM));
-            SubscriptionDetailFragment fragment = new SubscriptionDetailFragment();
+            arguments.putSerializable(AddressDetailFragment.ARG_ITEM,
+                    getIntent().getSerializableExtra(AddressDetailFragment.ARG_ITEM));
+            AddressDetailFragment fragment = new AddressDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.content, fragment)

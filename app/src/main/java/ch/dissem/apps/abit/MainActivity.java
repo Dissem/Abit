@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity
 
     private static final Logger LOG = LoggerFactory.getLogger(MainActivity.class);
     private static final int ADD_IDENTITY = 1;
+    private static final int MANAGE_IDENTITY = 2;
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -120,7 +121,6 @@ public class MainActivity extends AppCompatActivity
     private Label selectedLabel;
 
     private BitmessageContext bmc;
-    private BitmessageAddress selectedIdentity;
     private AccountHeader accountHeader;
 
     @Override
@@ -190,6 +190,7 @@ public class MainActivity extends AppCompatActivity
             profiles.add(new ProfileDrawerItem()
                             .withIcon(new Identicon(identity))
                             .withName(identity.toString())
+                            .withNameShown(true)
                             .withEmail(identity.getAddress())
                             .withTag(identity)
             );
@@ -216,6 +217,7 @@ public class MainActivity extends AppCompatActivity
         profiles.add(new ProfileSettingDrawerItem()
                         .withName(getString(R.string.manage_identity))
                         .withIcon(GoogleMaterial.Icon.gmd_settings)
+                        .withIdentifier(MANAGE_IDENTITY)
         );
         // Create the AccountHeader
         accountHeader = new AccountHeaderBuilder()
@@ -226,25 +228,46 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean
                             currentProfile) {
-                        if (profile.getIdentifier() == ADD_IDENTITY) {
-                            BitmessageAddress identity = bmc.createIdentity(false);
-                            IProfile newProfile = new ProfileDrawerItem()
-                                    .withName(identity.toString())
-                                    .withEmail(identity.getAddress())
-                                    .withTag(identity);
-                            if (accountHeader.getProfiles() != null) {
-                                // we know that there are 2 setting elements.
-                                // Set the new profile above them ;)
-                                accountHeader.addProfile(
-                                        newProfile, accountHeader.getProfiles().size() - 2);
-                            } else {
-                                accountHeader.addProfiles(newProfile);
-                            }
-                        } else if (profile instanceof ProfileDrawerItem) {
-                            Object tag = ((ProfileDrawerItem) profile).getTag();
-                            if (tag instanceof BitmessageAddress) {
-                                selectedIdentity = (BitmessageAddress) tag;
-                            }
+                        switch (profile.getIdentifier()) {
+                            case ADD_IDENTITY:
+                                new AlertDialog.Builder(MainActivity.this)
+                                        .setMessage(R.string.add_identity_warning)
+                                        .setPositiveButton(android.R.string.yes, new
+                                                DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                BitmessageAddress identity = bmc.createIdentity(false);
+                                                IProfile newProfile = new ProfileDrawerItem()
+                                                        .withName(identity.toString())
+                                                        .withEmail(identity.getAddress())
+                                                        .withTag(identity);
+                                                if (accountHeader.getProfiles() != null) {
+                                                    // we know that there are 2 setting elements.
+                                                    // Set the new profile above them ;)
+                                                    accountHeader.addProfile(
+                                                            newProfile, accountHeader.getProfiles().size() - 2);
+                                                } else {
+                                                    accountHeader.addProfiles(newProfile);
+                                                }
+                                            }
+                                        })
+                                        .setNegativeButton(android.R.string.no, null)
+                                        .show();
+                                break;
+                            case MANAGE_IDENTITY:
+                                Intent show = new Intent(MainActivity.this,
+                                        AddressDetailActivity.class);
+                                show.putExtra(AddressDetailFragment.ARG_ITEM,
+                                        Singleton.getIdentity(getApplicationContext()));
+                                startActivity(show);
+                                break;
+                            default:
+                                if (profile instanceof ProfileDrawerItem) {
+                                    Object tag = ((ProfileDrawerItem) profile).getTag();
+                                    if (tag instanceof BitmessageAddress) {
+                                        Singleton.setIdentity((BitmessageAddress) tag);
+                                    }
+                                }
                         }
                         // false if it should close the drawer
                         return false;
@@ -336,10 +359,10 @@ public class MainActivity extends AppCompatActivity
                             switch (ni.getNameRes()) {
                                 case R.string.contacts_and_subscriptions:
                                     if (!(getSupportFragmentManager().findFragmentById(R.id
-                                            .item_list) instanceof SubscriptionListFragment)) {
-                                        changeList(new SubscriptionListFragment());
+                                            .item_list) instanceof AddressListFragment)) {
+                                        changeList(new AddressListFragment());
                                     } else {
-                                        ((SubscriptionListFragment) getSupportFragmentManager()
+                                        ((AddressListFragment) getSupportFragmentManager()
                                                 .findFragmentById(R.id.item_list)).updateList();
                                     }
 
@@ -415,7 +438,7 @@ public class MainActivity extends AppCompatActivity
             if (item instanceof Plaintext)
                 fragment = new MessageDetailFragment();
             else if (item instanceof BitmessageAddress)
-                fragment = new SubscriptionDetailFragment();
+                fragment = new AddressDetailFragment();
             else
                 throw new IllegalArgumentException("Plaintext or BitmessageAddress expected, but " +
                         "was "
@@ -431,7 +454,7 @@ public class MainActivity extends AppCompatActivity
             if (item instanceof Plaintext)
                 detailIntent = new Intent(this, MessageDetailActivity.class);
             else if (item instanceof BitmessageAddress)
-                detailIntent = new Intent(this, SubscriptionDetailActivity.class);
+                detailIntent = new Intent(this, AddressDetailActivity.class);
             else
                 throw new IllegalArgumentException("Plaintext or BitmessageAddress expected, but " +
                         "was "
@@ -467,9 +490,5 @@ public class MainActivity extends AppCompatActivity
             bound = false;
         }
         super.onStop();
-    }
-
-    public BitmessageAddress getSelectedIdentity() {
-        return selectedIdentity;
     }
 }

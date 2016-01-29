@@ -132,7 +132,7 @@ public class MessageListFragment extends AbstractItemListFragment<Plaintext> {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity().getApplicationContext(), ComposeMessageActivity.class);
-                intent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, ((MainActivity) getActivity()).getSelectedIdentity());
+                intent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, Singleton.getIdentity(getActivity()));
                 startActivity(intent);
             }
         });

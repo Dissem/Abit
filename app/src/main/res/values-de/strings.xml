@@ -58,4 +58,9 @@
     <string name="status_summary">Technische Infos</string>
     <string name="pubkey_available">Öffentlicher Schlüssel verfügbar</string>
     <string name="pubkey_not_available">Öffentlicher Schlüssel noch nicht verfügbar</string>
+    <string name="alt_qr_code">QR-Code</string>
+    <string name="add_identity_warning">Mehrere Identitäten zu haben bedeutet einen höheren Resourcenverbrauch. Sind Sie sicher?</string>
+    <string name="share">Teilen</string>
+    <string name="delete_contact_warning">Sind Sie sicher dass dieser Kontakt gelöscht werden soll?</string>
+    <string name="delete_identity_warning">Sind Sie sicher dass diese Identität gelöscht werden soll? Sie werden keine Nachrichten mehr empfangen können welche an diese Adresse gesendet werden, und es est nicht möglich diese Aktion rückgängig zu machen.</string>
 </resources>

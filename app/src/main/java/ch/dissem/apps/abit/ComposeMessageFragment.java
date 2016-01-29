@@ -36,6 +36,7 @@ import ch.dissem.bitmessage.entity.BitmessageAddress;
 
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_IDENTITY;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_RECIPIENT;
+import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_SUBJECT;
 
 /**
  * Compose a new message.
@@ -43,6 +44,7 @@ import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_RECIPIENT;
 public class ComposeMessageFragment extends Fragment {
     private BitmessageAddress identity;
     private BitmessageAddress recipient;
+    private String subject;
     private AutoCompleteTextView recipientInput;
     private EditText subjectInput;
     private EditText bodyInput;
@@ -65,6 +67,9 @@ public class ComposeMessageFragment extends Fragment {
             }
             if (getArguments().containsKey(EXTRA_RECIPIENT)) {
                 recipient = (BitmessageAddress) getArguments().getSerializable(EXTRA_RECIPIENT);
+            }
+            if (getArguments().containsKey(EXTRA_SUBJECT)) {
+                subject = getArguments().getString(EXTRA_SUBJECT);
             }
         } else {
             throw new RuntimeException("No identity set for ComposeMessageFragment");
@@ -99,9 +104,9 @@ public class ComposeMessageFragment extends Fragment {
             recipientInput.setText(recipient.toString());
         }
         subjectInput = (EditText) rootView.findViewById(R.id.subject);
+        subjectInput.setText(subject);
         bodyInput = (EditText) rootView.findViewById(R.id.body);
-//        bodyInput.setInputType(EditorInfo.TYPE_TEXT_VARIATION_SHORT_MESSAGE | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
-//        bodyInput.setImeOptions(EditorInfo.IME_ACTION_SEND | EditorInfo.IME_FLAG_NO_ENTER_ACTION);
+
         return rootView;
     }
 
@@ -120,7 +125,8 @@ public class ComposeMessageFragment extends Fragment {
                     try {
                         recipient = new BitmessageAddress(inputString);
                     } catch (Exception e) {
-                        List<BitmessageAddress> contacts = Singleton.getAddressRepository(getContext()).getContacts();
+                        List<BitmessageAddress> contacts = Singleton.getAddressRepository
+                                (getContext()).getContacts();
                         for (BitmessageAddress contact : contacts) {
                             if (inputString.equalsIgnoreCase(contact.getAlias())) {
                                 recipient = contact;

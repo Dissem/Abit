@@ -43,6 +43,9 @@ import ch.dissem.bitmessage.entity.valueobject.Label;
 import ch.dissem.bitmessage.ports.MessageRepository;
 
 import static android.text.util.Linkify.WEB_URLS;
+import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_IDENTITY;
+import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_RECIPIENT;
+import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_SUBJECT;
 import static ch.dissem.apps.abit.util.Constants.BITMESSAGE_ADDRESS_PATTERN;
 import static ch.dissem.apps.abit.util.Constants.BITMESSAGE_URL_SCHEMA;
 
@@ -152,8 +155,12 @@ public class MessageDetailFragment extends Fragment {
             case R.id.reply:
                 Intent replyIntent = new Intent(getActivity().getApplicationContext(),
                         ComposeMessageActivity.class);
-                replyIntent.putExtra(ComposeMessageActivity.EXTRA_RECIPIENT, item.getFrom());
-                replyIntent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, item.getTo());
+                replyIntent.putExtra(EXTRA_RECIPIENT, item.getFrom());
+                replyIntent.putExtra(EXTRA_IDENTITY, item.getTo());
+                replyIntent.putExtra(EXTRA_SUBJECT,
+                        (item.getSubject().substring(0, 3).equalsIgnoreCase("RE:") ? "" : "RE: ")
+                                + item.getSubject()
+                );
                 startActivity(replyIntent);
                 return true;
             case R.id.delete:

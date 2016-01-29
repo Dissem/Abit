@@ -239,7 +239,7 @@ public class AndroidAddressRepository implements AddressRepository {
     @Override
     public void remove(BitmessageAddress address) {
         SQLiteDatabase db = sql.getWritableDatabase();
-        db.delete(TABLE_NAME, "address = " + address.getAddress(), null);
+        db.delete(TABLE_NAME, "address = ?", new String[]{address.getAddress()});
     }
 
     @Override

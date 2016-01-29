@@ -124,4 +124,10 @@ public class Singleton {
         }
         return identity;
     }
+
+    public static void setIdentity(BitmessageAddress identity) {
+        if (identity.getPrivateKey() == null)
+            throw new IllegalArgumentException("Identity expected, but no private key available");
+        Singleton.identity = identity;
+    }
 }

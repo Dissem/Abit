@@ -100,4 +100,18 @@
         android:text="@string/pubkey_available"
         android:textAppearance="?android:attr/textAppearanceSmall"/>
 
+    <ImageView
+        android:id="@+id/qr_code"
+        tools:src="@drawable/public_key"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_below="@+id/pubkey_available"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="64dp"
+        android:contentDescription="@string/alt_qr_code"/>
 </RelativeLayout>

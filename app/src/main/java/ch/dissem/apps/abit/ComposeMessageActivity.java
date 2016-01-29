@@ -26,6 +26,7 @@ import android.support.v7.widget.Toolbar;
 public class ComposeMessageActivity extends AppCompatActivity {
     public static final String EXTRA_IDENTITY = "ch.dissem.abit.Message.SENDER";
     public static final String EXTRA_RECIPIENT = "ch.dissem.abit.Message.RECIPIENT";
+    public static final String EXTRA_SUBJECT = "ch.dissem.abit.Message.SUBJECT";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

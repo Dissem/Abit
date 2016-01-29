@@ -38,7 +38,7 @@
                 android:value=".MainActivity"/>
         </activity>
         <activity
-            android:name=".SubscriptionDetailActivity"
+            android:name=".AddressDetailActivity"
             android:label="@string/title_subscription_detail"
             android:parentActivityName=".MainActivity"
             tools:ignore="UnusedAttribute">
