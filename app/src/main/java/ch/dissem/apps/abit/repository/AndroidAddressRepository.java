@@ -196,7 +196,9 @@ public class AndroidAddressRepository implements AddressRepository {
             } else {
                 values.put(COLUMN_PUBLIC_KEY, (byte[]) null);
             }
-            values.put(COLUMN_PRIVATE_KEY, Encode.bytes(address.getPrivateKey()));
+            if (address.getPrivateKey() != null) {
+                values.put(COLUMN_PRIVATE_KEY, Encode.bytes(address.getPrivateKey()));
+            }
             values.put(COLUMN_SUBSCRIBED, address.isSubscribed());
 
             int update = db.update(TABLE_NAME, values, "address = '" + address.getAddress() +
