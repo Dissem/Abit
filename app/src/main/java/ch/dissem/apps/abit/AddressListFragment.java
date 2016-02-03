@@ -19,6 +19,7 @@ package ch.dissem.apps.abit;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -113,7 +114,20 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_address_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_address_list, container, false);
+
+        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab_add_contact);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Intent intent = new Intent(getActivity().getApplicationContext(), ComposeMessageActivity.class);
+//                intent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, Singleton.getIdentity(getActivity()));
+//                startActivity(intent);
+                // TODO
+            }
+        });
+
+        return view;
     }
 
     @Override
