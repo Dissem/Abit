@@ -157,10 +157,14 @@ public class MessageDetailFragment extends Fragment {
                         ComposeMessageActivity.class);
                 replyIntent.putExtra(EXTRA_RECIPIENT, item.getFrom());
                 replyIntent.putExtra(EXTRA_IDENTITY, item.getTo());
-                replyIntent.putExtra(EXTRA_SUBJECT,
-                        (item.getSubject().substring(0, 3).equalsIgnoreCase("RE:") ? "" : "RE: ")
-                                + item.getSubject()
-                );
+                String prefix;
+                if (item.getSubject().length() >= 3 && item.getSubject().substring(0, 3)
+                        .equalsIgnoreCase("RE:")) {
+                    prefix = "";
+                } else {
+                    prefix = "RE: ";
+                }
+                replyIntent.putExtra(EXTRA_SUBJECT, prefix + item.getSubject());
                 startActivity(replyIntent);
                 return true;
             case R.id.delete:
