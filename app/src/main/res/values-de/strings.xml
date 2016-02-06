@@ -63,4 +63,6 @@
     <string name="share">Teilen</string>
     <string name="delete_contact_warning">Sind Sie sicher dass dieser Kontakt gelöscht werden soll?</string>
     <string name="delete_identity_warning">Sind Sie sicher dass diese Identität gelöscht werden soll? Sie werden keine Nachrichten mehr empfangen können welche an diese Adresse gesendet werden, und es est nicht möglich diese Aktion rückgängig zu machen.</string>
+    <string name="create_contact">Kontakt erfassen</string>
+    <string name="scan_qr_code">QR-Code scannen</string>
 </resources>

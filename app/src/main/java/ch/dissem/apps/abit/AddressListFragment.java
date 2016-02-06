@@ -17,24 +17,30 @@
 package ch.dissem.apps.abit;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import ch.dissem.apps.abit.listener.ActionBarListener;
-import ch.dissem.apps.abit.service.Singleton;
-import ch.dissem.bitmessage.entity.BitmessageAddress;
-import ch.dissem.bitmessage.entity.valueobject.Label;
+import com.google.zxing.integration.android.IntentIntegrator;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import ch.dissem.apps.abit.listener.ActionBarListener;
+import ch.dissem.apps.abit.service.Singleton;
+import ch.dissem.bitmessage.entity.BitmessageAddress;
+import ch.dissem.bitmessage.entity.valueobject.Label;
+import io.github.yavski.fabspeeddial.FabSpeedDial;
+import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
 
 /**
  * Fragment that shows a list of all contacts, the ones we subscribed to first.
@@ -48,7 +54,8 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
     }
 
     public void updateList() {
-        List<BitmessageAddress> addresses = Singleton.getAddressRepository(getContext()).getContacts();
+        List<BitmessageAddress> addresses = Singleton.getAddressRepository(getContext())
+                .getContacts();
         Collections.sort(addresses, new Comparator<BitmessageAddress>() {
             /**
              * Yields the following order:
@@ -92,12 +99,15 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
                     convertView = inflater.inflate(R.layout.subscription_row, null, false);
                 }
                 BitmessageAddress item = getItem(position);
-                ((ImageView) convertView.findViewById(R.id.avatar)).setImageDrawable(new Identicon(item));
+                ((ImageView) convertView.findViewById(R.id.avatar)).setImageDrawable(new
+                        Identicon(item));
                 TextView name = (TextView) convertView.findViewById(R.id.name);
                 name.setText(item.toString());
                 TextView streamNumber = (TextView) convertView.findViewById(R.id.stream_number);
-                streamNumber.setText(getContext().getString(R.string.stream_number, item.getStream()));
-                convertView.findViewById(R.id.subscribed).setVisibility(item.isSubscribed() ? View.VISIBLE : View.INVISIBLE);
+                streamNumber.setText(getContext().getString(R.string.stream_number, item
+                        .getStream()));
+                convertView.findViewById(R.id.subscribed).setVisibility(item.isSubscribed() ?
+                        View.VISIBLE : View.INVISIBLE);
                 return convertView;
             }
         });
@@ -106,28 +116,51 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
     @Override
     public void onAttach(Context ctx) {
         super.onAttach(ctx);
-        if (ctx instanceof ActionBarListener){
+        if (ctx instanceof ActionBarListener) {
             ((ActionBarListener) ctx).updateTitle(getString(R.string.contacts_and_subscriptions));
         }
     }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
+            savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_address_list, container, false);
 
-        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab_add_contact);
-        fab.setOnClickListener(new View.OnClickListener() {
+        FabSpeedDial fabSpeedDial = (FabSpeedDial) view.findViewById(R.id.fab_add_contact);
+        fabSpeedDial.setMenuListener(new SimpleMenuListenerAdapter() {
             @Override
-            public void onClick(View view) {
-//                Intent intent = new Intent(getActivity().getApplicationContext(), ComposeMessageActivity.class);
-//                intent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, Singleton.getIdentity(getActivity()));
-//                startActivity(intent);
-                // TODO
+            public boolean onMenuItemSelected(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.action_read_qr_code:
+                        IntentIntegrator.forSupportFragment(AddressListFragment.this)
+                                .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES)
+                                .initiateScan();
+                        return true;
+                    case R.id.action_create_contact:
+                        return true;
+                    default:
+                        return false;
+                }
             }
         });
 
         return view;
+    }
+
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode) {
+        super.startActivityForResult(intent, requestCode);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (data.hasExtra("SCAN_RESULT")) {
+            Uri uri = Uri.parse(data.getStringExtra("SCAN_RESULT"));
+            Intent intent = new Intent(getActivity(), OpenBitmessageLinkActivity.class);
+            intent.setData(uri);
+            startActivity(intent);
+        }
     }
 
     @Override
