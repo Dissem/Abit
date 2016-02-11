@@ -22,15 +22,21 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.RelativeLayout;
 
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.Target;
 import com.mikepenz.community_material_typeface_library.CommunityMaterial;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -38,6 +44,7 @@ import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.accountswitcher.AccountHeader;
 import com.mikepenz.materialdrawer.accountswitcher.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
@@ -123,6 +130,9 @@ public class MainActivity extends AppCompatActivity
     private BitmessageContext bmc;
     private AccountHeader accountHeader;
 
+    private Drawer drawer;
+    private ShowcaseView showcaseView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -166,6 +176,36 @@ public class MainActivity extends AppCompatActivity
             SyncAdapter.startSync(this);
         } else {
             SyncAdapter.stopSync(this);
+        }
+        if (drawer.isDrawerOpen()) {
+            RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup
+                    .LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+            int margin = ((Number) (getResources().getDisplayMetrics().density * 12)).intValue();
+            lps.setMargins(margin, margin, margin, margin);
+
+            showcaseView = new ShowcaseView.Builder(this)
+                    .withMaterialShowcase()
+                    .setStyle(R.style.CustomShowcaseTheme)
+                    .setContentTitle(R.string.full_node)
+                    .setContentText(R.string.full_node_description)
+                    .setTarget(new Target() {
+                                   @Override
+                                   public Point getPoint() {
+                                       View view = drawer.getStickyFooter();
+                                       int[] location = new int[2];
+                                       view.getLocationInWindow(location);
+                                       int x = location[0] + 7 * view.getWidth() / 8;
+                                       int y = location[1] + view.getHeight() / 2;
+                                       return new Point(x, y);
+                                   }
+                               }
+                    )
+                    .replaceEndButton(R.layout.showcase_button)
+                    .hideOnTouchOutside()
+                    .build();
+            showcaseView.setButtonPosition(lps);
         }
     }
 
@@ -234,23 +274,29 @@ public class MainActivity extends AppCompatActivity
                                         .setMessage(R.string.add_identity_warning)
                                         .setPositiveButton(android.R.string.yes, new
                                                 DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                BitmessageAddress identity = bmc.createIdentity(false);
-                                                IProfile newProfile = new ProfileDrawerItem()
-                                                        .withName(identity.toString())
-                                                        .withEmail(identity.getAddress())
-                                                        .withTag(identity);
-                                                if (accountHeader.getProfiles() != null) {
-                                                    // we know that there are 2 setting elements.
-                                                    // Set the new profile above them ;)
-                                                    accountHeader.addProfile(
-                                                            newProfile, accountHeader.getProfiles().size() - 2);
-                                                } else {
-                                                    accountHeader.addProfiles(newProfile);
-                                                }
-                                            }
-                                        })
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog,
+                                                                        int which) {
+                                                        BitmessageAddress identity = bmc
+                                                                .createIdentity(false);
+                                                        IProfile newProfile = new
+                                                                ProfileDrawerItem()
+                                                                .withName(identity.toString())
+                                                                .withEmail(identity.getAddress())
+                                                                .withTag(identity);
+                                                        if (accountHeader.getProfiles() != null) {
+                                                            // we know that there are 2 setting
+                                                            // elements.
+                                                            // Set the new profile above them ;)
+                                                            accountHeader.addProfile(
+                                                                    newProfile, accountHeader
+                                                                            .getProfiles().size()
+                                                                            - 2);
+                                                        } else {
+                                                            accountHeader.addProfiles(newProfile);
+                                                        }
+                                                    }
+                                                })
                                         .setNegativeButton(android.R.string.no, null)
                                         .show();
                                 break;
@@ -315,20 +361,20 @@ public class MainActivity extends AppCompatActivity
                         .withTag(null)
                         .withIcon(CommunityMaterial.Icon.cmd_archive)
         );
+        drawerItems.add(new DividerDrawerItem());
+        drawerItems.add(new PrimaryDrawerItem()
+                .withName(R.string.contacts_and_subscriptions)
+                .withIcon(GoogleMaterial.Icon.gmd_contacts));
+        drawerItems.add(new PrimaryDrawerItem()
+                .withName(R.string.settings)
+                .withIcon(GoogleMaterial.Icon.gmd_settings));
 
-
-        new DrawerBuilder()
+        drawer = new DrawerBuilder()
                 .withActivity(this)
                 .withToolbar(toolbar)
                 .withAccountHeader(accountHeader)
                 .withDrawerItems(drawerItems)
                 .addStickyDrawerItems(
-                        new PrimaryDrawerItem()
-                                .withName(R.string.contacts_and_subscriptions)
-                                .withIcon(GoogleMaterial.Icon.gmd_contacts),
-                        new PrimaryDrawerItem()
-                                .withName(R.string.settings)
-                                .withIcon(GoogleMaterial.Icon.gmd_settings),
                         new SwitchDrawerItem()
                                 .withName(R.string.full_node)
                                 .withIcon(CommunityMaterial.Icon.cmd_cloud_outline)
@@ -382,7 +428,7 @@ public class MainActivity extends AppCompatActivity
                         return false;
                     }
                 })
-                .withCloseOnClick(true)
+                .withShowDrawerOnFirstLaunch(true)
                 .build();
     }
 

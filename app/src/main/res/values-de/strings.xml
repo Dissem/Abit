@@ -65,4 +65,8 @@
     <string name="delete_identity_warning">Sind Sie sicher dass diese Identität gelöscht werden soll? Sie werden keine Nachrichten mehr empfangen können welche an diese Adresse gesendet werden, und es est nicht möglich diese Aktion rückgängig zu machen.</string>
     <string name="create_contact">Kontakt erfassen</string>
     <string name="scan_qr_code">QR-Code scannen</string>
+    <string name="full_node_description">Solange kein aktiver Knoten gestartet ist, werden keine Meldungen empfangen oder gesendet. Dies braucht jedoch viele Resourcen und Daten.
+
+Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfiguriert werden, aber im Moment muss dieser selbst bereitgestellt werden.</string>
+    <string name="got_it">Alles klar</string>
 </resources>
