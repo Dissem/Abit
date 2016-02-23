@@ -21,4 +21,6 @@ package ch.dissem.apps.abit.listener;
  */
 public interface ActionBarListener {
     void updateTitle(CharSequence title);
+
+    void updateUnread();
 }

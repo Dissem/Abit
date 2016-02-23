@@ -21,6 +21,7 @@ import android.content.Context;
 import java.util.Deque;
 import java.util.LinkedList;
 
+import ch.dissem.apps.abit.MainActivity;
 import ch.dissem.apps.abit.notification.NewMessageNotification;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.Plaintext;
@@ -58,6 +59,12 @@ public class MessageListener implements BitmessageContext.Listener {
             notification.multiNotification(unacknowledged, numberOfUnacknowledgedMessages);
         }
         notification.show();
+
+        // If MainActivity is shown, update the sidebar badges
+        MainActivity main = MainActivity.getInstance();
+        if (main != null) {
+            main.updateUnread();
+        }
     }
 
     public void resetNotification() {

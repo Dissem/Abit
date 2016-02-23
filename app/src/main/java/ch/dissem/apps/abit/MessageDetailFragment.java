@@ -35,6 +35,7 @@ import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 
+import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.util.Drawables;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
@@ -129,6 +130,9 @@ public class MessageDetailFragment extends Fragment {
                 }
             }
             if (removed) {
+                if (getActivity() instanceof ActionBarListener) {
+                    ((ActionBarListener) getActivity()).updateUnread();
+                }
                 Singleton.getMessageRepository(inflater.getContext()).save(item);
             }
         }
@@ -180,8 +184,14 @@ public class MessageDetailFragment extends Fragment {
             case R.id.mark_unread:
                 item.addLabels(messageRepo.getLabels(Label.Type.UNREAD));
                 messageRepo.save(item);
+                if (getActivity() instanceof ActionBarListener) {
+                    ((ActionBarListener) getActivity()).updateUnread();
+                }
                 return true;
             case R.id.archive:
+                if (item.isUnread() && getActivity() instanceof ActionBarListener) {
+                    ((ActionBarListener) getActivity()).updateUnread();
+                }
                 item.getLabels().clear();
                 messageRepo.save(item);
                 return true;

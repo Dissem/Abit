@@ -31,7 +31,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 
@@ -58,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -102,6 +102,8 @@ public class MainActivity extends AppCompatActivity
     private static final Logger LOG = LoggerFactory.getLogger(MainActivity.class);
     private static final int ADD_IDENTITY = 1;
     private static final int MANAGE_IDENTITY = 2;
+
+    public static WeakReference<MainActivity> instance;
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -432,6 +434,19 @@ public class MainActivity extends AppCompatActivity
                 .build();
     }
 
+    @Override
+    protected void onResume() {
+        instance = new WeakReference<>(this);
+        updateUnread();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        instance = null;
+    }
+
     private void checkAndStartNode(final CompoundButton buttonView) {
         if (service == null) return;
 
@@ -453,6 +468,21 @@ public class MainActivity extends AppCompatActivity
                         }
                     })
                     .show();
+        }
+    }
+
+    @Override
+    public void updateUnread() {
+        for (IDrawerItem item : drawer.getDrawerItems()) {
+            if (item.getTag() instanceof Label) {
+                Label label = (Label) item.getTag();
+                int unread = bmc.messages().countUnread(label);
+                if (unread > 0) {
+                    ((PrimaryDrawerItem) item).withBadge(String.valueOf(unread));
+                } else {
+                    ((PrimaryDrawerItem) item).withBadge(null);
+                }
+            }
         }
     }
 
@@ -536,5 +566,10 @@ public class MainActivity extends AppCompatActivity
             bound = false;
         }
         super.onStop();
+    }
+
+    public static MainActivity getInstance() {
+        if (instance == null) return null;
+        return instance.get();
     }
 }

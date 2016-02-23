@@ -19,8 +19,10 @@ package ch.dissem.apps.abit.repository;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.database.DatabaseUtilsCompat;
 
 import ch.dissem.apps.abit.R;
 import ch.dissem.bitmessage.InternalContext;
@@ -171,14 +173,10 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
             where = "";
         }
         SQLiteDatabase db = sql.getReadableDatabase();
-        try (Cursor c = db.query(
-                TABLE_NAME, new String[]{COLUMN_ID},
+        return (int) DatabaseUtils.queryNumEntries(db, TABLE_NAME,
                 where + "id IN (SELECT message_id FROM Message_Label WHERE label_id IN (" +
-                        "SELECT id FROM Label WHERE type = '" + Label.Type.UNREAD.name() + "'))",
-                null, null, null, null
-        )) {
-            return c.getColumnCount();
-        }
+                        "SELECT id FROM Label WHERE type = '" + Label.Type.UNREAD.name() + "'))"
+        );
     }
 
     @Override
