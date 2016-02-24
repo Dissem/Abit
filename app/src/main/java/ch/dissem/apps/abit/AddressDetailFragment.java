@@ -23,8 +23,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.widget.ShareActionProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -71,7 +69,6 @@ public class AddressDetailFragment extends Fragment {
 
     private static final int QR_CODE_SIZE = 350;
 
-    private ShareActionProvider shareActionProvider;
     /**
      * The content this fragment is presenting.
      */
@@ -103,11 +100,8 @@ public class AddressDetailFragment extends Fragment {
         inflater.inflate(R.menu.address, menu);
 
         Drawables.addIcon(getActivity(), menu, R.id.write_message, GoogleMaterial.Icon.gmd_mail);
-        Drawables.addIcon(getActivity(), menu, R.id.delete, GoogleMaterial.Icon.gmd_delete);
         Drawables.addIcon(getActivity(), menu, R.id.share, GoogleMaterial.Icon.gmd_share);
-
-        shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(
-                menu.findItem(R.id.share));
+        Drawables.addIcon(getActivity(), menu, R.id.delete, GoogleMaterial.Icon.gmd_delete);
 
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -143,17 +137,12 @@ public class AddressDetailFragment extends Fragment {
                         .show();
                 return true;
             case R.id.share:
-                new AlertDialog.Builder(ctx)
-                        .setMessage("I have no fucking clue.")
-                        .show();
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, item.getAddress());
+                startActivity(Intent.createChooser(shareIntent, null));
             default:
                 return false;
-        }
-    }
-
-    private void setShareIntent(Intent shareIntent) {
-        if (shareActionProvider != null) {
-            shareActionProvider.setShareIntent(shareIntent);
         }
     }
 

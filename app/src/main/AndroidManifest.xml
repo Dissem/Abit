@@ -89,7 +89,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".OpenBitmessageLinkActivity"
+            android:name=".CreateAddressActivity"
             android:label="@string/title_activity_open_bitmessage_link"
             android:theme="@style/Theme.AppCompat.Light.Dialog">
             <intent-filter>

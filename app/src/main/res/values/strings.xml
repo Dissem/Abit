@@ -72,4 +72,6 @@
 
 As an alternative you could configure a trusted node in the settings, but as of now you\'ll need to deploy your own.</string>
     <string name="got_it">Got it</string>
+    <string name="address">Bitmessage Address</string>
+    <string name="error_illegal_address">There might be a typo</string>
 </resources>

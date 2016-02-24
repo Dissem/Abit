@@ -69,4 +69,6 @@
 
 Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfiguriert werden, aber im Moment muss dieser selbst bereitgestellt werden.</string>
     <string name="got_it">Alles klar</string>
+    <string name="address">Bitmessage-Adresse</string>
+    <string name="error_illegal_address">Vielleicht hat es einen Tippfehler</string>
 </resources>

@@ -30,31 +30,35 @@ import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 
-public class OpenBitmessageLinkActivity extends AppCompatActivity {
+public class CreateAddressActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_open_bitmessage_link);
+        Uri uri = getIntent().getData();
+        if (uri != null)
+            setContentView(R.layout.activity_open_bitmessage_link);
+        else
+            setContentView(R.layout.activity_create_bitmessage_address);
 
-        final TextView addressView = (TextView) findViewById(R.id.address);
+        final TextView address = (TextView) findViewById(R.id.address);
         final EditText label = (EditText) findViewById(R.id.label);
         final Switch subscribe = (Switch) findViewById(R.id.subscribe);
 
-        Uri uri = getIntent().getData();
-        final String address = getAddress(uri);
-        String[] parameters = getParameters(uri);
-        for (String parameter : parameters) {
-            String name = parameter.substring(0, 6).toLowerCase();
-            if (name.startsWith("label")) {
-                label.setText(parameter.substring(parameter.indexOf('=') + 1).trim());
-            } else if (name.startsWith("action")) {
-                parameter = parameter.toLowerCase();
-                subscribe.setChecked(parameter.contains("subscribe"));
+        if (uri != null) {
+            String addressText = getAddress(uri);
+            String[] parameters = getParameters(uri);
+            for (String parameter : parameters) {
+                String name = parameter.substring(0, 6).toLowerCase();
+                if (name.startsWith("label")) {
+                    label.setText(parameter.substring(parameter.indexOf('=') + 1).trim());
+                } else if (name.startsWith("action")) {
+                    parameter = parameter.toLowerCase();
+                    subscribe.setChecked(parameter.contains("subscribe"));
+                }
             }
+
+            address.setText(addressText);
         }
-
-        addressView.setText(address);
-
 
         final Button cancel = (Button) findViewById(R.id.cancel);
         cancel.setOnClickListener(new View.OnClickListener() {
@@ -68,18 +72,23 @@ public class OpenBitmessageLinkActivity extends AppCompatActivity {
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BitmessageAddress bmAddress = new BitmessageAddress(address);
-                bmAddress.setAlias(label.getText().toString());
+                String addressText = String.valueOf(address.getText()).trim();
+                try {
+                    BitmessageAddress bmAddress = new BitmessageAddress(addressText);
+                    bmAddress.setAlias(label.getText().toString());
 
-                BitmessageContext bmc = Singleton.getBitmessageContext(OpenBitmessageLinkActivity
-                        .this);
-                bmc.addContact(bmAddress);
-                if (subscribe.isChecked()) {
-                    bmc.addSubscribtion(bmAddress);
+                    BitmessageContext bmc = Singleton.getBitmessageContext
+                            (CreateAddressActivity.this);
+                    bmc.addContact(bmAddress);
+                    if (subscribe.isChecked()) {
+                        bmc.addSubscribtion(bmAddress);
+                    }
+
+                    setResult(Activity.RESULT_OK);
+                    finish();
+                } catch (RuntimeException e) {
+                    address.setError(getString(R.string.error_illegal_address));
                 }
-
-                setResult(Activity.RESULT_OK);
-                finish();
             }
         });
     }

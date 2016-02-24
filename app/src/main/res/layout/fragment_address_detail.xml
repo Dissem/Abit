@@ -38,8 +38,8 @@
         android:layout_alignTop="@+id/avatar"
         android:layout_marginEnd="16dp"
         android:layout_toEndOf="@+id/avatar"
-        android:text=""
         android:inputType="textPersonName"
+        android:text=""
         tools:ignore="LabelFor"/>
 
     <TextView
@@ -50,9 +50,9 @@
         android:lines="1"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        tools:text="BM-XyYxXyYxXyYxXyYxXyYx"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        tools:text="BM-XyYxXyYxXyYxXyYxXyYx"/>
 
     <TextView
         android:id="@+id/stream_number"
@@ -63,8 +63,8 @@
         android:lines="1"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        tools:text="Stream #"
-        android:textAppearance="?android:attr/textAppearanceSmall"/>
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        tools:text="Stream #"/>
 
     <Switch
         android:id="@+id/active"
@@ -82,8 +82,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/active"
-        android:paddingStart="16dp"
         android:paddingEnd="4dp"
+        android:paddingStart="16dp"
         android:paddingTop="16dp"
         android:src="@drawable/public_key"
         tools:ignore="ContentDescription"/>
@@ -92,26 +92,28 @@
         android:id="@+id/pubkey_available_desc"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingStart="0dp"
-        android:paddingEnd="16dp"
         android:layout_alignBottom="@id/pubkey_available"
-        android:layout_toEndOf="@id/pubkey_available"
         android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@id/pubkey_available"
+        android:paddingEnd="16dp"
+        android:paddingStart="0dp"
         android:text="@string/pubkey_available"
         android:textAppearance="?android:attr/textAppearanceSmall"/>
 
     <ImageView
         android:id="@+id/qr_code"
-        tools:src="@drawable/public_key"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_below="@+id/pubkey_available"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginTop="24dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/pubkey_available"
         android:layout_marginBottom="64dp"
-        android:contentDescription="@string/alt_qr_code"/>
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:contentDescription="@string/alt_qr_code"
+        android:elevation="2dp"
+        tools:ignore="UnusedAttribute"
+        tools:src="@drawable/public_key"/>
 </RelativeLayout>

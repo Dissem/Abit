@@ -138,6 +138,8 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
                                 .initiateScan();
                         return true;
                     case R.id.action_create_contact:
+                        Intent intent = new Intent(getActivity(), CreateAddressActivity.class);
+                        startActivity(intent);
                         return true;
                     default:
                         return false;
@@ -155,9 +157,9 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (data.hasExtra("SCAN_RESULT")) {
+        if (data != null && data.hasExtra("SCAN_RESULT")) {
             Uri uri = Uri.parse(data.getStringExtra("SCAN_RESULT"));
-            Intent intent = new Intent(getActivity(), OpenBitmessageLinkActivity.class);
+            Intent intent = new Intent(getActivity(), CreateAddressActivity.class);
             intent.setData(uri);
             startActivity(intent);
         }
