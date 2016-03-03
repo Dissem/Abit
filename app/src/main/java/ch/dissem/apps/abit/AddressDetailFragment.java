@@ -40,6 +40,7 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
+import com.mikepenz.community_material_typeface_library.CommunityMaterial;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 
 import org.slf4j.Logger;
@@ -48,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.util.Drawables;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
+import ch.dissem.bitmessage.wif.WifExporter;
 
 import static android.graphics.Color.BLACK;
 import static android.graphics.Color.WHITE;
@@ -66,6 +68,7 @@ public class AddressDetailFragment extends Fragment {
      * represents.
      */
     public static final String ARG_ITEM = "item";
+    public static final String EXPORT_POSTFIX = ".keys.dat";
 
     private static final int QR_CODE_SIZE = 350;
 
@@ -102,6 +105,9 @@ public class AddressDetailFragment extends Fragment {
         Drawables.addIcon(getActivity(), menu, R.id.write_message, GoogleMaterial.Icon.gmd_mail);
         Drawables.addIcon(getActivity(), menu, R.id.share, GoogleMaterial.Icon.gmd_share);
         Drawables.addIcon(getActivity(), menu, R.id.delete, GoogleMaterial.Icon.gmd_delete);
+        Drawables.addIcon(getActivity(), menu, R.id.export,
+                CommunityMaterial.Icon.cmd_export)
+                .setVisible(item != null && item.getPrivateKey() != null);
 
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -110,13 +116,14 @@ public class AddressDetailFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         final Activity ctx = getActivity();
         switch (menuItem.getItemId()) {
-            case R.id.write_message:
+            case R.id.write_message: {
                 Intent intent = new Intent(ctx, ComposeMessageActivity.class);
                 intent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, Singleton.getIdentity(ctx));
                 intent.putExtra(ComposeMessageActivity.EXTRA_RECIPIENT, item);
                 startActivity(intent);
                 return true;
-            case R.id.delete:
+            }
+            case R.id.delete: {
                 int warning;
                 if (item.getPrivateKey() != null)
                     warning = R.string.delete_identity_warning;
@@ -136,11 +143,36 @@ public class AddressDetailFragment extends Fragment {
                         .setNegativeButton(android.R.string.no, null)
                         .show();
                 return true;
-            case R.id.share:
+            }
+            case R.id.export: {
+                new AlertDialog.Builder(ctx)
+                        .setMessage(R.string.confirm_export)
+                        .setPositiveButton(android.R.string.yes, new
+                                DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                                        shareIntent.setType("text/plain");
+                                        shareIntent.putExtra(Intent.EXTRA_TITLE, item +
+                                                EXPORT_POSTFIX);
+                                        WifExporter exporter = new WifExporter(Singleton
+                                                .getBitmessageContext(ctx));
+                                        exporter.addIdentity(item);
+                                        shareIntent.putExtra(Intent.EXTRA_TEXT, exporter.toString
+                                                ());
+                                        startActivity(Intent.createChooser(shareIntent, null));
+                                    }
+                                })
+                        .setNegativeButton(android.R.string.no, null)
+                        .show();
+                return true;
+            }
+            case R.id.share: {
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
                 shareIntent.setType("text/plain");
                 shareIntent.putExtra(Intent.EXTRA_TEXT, item.getAddress());
                 startActivity(Intent.createChooser(shareIntent, null));
+            }
             default:
                 return false;
         }
@@ -204,13 +236,13 @@ public class AddressDetailFragment extends Fragment {
 
             // QR code
             ImageView qrCode = (ImageView) rootView.findViewById(R.id.qr_code);
-            qrCode.setImageBitmap(encodeAsBitmap(item));
+            qrCode.setImageBitmap(qrCode(item));
         }
 
         return rootView;
     }
 
-    Bitmap encodeAsBitmap(BitmessageAddress address) {
+    Bitmap qrCode(BitmessageAddress address) {
         StringBuilder link = new StringBuilder("bitmessage:");
         link.append(address.getAddress());
         if (address.getAlias() != null) {

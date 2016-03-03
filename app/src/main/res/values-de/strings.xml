@@ -71,4 +71,6 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="got_it">Alles klar</string>
     <string name="address">Bitmessage-Adresse</string>
     <string name="error_illegal_address">Vielleicht hat es einen Tippfehler</string>
+    <string name="export">Exportieren</string>
+    <string name="confirm_export">Identität wirklich exportieren? Der Export wird die privaten Schlüssel unverschlüsselt enthalten.</string>
 </resources>

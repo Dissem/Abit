@@ -20,19 +20,22 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.view.Menu;
+import android.view.MenuItem;
+
+import com.mikepenz.iconics.IconicsDrawable;
+import com.mikepenz.iconics.typeface.IIcon;
 
 import ch.dissem.apps.abit.Identicon;
 import ch.dissem.apps.abit.R;
-
-import com.mikepenz.google_material_typeface_library.GoogleMaterial;
-import com.mikepenz.iconics.IconicsDrawable;
 
 /**
  * Some helper methods to work with drawables.
  */
 public class Drawables {
-    public static void addIcon(Context ctx, Menu menu, int menuItem, GoogleMaterial.Icon icon) {
-        menu.findItem(menuItem).setIcon(new IconicsDrawable(ctx, icon).colorRes(R.color.colorPrimaryDarkText).actionBar());
+    public static MenuItem addIcon(Context ctx, Menu menu, int menuItem, IIcon icon) {
+        MenuItem item = menu.findItem(menuItem);
+        item.setIcon(new IconicsDrawable(ctx, icon).colorRes(R.color.colorPrimaryDarkText).actionBar());
+        return item;
     }
 
     public static Bitmap toBitmap(Identicon identicon, int size) {
