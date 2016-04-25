@@ -52,6 +52,7 @@ public class AndroidAddressRepository implements AddressRepository {
     private static final String COLUMN_PUBLIC_KEY = "public_key";
     private static final String COLUMN_PRIVATE_KEY = "private_key";
     private static final String COLUMN_SUBSCRIBED = "subscribed";
+    private static final String COLUMN_CHAN = "chan";
 
     private final SqlHelper sql;
 
@@ -89,6 +90,11 @@ public class AndroidAddressRepository implements AddressRepository {
     }
 
     @Override
+    public List<BitmessageAddress> getChans() {
+        return find("chan = '1'");
+    }
+
+    @Override
     public List<BitmessageAddress> getSubscriptions() {
         return find("subscribed = '1'");
     }
@@ -117,7 +123,8 @@ public class AndroidAddressRepository implements AddressRepository {
                 COLUMN_ALIAS,
                 COLUMN_PUBLIC_KEY,
                 COLUMN_PRIVATE_KEY,
-                COLUMN_SUBSCRIBED
+                COLUMN_SUBSCRIBED,
+                COLUMN_CHAN
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
@@ -150,6 +157,7 @@ public class AndroidAddressRepository implements AddressRepository {
                     }
                 }
                 address.setAlias(c.getString(c.getColumnIndex(COLUMN_ALIAS)));
+                address.setChan(c.getInt(c.getColumnIndex(COLUMN_CHAN)) == 1);
                 address.setSubscribed(c.getInt(c.getColumnIndex(COLUMN_SUBSCRIBED)) == 1);
 
                 result.add(address);
@@ -199,6 +207,7 @@ public class AndroidAddressRepository implements AddressRepository {
             if (address.getPrivateKey() != null) {
                 values.put(COLUMN_PRIVATE_KEY, Encode.bytes(address.getPrivateKey()));
             }
+            values.put(COLUMN_CHAN, address.isChan());
             values.put(COLUMN_SUBSCRIBED, address.isSubscribed());
 
             int update = db.update(TABLE_NAME, values, "address = '" + address.getAddress() +
@@ -227,6 +236,7 @@ public class AndroidAddressRepository implements AddressRepository {
                 values.put(COLUMN_PUBLIC_KEY, (byte[]) null);
             }
             values.put(COLUMN_PRIVATE_KEY, Encode.bytes(address.getPrivateKey()));
+            values.put(COLUMN_CHAN, address.isChan());
             values.put(COLUMN_SUBSCRIBED, address.isSubscribed());
 
             long insert = db.insert(TABLE_NAME, null, values);
