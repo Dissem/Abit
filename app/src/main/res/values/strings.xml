@@ -44,7 +44,8 @@
     <string name="connection_info_disconnected">Disconnected</string>
     <string name="connection_info_pending">Connecting…</string>
     <string name="proof_of_work_title">Proof of Work</string>
-    <string name="proof_of_work_text">Doing work to send message (%1$d queued)</string>
+    <string name="proof_of_work_text_0">Doing work to send message</string>
+    <string name="proof_of_work_text_n">Doing work to send message (%1$d queued)</string>
     <string name="error_invalid_sync_port">Invalid port in synchronization settings: %s</string>
     <string name="error_invalid_sync_host">Synchronization failed: Trusted node could not be reached.</string>
     <string name="compose_body_hint">Write message</string>
@@ -76,4 +77,5 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="error_illegal_address">There might be a typo</string>
     <string name="export">Export</string>
     <string name="confirm_export">Do you really want to export your identity? The export will contain the unencrypted private keys.</string>
+    <string name="compose_message">Compose</string>
 </resources>

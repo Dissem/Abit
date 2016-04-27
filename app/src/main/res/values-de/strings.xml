@@ -42,7 +42,8 @@
     <string name="connection_info_n">Stream %1$d: %2$d Verbindungen</string>
     <string name="connection_info_disconnected">Getrennt</string>
     <string name="connection_info_pending">Verbindung wird aufgebaut…</string>
-    <string name="proof_of_work_text">Arbeite am Versenden (%1$d in Warteschlange)</string>
+    <string name="proof_of_work_text_0">Arbeite am Versenden</string>
+    <string name="proof_of_work_text_n">Arbeite am Versenden (%1$d in Warteschlange)</string>
     <string name="proof_of_work_title">Proof of Work</string>
     <string name="error_invalid_sync_host">Synchronisation fehlgeschlagen: der vertrauenswürdige Knoten konnte nicht erreicht werden.</string>
     <string name="error_invalid_sync_port">Ungültiger Port in den Synchronisationseinstellungen: %s</string>
@@ -73,4 +74,5 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="error_illegal_address">Vielleicht hat es einen Tippfehler</string>
     <string name="export">Exportieren</string>
     <string name="confirm_export">Identität wirklich exportieren? Der Export wird die privaten Schlüssel unverschlüsselt enthalten.</string>
+    <string name="compose_message">Schreiben</string>
 </resources>

@@ -32,7 +32,7 @@ public class ProofOfWorkNotification extends AbstractNotification {
 
     public ProofOfWorkNotification(Context ctx) {
         super(ctx);
-        update(1);
+        update(0);
     }
 
     @Override
@@ -52,7 +52,9 @@ public class ProofOfWorkNotification extends AbstractNotification {
                 .setOngoing(true)
                 .setSmallIcon(R.drawable.ic_notification_proof_of_work)
                 .setContentTitle(ctx.getString(R.string.proof_of_work_title))
-                .setContentText(ctx.getString(R.string.proof_of_work_text, numberOfItems))
+                .setContentText(numberOfItems == 0
+                        ? ctx.getString(R.string.proof_of_work_text_0)
+                        : ctx.getString(R.string.proof_of_work_text_n, numberOfItems))
                 .setContentIntent(pendingIntent);
 
         notification = builder.build();
