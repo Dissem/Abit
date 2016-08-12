@@ -44,7 +44,7 @@ import static ch.dissem.apps.abit.synchronization.Authenticator.ACCOUNT_SYNC;
 import static ch.dissem.apps.abit.synchronization.StubProvider.AUTHORITY;
 import static ch.dissem.bitmessage.extensions.pow.ProofOfWorkRequest.Request.CALCULATE;
 import static ch.dissem.bitmessage.extensions.pow.ProofOfWorkRequest.Request.COMPLETE;
-import static ch.dissem.bitmessage.utils.Singleton.security;
+import static ch.dissem.bitmessage.utils.Singleton.cryptography;
 
 /**
  * Sync Adapter to synchronize with the Bitmessage network - fetches
@@ -107,13 +107,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         try {
             BitmessageAddress identity = Singleton.getIdentity(getContext());
             byte[] privateKey = identity.getPrivateKey().getPrivateEncryptionKey();
-            byte[] signingKey = security().createPublicKey(identity.getPublicDecryptionKey());
+            byte[] signingKey = cryptography().createPublicKey(identity.getPublicDecryptionKey());
             ProofOfWorkRequest.Reader reader = new ProofOfWorkRequest.Reader(identity);
             ProofOfWorkRepository powRepo = Singleton.getProofOfWorkRepository(getContext());
             List<byte[]> items = powRepo.getItems();
             for (byte[] initialHash : items) {
                 ProofOfWorkRepository.Item item = powRepo.getItem(initialHash);
-                byte[] target = security().getProofOfWorkTarget(item.object, item
+                byte[] target = cryptography().getProofOfWorkTarget(item.object, item
                         .nonceTrialsPerByte, item.extraBytes);
                 CryptoCustomMessage<ProofOfWorkRequest> cryptoMsg = new CryptoCustomMessage<>(
                         new ProofOfWorkRequest(identity, initialHash, CALCULATE, target));

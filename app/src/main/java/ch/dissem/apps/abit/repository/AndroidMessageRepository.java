@@ -22,17 +22,6 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.v4.database.DatabaseUtilsCompat;
-
-import ch.dissem.apps.abit.R;
-import ch.dissem.bitmessage.InternalContext;
-import ch.dissem.bitmessage.entity.BitmessageAddress;
-import ch.dissem.bitmessage.entity.Plaintext;
-import ch.dissem.bitmessage.entity.valueobject.InventoryVector;
-import ch.dissem.bitmessage.entity.valueobject.Label;
-import ch.dissem.bitmessage.ports.MessageRepository;
-import ch.dissem.bitmessage.utils.Encode;
-import ch.dissem.bitmessage.utils.Strings;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,12 +32,19 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import static ch.dissem.apps.abit.repository.SqlHelper.join;
+import ch.dissem.apps.abit.R;
+import ch.dissem.bitmessage.entity.BitmessageAddress;
+import ch.dissem.bitmessage.entity.Plaintext;
+import ch.dissem.bitmessage.entity.valueobject.InventoryVector;
+import ch.dissem.bitmessage.entity.valueobject.Label;
+import ch.dissem.bitmessage.ports.AbstractMessageRepository;
+import ch.dissem.bitmessage.ports.MessageRepository;
+import ch.dissem.bitmessage.utils.Encode;
 
 /**
  * {@link MessageRepository} implementation using the Android SQL API.
  */
-public class AndroidMessageRepository implements MessageRepository, InternalContext.ContextHolder {
+public class AndroidMessageRepository extends AbstractMessageRepository {
     private static final Logger LOG = LoggerFactory.getLogger(AndroidMessageRepository.class);
 
     private static final String TABLE_NAME = "Message";
@@ -58,9 +54,13 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
     private static final String COLUMN_SENDER = "sender";
     private static final String COLUMN_RECIPIENT = "recipient";
     private static final String COLUMN_DATA = "data";
+    private static final String COLUMN_ACK_DATA = "ack_data";
     private static final String COLUMN_SENT = "sent";
     private static final String COLUMN_RECEIVED = "received";
     private static final String COLUMN_STATUS = "status";
+    private static final String COLUMN_TTL = "ttl";
+    private static final String COLUMN_RETRIES = "retries";
+    private static final String COLUMN_NEXT_TRY = "next_try";
     private static final String COLUMN_INITIAL_HASH = "initial_hash";
 
     private static final String JOIN_TABLE_NAME = "Message_Label";
@@ -74,27 +74,11 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
     private static final String LBL_COLUMN_COLOR = "color";
     private static final String LBL_COLUMN_ORDER = "ord";
     private final SqlHelper sql;
-    private final Context ctx;
-    private InternalContext bmc;
+    private final Context context;
 
     public AndroidMessageRepository(SqlHelper sql, Context ctx) {
         this.sql = sql;
-        this.ctx = ctx;
-    }
-
-    @Override
-    public void setContext(InternalContext context) {
-        bmc = context;
-    }
-
-    @Override
-    public List<Label> getLabels() {
-        return findLabels(null);
-    }
-
-    @Override
-    public List<Label> getLabels(Label.Type... types) {
-        return findLabels("type IN (" + join(types) + ")");
+        this.context = ctx;
     }
 
     public List<Label> findLabels(String where) {
@@ -134,22 +118,22 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
         } else {
             switch (type) {
                 case INBOX:
-                    text = ctx.getString(R.string.inbox);
+                    text = context.getString(R.string.inbox);
                     break;
                 case DRAFT:
-                    text = ctx.getString(R.string.draft);
+                    text = context.getString(R.string.draft);
                     break;
                 case SENT:
-                    text = ctx.getString(R.string.sent);
+                    text = context.getString(R.string.sent);
                     break;
                 case UNREAD:
-                    text = ctx.getString(R.string.unread);
+                    text = context.getString(R.string.unread);
                     break;
                 case TRASH:
-                    text = ctx.getString(R.string.trash);
+                    text = context.getString(R.string.trash);
                     break;
                 case BROADCAST:
-                    text = ctx.getString(R.string.broadcasts);
+                    text = context.getString(R.string.broadcasts);
                     break;
                 default:
                     text = c.getString(c.getColumnIndex(LBL_COLUMN_LABEL));
@@ -179,47 +163,7 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
         );
     }
 
-    @Override
-    public Plaintext getMessage(byte[] initialHash) {
-        List<Plaintext> results = find("initial_hash=X'" + Strings.hex(initialHash) + "'");
-        switch (results.size()) {
-            case 0:
-                return null;
-            case 1:
-                return results.get(0);
-            default:
-                throw new RuntimeException("This shouldn't happen, found " + results.size() +
-                        " messages, one or none was expected");
-        }
-    }
-
-    @Override
-    public List<Plaintext> findMessages(Label label) {
-        if (label != null) {
-            return find("id IN (SELECT message_id FROM Message_Label WHERE label_id=" + label
-                    .getId() + ")");
-        } else {
-            return find("id NOT IN (SELECT message_id FROM Message_Label)");
-        }
-    }
-
-    @Override
-    public List<Plaintext> findMessages(Plaintext.Status status, BitmessageAddress recipient) {
-        return find("status='" + status.name() + "' AND recipient='" + recipient.getAddress() +
-                "'");
-    }
-
-    @Override
-    public List<Plaintext> findMessages(BitmessageAddress sender) {
-        return find("sender=" + sender.getAddress());
-    }
-
-    @Override
-    public List<Plaintext> findMessages(Plaintext.Status status) {
-        return find("status='" + status.name() + "'");
-    }
-
-    private List<Plaintext> find(String where) {
+    protected List<Plaintext> find(String where) {
         List<Plaintext> result = new LinkedList<>();
 
         // Define a projection that specifies which columns from the database
@@ -231,9 +175,13 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
                 COLUMN_SENDER,
                 COLUMN_RECIPIENT,
                 COLUMN_DATA,
+                COLUMN_ACK_DATA,
                 COLUMN_SENT,
                 COLUMN_RECEIVED,
-                COLUMN_STATUS
+                COLUMN_STATUS,
+                COLUMN_TTL,
+                COLUMN_RETRIES,
+                COLUMN_NEXT_TRY
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
@@ -254,14 +202,21 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
                 long id = c.getLong(c.getColumnIndex(COLUMN_ID));
                 builder.id(id);
                 builder.IV(new InventoryVector(iv));
-                builder.from(bmc.getAddressRepository().getAddress(c.getString(c.getColumnIndex
+                builder.from(ctx.getAddressRepository().getAddress(c.getString(c.getColumnIndex
                         (COLUMN_SENDER))));
-                builder.to(bmc.getAddressRepository().getAddress(c.getString(c.getColumnIndex
+                builder.to(ctx.getAddressRepository().getAddress(c.getString(c.getColumnIndex
                         (COLUMN_RECIPIENT))));
+                builder.ackData(c.getBlob(c.getColumnIndex(COLUMN_ACK_DATA)));
                 builder.sent(c.getLong(c.getColumnIndex(COLUMN_SENT)));
                 builder.received(c.getLong(c.getColumnIndex(COLUMN_RECEIVED)));
                 builder.status(Plaintext.Status.valueOf(c.getString(c.getColumnIndex
                         (COLUMN_STATUS))));
+                builder.ttl(c.getLong(c.getColumnIndex(COLUMN_TTL)));
+                builder.retries(c.getInt(c.getColumnIndex(COLUMN_RETRIES)));
+                int nextTryColumn = c.getColumnIndex(COLUMN_NEXT_TRY);
+                if (!c.isNull(nextTryColumn)) {
+                    builder.nextTry(c.getLong(nextTryColumn));
+                }
                 builder.labels(findLabels(id));
                 result.add(builder.build());
                 c.moveToNext();
@@ -284,13 +239,13 @@ public class AndroidMessageRepository implements MessageRepository, InternalCont
 
             // save from address if necessary
             if (message.getId() == null) {
-                BitmessageAddress savedAddress = bmc.getAddressRepository().getAddress(message
+                BitmessageAddress savedAddress = ctx.getAddressRepository().getAddress(message
                         .getFrom().getAddress());
                 if (savedAddress == null || savedAddress.getPrivateKey() == null) {
                     if (savedAddress != null && savedAddress.getAlias() != null) {
                         message.getFrom().setAlias(savedAddress.getAlias());
                     }
-                    bmc.getAddressRepository().save(message.getFrom());
+                    ctx.getAddressRepository().save(message.getFrom());
                 }
             }
 

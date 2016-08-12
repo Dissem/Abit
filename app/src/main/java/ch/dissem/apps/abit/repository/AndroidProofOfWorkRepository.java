@@ -35,7 +35,7 @@ import ch.dissem.bitmessage.ports.ProofOfWorkRepository;
 import ch.dissem.bitmessage.utils.Encode;
 import ch.dissem.bitmessage.utils.Strings;
 
-import static ch.dissem.bitmessage.utils.Singleton.security;
+import static ch.dissem.bitmessage.utils.Singleton.cryptography;
 
 /**
  * @author Christian Basler
@@ -49,6 +49,8 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository {
     private static final String COLUMN_VERSION = "version";
     private static final String COLUMN_NONCE_TRIALS_PER_BYTE = "nonce_trials_per_byte";
     private static final String COLUMN_EXTRA_BYTES = "extra_bytes";
+    private static final String COLUMN_EXPIRATION_TIME = "expiration_time";
+    private static final String COLUMN_MESSAGE_ID = "message_id";
 
     private final SqlHelper sql;
 
@@ -114,16 +116,20 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository {
     }
 
     @Override
-    public void putObject(ObjectMessage object, long nonceTrialsPerByte, long extraBytes) {
+    public void putObject(Item item) {
         try {
             SQLiteDatabase db = sql.getWritableDatabase();
             // Create a new map of values, where column names are the keys
             ContentValues values = new ContentValues();
-            values.put(COLUMN_INITIAL_HASH, security().getInitialHash(object));
-            values.put(COLUMN_DATA, Encode.bytes(object));
-            values.put(COLUMN_VERSION, object.getVersion());
-            values.put(COLUMN_NONCE_TRIALS_PER_BYTE, nonceTrialsPerByte);
-            values.put(COLUMN_EXTRA_BYTES, extraBytes);
+            values.put(COLUMN_INITIAL_HASH, cryptography().getInitialHash(item.object));
+            values.put(COLUMN_DATA, Encode.bytes(item.object));
+            values.put(COLUMN_VERSION, item.object.getVersion());
+            values.put(COLUMN_NONCE_TRIALS_PER_BYTE, item.nonceTrialsPerByte);
+            values.put(COLUMN_EXTRA_BYTES, item.extraBytes);
+            if (item.message != null) {
+                values.put(COLUMN_EXPIRATION_TIME, item.expirationTime);
+                values.put(COLUMN_MESSAGE_ID, (Long) item.message.getId());
+            }
 
             db.insertOrThrow(TABLE_NAME, null, values);
         } catch (SQLiteConstraintException e) {
@@ -131,6 +137,11 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository {
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public void putObject(ObjectMessage object, long nonceTrialsPerByte, long extraBytes) {
+        putObject(new Item(object, nonceTrialsPerByte, extraBytes));
     }
 
     @Override

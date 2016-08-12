@@ -36,7 +36,7 @@ import ch.dissem.bitmessage.extensions.pow.ProofOfWorkRequest;
 import ch.dissem.bitmessage.ports.ProofOfWorkEngine;
 
 import static ch.dissem.bitmessage.extensions.pow.ProofOfWorkRequest.Request.CALCULATE;
-import static ch.dissem.bitmessage.utils.Singleton.security;
+import static ch.dissem.bitmessage.utils.Singleton.cryptography;
 
 /**
  * @author Christian Basler
@@ -78,7 +78,7 @@ public class ServerPowEngine implements ProofOfWorkEngine, InternalContext
                             (request);
                     cryptoMsg.signAndEncrypt(
                             identity,
-                            security().createPublicKey(identity.getPublicDecryptionKey())
+                            cryptography().createPublicKey(identity.getPublicDecryptionKey())
                     );
                     context.getNetworkHandler().send(
                             Preferences.getTrustedNode(ctx), Preferences.getTrustedNodePort(ctx),
