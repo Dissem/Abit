@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import ch.dissem.bitmessage.InternalContext;
 import ch.dissem.bitmessage.entity.ObjectMessage;
 import ch.dissem.bitmessage.factory.Factory;
 import ch.dissem.bitmessage.ports.ProofOfWorkRepository;
@@ -40,7 +41,8 @@ import static ch.dissem.bitmessage.utils.Singleton.cryptography;
 /**
  * @author Christian Basler
  */
-public class AndroidProofOfWorkRepository implements ProofOfWorkRepository {
+public class AndroidProofOfWorkRepository implements ProofOfWorkRepository, InternalContext
+        .ContextHolder {
     private static final Logger LOG = LoggerFactory.getLogger(AndroidProofOfWorkRepository.class);
 
     private static final String TABLE_NAME = "POW";
@@ -53,9 +55,15 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository {
     private static final String COLUMN_MESSAGE_ID = "message_id";
 
     private final SqlHelper sql;
+    private InternalContext bmc;
 
     public AndroidProofOfWorkRepository(SqlHelper sql) {
         this.sql = sql;
+    }
+
+    @Override
+    public void setContext(InternalContext internalContext) {
+        this.bmc = internalContext;
     }
 
     @Override
@@ -66,7 +74,9 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository {
                 COLUMN_DATA,
                 COLUMN_VERSION,
                 COLUMN_NONCE_TRIALS_PER_BYTE,
-                COLUMN_EXTRA_BYTES
+                COLUMN_EXTRA_BYTES,
+                COLUMN_EXPIRATION_TIME,
+                COLUMN_MESSAGE_ID
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
@@ -79,12 +89,24 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository {
             if (!c.isAfterLast()) {
                 int version = c.getInt(c.getColumnIndex(COLUMN_VERSION));
                 byte[] blob = c.getBlob(c.getColumnIndex(COLUMN_DATA));
-                return new Item(
-                        Factory.getObjectMessage(version, new ByteArrayInputStream(blob), blob
-                                .length),
-                        c.getLong(c.getColumnIndex(COLUMN_NONCE_TRIALS_PER_BYTE)),
-                        c.getLong(c.getColumnIndex(COLUMN_EXTRA_BYTES))
-                );
+                if (c.isNull(c.getColumnIndex(COLUMN_MESSAGE_ID))) {
+                    return new Item(
+                            Factory.getObjectMessage(version, new ByteArrayInputStream(blob), blob
+                                    .length),
+                            c.getLong(c.getColumnIndex(COLUMN_NONCE_TRIALS_PER_BYTE)),
+                            c.getLong(c.getColumnIndex(COLUMN_EXTRA_BYTES))
+                    );
+                } else {
+                    return new Item(
+                            Factory.getObjectMessage(version, new ByteArrayInputStream(blob), blob
+                                    .length),
+                            c.getLong(c.getColumnIndex(COLUMN_NONCE_TRIALS_PER_BYTE)),
+                            c.getLong(c.getColumnIndex(COLUMN_EXTRA_BYTES)),
+                            c.getLong(c.getColumnIndex(COLUMN_EXPIRATION_TIME)),
+                            bmc.getMessageRepository().getMessage(
+                                    c.getLong(c.getColumnIndex(COLUMN_MESSAGE_ID)))
+                    );
+                }
             }
         }
         throw new RuntimeException("Object requested that we don't have. Initial hash: " +
