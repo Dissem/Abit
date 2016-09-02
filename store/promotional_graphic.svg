@@ -10,14 +10,14 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="1024"
-   height="500"
-   viewBox="0 0 1024 500.00001"
+   width="180"
+   height="120"
+   viewBox="0 0 180 120"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="function_graphic.svg"
-   inkscape:export-filename="C:\Users\chrig\Projects\Abit\store\function_graphic.png"
+   sodipodi:docname="promotional_graphic.svg"
+   inkscape:export-filename="C:\Users\chrig\Projects\Abit\store\promotional_graphic.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -253,7 +253,8 @@
        y1="551.84436"
        x2="477.62885"
        y2="1052.88"
-       gradientUnits="userSpaceOnUse" />
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.17578125,0,0,0.24,-0.50223215,799.79526)" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -262,9 +263,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.49497475"
-     inkscape:cx="504.44126"
-     inkscape:cy="273.50135"
+     inkscape:zoom="2.8"
+     inkscape:cx="71.383061"
+     inkscape:cy="65.949753"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -273,7 +274,8 @@
      inkscape:window-height="657"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
-     inkscape:window-maximized="1" />
+     inkscape:window-maximized="1"
+     showguides="false" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -290,22 +292,23 @@
      inkscape:label="Ebene 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-552.36216)">
+     transform="translate(0,-932.36216)">
     <rect
-       style="opacity:1;fill:url(#linearGradient4302);fill-opacity:1.0;stroke:none;stroke-width:4;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="opacity:1;fill:url(#linearGradient4302);fill-opacity:1;stroke:none;stroke-width:4;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect3336"
-       width="1024"
-       height="500"
-       x="2.8571429"
-       y="552.36218" />
+       width="180"
+       height="120"
+       x="4.83129e-009"
+       y="932.36218" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#607d8b;stroke-width:3.20000005;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;filter:url(#filter4346)"
        d="m 237.14286,970.07645 c 21.22559,1.59192 45.12779,12.2133 65.65697,30.54595 56.85434,50.7713 163.8859,-36.32334 317.58615,16.9642 50.86665,17.6354 101.47749,18.6011 139.26053,12.619 122.36869,-19.3742 50.78221,-129.85677 -49.14945,-119.58354 -180.48828,18.55465 -81.95538,130.45724 145.95862,63.71699 171.37962,-50.18523 -9.54808,-235.20057 49.25861,-189.97689"
        id="path4294"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="csssssc" />
+       sodipodi:nodetypes="csssssc"
+       transform="matrix(0.17578125,0,0,0.17578125,-0.50223215,854.72639)" />
     <g
-       transform="matrix(1.1248833,0,0,1.1248833,668.4078,-306.70747)"
+       transform="matrix(0.19773339,0,0,0.19773339,116.99133,788.81297)"
        id="g4508"
        inkscape:export-filename="C:\Users\chrig\Abit2.png"
        inkscape:export-xdpi="602.35297"
@@ -338,14 +341,15 @@
        x="64.155144"
        y="851.16418"
        id="text4230"
-       sodipodi:linespacing="125%"><tspan
+       sodipodi:linespacing="125%"
+       transform="matrix(0.17578125,0,0,0.17578125,-0.50223215,842.72639)"><tspan
          sodipodi:role="line"
          id="tspan4232"
          x="64.155144"
          y="851.16418">Abit</tspan></text>
     <g
        id="g4254"
-       transform="matrix(0.98088654,0.19458057,-0.19458057,0.98088654,-982.26237,72.359809)">
+       transform="matrix(0.17242146,0.03420362,-0.03420362,0.17242146,-173.16554,867.44589)">
       <ellipse
          ry="50"
          rx="20"

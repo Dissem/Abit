@@ -10,14 +10,14 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="1024"
-   height="500"
-   viewBox="0 0 1024 500.00001"
+   width="1280"
+   height="720"
+   viewBox="0 0 1280 720.00001"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="function_graphic.svg"
-   inkscape:export-filename="C:\Users\chrig\Projects\Abit\store\function_graphic.png"
+   sodipodi:docname="tv_banner.svg"
+   inkscape:export-filename="C:\Users\chrig\Projects\Abit\store\tv_banner.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -253,7 +253,8 @@
        y1="551.84436"
        x2="477.62885"
        y2="1052.88"
-       gradientUnits="userSpaceOnUse" />
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.25,0,0,1.44,-3.5714286,-463.03937)" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -262,9 +263,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.49497475"
-     inkscape:cx="504.44126"
-     inkscape:cy="273.50135"
+     inkscape:zoom="0.24748738"
+     inkscape:cx="285.45006"
+     inkscape:cy="354.31355"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -282,7 +283,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -290,22 +291,23 @@
      inkscape:label="Ebene 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-552.36216)">
+     transform="translate(0,-332.36216)">
     <rect
-       style="opacity:1;fill:url(#linearGradient4302);fill-opacity:1.0;stroke:none;stroke-width:4;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="opacity:1;fill:url(#linearGradient4302);fill-opacity:1;stroke:none;stroke-width:4;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect3336"
-       width="1024"
-       height="500"
-       x="2.8571429"
-       y="552.36218" />
+       width="1280"
+       height="720"
+       x="3.1578065e-008"
+       y="332.36215" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#607d8b;stroke-width:3.20000005;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;filter:url(#filter4346)"
-       d="m 237.14286,970.07645 c 21.22559,1.59192 45.12779,12.2133 65.65697,30.54595 56.85434,50.7713 163.8859,-36.32334 317.58615,16.9642 50.86665,17.6354 101.47749,18.6011 139.26053,12.619 122.36869,-19.3742 50.78221,-129.85677 -49.14945,-119.58354 -180.48828,18.55465 -81.95538,130.45724 145.95862,63.71699 171.37962,-50.18523 -9.54808,-235.20057 49.25861,-189.97689"
+       d="m 234.28572,856.68845 c 21.22559,1.59192 45.12779,12.2133 65.65697,30.54595 56.85434,50.7713 163.8859,-36.32334 317.58615,16.9642 50.86665,17.6354 101.47749,18.6011 139.26053,12.619 122.36869,-19.3742 50.78221,-129.85677 -49.14945,-119.58354 -180.48828,18.55465 -81.95538,130.45724 145.95862,63.71699 171.37966,-50.18523 -9.54808,-235.20057 49.25861,-189.97689"
        id="path4294"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="csssssc" />
+       sodipodi:nodetypes="csssssc"
+       transform="matrix(1.25,0,0,1.25,0,-198.43754)" />
     <g
-       transform="matrix(1.1248833,0,0,1.1248833,668.4078,-306.70747)"
+       transform="matrix(1.4061041,0,0,1.4061041,831.93832,-725.55688)"
        id="g4508"
        inkscape:export-filename="C:\Users\chrig\Abit2.png"
        inkscape:export-xdpi="602.35297"
@@ -335,17 +337,18 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:298.45654297px;line-height:125%;font-family:Roboto;-inkscape-font-specification:Roboto;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#607d8b;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;filter:url(#filter4346)"
-       x="64.155144"
-       y="851.16418"
+       x="61.298"
+       y="737.77618"
        id="text4230"
-       sodipodi:linespacing="125%"><tspan
+       sodipodi:linespacing="125%"
+       transform="matrix(1.25,0,0,1.25,0,-200.43754)"><tspan
          sodipodi:role="line"
          id="tspan4232"
-         x="64.155144"
-         y="851.16418">Abit</tspan></text>
+         x="61.298"
+         y="737.77618">Abit</tspan></text>
     <g
        id="g4254"
-       transform="matrix(0.98088654,0.19458057,-0.19458057,0.98088654,-982.26237,72.359809)">
+       transform="matrix(1.2261082,0.24322571,-0.24322571,1.2261082,-1231.3994,-249.72278)">
       <ellipse
          ry="50"
          rx="20"
