@@ -14,6 +14,8 @@
     <string name="manage_identity">Manage Identity</string>
     <string name="add_identity">Add Identity</string>
     <string name="add_identity_summary">Create new identity</string>
+    <string name="add_chan">Add Chan</string>
+    <string name="add_chan_summary">Add or create a chan</string>
     <string name="title_activity_open_bitmessage_link">Import Contact</string>
 
     <string name="action_settings">Settings</string>
@@ -78,4 +80,8 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="export">Export</string>
     <string name="confirm_export">Do you really want to export your identity? The export will contain the unencrypted private keys.</string>
     <string name="compose_message">Compose</string>
+    <string name="passphrase">passphrase</string>
+    <string name="toast_long_running_operation">This may take a few minutes</string>
+    <string name="toast_identity_created">Identity created</string>
+    <string name="toast_chan_created">Chan created</string>
 </resources>

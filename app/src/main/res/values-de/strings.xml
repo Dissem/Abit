@@ -13,6 +13,8 @@
     <string name="action_settings">Einstellungen</string>
     <string name="add_identity">Identität hinzufügen</string>
     <string name="add_identity_summary">Eine neue Identität erstellen</string>
+    <string name="add_chan">Chan hinzufügen</string>
+    <string name="add_chan_summary">Einen Chan hinzufügen oder erstellen</string>
     <string name="broadcast">Broadcast</string>
     <string name="cancel">Abbrechen</string>
     <string name="do_import">Importieren</string>
@@ -60,10 +62,10 @@
     <string name="pubkey_available">Öffentlicher Schlüssel verfügbar</string>
     <string name="pubkey_not_available">Öffentlicher Schlüssel noch nicht verfügbar</string>
     <string name="alt_qr_code">QR-Code</string>
-    <string name="add_identity_warning">Mehrere Identitäten zu haben bedeutet einen höheren Resourcenverbrauch. Sind Sie sicher?</string>
+    <string name="add_identity_warning">Mehrere Identitäten zu haben bedeutet einen höheren Resourcenverbrauch. Bist Du sicher?</string>
     <string name="share">Teilen</string>
-    <string name="delete_contact_warning">Sind Sie sicher dass dieser Kontakt gelöscht werden soll?</string>
-    <string name="delete_identity_warning">Sind Sie sicher dass diese Identität gelöscht werden soll? Sie werden keine Nachrichten mehr empfangen können welche an diese Adresse gesendet werden, und es est nicht möglich diese Aktion rückgängig zu machen.</string>
+    <string name="delete_contact_warning">Bist Du sicher dass dieser Kontakt gelöscht werden soll?</string>
+    <string name="delete_identity_warning">Bist Du sicher dass diese Identität gelöscht werden soll? Nachrichten, welche an diese Adresse gesendet werden, können nicht mehr empfangen werden und es est nicht möglich diese Aktion rückgängig zu machen.</string>
     <string name="create_contact">Kontakt erfassen</string>
     <string name="scan_qr_code">QR-Code scannen</string>
     <string name="full_node_description">Solange kein aktiver Knoten gestartet ist, werden keine Meldungen empfangen oder gesendet. Dies braucht jedoch viele Resourcen und Daten.
@@ -75,4 +77,8 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="export">Exportieren</string>
     <string name="confirm_export">Identität wirklich exportieren? Der Export wird die privaten Schlüssel unverschlüsselt enthalten.</string>
     <string name="compose_message">Schreiben</string>
+    <string name="passphrase">Passphrase</string>
+    <string name="toast_chan_created">Chan erstellt</string>
+    <string name="toast_long_running_operation">Dies kann einige Minuten dauern</string>
+    <string name="toast_identity_created">Identität erstellt</string>
 </resources>

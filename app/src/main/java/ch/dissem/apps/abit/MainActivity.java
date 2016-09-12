@@ -16,6 +16,7 @@
 
 package ch.dissem.apps.abit;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Point;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -33,6 +35,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
@@ -72,6 +76,7 @@ import ch.dissem.apps.abit.util.Preferences;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
+import ch.dissem.bitmessage.entity.payload.Pubkey;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 
 import static ch.dissem.apps.abit.service.BitmessageService.isRunning;
@@ -102,6 +107,7 @@ public class MainActivity extends AppCompatActivity
     private static final Logger LOG = LoggerFactory.getLogger(MainActivity.class);
     private static final int ADD_IDENTITY = 1;
     private static final int MANAGE_IDENTITY = 2;
+    private static final int ADD_CHAN = 3;
 
     public static WeakReference<MainActivity> instance;
 
@@ -230,36 +236,45 @@ public class MainActivity extends AppCompatActivity
         for (BitmessageAddress identity : bmc.addresses().getIdentities()) {
             LOG.info("Adding identity " + identity.getAddress());
             profiles.add(new ProfileDrawerItem()
-                            .withIcon(new Identicon(identity))
-                            .withName(identity.toString())
-                            .withNameShown(true)
-                            .withEmail(identity.getAddress())
-                            .withTag(identity)
+                    .withIcon(new Identicon(identity))
+                    .withName(identity.toString())
+                    .withNameShown(true)
+                    .withEmail(identity.getAddress())
+                    .withTag(identity)
             );
         }
         if (profiles.isEmpty()) {
             // Create an initial identity
             BitmessageAddress identity = Singleton.getIdentity(this);
             profiles.add(new ProfileDrawerItem()
-                            .withIcon(new Identicon(identity))
-                            .withName(identity.toString())
-                            .withEmail(identity.getAddress())
-                            .withTag(identity)
+                    .withIcon(new Identicon(identity))
+                    .withName(identity.toString())
+                    .withEmail(identity.getAddress())
+                    .withTag(identity)
             );
         }
         profiles.add(new ProfileSettingDrawerItem()
-                        .withName("Add Identity")
-                        .withDescription("Create new identity")
-                        .withIcon(new IconicsDrawable(this, GoogleMaterial.Icon.gmd_add)
-                                .actionBar()
-                                .paddingDp(5)
-                                .colorRes(R.color.icons))
-                        .withIdentifier(ADD_IDENTITY)
+                .withName(getString(R.string.add_identity))
+                .withDescription(getString(R.string.add_identity_summary))
+                .withIcon(new IconicsDrawable(this, GoogleMaterial.Icon.gmd_add)
+                        .actionBar()
+                        .paddingDp(5)
+                        .colorRes(R.color.icons))
+                .withIdentifier(ADD_IDENTITY)
         );
         profiles.add(new ProfileSettingDrawerItem()
-                        .withName(getString(R.string.manage_identity))
-                        .withIcon(GoogleMaterial.Icon.gmd_settings)
-                        .withIdentifier(MANAGE_IDENTITY)
+                .withName(getString(R.string.add_chan))
+                .withDescription(getString(R.string.add_chan_summary))
+                .withIcon(new IconicsDrawable(this, GoogleMaterial.Icon.gmd_add)
+                        .actionBar()
+                        .paddingDp(5)
+                        .colorRes(R.color.icons))
+                .withIdentifier(ADD_CHAN)
+        );
+        profiles.add(new ProfileSettingDrawerItem()
+                .withName(getString(R.string.manage_identity))
+                .withIcon(GoogleMaterial.Icon.gmd_settings)
+                .withIdentifier(MANAGE_IDENTITY)
         );
         // Create the AccountHeader
         accountHeader = new AccountHeaderBuilder()
@@ -272,35 +287,10 @@ public class MainActivity extends AppCompatActivity
                             currentProfile) {
                         switch (profile.getIdentifier()) {
                             case ADD_IDENTITY:
-                                new AlertDialog.Builder(MainActivity.this)
-                                        .setMessage(R.string.add_identity_warning)
-                                        .setPositiveButton(android.R.string.yes, new
-                                                DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog,
-                                                                        int which) {
-                                                        BitmessageAddress identity = bmc
-                                                                .createIdentity(false);
-                                                        IProfile newProfile = new
-                                                                ProfileDrawerItem()
-                                                                .withName(identity.toString())
-                                                                .withEmail(identity.getAddress())
-                                                                .withTag(identity);
-                                                        if (accountHeader.getProfiles() != null) {
-                                                            // we know that there are 2 setting
-                                                            // elements.
-                                                            // Set the new profile above them ;)
-                                                            accountHeader.addProfile(
-                                                                    newProfile, accountHeader
-                                                                            .getProfiles().size()
-                                                                            - 2);
-                                                        } else {
-                                                            accountHeader.addProfiles(newProfile);
-                                                        }
-                                                    }
-                                                })
-                                        .setNegativeButton(android.R.string.no, null)
-                                        .show();
+                                addIdentityDialog();
+                                break;
+                            case ADD_CHAN:
+                                addChanDialog();
                                 break;
                             case MANAGE_IDENTITY:
                                 Intent show = new Intent(MainActivity.this,
@@ -359,9 +349,9 @@ public class MainActivity extends AppCompatActivity
             drawerItems.add(item);
         }
         drawerItems.add(new PrimaryDrawerItem()
-                        .withName(R.string.archive)
-                        .withTag(null)
-                        .withIcon(CommunityMaterial.Icon.cmd_archive)
+                .withName(R.string.archive)
+                .withTag(null)
+                .withIcon(CommunityMaterial.Icon.cmd_archive)
         );
         drawerItems.add(new DividerDrawerItem());
         drawerItems.add(new PrimaryDrawerItem()
@@ -434,11 +424,97 @@ public class MainActivity extends AppCompatActivity
                 .build();
     }
 
+    private void addIdentityDialog() {
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage(R.string.add_identity_warning)
+                .setPositiveButton(android.R.string.yes, new
+                        DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog,
+                                                int which) {
+                                Toast.makeText(MainActivity.this,
+                                        R.string.toast_long_running_operation,
+                                        Toast.LENGTH_SHORT).show();
+                                new AsyncTask<Void, Void, BitmessageAddress>() {
+                                    @Override
+                                    protected BitmessageAddress doInBackground(Void... args) {
+                                        return bmc.createIdentity(false, Pubkey.Feature.DOES_ACK);
+                                    }
+
+                                    @Override
+                                    protected void onPostExecute(BitmessageAddress chan) {
+                                        Toast.makeText(MainActivity.this,
+                                                R.string.toast_identity_created,
+                                                Toast.LENGTH_SHORT).show();
+                                        addIdentityEntry(chan);
+                                    }
+                                }.execute();
+                            }
+                        })
+                .setNegativeButton(android.R.string.no, null)
+                .show();
+    }
+
+    private void addChanDialog() {
+        @SuppressLint("InflateParams")
+        final View dialogView = getLayoutInflater().inflate(R.layout.dialog_input_passphrase, null);
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage(R.string.add_chan)
+                .setView(dialogView)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        TextView passphrase = (TextView) dialogView.findViewById(R.id.passphrase);
+                        Toast.makeText(MainActivity.this, R.string.toast_long_running_operation,
+                                Toast.LENGTH_SHORT).show();
+                        new AsyncTask<String, Void, BitmessageAddress>() {
+                            @Override
+                            protected BitmessageAddress doInBackground(String... args) {
+                                String pass = args[0];
+                                BitmessageAddress chan = bmc.createChan(pass);
+                                chan.setAlias(pass);
+                                bmc.addresses().save(chan);
+                                return chan;
+                            }
+
+                            @Override
+                            protected void onPostExecute(BitmessageAddress chan) {
+                                Toast.makeText(MainActivity.this,
+                                        R.string.toast_chan_created,
+                                        Toast.LENGTH_SHORT).show();
+                                addIdentityEntry(chan);
+                            }
+                        }.execute(passphrase.getText().toString());
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
     @Override
     protected void onResume() {
         instance = new WeakReference<>(this);
         updateUnread();
         super.onResume();
+    }
+
+    private void addIdentityEntry(BitmessageAddress identity) {
+        IProfile newProfile = new
+                ProfileDrawerItem()
+                .withName(identity.toString())
+                .withEmail(identity.getAddress())
+                .withTag(identity);
+        if (accountHeader.getProfiles() != null) {
+            // we know that there are 3 setting
+            // elements.
+            // Set the new profile above them ;)
+            accountHeader.addProfile(
+                    newProfile, accountHeader
+                            .getProfiles().size()
+                            - 3);
+        } else {
+            accountHeader.addProfiles(newProfile);
+        }
     }
 
     @Override
