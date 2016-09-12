@@ -44,6 +44,7 @@ import ch.dissem.bitmessage.entity.valueobject.Label;
 import ch.dissem.bitmessage.ports.MessageRepository;
 
 import static android.text.util.Linkify.WEB_URLS;
+import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_CONTENT;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_IDENTITY;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_RECIPIENT;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_SUBJECT;
@@ -100,7 +101,7 @@ public class MessageDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.subject)).setText(item.getSubject());
             BitmessageAddress sender = item.getFrom();
             ((ImageView) rootView.findViewById(R.id.avatar)).setImageDrawable(new Identicon
-                    (sender));
+                (sender));
             ((TextView) rootView.findViewById(R.id.sender)).setText(sender.toString());
             if (item.getTo() != null) {
                 ((TextView) rootView.findViewById(R.id.recipient)).setText(item.getTo().toString());
@@ -112,11 +113,11 @@ public class MessageDetailFragment extends Fragment {
 
             Linkify.addLinks(messageBody, WEB_URLS);
             Linkify.addLinks(messageBody, BITMESSAGE_ADDRESS_PATTERN, BITMESSAGE_URL_SCHEMA, null,
-                    new TransformFilter() {
-                        public final String transformUrl(final Matcher match, String url) {
-                            return match.group();
-                        }
-                    });
+                new TransformFilter() {
+                    public final String transformUrl(final Matcher match, String url) {
+                        return match.group();
+                    }
+                });
 
             messageBody.setLinksClickable(true);
             messageBody.setTextIsSelectable(true);
@@ -146,7 +147,7 @@ public class MessageDetailFragment extends Fragment {
         Drawables.addIcon(getActivity(), menu, R.id.reply, GoogleMaterial.Icon.gmd_reply);
         Drawables.addIcon(getActivity(), menu, R.id.delete, GoogleMaterial.Icon.gmd_delete);
         Drawables.addIcon(getActivity(), menu, R.id.mark_unread, GoogleMaterial.Icon
-                .gmd_markunread);
+            .gmd_markunread);
         Drawables.addIcon(getActivity(), menu, R.id.archive, GoogleMaterial.Icon.gmd_archive);
 
         super.onCreateOptionsMenu(menu, inflater);
@@ -158,17 +159,20 @@ public class MessageDetailFragment extends Fragment {
         switch (menuItem.getItemId()) {
             case R.id.reply:
                 Intent replyIntent = new Intent(getActivity().getApplicationContext(),
-                        ComposeMessageActivity.class);
+                    ComposeMessageActivity.class);
                 replyIntent.putExtra(EXTRA_RECIPIENT, item.getFrom());
                 replyIntent.putExtra(EXTRA_IDENTITY, item.getTo());
                 String prefix;
                 if (item.getSubject().length() >= 3 && item.getSubject().substring(0, 3)
-                        .equalsIgnoreCase("RE:")) {
+                    .equalsIgnoreCase("RE:")) {
                     prefix = "";
                 } else {
                     prefix = "RE: ";
                 }
                 replyIntent.putExtra(EXTRA_SUBJECT, prefix + item.getSubject());
+                replyIntent.putExtra(EXTRA_CONTENT,
+                    "\n\n------------------------------------------------------\n"
+                        + item.getText());
                 startActivity(replyIntent);
                 return true;
             case R.id.delete:

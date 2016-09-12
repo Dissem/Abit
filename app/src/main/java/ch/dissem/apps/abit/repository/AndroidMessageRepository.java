@@ -41,6 +41,8 @@ import ch.dissem.bitmessage.ports.AbstractMessageRepository;
 import ch.dissem.bitmessage.ports.MessageRepository;
 import ch.dissem.bitmessage.utils.Encode;
 
+import static java.lang.String.valueOf;
+
 /**
  * {@link MessageRepository} implementation using the Android SQL API.
  */
@@ -87,23 +89,21 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         String[] projection = {
-                LBL_COLUMN_ID,
-                LBL_COLUMN_LABEL,
-                LBL_COLUMN_TYPE,
-                LBL_COLUMN_COLOR
+            LBL_COLUMN_ID,
+            LBL_COLUMN_LABEL,
+            LBL_COLUMN_TYPE,
+            LBL_COLUMN_COLOR
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
         try (Cursor c = db.query(
-                LBL_TABLE_NAME, projection,
-                where,
-                null, null, null,
-                LBL_COLUMN_ORDER
+            LBL_TABLE_NAME, projection,
+            where,
+            null, null, null,
+            LBL_COLUMN_ORDER
         )) {
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
+            while (c.moveToNext()) {
                 result.add(getLabel(c));
-                c.moveToNext();
             }
         }
         return result;
@@ -140,26 +140,34 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
             }
         }
         Label label = new Label(
-                text,
-                type,
-                c.getInt(c.getColumnIndex(LBL_COLUMN_COLOR)));
+            text,
+            type,
+            c.getInt(c.getColumnIndex(LBL_COLUMN_COLOR)));
         label.setId(c.getLong(c.getColumnIndex(LBL_COLUMN_ID)));
         return label;
     }
 
     @Override
     public int countUnread(Label label) {
+        String[] args;
         String where;
         if (label != null) {
-            where = "id IN (SELECT message_id FROM Message_Label WHERE label_id=" + label.getId()
-                    + ") AND ";
+            where = "id IN (SELECT message_id FROM Message_Label WHERE label_id=?) AND ";
+            args = new String[]{
+                label.getId().toString(),
+                Label.Type.UNREAD.name()
+            };
         } else {
             where = "";
+            args = new String[]{
+                Label.Type.UNREAD.name()
+            };
         }
         SQLiteDatabase db = sql.getReadableDatabase();
         return (int) DatabaseUtils.queryNumEntries(db, TABLE_NAME,
-                where + "id IN (SELECT message_id FROM Message_Label WHERE label_id IN (" +
-                        "SELECT id FROM Label WHERE type = '" + Label.Type.UNREAD.name() + "'))"
+            where + "id IN (SELECT message_id FROM Message_Label WHERE label_id IN (" +
+                "SELECT id FROM Label WHERE type=?))",
+            args
         );
     }
 
@@ -169,48 +177,47 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         String[] projection = {
-                COLUMN_ID,
-                COLUMN_IV,
-                COLUMN_TYPE,
-                COLUMN_SENDER,
-                COLUMN_RECIPIENT,
-                COLUMN_DATA,
-                COLUMN_ACK_DATA,
-                COLUMN_SENT,
-                COLUMN_RECEIVED,
-                COLUMN_STATUS,
-                COLUMN_TTL,
-                COLUMN_RETRIES,
-                COLUMN_NEXT_TRY
+            COLUMN_ID,
+            COLUMN_IV,
+            COLUMN_TYPE,
+            COLUMN_SENDER,
+            COLUMN_RECIPIENT,
+            COLUMN_DATA,
+            COLUMN_ACK_DATA,
+            COLUMN_SENT,
+            COLUMN_RECEIVED,
+            COLUMN_STATUS,
+            COLUMN_TTL,
+            COLUMN_RETRIES,
+            COLUMN_NEXT_TRY
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
         try (Cursor c = db.query(
-                TABLE_NAME, projection,
-                where,
-                null, null, null,
-                COLUMN_RECEIVED + " DESC"
+            TABLE_NAME, projection,
+            where,
+            null, null, null,
+            COLUMN_RECEIVED + " DESC"
         )) {
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
+            while (c.moveToNext()) {
                 byte[] iv = c.getBlob(c.getColumnIndex(COLUMN_IV));
                 byte[] data = c.getBlob(c.getColumnIndex(COLUMN_DATA));
                 Plaintext.Type type = Plaintext.Type.valueOf(c.getString(c.getColumnIndex
-                        (COLUMN_TYPE)));
+                    (COLUMN_TYPE)));
                 Plaintext.Builder builder = Plaintext.readWithoutSignature(type, new
-                        ByteArrayInputStream(data));
+                    ByteArrayInputStream(data));
                 long id = c.getLong(c.getColumnIndex(COLUMN_ID));
                 builder.id(id);
                 builder.IV(new InventoryVector(iv));
                 builder.from(ctx.getAddressRepository().getAddress(c.getString(c.getColumnIndex
-                        (COLUMN_SENDER))));
+                    (COLUMN_SENDER))));
                 builder.to(ctx.getAddressRepository().getAddress(c.getString(c.getColumnIndex
-                        (COLUMN_RECIPIENT))));
+                    (COLUMN_RECIPIENT))));
                 builder.ackData(c.getBlob(c.getColumnIndex(COLUMN_ACK_DATA)));
                 builder.sent(c.getLong(c.getColumnIndex(COLUMN_SENT)));
                 builder.received(c.getLong(c.getColumnIndex(COLUMN_RECEIVED)));
                 builder.status(Plaintext.Status.valueOf(c.getString(c.getColumnIndex
-                        (COLUMN_STATUS))));
+                    (COLUMN_STATUS))));
                 builder.ttl(c.getLong(c.getColumnIndex(COLUMN_TTL)));
                 builder.retries(c.getInt(c.getColumnIndex(COLUMN_RETRIES)));
                 int nextTryColumn = c.getColumnIndex(COLUMN_NEXT_TRY);
@@ -219,7 +226,6 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
                 }
                 builder.labels(findLabels(id));
                 result.add(builder.build());
-                c.moveToNext();
             }
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
@@ -240,7 +246,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
             // save from address if necessary
             if (message.getId() == null) {
                 BitmessageAddress savedAddress = ctx.getAddressRepository().getAddress(message
-                        .getFrom().getAddress());
+                    .getFrom().getAddress());
                 if (savedAddress == null || savedAddress.getPrivateKey() == null) {
                     if (savedAddress != null && savedAddress.getAlias() != null) {
                         message.getFrom().setAlias(savedAddress.getAlias());
@@ -257,7 +263,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
             }
 
             // remove existing labels
-            db.delete(JOIN_TABLE_NAME, "message_id=" + message.getId(), null);
+            db.delete(JOIN_TABLE_NAME, "message_id=?", new String[]{valueOf(message.getId())});
 
             // save labels
             ContentValues values = new ContentValues();
@@ -279,15 +285,19 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
     private void insert(SQLiteDatabase db, Plaintext message) throws IOException {
         ContentValues values = new ContentValues();
         values.put(COLUMN_IV, message.getInventoryVector() == null ? null : message
-                .getInventoryVector().getHash());
+            .getInventoryVector().getHash());
         values.put(COLUMN_TYPE, message.getType().name());
         values.put(COLUMN_SENDER, message.getFrom().getAddress());
         values.put(COLUMN_RECIPIENT, message.getTo() == null ? null : message.getTo().getAddress());
         values.put(COLUMN_DATA, Encode.bytes(message));
+        values.put(COLUMN_ACK_DATA, message.getAckData());
         values.put(COLUMN_SENT, message.getSent());
         values.put(COLUMN_RECEIVED, message.getReceived());
         values.put(COLUMN_STATUS, message.getStatus() == null ? null : message.getStatus().name());
         values.put(COLUMN_INITIAL_HASH, message.getInitialHash());
+        values.put(COLUMN_TTL, message.getTTL());
+        values.put(COLUMN_RETRIES, message.getRetries());
+        values.put(COLUMN_NEXT_TRY, message.getNextTry());
         long id = db.insertOrThrow(TABLE_NAME, null, values);
         message.setId(id);
     }
@@ -295,15 +305,19 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
     private void update(SQLiteDatabase db, Plaintext message) throws IOException {
         ContentValues values = new ContentValues();
         values.put(COLUMN_IV, message.getInventoryVector() == null ? null : message
-                .getInventoryVector().getHash());
+            .getInventoryVector().getHash());
         values.put(COLUMN_TYPE, message.getType().name());
         values.put(COLUMN_SENDER, message.getFrom().getAddress());
         values.put(COLUMN_RECIPIENT, message.getTo() == null ? null : message.getTo().getAddress());
         values.put(COLUMN_DATA, Encode.bytes(message));
+        values.put(COLUMN_ACK_DATA, message.getAckData());
         values.put(COLUMN_SENT, message.getSent());
         values.put(COLUMN_RECEIVED, message.getReceived());
         values.put(COLUMN_STATUS, message.getStatus() == null ? null : message.getStatus().name());
         values.put(COLUMN_INITIAL_HASH, message.getInitialHash());
+        values.put(COLUMN_TTL, message.getTTL());
+        values.put(COLUMN_RETRIES, message.getRetries());
+        values.put(COLUMN_NEXT_TRY, message.getNextTry());
         db.update(TABLE_NAME, values, "id = " + message.getId(), null);
     }
 

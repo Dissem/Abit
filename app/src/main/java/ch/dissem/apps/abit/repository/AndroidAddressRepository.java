@@ -119,37 +119,36 @@ public class AndroidAddressRepository implements AddressRepository {
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         String[] projection = {
-                COLUMN_ADDRESS,
-                COLUMN_ALIAS,
-                COLUMN_PUBLIC_KEY,
-                COLUMN_PRIVATE_KEY,
-                COLUMN_SUBSCRIBED,
-                COLUMN_CHAN
+            COLUMN_ADDRESS,
+            COLUMN_ALIAS,
+            COLUMN_PUBLIC_KEY,
+            COLUMN_PRIVATE_KEY,
+            COLUMN_SUBSCRIBED,
+            COLUMN_CHAN
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
         try (Cursor c = db.query(
-                TABLE_NAME, projection,
-                where,
-                null, null, null, null
+            TABLE_NAME, projection,
+            where,
+            null, null, null, null
         )) {
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
+            while (c.moveToNext()) {
                 BitmessageAddress address;
 
                 byte[] privateKeyBytes = c.getBlob(c.getColumnIndex(COLUMN_PRIVATE_KEY));
                 if (privateKeyBytes != null) {
                     PrivateKey privateKey = PrivateKey.read(new ByteArrayInputStream
-                            (privateKeyBytes));
+                        (privateKeyBytes));
                     address = new BitmessageAddress(privateKey);
                 } else {
                     address = new BitmessageAddress(c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
                     byte[] publicKeyBytes = c.getBlob(c.getColumnIndex(COLUMN_PUBLIC_KEY));
                     if (publicKeyBytes != null) {
                         Pubkey pubkey = Factory.readPubkey(address.getVersion(), address
-                                        .getStream(),
-                                new ByteArrayInputStream(publicKeyBytes), publicKeyBytes.length,
-                                false);
+                                .getStream(),
+                            new ByteArrayInputStream(publicKeyBytes), publicKeyBytes.length,
+                            false);
                         if (address.getVersion() == 4 && pubkey instanceof V3Pubkey) {
                             pubkey = new V4Pubkey((V3Pubkey) pubkey);
                         }
@@ -161,7 +160,6 @@ public class AndroidAddressRepository implements AddressRepository {
                 address.setSubscribed(c.getInt(c.getColumnIndex(COLUMN_SUBSCRIBED)) == 1);
 
                 result.add(address);
-                c.moveToNext();
             }
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
@@ -184,8 +182,10 @@ public class AndroidAddressRepository implements AddressRepository {
 
     private boolean exists(BitmessageAddress address) {
         SQLiteDatabase db = sql.getReadableDatabase();
-        try (Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM Address WHERE address='" + address
-                .getAddress() + "'", null)) {
+        try (Cursor cursor = db.rawQuery(
+            "SELECT COUNT(*) FROM Address WHERE address=?",
+            new String[]{address.getAddress()}
+        )) {
             cursor.moveToFirst();
             return cursor.getInt(0) > 0;
         }
@@ -210,8 +210,8 @@ public class AndroidAddressRepository implements AddressRepository {
             values.put(COLUMN_CHAN, address.isChan());
             values.put(COLUMN_SUBSCRIBED, address.isSubscribed());
 
-            int update = db.update(TABLE_NAME, values, "address = '" + address.getAddress() +
-                    "'", null);
+            int update = db.update(TABLE_NAME, values, "address=?",
+                new String[]{address.getAddress()});
             if (update < 0) {
                 LOG.error("Could not update address " + address);
             }

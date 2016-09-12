@@ -28,16 +28,17 @@ import ch.dissem.apps.abit.pow.ServerPowEngine;
 import ch.dissem.apps.abit.repository.AndroidAddressRepository;
 import ch.dissem.apps.abit.repository.AndroidInventory;
 import ch.dissem.apps.abit.repository.AndroidMessageRepository;
+import ch.dissem.apps.abit.repository.AndroidNodeRegistry;
 import ch.dissem.apps.abit.repository.AndroidProofOfWorkRepository;
 import ch.dissem.apps.abit.repository.SqlHelper;
 import ch.dissem.apps.abit.util.Constants;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
-import ch.dissem.bitmessage.networking.DefaultNetworkHandler;
+import ch.dissem.bitmessage.networking.nio.NioNetworkHandler;
 import ch.dissem.bitmessage.ports.AddressRepository;
-import ch.dissem.bitmessage.ports.MemoryNodeRegistry;
 import ch.dissem.bitmessage.ports.MessageRepository;
 import ch.dissem.bitmessage.ports.ProofOfWorkRepository;
+import ch.dissem.bitmessage.utils.TTL;
 
 import static ch.dissem.bitmessage.utils.UnixTime.DAY;
 
@@ -58,6 +59,7 @@ public class Singleton {
                     final Context ctx = context.getApplicationContext();
                     SqlHelper sqlHelper = new SqlHelper(ctx);
                     powRepo = new AndroidProofOfWorkRepository(sqlHelper);
+                    TTL.pubkey(2 * DAY);
                     bitmessageContext = new BitmessageContext.Builder()
                             .proofOfWorkEngine(new SwitchingProofOfWorkEngine(
                                     ctx, Constants.PREFERENCE_SERVER_POW,
@@ -65,15 +67,14 @@ public class Singleton {
                                     new ServicePowEngine(ctx)
                             ))
                             .cryptography(new AndroidCryptography())
-                            .nodeRegistry(new MemoryNodeRegistry())
+                            .nodeRegistry(new AndroidNodeRegistry(sqlHelper))
                             .inventory(new AndroidInventory(sqlHelper))
                             .addressRepo(new AndroidAddressRepository(sqlHelper))
                             .messageRepo(new AndroidMessageRepository(sqlHelper, ctx))
                             .powRepo(powRepo)
-                            .networkHandler(new DefaultNetworkHandler())
+                            .networkHandler(new NioNetworkHandler())
                             .listener(getMessageListener(ctx))
                             .doNotSendPubkeyOnIdentityCreation()
-                            .pubkeyTTL(2 * DAY)
                             .build();
                 }
             }
