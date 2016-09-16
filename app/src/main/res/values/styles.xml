@@ -1,27 +1,11 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme.Base" parent="MaterialDrawerTheme.Light.DarkToolbar.TranslucentStatus">
-
+    <style name="AppTheme" parent="MaterialDrawerTheme.Light.DarkToolbar.TranslucentStatus">
         <item name="android:activatedBackgroundIndicator">@color/colorPrimaryLight</item>
         <item name="android:textColor">@color/colorPrimaryText</item>
         <item name="android:textColorSecondary">@color/colorSecondaryText</item>
-
-        <!-- MaterialDrawer specific values -->
-        <item name="material_drawer_background">@color/colorPrimaryDark</item>
-        <item name="material_drawer_icons">@color/colorPrimaryText</item>
-        <item name="material_drawer_primary_icon">@color/icons</item>
-        <item name="material_drawer_primary_text">@color/colorPrimaryText</item>
-        <item name="material_drawer_secondary_text">@color/colorSecondaryText</item>
-        <item name="material_drawer_hint_text">@color/colorSecondaryText</item>
-        <item name="material_drawer_divider">@color/divider</item>
-        <item name="material_drawer_selected">@color/primary</item>
-        <item name="material_drawer_selected_text">@color/colorPrimaryText</item>
-        <item name="material_drawer_header_selection_text">@color/colorPrimaryText</item>
-
     </style>
-
-    <style name="AppTheme" parent="AppTheme.Base"/>
 
     <style name="CustomShowcaseTheme" parent="ShowcaseView">
         <item name="sv_backgroundColor">#eeffc107</item>

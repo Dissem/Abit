@@ -7,18 +7,10 @@ import android.support.v7.widget.Toolbar;
 /**
  * @author Christian Basler
  */
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends DetailActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.scrolling_toolbar_layout);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        //noinspection ConstantConditions
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(false);
 
         // Display the fragment as the main content.
         getFragmentManager().beginTransaction()

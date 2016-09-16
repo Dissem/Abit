@@ -32,20 +32,29 @@ public class WifiReceiver extends BroadcastReceiver {
         if (Preferences.isWifiOnly(ctx)) {
             BitmessageContext bmc = Singleton.getBitmessageContext(ctx);
 
-            if (!isConnectedToWifi(ctx) && bmc.isRunning()) {
+            if (isConnectedToMeteredNetwork(ctx) && bmc.isRunning()) {
                 bmc.shutdown();
             }
         }
     }
 
-    public static boolean isConnectedToWifi(Context ctx) {
+    public static boolean isConnectedToMeteredNetwork(Context ctx) {
         NetworkInfo netInfo = getNetworkInfo(ctx);
-        return netInfo != null && netInfo.getType() == ConnectivityManager.TYPE_WIFI;
+        if (netInfo == null || !netInfo.isConnectedOrConnecting()) {
+            return false;
+        }
+        switch (netInfo.getType()){
+            case ConnectivityManager.TYPE_ETHERNET:
+            case ConnectivityManager.TYPE_WIFI:
+                return false;
+            default:
+                return true;
+        }
     }
 
     private static NetworkInfo getNetworkInfo(Context ctx) {
         ConnectivityManager conMan = (ConnectivityManager) ctx.getSystemService(Context
-                .CONNECTIVITY_SERVICE);
+            .CONNECTIVITY_SERVICE);
         return conMan.getActiveNetworkInfo();
     }
 }
