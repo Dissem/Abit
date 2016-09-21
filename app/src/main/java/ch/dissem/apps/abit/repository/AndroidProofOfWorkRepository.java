@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,12 +36,13 @@ import ch.dissem.bitmessage.utils.Encode;
 import ch.dissem.bitmessage.utils.Strings;
 
 import static ch.dissem.bitmessage.utils.Singleton.cryptography;
+import static ch.dissem.bitmessage.utils.Strings.hex;
 
 /**
  * @author Christian Basler
  */
 public class AndroidProofOfWorkRepository implements ProofOfWorkRepository, InternalContext
-        .ContextHolder {
+    .ContextHolder {
     private static final Logger LOG = LoggerFactory.getLogger(AndroidProofOfWorkRepository.class);
 
     private static final String TABLE_NAME = "POW";
@@ -71,46 +71,45 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository, Inte
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         String[] projection = {
-                COLUMN_DATA,
-                COLUMN_VERSION,
-                COLUMN_NONCE_TRIALS_PER_BYTE,
-                COLUMN_EXTRA_BYTES,
-                COLUMN_EXPIRATION_TIME,
-                COLUMN_MESSAGE_ID
+            COLUMN_DATA,
+            COLUMN_VERSION,
+            COLUMN_NONCE_TRIALS_PER_BYTE,
+            COLUMN_EXTRA_BYTES,
+            COLUMN_EXPIRATION_TIME,
+            COLUMN_MESSAGE_ID
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
         try (Cursor c = db.query(
-                TABLE_NAME, projection,
-                "initial_hash = X'" + Strings.hex(initialHash) + "'",
-                null, null, null, null
+            TABLE_NAME, projection,
+            "initial_hash=X'" + hex(initialHash) + "'",
+            null, null, null, null
         )) {
-            c.moveToFirst();
-            if (!c.isAfterLast()) {
+            if (c.moveToFirst()) {
                 int version = c.getInt(c.getColumnIndex(COLUMN_VERSION));
                 byte[] blob = c.getBlob(c.getColumnIndex(COLUMN_DATA));
                 if (c.isNull(c.getColumnIndex(COLUMN_MESSAGE_ID))) {
                     return new Item(
-                            Factory.getObjectMessage(version, new ByteArrayInputStream(blob), blob
-                                    .length),
-                            c.getLong(c.getColumnIndex(COLUMN_NONCE_TRIALS_PER_BYTE)),
-                            c.getLong(c.getColumnIndex(COLUMN_EXTRA_BYTES))
+                        Factory.getObjectMessage(version, new ByteArrayInputStream(blob), blob
+                            .length),
+                        c.getLong(c.getColumnIndex(COLUMN_NONCE_TRIALS_PER_BYTE)),
+                        c.getLong(c.getColumnIndex(COLUMN_EXTRA_BYTES))
                     );
                 } else {
                     return new Item(
-                            Factory.getObjectMessage(version, new ByteArrayInputStream(blob), blob
-                                    .length),
-                            c.getLong(c.getColumnIndex(COLUMN_NONCE_TRIALS_PER_BYTE)),
-                            c.getLong(c.getColumnIndex(COLUMN_EXTRA_BYTES)),
-                            c.getLong(c.getColumnIndex(COLUMN_EXPIRATION_TIME)),
-                            bmc.getMessageRepository().getMessage(
-                                    c.getLong(c.getColumnIndex(COLUMN_MESSAGE_ID)))
+                        Factory.getObjectMessage(version, new ByteArrayInputStream(blob), blob
+                            .length),
+                        c.getLong(c.getColumnIndex(COLUMN_NONCE_TRIALS_PER_BYTE)),
+                        c.getLong(c.getColumnIndex(COLUMN_EXTRA_BYTES)),
+                        c.getLong(c.getColumnIndex(COLUMN_EXPIRATION_TIME)),
+                        bmc.getMessageRepository().getMessage(
+                            c.getLong(c.getColumnIndex(COLUMN_MESSAGE_ID)))
                     );
                 }
             }
         }
         throw new RuntimeException("Object requested that we don't have. Initial hash: " +
-                Strings.hex(initialHash));
+            hex(initialHash));
     }
 
     @Override
@@ -118,20 +117,18 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository, Inte
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         String[] projection = {
-                COLUMN_INITIAL_HASH
+            COLUMN_INITIAL_HASH
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
         List<byte[]> result = new LinkedList<>();
         try (Cursor c = db.query(
-                TABLE_NAME, projection,
-                null, null, null, null, null
+            TABLE_NAME, projection,
+            null, null, null, null, null
         )) {
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
+            while (c.moveToNext()) {
                 byte[] initialHash = c.getBlob(c.getColumnIndex(COLUMN_INITIAL_HASH));
                 result.add(initialHash);
-                c.moveToNext();
             }
         }
         return result;
@@ -156,8 +153,6 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository, Inte
             db.insertOrThrow(TABLE_NAME, null, values);
         } catch (SQLiteConstraintException e) {
             LOG.trace(e.getMessage(), e);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -169,8 +164,10 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository, Inte
     @Override
     public void removeObject(byte[] initialHash) {
         SQLiteDatabase db = sql.getWritableDatabase();
-        db.delete(TABLE_NAME,
-                "initial_hash = X'" + Strings.hex(initialHash) + "'",
-                null);
+        db.delete(
+            TABLE_NAME,
+            "initial_hash=X'" + hex(initialHash) + "'",
+            null
+        );
     }
 }

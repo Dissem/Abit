@@ -21,6 +21,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
+import com.mikepenz.materialize.MaterializeBuilder;
+
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
@@ -38,6 +40,13 @@ public class StatusActivity extends AppCompatActivity {
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(false);
+
+        new MaterializeBuilder()
+            .withActivity(this)
+            .withStatusBarColorRes(R.color.colorPrimaryDark)
+            .withTranslucentStatusBarProgrammatically(true)
+            .withStatusBarPadding(true)
+            .build();
 
         BitmessageContext bmc = Singleton.getBitmessageContext(this);
         StringBuilder status = new StringBuilder();

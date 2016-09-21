@@ -18,6 +18,7 @@ package ch.dissem.apps.abit;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Selection;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,6 +35,7 @@ import ch.dissem.apps.abit.adapter.ContactAdapter;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 
+import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_CONTENT;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_IDENTITY;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_RECIPIENT;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_SUBJECT;
@@ -45,6 +47,7 @@ public class ComposeMessageFragment extends Fragment {
     private BitmessageAddress identity;
     private BitmessageAddress recipient;
     private String subject;
+    private String content;
     private AutoCompleteTextView recipientInput;
     private EditText subjectInput;
     private EditText bodyInput;
@@ -70,6 +73,9 @@ public class ComposeMessageFragment extends Fragment {
             }
             if (getArguments().containsKey(EXTRA_SUBJECT)) {
                 subject = getArguments().getString(EXTRA_SUBJECT);
+            }
+            if (getArguments().containsKey(EXTRA_CONTENT)) {
+                content = getArguments().getString(EXTRA_CONTENT);
             }
         } else {
             throw new RuntimeException("No identity set for ComposeMessageFragment");
@@ -106,6 +112,16 @@ public class ComposeMessageFragment extends Fragment {
         subjectInput = (EditText) rootView.findViewById(R.id.subject);
         subjectInput.setText(subject);
         bodyInput = (EditText) rootView.findViewById(R.id.body);
+        bodyInput.setText(content);
+
+        if (recipient == null) {
+            recipientInput.requestFocus();
+        } else if (subject == null || subject.isEmpty()) {
+            subjectInput.requestFocus();
+        } else {
+            bodyInput.requestFocus();
+            bodyInput.setSelection(0);
+        }
 
         return rootView;
     }
@@ -126,7 +142,7 @@ public class ComposeMessageFragment extends Fragment {
                         recipient = new BitmessageAddress(inputString);
                     } catch (Exception e) {
                         List<BitmessageAddress> contacts = Singleton.getAddressRepository
-                                (getContext()).getContacts();
+                            (getContext()).getContacts();
                         for (BitmessageAddress contact : contacts) {
                             if (inputString.equalsIgnoreCase(contact.getAlias())) {
                                 recipient = contact;
@@ -137,8 +153,8 @@ public class ComposeMessageFragment extends Fragment {
                     }
                 }
                 Singleton.getBitmessageContext(getContext()).send(identity, recipient,
-                        subjectInput.getText().toString(),
-                        bodyInput.getText().toString());
+                    subjectInput.getText().toString(),
+                    bodyInput.getText().toString());
                 getActivity().finish();
                 return true;
             default:

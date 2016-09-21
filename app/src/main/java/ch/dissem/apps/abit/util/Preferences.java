@@ -101,7 +101,7 @@ public class Preferences {
     }
 
     public static boolean isConnectionAllowed(Context ctx) {
-        return !isWifiOnly(ctx) || WifiReceiver.isConnectedToWifi(ctx);
+        return !isWifiOnly(ctx) || !WifiReceiver.isConnectedToMeteredNetwork(ctx);
     }
 
     public static boolean isWifiOnly(Context ctx) {
