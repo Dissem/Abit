@@ -18,9 +18,8 @@
     <item>
         <color android:color="@color/bg_swipe_item_archive"/>
     </item>
-    <item android:left="16dp">
-        <bitmap
-            android:gravity="left|center_vertical"
-            android:src="@drawable/ic_item_swipe_archive"/>
-    </item>
+    <item
+        android:drawable="@drawable/ic_item_swipe_archive"
+        android:gravity="left|center_vertical"
+        android:left="16dp"/>
 </layer-list>
