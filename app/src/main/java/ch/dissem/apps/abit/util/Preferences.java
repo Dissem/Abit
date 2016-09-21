@@ -23,6 +23,7 @@ import android.preference.PreferenceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -49,7 +50,7 @@ public class Preferences {
      * Warning, this method might do a network call and therefore can't be called from
      * the UI thread.
      */
-    public static InetAddress getTrustedNode(Context ctx) {
+    public static InetAddress getTrustedNode(Context ctx) throws IOException {
         String trustedNode = getPreference(ctx, PREFERENCE_TRUSTED_NODE);
         if (trustedNode == null) return null;
         trustedNode = trustedNode.trim();
@@ -59,15 +60,7 @@ public class Preferences {
             int index = trustedNode.lastIndexOf(':');
             trustedNode = trustedNode.substring(0, index);
         }
-        try {
             return InetAddress.getByName(trustedNode);
-        } catch (UnknownHostException e) {
-            new ErrorNotification(ctx)
-                    .setError(R.string.error_invalid_sync_host)
-                    .show();
-            LOG.error(e.getMessage(), e);
-            return null;
-        }
     }
 
     public static int getTrustedNodePort(Context ctx) {

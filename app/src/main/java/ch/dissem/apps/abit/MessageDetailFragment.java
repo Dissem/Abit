@@ -204,7 +204,7 @@ public class MessageDetailFragment extends Fragment {
         }
     }
 
-    private boolean isInTrash(Plaintext item) {
+    public static boolean isInTrash(Plaintext item) {
         for (Label label : item.getLabels()) {
             if (label.getType() == Label.Type.TRASH) {
                 return true;

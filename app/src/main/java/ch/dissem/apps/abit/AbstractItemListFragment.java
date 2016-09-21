@@ -28,7 +28,7 @@ import ch.dissem.bitmessage.entity.valueobject.Label;
 /**
  * @author Christian Basler
  */
-public abstract class AbstractItemListFragment<T> extends ListFragment {
+public abstract class AbstractItemListFragment<T> extends ListFragment implements ListHolder {
     /**
      * The serialization (saved instance state) Bundle key representing the
      * activated item position. Only used on tablets.
@@ -54,8 +54,6 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
      */
     private int activatedPosition = ListView.INVALID_POSITION;
     private boolean activateOnItemClick;
-
-    abstract void updateList(Label label);
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
