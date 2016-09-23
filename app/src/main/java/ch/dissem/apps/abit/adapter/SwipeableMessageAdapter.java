@@ -1,3 +1,20 @@
+/*
+ * Copyright 2015 Haruki Hasegawa
+ * Copyright 2016 Christian Basler
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ch.dissem.apps.abit.adapter;
 
 import android.graphics.Typeface;
@@ -26,12 +43,18 @@ import ch.dissem.apps.abit.R;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 
+import static ch.dissem.apps.abit.util.Strings.normalizeWhitespaces;
+
 /**
+ * Adapted from the basic swipeable example by Haruki Hasegawa. See
+ *
  * @author Christian Basler
+ * @see <a href="https://github.com/h6ah4i/android-advancedrecyclerview">
+ *          https://github.com/h6ah4i/android-advancedrecyclerview</a>
  */
 public class SwipeableMessageAdapter
-    extends RecyclerView.Adapter<SwipeableMessageAdapter.MyViewHolder>
-    implements SwipeableItemAdapter<SwipeableMessageAdapter.MyViewHolder>, SwipeableItemConstants {
+    extends RecyclerView.Adapter<SwipeableMessageAdapter.ViewHolder>
+    implements SwipeableItemAdapter<SwipeableMessageAdapter.ViewHolder>, SwipeableItemConstants {
 
     private List<Plaintext> data = Collections.emptyList();
     private EventListener eventListener;
@@ -48,14 +71,14 @@ public class SwipeableMessageAdapter
         void onItemViewClicked(View v, boolean pinned);
     }
 
-    public static class MyViewHolder extends AbstractSwipeableItemViewHolder {
+    public static class ViewHolder extends AbstractSwipeableItemViewHolder {
         public FrameLayout container;
         public final ImageView avatar;
         public final TextView sender;
         public final TextView subject;
         public final TextView extract;
 
-        public MyViewHolder(View v) {
+        public ViewHolder(View v) {
             super(v);
             container = (FrameLayout) v.findViewById(R.id.container);
             avatar = (ImageView) v.findViewById(R.id.avatar);
@@ -117,14 +140,14 @@ public class SwipeableMessageAdapter
     }
 
     @Override
-    public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         final View v = inflater.inflate(R.layout.message_row, parent, false);
-        return new MyViewHolder(v);
+        return new ViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position) {
         final Plaintext item = data.get(position);
 
         // set listeners
@@ -136,8 +159,8 @@ public class SwipeableMessageAdapter
         // set data
         holder.avatar.setImageDrawable(new Identicon(item.getFrom()));
         holder.sender.setText(item.getFrom().toString());
-        holder.subject.setText(item.getSubject());
-        holder.extract.setText(item.getText());
+        holder.subject.setText(normalizeWhitespaces(item.getSubject()));
+        holder.extract.setText(normalizeWhitespaces(item.getText()));
         if (item.isUnread()) {
             holder.sender.setTypeface(Typeface.DEFAULT_BOLD);
             holder.subject.setTypeface(Typeface.DEFAULT_BOLD);
@@ -153,43 +176,36 @@ public class SwipeableMessageAdapter
     }
 
     @Override
-    public int onGetSwipeReactionType(MyViewHolder holder, int position, int x, int y) {
-        if (label == null) {
-            return REACTION_CAN_NOT_SWIPE_BOTH_H_WITH_RUBBER_BAND_EFFECT;
-        }
-        if (label.getType() == Label.Type.TRASH) {
+    public int onGetSwipeReactionType(ViewHolder holder, int position, int x, int y) {
+        if (label == null || label.getType() == Label.Type.TRASH) {
             return REACTION_CAN_SWIPE_LEFT | REACTION_CAN_NOT_SWIPE_RIGHT_WITH_RUBBER_BAND_EFFECT;
         }
         return REACTION_CAN_SWIPE_BOTH_H;
     }
 
     @Override
-    public void onSetSwipeBackground(MyViewHolder holder, int position, int type) {
+    public void onSetSwipeBackground(ViewHolder holder, int position, int type) {
         int bgRes = 0;
-        if (label == null) {
-            bgRes = R.drawable.bg_swipe_item_neutral;
-        } else {
-            switch (type) {
-                case DRAWABLE_SWIPE_NEUTRAL_BACKGROUND:
+        switch (type) {
+            case DRAWABLE_SWIPE_NEUTRAL_BACKGROUND:
+                bgRes = R.drawable.bg_swipe_item_neutral;
+                break;
+            case DRAWABLE_SWIPE_LEFT_BACKGROUND:
+                bgRes = R.drawable.bg_swipe_item_left;
+                break;
+            case DRAWABLE_SWIPE_RIGHT_BACKGROUND:
+                if (label == null || label.getType() == Label.Type.TRASH) {
                     bgRes = R.drawable.bg_swipe_item_neutral;
-                    break;
-                case DRAWABLE_SWIPE_LEFT_BACKGROUND:
-                    bgRes = R.drawable.bg_swipe_item_left;
-                    break;
-                case DRAWABLE_SWIPE_RIGHT_BACKGROUND:
-                    if (label.getType() == Label.Type.TRASH) {
-                        bgRes = R.drawable.bg_swipe_item_neutral;
-                    } else {
-                        bgRes = R.drawable.bg_swipe_item_right;
-                    }
-                    break;
-            }
+                } else {
+                    bgRes = R.drawable.bg_swipe_item_right;
+                }
+                break;
         }
         holder.itemView.setBackgroundResource(bgRes);
     }
 
     @Override
-    public SwipeResultAction onSwipeItem(MyViewHolder holder, final int position, int result) {
+    public SwipeResultAction onSwipeItem(ViewHolder holder, final int position, int result) {
         switch (result) {
             // swipe right
             case RESULT_SWIPED_RIGHT:

@@ -26,15 +26,16 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@drawable/bg_item_normal_state"
         android:clickable="true"
         android:foreground="?attr/selectableItemBackground"
-        android:background="@drawable/bg_item_normal_state"
         tools:ignore="UselessParent">
 
         <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                         xmlns:tools="http://schemas.android.com/tools"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground">
 
             <ImageView
                 android:id="@+id/avatar"
@@ -48,8 +49,9 @@
 
             <TextView
                 android:id="@+id/sender"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
                 android:layout_alignTop="@+id/avatar"
                 android:layout_marginTop="-5dp"
                 android:layout_toEndOf="@+id/avatar"
@@ -66,8 +68,9 @@
 
             <TextView
                 android:id="@+id/subject"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
                 android:layout_below="@+id/sender"
                 android:layout_toEndOf="@+id/avatar"
                 android:ellipsize="end"
@@ -79,8 +82,9 @@
 
             <TextView
                 android:id="@+id/text"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
                 android:layout_below="@+id/subject"
                 android:layout_toEndOf="@+id/avatar"
                 android:ellipsize="end"
