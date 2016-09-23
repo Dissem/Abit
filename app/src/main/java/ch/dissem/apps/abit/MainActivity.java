@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void changeList(AbstractItemListFragment<?> listFragment) {
+    private <F extends Fragment & ListHolder> void changeList(F listFragment) {
         getSupportFragmentManager()
             .beginTransaction()
             .replace(R.id.item_list, listFragment)

@@ -166,7 +166,7 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
     }
 
     @Override
-    void updateList(Label label) {
+    public void updateList(Label label) {
         updateList();
     }
 }

@@ -28,6 +28,7 @@ import android.os.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 
 import ch.dissem.apps.abit.service.Singleton;
@@ -35,6 +36,7 @@ import ch.dissem.apps.abit.util.Preferences;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.CustomMessage;
+import ch.dissem.bitmessage.exception.DecryptionFailedException;
 import ch.dissem.bitmessage.extensions.CryptoCustomMessage;
 import ch.dissem.bitmessage.extensions.pow.ProofOfWorkRequest;
 import ch.dissem.bitmessage.ports.ProofOfWorkRepository;
@@ -68,18 +70,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
-        if (account.equals(Authenticator.ACCOUNT_SYNC)) {
-            if (Preferences.isConnectionAllowed(getContext())) {
-                syncData();
+        try {
+            if (account.equals(Authenticator.ACCOUNT_SYNC)) {
+                if (Preferences.isConnectionAllowed(getContext())) {
+                    syncData();
+                }
+            } else if (account.equals(Authenticator.ACCOUNT_POW)) {
+                syncPOW();
+            } else {
+                syncResult.stats.numAuthExceptions++;
             }
-        } else if (account.equals(Authenticator.ACCOUNT_POW)) {
-            syncPOW();
-        } else {
-            throw new RuntimeException("Unknown " + account);
+        } catch (IOException e) {
+            syncResult.stats.numIoExceptions++;
+        } catch (DecryptionFailedException e) {
+            syncResult.stats.numAuthExceptions++;
         }
     }
 
-    private void syncData() {
+    private void syncData() throws IOException {
         // If the Bitmessage context acts as a full node, synchronization isn't necessary
         if (bmc.isRunning()) {
             LOG.info("Synchronization skipped, Abit is acting as a full node");
@@ -87,61 +95,53 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
         LOG.info("Synchronizing Bitmessage");
 
-        try {
-            LOG.info("Synchronization started");
-            bmc.synchronize(
-                    Preferences.getTrustedNode(getContext()),
-                    Preferences.getTrustedNodePort(getContext()),
-                    Preferences.getTimeoutInSeconds(getContext()),
-                    true);
-            LOG.info("Synchronization finished");
-        } catch (RuntimeException e) {
-            LOG.error(e.getMessage(), e);
-        }
+        LOG.info("Synchronization started");
+        bmc.synchronize(
+            Preferences.getTrustedNode(getContext()),
+            Preferences.getTrustedNodePort(getContext()),
+            Preferences.getTimeoutInSeconds(getContext()),
+            true);
+        LOG.info("Synchronization finished");
     }
 
-    private void syncPOW() {
+    private void syncPOW() throws IOException, DecryptionFailedException {
         // If the Bitmessage context acts as a full node, synchronization isn't necessary
         LOG.info("Looking for completed POW");
 
-        try {
-            BitmessageAddress identity = Singleton.getIdentity(getContext());
-            byte[] privateKey = identity.getPrivateKey().getPrivateEncryptionKey();
-            byte[] signingKey = cryptography().createPublicKey(identity.getPublicDecryptionKey());
-            ProofOfWorkRequest.Reader reader = new ProofOfWorkRequest.Reader(identity);
-            ProofOfWorkRepository powRepo = Singleton.getProofOfWorkRepository(getContext());
-            List<byte[]> items = powRepo.getItems();
-            for (byte[] initialHash : items) {
-                ProofOfWorkRepository.Item item = powRepo.getItem(initialHash);
-                byte[] target = cryptography().getProofOfWorkTarget(item.object, item
-                        .nonceTrialsPerByte, item.extraBytes);
-                CryptoCustomMessage<ProofOfWorkRequest> cryptoMsg = new CryptoCustomMessage<>(
-                        new ProofOfWorkRequest(identity, initialHash, CALCULATE, target));
-                cryptoMsg.signAndEncrypt(identity, signingKey);
-                CustomMessage response = bmc.send(
-                        Preferences.getTrustedNode(getContext()),
-                        Preferences.getTrustedNodePort(getContext()),
-                        cryptoMsg
-                );
-                if (response.isError()) {
-                    LOG.error("Server responded with error: " + new String(response.getData(),
-                            "UTF-8"));
-                } else {
-                    ProofOfWorkRequest decryptedResponse = CryptoCustomMessage.read(
-                            response, reader).decrypt(privateKey);
-                    if (decryptedResponse.getRequest() == COMPLETE) {
-                        bmc.internals().getProofOfWorkService().onNonceCalculated(
-                                initialHash, decryptedResponse.getData());
-                    }
+        BitmessageAddress identity = Singleton.getIdentity(getContext());
+        byte[] privateKey = identity.getPrivateKey().getPrivateEncryptionKey();
+        byte[] signingKey = cryptography().createPublicKey(identity.getPublicDecryptionKey());
+        ProofOfWorkRequest.Reader reader = new ProofOfWorkRequest.Reader(identity);
+        ProofOfWorkRepository powRepo = Singleton.getProofOfWorkRepository(getContext());
+        List<byte[]> items = powRepo.getItems();
+        for (byte[] initialHash : items) {
+            ProofOfWorkRepository.Item item = powRepo.getItem(initialHash);
+            byte[] target = cryptography().getProofOfWorkTarget(item.object, item
+                .nonceTrialsPerByte, item.extraBytes);
+            CryptoCustomMessage<ProofOfWorkRequest> cryptoMsg = new CryptoCustomMessage<>(
+                new ProofOfWorkRequest(identity, initialHash, CALCULATE, target));
+            cryptoMsg.signAndEncrypt(identity, signingKey);
+            CustomMessage response = bmc.send(
+                Preferences.getTrustedNode(getContext()),
+                Preferences.getTrustedNodePort(getContext()),
+                cryptoMsg
+            );
+            if (response.isError()) {
+                LOG.error("Server responded with error: " + new String(response.getData(),
+                    "UTF-8"));
+            } else {
+                ProofOfWorkRequest decryptedResponse = CryptoCustomMessage.read(
+                    response, reader).decrypt(privateKey);
+                if (decryptedResponse.getRequest() == COMPLETE) {
+                    bmc.internals().getProofOfWorkService().onNonceCalculated(
+                        initialHash, decryptedResponse.getData());
                 }
             }
-            if (items.size() == 0) {
-                stopPowSync(getContext());
-            }
-            LOG.info("Synchronization finished");
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
         }
+        if (items.size() == 0) {
+            stopPowSync(getContext());
+        }
+        LOG.info("Synchronization finished");
     }
 
     public static void startSync(Context ctx) {
