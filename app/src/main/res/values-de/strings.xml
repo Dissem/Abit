@@ -78,6 +78,9 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="confirm_export">Identität wirklich exportieren? Der Export wird die privaten Schlüssel unverschlüsselt enthalten.</string>
     <string name="compose_message">Schreiben</string>
     <string name="passphrase">Passphrase</string>
+    <string name="help_out">Entwicklung unterstützen</string>
+    <string name="help_out_summary">Erfahre wie du die Entwicklung von Abit unterstützen kannst</string>
+    <string name="help_out_link">https://dissem.github.io/Abit/mithelfen</string>
     <string name="toast_chan_created">Chan erstellt</string>
     <string name="toast_long_running_operation">Dies kann einige Minuten dauern</string>
     <string name="toast_identity_created">Identität erstellt</string>
