@@ -106,8 +106,8 @@ public class AddressDetailFragment extends Fragment {
         Drawables.addIcon(getActivity(), menu, R.id.share, GoogleMaterial.Icon.gmd_share);
         Drawables.addIcon(getActivity(), menu, R.id.delete, GoogleMaterial.Icon.gmd_delete);
         Drawables.addIcon(getActivity(), menu, R.id.export,
-                CommunityMaterial.Icon.cmd_export)
-                .setVisible(item != null && item.getPrivateKey() != null);
+            CommunityMaterial.Icon.cmd_export)
+            .setVisible(item != null && item.getPrivateKey() != null);
 
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -130,41 +130,45 @@ public class AddressDetailFragment extends Fragment {
                 else
                     warning = R.string.delete_contact_warning;
                 new AlertDialog.Builder(ctx)
-                        .setMessage(warning)
-                        .setPositiveButton(android.R.string.yes, new
-                                DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        Singleton.getAddressRepository(ctx).remove(item);
-                                        item = null;
-                                        ctx.onBackPressed();
-                                    }
-                                })
-                        .setNegativeButton(android.R.string.no, null)
-                        .show();
+                    .setMessage(warning)
+                    .setPositiveButton(android.R.string.yes, new
+                        DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Singleton.getAddressRepository(ctx).remove(item);
+                                MainActivity mainActivity = MainActivity.getInstance();
+                                if (item.getPrivateKey() != null && mainActivity != null) {
+                                    mainActivity.removeIdentityEntry(item);
+                                }
+                                item = null;
+                                ctx.onBackPressed();
+                            }
+                        })
+                    .setNegativeButton(android.R.string.no, null)
+                    .show();
                 return true;
             }
             case R.id.export: {
                 new AlertDialog.Builder(ctx)
-                        .setMessage(R.string.confirm_export)
-                        .setPositiveButton(android.R.string.yes, new
-                                DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                                        shareIntent.setType("text/plain");
-                                        shareIntent.putExtra(Intent.EXTRA_TITLE, item +
-                                                EXPORT_POSTFIX);
-                                        WifExporter exporter = new WifExporter(Singleton
-                                                .getBitmessageContext(ctx));
-                                        exporter.addIdentity(item);
-                                        shareIntent.putExtra(Intent.EXTRA_TEXT, exporter.toString
-                                                ());
-                                        startActivity(Intent.createChooser(shareIntent, null));
-                                    }
-                                })
-                        .setNegativeButton(android.R.string.no, null)
-                        .show();
+                    .setMessage(R.string.confirm_export)
+                    .setPositiveButton(android.R.string.yes, new
+                        DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                                shareIntent.setType("text/plain");
+                                shareIntent.putExtra(Intent.EXTRA_TITLE, item +
+                                    EXPORT_POSTFIX);
+                                WifExporter exporter = new WifExporter(Singleton
+                                    .getBitmessageContext(ctx));
+                                exporter.addIdentity(item);
+                                shareIntent.putExtra(Intent.EXTRA_TEXT, exporter.toString
+                                    ());
+                                startActivity(Intent.createChooser(shareIntent, null));
+                            }
+                        })
+                    .setNegativeButton(android.R.string.no, null)
+                    .show();
                 return true;
             }
             case R.id.share: {
@@ -208,7 +212,7 @@ public class AddressDetailFragment extends Fragment {
             address.setText(item.getAddress());
             address.setSelected(true);
             ((TextView) rootView.findViewById(R.id.stream_number)).setText(getActivity()
-                    .getString(R.string.stream_number, item.getStream()));
+                .getString(R.string.stream_number, item.getStream()));
             if (item.getPrivateKey() == null) {
                 Switch active = (Switch) rootView.findViewById(R.id.active);
                 active.setChecked(item.isSubscribed());
@@ -220,12 +224,12 @@ public class AddressDetailFragment extends Fragment {
                 });
 
                 ImageView pubkeyAvailableImg = (ImageView) rootView.findViewById(R.id
-                        .pubkey_available);
+                    .pubkey_available);
 
                 if (item.getPubkey() == null) {
                     pubkeyAvailableImg.setAlpha(0.3f);
                     TextView pubkeyAvailableDesc = (TextView) rootView.findViewById(R.id
-                            .pubkey_available_desc);
+                        .pubkey_available_desc);
                     pubkeyAvailableDesc.setText(R.string.pubkey_not_available);
                 }
             } else {
@@ -251,7 +255,7 @@ public class AddressDetailFragment extends Fragment {
         BitMatrix result;
         try {
             result = new MultiFormatWriter().encode(link.toString(),
-                    BarcodeFormat.QR_CODE, QR_CODE_SIZE, QR_CODE_SIZE, null);
+                BarcodeFormat.QR_CODE, QR_CODE_SIZE, QR_CODE_SIZE, null);
         } catch (WriterException e) {
             LOG.error(e.getMessage(), e);
             return null;

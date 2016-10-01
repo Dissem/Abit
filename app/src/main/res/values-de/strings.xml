@@ -81,4 +81,19 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="toast_chan_created">Chan erstellt</string>
     <string name="toast_long_running_operation">Dies kann einige Minuten dauern</string>
     <string name="toast_identity_created">Identität erstellt</string>
+    <string name="toast_identities_created">Identitäten erstellt</string>
+    <string name="import_identity">Importieren</string>
+    <string name="create_identity">Erstellen</string>
+    <string name="add_deterministic_address">Deterministische Identität</string>
+    <string name="deterministic_address_warning">Merke dir diese Enstellungen und stelle sicher dass sie korrekt sind wenn du eine deterministische Addresse wiederherstellst.</string>
+    <string name="shorter">Kürzere Adressen suchen</string>
+    <string name="number_of_identities">Anzahl zu generierender Identitäten</string>
+    <string name="title_import_identity">Identität importieren</string>
+    <string name="wif_string">WIF / Inhalt von \'keys.dat\'</string>
+    <string name="select_identities_to_import">Bitte wähle die zu importierenden Identitäten:</string>
+    <string name="select_file_title">Datei auswählen</string>
+    <string name="open_file">Datei öffnen</string>
+    <string name="next">Weiter</string>
+    <string name="import_input_description">Du kannst einfach den Inhalt eines Exports oder einer \'keys.dat\'-Datei einfügen</string>
+    <string name="error_loading_data">Fehler beim Laden der Daten</string>
 </resources>

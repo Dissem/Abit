@@ -19,4 +19,7 @@
         <item name="android:textColor">@color/colorAccent</item>
     </style>
 
+    <style name="FixedDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="windowNoTitle">false</item>
+    </style>
 </resources>
