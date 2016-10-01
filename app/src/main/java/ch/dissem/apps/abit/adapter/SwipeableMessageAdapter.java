@@ -17,6 +17,7 @@
 
 package ch.dissem.apps.abit.adapter;
 
+import android.annotation.SuppressLint;
 import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -50,7 +51,7 @@ import static ch.dissem.apps.abit.util.Strings.normalizeWhitespaces;
  *
  * @author Christian Basler
  * @see <a href="https://github.com/h6ah4i/android-advancedrecyclerview">
- *          https://github.com/h6ah4i/android-advancedrecyclerview</a>
+ * https://github.com/h6ah4i/android-advancedrecyclerview</a>
  */
 public class SwipeableMessageAdapter
     extends RecyclerView.Adapter<SwipeableMessageAdapter.ViewHolder>
@@ -62,6 +63,12 @@ public class SwipeableMessageAdapter
     private View.OnClickListener swipeableViewContainerOnClickListener;
 
     private Label label;
+    private int selectedPosition;
+    private boolean activateOnItemClick;
+
+    public void setActivateOnItemClick(boolean activateOnItemClick) {
+        this.activateOnItemClick = activateOnItemClick;
+    }
 
     public interface EventListener {
         void onItemDeleted(Plaintext item);
@@ -71,14 +78,15 @@ public class SwipeableMessageAdapter
         void onItemViewClicked(View v, boolean pinned);
     }
 
-    public static class ViewHolder extends AbstractSwipeableItemViewHolder {
+    @SuppressWarnings("WeakerAccess")
+    static class ViewHolder extends AbstractSwipeableItemViewHolder {
         public FrameLayout container;
         public final ImageView avatar;
         public final TextView sender;
         public final TextView subject;
         public final TextView extract;
 
-        public ViewHolder(View v) {
+        ViewHolder(View v) {
             super(v);
             container = (FrameLayout) v.findViewById(R.id.container);
             avatar = (ImageView) v.findViewById(R.id.avatar);
@@ -150,6 +158,14 @@ public class SwipeableMessageAdapter
     public void onBindViewHolder(ViewHolder holder, int position) {
         final Plaintext item = data.get(position);
 
+        if (activateOnItemClick) {
+            holder.container.setBackgroundResource(
+                position == selectedPosition
+                    ? R.drawable.bg_item_selected_state
+                    : R.drawable.bg_item_normal_state
+            );
+        }
+
         // set listeners
         // (if the item is *pinned*, click event comes to the itemView)
         holder.itemView.setOnClickListener(itemViewOnClickListener);
@@ -184,6 +200,7 @@ public class SwipeableMessageAdapter
     }
 
     @Override
+    @SuppressLint("SwitchIntDef")
     public void onSetSwipeBackground(ViewHolder holder, int position, int type) {
         int bgRes = 0;
         switch (type) {
@@ -205,6 +222,7 @@ public class SwipeableMessageAdapter
     }
 
     @Override
+    @SuppressLint("SwitchIntDef")
     public SwipeResultAction onSwipeItem(ViewHolder holder, final int position, int result) {
         switch (result) {
             // swipe right
@@ -221,6 +239,13 @@ public class SwipeableMessageAdapter
 
     public void setEventListener(EventListener eventListener) {
         this.eventListener = eventListener;
+    }
+
+    public void setSelectedPosition(int selectedPosition) {
+        int oldPosition = this.selectedPosition;
+        this.selectedPosition = selectedPosition;
+        notifyItemChanged(oldPosition);
+        notifyItemChanged(selectedPosition);
     }
 
     private static class SwipeLeftResultAction extends SwipeResultActionMoveToSwipedDirection {

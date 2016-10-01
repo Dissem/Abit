@@ -34,7 +34,6 @@ import ch.dissem.bitmessage.entity.BitmessageAddress;
 /**
  * @author Christian Basler
  */
-
 public class AddressSelectorAdapter
     extends RecyclerView.Adapter<AddressSelectorAdapter.ViewHolder> {
 
@@ -85,15 +84,6 @@ public class AddressSelectorAdapter
                     }
                 }
             });
-        }
-    }
-
-    private static class Selectable<T> {
-        private final T data;
-        private boolean selected = false;
-
-        private Selectable(T data) {
-            this.data = data;
         }
     }
 
