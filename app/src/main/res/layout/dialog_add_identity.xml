@@ -19,12 +19,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="18dp"
     android:paddingEnd="24dp"
     android:paddingStart="24dp"
-    android:paddingTop="18dp"
-    android:paddingBottom="18dp"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:paddingTop="18dp">
 
     <TextView
         android:id="@+id/description"
@@ -36,58 +36,56 @@
         tools:layout_constraintLeft_creator="1"
         tools:layout_constraintTop_creator="1"/>
 
-    <Button
-        android:id="@+id/create_identity"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/create_identity"
-        android:textColor="@color/colorAccent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintRight_toRightOf="@+id/description"
-        app:layout_constraintTop_toBottomOf="@+id/description"
-        tools:layout_constraintLeft_creator="1"
-        tools:layout_constraintRight_creator="1"
-        tools:layout_constraintTop_creator="1"/>
+        android:paddingBottom="24dp"
+        android:paddingTop="24dp"
+        app:layout_constraintLeft_toLeftOf="@+id/description"
+        app:layout_constraintTop_toBottomOf="@+id/description">
+
+        <RadioButton
+            android:id="@+id/add_chan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="@string/add_chan_description"/>
+
+        <RadioButton
+            android:id="@+id/add_deterministic_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="@string/add_deterministic_address_description"/>
+
+        <RadioButton
+            android:id="@+id/import_identity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="@string/import_identity_description"/>
+
+        <RadioButton
+            android:id="@+id/create_identity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/create_identity_description"/>
+
+    </RadioGroup>
+
 
     <Button
-        android:id="@+id/import_identity"
+        android:id="@+id/ok"
         style="?android:attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/import_identity"
+        android:text="@string/ok"
         android:textColor="@color/colorAccent"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintRight_toRightOf="@+id/create_identity"
-        app:layout_constraintTop_toBottomOf="@+id/create_identity"
-        tools:layout_constraintLeft_creator="1"
-        tools:layout_constraintRight_creator="1"
-        tools:layout_constraintTop_creator="1"/>
-
-    <Button
-        android:id="@+id/add_deterministic_address"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/add_deterministic_address"
-        android:textColor="@color/colorAccent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintRight_toRightOf="@+id/import_identity"
-        app:layout_constraintTop_toBottomOf="@+id/import_identity"
-        tools:layout_constraintLeft_creator="1"
-        tools:layout_constraintRight_creator="1"
-        tools:layout_constraintTop_creator="1"/>
-
-    <Button
-        android:id="@+id/add_chan"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/add_chan"
-        android:textColor="@color/colorAccent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintRight_toRightOf="@+id/add_deterministic_address"
-        app:layout_constraintTop_toBottomOf="@+id/add_deterministic_address"
+        app:layout_constraintRight_toRightOf="@+id/radioGroup"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroup"
         tools:layout_constraintLeft_creator="1"
         tools:layout_constraintRight_creator="1"
         tools:layout_constraintTop_creator="1"/>
@@ -99,6 +97,6 @@
         android:layout_height="wrap_content"
         android:text="@string/cancel"
         android:textColor="@color/colorAccent"
-        app:layout_constraintLeft_toLeftOf="@+id/description"
-        app:layout_constraintTop_toBottomOf="@+id/add_deterministic_address"/>
+        app:layout_constraintRight_toLeftOf="@+id/ok"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroup"/>
 </android.support.constraint.ConstraintLayout>

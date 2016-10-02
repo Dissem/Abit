@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="about">Über Abit</string>
-    <string name="about_app">Ein Bitmessage-Client für Android</string>
-    <string name="about_summary">Open Source Abhängigkeiten.</string>
     <string name="library_jabit_libraryDescription">Jabit hat das Ziel eine einfach zu benutzende Bitmessage-Bibliothek für Java-Entwickler zu sein, um schnell eigene Bitmessage-Anwendungen zu implementieren.</string>
 </resources>
