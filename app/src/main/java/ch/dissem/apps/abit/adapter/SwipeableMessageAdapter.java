@@ -300,7 +300,6 @@ public class SwipeableMessageAdapter
             super.onPerformAction();
 
             adapter.data.remove(position);
-            adapter.data.remove(position);
             adapter.notifyItemRemoved(position);
         }
 
