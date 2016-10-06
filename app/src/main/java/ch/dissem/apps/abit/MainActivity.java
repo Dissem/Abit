@@ -16,7 +16,6 @@
 
 package ch.dissem.apps.abit;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,7 +23,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Point;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -34,8 +32,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
@@ -65,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import ch.dissem.apps.abit.dialog.AddIdentityDialogFragment;
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
 import ch.dissem.apps.abit.service.BitmessageService;
@@ -75,7 +72,6 @@ import ch.dissem.apps.abit.util.Preferences;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
-import ch.dissem.bitmessage.entity.payload.Pubkey;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 
 import static ch.dissem.apps.abit.service.BitmessageService.isRunning;
@@ -143,6 +139,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = new WeakReference<>(this);
         bmc = Singleton.getBitmessageContext(this);
         List<Label> labels = bmc.messages().getLabels();
         if (selectedLabel == null) {
@@ -262,15 +259,6 @@ public class MainActivity extends AppCompatActivity
             .withIdentifier(ADD_IDENTITY)
         );
         profiles.add(new ProfileSettingDrawerItem()
-            .withName(getString(R.string.add_chan))
-            .withDescription(getString(R.string.add_chan_summary))
-            .withIcon(new IconicsDrawable(this, GoogleMaterial.Icon.gmd_add)
-                .actionBar()
-                .paddingDp(5)
-                .colorRes(R.color.icons))
-            .withIdentifier(ADD_CHAN)
-        );
-        profiles.add(new ProfileSettingDrawerItem()
             .withName(getString(R.string.manage_identity))
             .withIcon(GoogleMaterial.Icon.gmd_settings)
             .withIdentifier(MANAGE_IDENTITY)
@@ -287,9 +275,6 @@ public class MainActivity extends AppCompatActivity
                     switch ((int) profile.getIdentifier()) {
                         case ADD_IDENTITY:
                             addIdentityDialog();
-                            break;
-                        case ADD_CHAN:
-                            addChanDialog();
                             break;
                         case MANAGE_IDENTITY:
                             Intent show = new Intent(MainActivity.this,
@@ -423,102 +408,58 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void addIdentityDialog() {
-        new AlertDialog.Builder(MainActivity.this)
-            .setMessage(R.string.add_identity_warning)
-            .setPositiveButton(android.R.string.yes, new
-                DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog,
-                                        int which) {
-                        Toast.makeText(MainActivity.this,
-                            R.string.toast_long_running_operation,
-                            Toast.LENGTH_SHORT).show();
-                        new AsyncTask<Void, Void, BitmessageAddress>() {
-                            @Override
-                            protected BitmessageAddress doInBackground(Void... args) {
-                                return bmc.createIdentity(false, Pubkey.Feature.DOES_ACK);
-                            }
-
-                            @Override
-                            protected void onPostExecute(BitmessageAddress chan) {
-                                Toast.makeText(MainActivity.this,
-                                    R.string.toast_identity_created,
-                                    Toast.LENGTH_SHORT).show();
-                                addIdentityEntry(chan);
-                            }
-                        }.execute();
-                    }
-                })
-            .setNegativeButton(android.R.string.no, null)
-            .show();
-    }
-
-    private void addChanDialog() {
-        @SuppressLint("InflateParams")
-        final View dialogView = getLayoutInflater().inflate(R.layout.dialog_input_passphrase, null);
-        new AlertDialog.Builder(MainActivity.this)
-            .setMessage(R.string.add_chan)
-            .setView(dialogView)
-            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    TextView passphrase = (TextView) dialogView.findViewById(R.id.passphrase);
-                    Toast.makeText(MainActivity.this, R.string.toast_long_running_operation,
-                        Toast.LENGTH_SHORT).show();
-                    new AsyncTask<String, Void, BitmessageAddress>() {
-                        @Override
-                        protected BitmessageAddress doInBackground(String... args) {
-                            String pass = args[0];
-                            BitmessageAddress chan = bmc.createChan(pass);
-                            chan.setAlias(pass);
-                            bmc.addresses().save(chan);
-                            return chan;
-                        }
-
-                        @Override
-                        protected void onPostExecute(BitmessageAddress chan) {
-                            Toast.makeText(MainActivity.this,
-                                R.string.toast_chan_created,
-                                Toast.LENGTH_SHORT).show();
-                            addIdentityEntry(chan);
-                        }
-                    }.execute(passphrase.getText().toString());
-                }
-            })
-            .setNegativeButton(R.string.cancel, null)
-            .show();
+        AddIdentityDialogFragment dialog = new AddIdentityDialogFragment();
+        dialog.show(getSupportFragmentManager(), "dialog");
     }
 
     @Override
     protected void onResume() {
-        instance = new WeakReference<>(this);
         updateUnread();
         super.onResume();
     }
 
-    private void addIdentityEntry(BitmessageAddress identity) {
-        IProfile newProfile = new
-            ProfileDrawerItem()
+    public void addIdentityEntry(BitmessageAddress identity) {
+        IProfile newProfile = new ProfileDrawerItem()
+            .withIcon(new Identicon(identity))
             .withName(identity.toString())
+            .withNameShown(true)
             .withEmail(identity.getAddress())
             .withTag(identity);
         if (accountHeader.getProfiles() != null) {
-            // we know that there are 3 setting
+            // we know that there are 2 setting
             // elements.
             // Set the new profile above them ;)
             accountHeader.addProfile(
                 newProfile, accountHeader
                     .getProfiles().size()
-                    - 3);
+                    - 2);
         } else {
             accountHeader.addProfiles(newProfile);
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        instance = null;
+    public void updateIdentityEntry(BitmessageAddress identity) {
+        for (IProfile profile : accountHeader.getProfiles()) {
+            if (profile instanceof ProfileDrawerItem) {
+                if (identity.equals(((ProfileDrawerItem) profile).getTag())) {
+                    ((ProfileDrawerItem) profile)
+                        .withName(identity.toString())
+                        .withTag(identity);
+                    return;
+                }
+            }
+        }
+    }
+
+    public void removeIdentityEntry(BitmessageAddress identity) {
+        for (IProfile profile : accountHeader.getProfiles()) {
+            if (profile instanceof ProfileDrawerItem) {
+                if (identity.equals(((ProfileDrawerItem) profile).getTag())) {
+                    accountHeader.removeProfile(profile);
+                    return;
+                }
+            }
+        }
     }
 
     private void checkAndStartNode(final CompoundButton buttonView) {
