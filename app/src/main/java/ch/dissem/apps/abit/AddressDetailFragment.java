@@ -278,6 +278,10 @@ public class AddressDetailFragment extends Fragment {
     public void onPause() {
         if (item != null) {
             Singleton.getAddressRepository(getContext()).save(item);
+            MainActivity mainActivity = MainActivity.getInstance();
+            if (mainActivity != null && item.getPrivateKey() != null) {
+                mainActivity.updateIdentityEntry(item);
+            }
         }
         super.onPause();
     }

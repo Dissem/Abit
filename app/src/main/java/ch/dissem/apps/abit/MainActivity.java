@@ -438,6 +438,19 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public void updateIdentityEntry(BitmessageAddress identity) {
+        for (IProfile profile : accountHeader.getProfiles()) {
+            if (profile instanceof ProfileDrawerItem) {
+                if (identity.equals(((ProfileDrawerItem) profile).getTag())) {
+                    ((ProfileDrawerItem) profile)
+                        .withName(identity.toString())
+                        .withTag(identity);
+                    return;
+                }
+            }
+        }
+    }
+
     public void removeIdentityEntry(BitmessageAddress identity) {
         for (IProfile profile : accountHeader.getProfiles()) {
             if (profile instanceof ProfileDrawerItem) {
