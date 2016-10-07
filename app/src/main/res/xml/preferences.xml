@@ -12,33 +12,41 @@
         android:defaultValue="true"
         android:key="wifi_only"
         android:summary="@string/wifi_only_summary"
-        android:title="@string/wifi_only" />
+        android:title="@string/wifi_only"/>
     <EditTextPreference
         android:inputType="textUri"
         android:key="trusted_node"
         android:summary="@string/trusted_node_summary"
-        android:title="@string/trusted_node" />
+        android:title="@string/trusted_node"/>
     <EditTextPreference
         android:defaultValue="120"
         android:inputType="number"
         android:key="sync_timeout"
         android:summary="@string/sync_timeout_summary"
-        android:title="@string/sync_timeout" />
+        android:title="@string/sync_timeout"/>
     <SwitchPreference
         android:defaultValue="false"
-        android:key="server_pow"
         android:dependency="trusted_node"
-        android:title="@string/server_pow"
+        android:key="server_pow"
         android:summary="@string/server_pow_summary"
+        android:title="@string/server_pow"
         />
     <Preference
         android:key="about"
-        android:title="@string/about"
         android:summary="@string/about_summary"
+        android:title="@string/about"
         />
     <Preference
+        android:key="help_out"
+        android:summary="@string/help_out_summary"
+        android:title="@string/help_out">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="@string/help_out_link"/>
+    </Preference>
+    <Preference
         android:key="status"
-        android:title="@string/status"
         android:summary="@string/status_summary"
+        android:title="@string/status"
         />
 </PreferenceScreen>
