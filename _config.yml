@@ -1,0 +1,40 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely need to edit after that.
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'jekyll serve'. If you change this file, please restart the server process.
+
+# Site settings
+title: Abit
+email: chrigu.meyer@gmail.com
+description: > # this means to ignore newlines until "baseurl:"
+  Write an awesome description for your new site here. You can edit this
+  line in _config.yml. It will appear in your document head meta (for
+  Google search results) and in your feed.xml site description.
+baseurl: "/Abit" # the subpath of your site, e.g. /blog
+url: "https://dissem.github.io" # the base hostname & protocol for your site
+title_description: "A Bitmessage client for Android™"
+title_image: "ic_launcher-web.png"
+#google_analytics: "UA-20365477-4"
+#disqus_account: cartenoire
+github_repository: https://github.com/Dissem/Abit
+
+
+# Social usernames/URLs
+#twitter_username: jekyllrb
+github_username:  Dissem
+
+# Footer
+footer_left: "Made with <i class=\"fa fa-heart\"></i> by <a href=\"https://twitter.com/Dissem\">Christian Basler</a>"
+footer_right: "&lt;/&gt; on <a href=\"https://github.com/Dissem/Abit\">Github</a> &nbsp;<i class=\"fa fa-github-alt\"></i>"
+
+# Build settings
+markdown: kramdown
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+permalink: pretty
+exclude: [vendor]
