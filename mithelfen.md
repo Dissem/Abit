@@ -9,7 +9,7 @@ order: 1
 
 ### Code
 
-Willst du ganz dringend ein Feature? Und weisst wie? Mach nur! Ich bin sehr glücklich über deinen Pull-Request, nur sei bitte nicht verärgert falls ich zuerst etwas daran ändern möchte.
+Willst du ganz dringend ein Feature? Und weisst wie? Nur zu! Ich bin sehr glücklich über deinen Pull-Request, nur sei bitte nicht verärgert falls ich zuerst etwas daran ändern möchte.
 
 
 ### Ideen
@@ -27,7 +27,7 @@ Denk aber daran dass ich ein grosser Fan von Material Design bin. Das Icon wird 
 
 ## Spenden
 
-Nicht alle können programmieren, und manche Ideen sind einfach quatsch. Willst du stattdessen etwas Geld spenden? Sende deine Bitcoins einfach an [XXXX](bitcoin:XXXX).
+Nicht alle können programmieren, und manche Ideen sind einfach quatsch. Willst du stattdessen etwas Geld spenden? Sende deine Bitcoins einfach an [1FR3YnHHkoos3icKTrEpAvCvrDXuX3ZyGc](bitcoin:1FR3YnHHkoos3icKTrEpAvCvrDXuX3ZyGc).
 
 Für alle ohne Bitcoins: <a href="javascript:{}" onclick="document.getElementById('paypal').submit();return false;">Mit PayPal<sup>®</sup> spenden</a>
 <form id="paypal" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">

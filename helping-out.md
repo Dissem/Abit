@@ -27,7 +27,7 @@ Keep in mind though that I'm a great fan of material design, and the icon will n
 
 ## Donate
 
-Not everyone can code, and some ideas just suck. Want to give me some money instead? You can send me your bitcoins to [XXXX](bitcoin:XXXX).
+Not everyone can code, and some ideas just suck. Want to give me some money instead? You can send me your bitcoins to [1FR3YnHHkoos3icKTrEpAvCvrDXuX3ZyGc](bitcoin:1FR3YnHHkoos3icKTrEpAvCvrDXuX3ZyGc).
 
 For all who don't have bitcoin: <a href="javascript:{}" onclick="document.getElementById('paypal').submit();return false;">donate with PayPal™</a>
 <form id="paypal" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
