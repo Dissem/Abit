@@ -16,5 +16,5 @@
     <string name="library_jabit_classPath" translatable="false">ch.dissem.bitmessage.BitmessageContext</string>
     <!-- License section -->
     <string name="library_jabit_licenseId" translatable="false">apache_2_0</string>
-    <!-- Custom variables section -->
+    <!-- Language specific section -->
 </resources>

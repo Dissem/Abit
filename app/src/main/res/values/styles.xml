@@ -2,7 +2,7 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="MaterialDrawerTheme.Light.DarkToolbar.TranslucentStatus">
-        <item name="android:activatedBackgroundIndicator">@color/colorPrimaryLight</item>
+        <item name="android:activatedBackgroundIndicator">@drawable/bg_item_activated</item>
         <item name="android:textColor">@color/colorPrimaryText</item>
         <item name="android:textColorSecondary">@color/colorSecondaryText</item>
     </style>
@@ -19,4 +19,7 @@
         <item name="android:textColor">@color/colorAccent</item>
     </style>
 
+    <style name="FixedDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="windowNoTitle">false</item>
+    </style>
 </resources>

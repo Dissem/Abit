@@ -70,7 +70,7 @@ public class MessageListFragment extends Fragment implements ListHolder {
     private Label currentLabel;
     private MenuItem emptyTrashMenuItem;
     private MessageRepository messageRepo;
-    private List<Plaintext> messages;
+    private boolean activateOnItemClick;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -105,7 +105,7 @@ public class MessageListFragment extends Fragment implements ListHolder {
     }
 
     private void doUpdateList(Label label) {
-        messages = Singleton.getMessageRepository(getContext()).findMessages(label);
+        List<Plaintext> messages = Singleton.getMessageRepository(getContext()).findMessages(label);
         if (getActivity() instanceof ActionBarListener) {
             if (label != null) {
                 ((ActionBarListener) getActivity()).updateTitle(label.toString());
@@ -153,6 +153,7 @@ public class MessageListFragment extends Fragment implements ListHolder {
 
         //adapter
         adapter = new SwipeableMessageAdapter();
+        adapter.setActivateOnItemClick(activateOnItemClick);
         adapter.setEventListener(new SwipeableMessageAdapter.EventListener() {
             @Override
             public void onItemDeleted(Plaintext item) {
@@ -174,6 +175,7 @@ public class MessageListFragment extends Fragment implements ListHolder {
             @Override
             public void onItemViewClicked(View v, boolean pinned) {
                 int position = recyclerView.getChildAdapterPosition(v);
+                adapter.setSelectedPosition(position);
                 if (position != RecyclerView.NO_POSITION) {
                     Plaintext item = adapter.getItem(position);
                     ((MainActivity) getActivity()).onItemSelected(item);
@@ -263,6 +265,9 @@ public class MessageListFragment extends Fragment implements ListHolder {
 
     @Override
     public void setActivateOnItemClick(boolean activateOnItemClick) {
-        // TODO
+        if (adapter != null) {
+            adapter.setActivateOnItemClick(activateOnItemClick);
+        }
+        this.activateOnItemClick = activateOnItemClick;
     }
 }

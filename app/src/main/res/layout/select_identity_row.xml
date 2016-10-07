@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2015 Christian Basler
+  ~ Copyright 2016 Christian Basler
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,44 +18,34 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="64dp">
 
-    <ImageView
-        android:id="@+id/avatar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_margin="16dp"
-        android:src="@color/colorAccent"
-        tools:ignore="ContentDescription"/>
-
-    <TextView
-        android:id="@+id/name"
+    <CheckBox
+        android:id="@+id/checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/avatar"
-        android:layout_toEndOf="@+id/avatar"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         android:ellipsize="end"
-        android:lines="1"
-        android:paddingBottom="0dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:paddingTop="0dp"
+        android:paddingBottom="8dp"
+        android:paddingEnd="8dp"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:text="CheckBox"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textStyle="bold"
         tools:text="Name"/>
 
     <TextView
         android:id="@+id/address"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/avatar"
-        android:layout_toEndOf="@+id/avatar"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
         android:ellipsize="marquee"
         android:lines="1"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
+        android:paddingBottom="8dp"
+        android:paddingEnd="8dp"
+        android:paddingStart="48dp"
         android:textAppearance="?android:attr/textAppearanceSmall"
         tools:text="BM-2cW0000000000000000000000000000000"/>
 
