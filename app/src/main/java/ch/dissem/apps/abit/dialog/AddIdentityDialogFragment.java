@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,9 +64,10 @@ public class AddIdentityDialogFragment extends AppCompatDialogFragment {
         view.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                final Context ctx = getActivity().getBaseContext();
                 switch (radioGroup.getCheckedRadioButtonId()) {
                     case R.id.create_identity:
-                        Toast.makeText(getActivity(),
+                        Toast.makeText(ctx,
                             R.string.toast_long_running_operation,
                             Toast.LENGTH_SHORT).show();
                         new AsyncTask<Void, Void, BitmessageAddress>() {
@@ -76,7 +78,7 @@ public class AddIdentityDialogFragment extends AppCompatDialogFragment {
 
                             @Override
                             protected void onPostExecute(BitmessageAddress chan) {
-                                Toast.makeText(getActivity(),
+                                Toast.makeText(ctx,
                                     R.string.toast_identity_created,
                                     Toast.LENGTH_SHORT).show();
                                 MainActivity mainActivity = MainActivity.getInstance();
@@ -87,7 +89,7 @@ public class AddIdentityDialogFragment extends AppCompatDialogFragment {
                         }.execute();
                         break;
                     case R.id.import_identity:
-                        startActivity(new Intent(getActivity(), ImportIdentityActivity.class));
+                        startActivity(new Intent(ctx, ImportIdentityActivity.class));
                         break;
                     case R.id.add_chan:
                         addChanDialog();
@@ -113,17 +115,19 @@ public class AddIdentityDialogFragment extends AppCompatDialogFragment {
     }
 
     private void addChanDialog() {
+        FragmentActivity activity = getActivity();
+        final Context ctx = activity.getBaseContext();
         @SuppressLint("InflateParams")
-        final View dialogView = getActivity().getLayoutInflater()
+        final View dialogView = activity.getLayoutInflater()
             .inflate(R.layout.dialog_input_passphrase, null);
-        new AlertDialog.Builder(getActivity())
+        new AlertDialog.Builder(activity)
             .setTitle(R.string.add_chan)
             .setView(dialogView)
             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     TextView passphrase = (TextView) dialogView.findViewById(R.id.passphrase);
-                    Toast.makeText(getActivity(), R.string.toast_long_running_operation,
+                    Toast.makeText(ctx, R.string.toast_long_running_operation,
                         Toast.LENGTH_SHORT).show();
                     new AsyncTask<String, Void, BitmessageAddress>() {
                         @Override
@@ -137,7 +141,7 @@ public class AddIdentityDialogFragment extends AppCompatDialogFragment {
 
                         @Override
                         protected void onPostExecute(BitmessageAddress chan) {
-                            Toast.makeText(getActivity(),
+                            Toast.makeText(ctx,
                                 R.string.toast_chan_created,
                                 Toast.LENGTH_SHORT).show();
                             MainActivity mainActivity = MainActivity.getInstance();
