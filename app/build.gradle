@@ -17,8 +17,8 @@ android {
         applicationId "ch.dissem.apps." + appName.toLowerCase()
         minSdkVersion 19
         targetSdkVersion 24
-        versionCode 8
-        versionName "1.0-beta8"
+        versionCode 9
+        versionName "1.0-beta9"
     }
     buildTypes {
         release {
