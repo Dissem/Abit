@@ -19,6 +19,7 @@ package ch.dissem.apps.abit;
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.text.TextPaint;
 
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 
@@ -33,11 +34,19 @@ public class Identicon extends Drawable {
     private int color;
     private int background;
     private boolean[][] fields;
+    private boolean chan;
+    private final TextPaint textPaint;
 
     public Identicon(BitmessageAddress input) {
         paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
         paint.setAntiAlias(true);
+        textPaint = new TextPaint();
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setColor(0xFF607D8B);
+        textPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
+
+        chan = input.isChan();
 
         byte[] hash = input.getRipe();
 
@@ -54,9 +63,18 @@ public class Identicon extends Drawable {
         });
 
         for (int row = 0; row < SIZE; row++) {
-            for (int column = 0; column < SIZE; column++) {
-                fields[row][column] = hash[(row * (column < CENTER_COLUMN ? column : SIZE -
-                    column - 1)) % hash.length] >= 0;
+            if (!chan || row < 5 || row > 6) {
+                for (int column = 0; column <= CENTER_COLUMN; column++) {
+                    if (
+                        (row - SIZE / 2) * (row - SIZE / 2)
+                            + (column - SIZE / 2) * (column - SIZE / 2)
+                            < SIZE / 2 * SIZE / 2
+                        ) {
+                        fields[row][column] = hash[(row * CENTER_COLUMN + column) % hash.length]
+                            >= 0;
+                        fields[row][SIZE - column - 1] = fields[row][column];
+                    }
+                }
             }
         }
     }
@@ -76,10 +94,16 @@ public class Identicon extends Drawable {
                 if (fields[row][column]) {
                     x = cellWidth * column;
                     y = cellHeight * row;
-
-                    canvas.drawCircle(x + cellWidth / 2, y + cellHeight / 2, cellHeight / 2, paint);
+                    canvas.drawCircle(
+                        x + cellWidth / 2, y + cellHeight / 2, cellHeight / 2,
+                        paint
+                    );
                 }
             }
+        }
+        if (chan) {
+            textPaint.setTextSize(2 * cellHeight);
+            canvas.drawText("[chan]", width / 2, 6.7f * cellHeight, textPaint);
         }
     }
 
