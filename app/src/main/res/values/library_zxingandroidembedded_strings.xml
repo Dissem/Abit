@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="UnusedResources">
     <string name="define_int_zxingandroidembedded" translatable="false"/>
     <!-- Author section -->
     <string name="library_zxingandroidembedded_author" translatable="false">JourneyApps</string>

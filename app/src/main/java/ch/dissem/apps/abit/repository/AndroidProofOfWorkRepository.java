@@ -33,7 +33,6 @@ import ch.dissem.bitmessage.entity.ObjectMessage;
 import ch.dissem.bitmessage.factory.Factory;
 import ch.dissem.bitmessage.ports.ProofOfWorkRepository;
 import ch.dissem.bitmessage.utils.Encode;
-import ch.dissem.bitmessage.utils.Strings;
 
 import static ch.dissem.bitmessage.utils.Singleton.cryptography;
 import static ch.dissem.bitmessage.utils.Strings.hex;

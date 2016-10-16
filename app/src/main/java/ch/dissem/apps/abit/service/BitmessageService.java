@@ -21,11 +21,9 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ch.dissem.apps.abit.notification.NetworkNotification;
 import ch.dissem.bitmessage.BitmessageContext;
+import ch.dissem.bitmessage.utils.Property;
 
 import static ch.dissem.apps.abit.notification.NetworkNotification.ONGOING_NOTIFICATION_ID;
 
@@ -35,12 +33,7 @@ import static ch.dissem.apps.abit.notification.NetworkNotification.ONGOING_NOTIF
  * onPerformSync().
  */
 public class BitmessageService extends Service {
-    public static final Logger LOG = LoggerFactory.getLogger(BitmessageService.class);
-
-    // Object to use as a thread-safe lock
-    private static final Object lock = new Object();
-
-    private static NetworkNotification notification = null;
+    private NetworkNotification notification = null;
     private static BitmessageContext bmc = null;
 
     private static volatile boolean running = false;
@@ -51,11 +44,11 @@ public class BitmessageService extends Service {
 
     @Override
     public void onCreate() {
-        synchronized (lock) {
+        synchronized (BitmessageService.class) {
             if (bmc == null) {
                 bmc = Singleton.getBitmessageContext(this);
-                notification = new NetworkNotification(this, bmc);
             }
+            notification = new NetworkNotification(this);
         }
     }
 
@@ -70,7 +63,6 @@ public class BitmessageService extends Service {
         running = false;
     }
 
-
     /**
      * Return an object that allows the system to invoke
      * the sync adapter.
@@ -84,6 +76,7 @@ public class BitmessageService extends Service {
         public void startupNode() {
             startService(new Intent(BitmessageService.this, BitmessageService.class));
             running = true;
+            notification.connecting();
             startForeground(ONGOING_NOTIFICATION_ID, notification.getNotification());
             if (!bmc.isRunning()) {
                 bmc.startup();
@@ -96,8 +89,17 @@ public class BitmessageService extends Service {
                 bmc.shutdown();
             }
             running = false;
-            stopForeground(false);
+            stopForeground(true);
+            notification.show();
             stopSelf();
+        }
+    }
+
+    public static Property getStatus() {
+        if (bmc != null) {
+            return bmc.status();
+        } else {
+            return new Property("bitmessage context", null);
         }
     }
 }

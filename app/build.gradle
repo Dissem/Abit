@@ -5,10 +5,11 @@ ext {
     appName = "Abit"
 }
 if (project.hasProperty("project.configs")
-        && new File(project.property("project.configs") + appName + ".gradle").exists()) {
+    && new File(project.property("project.configs") + appName + ".gradle").exists()) {
     apply from: project.property("project.configs") + appName + ".gradle";
 }
 
+//noinspection GroovyMissingReturnStatement
 android {
     compileSdkVersion 24
     buildToolsVersion "24.0.3"
@@ -19,17 +20,23 @@ android {
         targetSdkVersion 24
         versionCode 9
         versionName "1.0-beta9"
+        jackOptions.enabled = true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
     }
 }
 
-ext.jabitVersion = '2.0.1'
+ext.jabitVersion = '2.0.2'
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:24.2.1'
@@ -58,8 +65,8 @@ dependencies {
     compile 'com.google.zxing:core:3.3.0'
     compile 'io.github.yavski:fab-speed-dial:1.0.4'
     compile 'com.github.amlcurran.showcaseview:library:5.4.3'
-    compile ('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.9.3@aar'){
-        transitive=true
+    compile('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.9.3@aar') {
+        transitive = true
     }
     compile 'com.github.angads25:filepicker:1.0.6'
 

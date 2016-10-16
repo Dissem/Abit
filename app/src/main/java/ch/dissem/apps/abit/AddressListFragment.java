@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -32,7 +33,6 @@ import android.widget.TextView;
 import com.google.zxing.integration.android.IntentIntegrator;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import ch.dissem.apps.abit.listener.ActionBarListener;
@@ -55,59 +55,53 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
 
     public void updateList() {
         List<BitmessageAddress> addresses = Singleton.getAddressRepository(getContext())
-                .getContacts();
-        Collections.sort(addresses, new Comparator<BitmessageAddress>() {
-            /**
-             * Yields the following order:
-             * <ol>
-             *     <li>Subscribed addresses come first</li>
-             *     <li>Addresses with Aliases (alphabetically)</li>
-             *     <li>Addresses (alphabetically)</li>
-             * </ol>
-             */
-            @Override
-            public int compare(BitmessageAddress lhs, BitmessageAddress rhs) {
-                if (lhs.isSubscribed() == rhs.isSubscribed()) {
-                    if (lhs.getAlias() != null) {
-                        if (rhs.getAlias() != null) {
-                            return lhs.getAlias().compareTo(rhs.getAlias());
-                        } else {
-                            return -1;
-                        }
-                    } else if (rhs.getAlias() != null) {
-                        return 1;
+            .getContacts();
+        Collections.sort(addresses, (lhs, rhs) -> {
+            // Yields the following order:
+            // * Subscribed addresses come first
+            // * Addresses with Aliases (alphabetically)
+            // * Addresses (alphabetically)
+            if (lhs.isSubscribed() == rhs.isSubscribed()) {
+                if (lhs.getAlias() != null) {
+                    if (rhs.getAlias() != null) {
+                        return lhs.getAlias().compareTo(rhs.getAlias());
                     } else {
-                        return lhs.getAddress().compareTo(rhs.getAddress());
+                        return -1;
                     }
-                }
-                if (lhs.isSubscribed()) {
-                    return -1;
-                } else {
+                } else if (rhs.getAlias() != null) {
                     return 1;
+                } else {
+                    return lhs.getAddress().compareTo(rhs.getAddress());
                 }
+            }
+            if (lhs.isSubscribed()) {
+                return -1;
+            } else {
+                return 1;
             }
         });
         setListAdapter(new ArrayAdapter<BitmessageAddress>(
-                getActivity(),
-                android.R.layout.simple_list_item_activated_1,
-                android.R.id.text1,
-                addresses) {
+            getActivity(),
+            android.R.layout.simple_list_item_activated_1,
+            android.R.id.text1,
+            addresses) {
+            @NonNull
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 if (convertView == null) {
                     LayoutInflater inflater = LayoutInflater.from(getContext());
-                    convertView = inflater.inflate(R.layout.subscription_row, null, false);
+                    convertView = inflater.inflate(R.layout.subscription_row, parent, false);
                 }
                 BitmessageAddress item = getItem(position);
                 ((ImageView) convertView.findViewById(R.id.avatar)).setImageDrawable(new
-                        Identicon(item));
+                    Identicon(item));
                 TextView name = (TextView) convertView.findViewById(R.id.name);
                 name.setText(item.toString());
                 TextView streamNumber = (TextView) convertView.findViewById(R.id.stream_number);
                 streamNumber.setText(getContext().getString(R.string.stream_number, item
-                        .getStream()));
+                    .getStream()));
                 convertView.findViewById(R.id.subscribed).setVisibility(item.isSubscribed() ?
-                        View.VISIBLE : View.INVISIBLE);
+                    View.VISIBLE : View.INVISIBLE);
                 return convertView;
             }
         });
@@ -124,7 +118,7 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
-            savedInstanceState) {
+        savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_address_list, container, false);
 
         FabSpeedDial fabSpeedDial = (FabSpeedDial) view.findViewById(R.id.fab_add_contact);
@@ -134,8 +128,8 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
                 switch (menuItem.getItemId()) {
                     case R.id.action_read_qr_code:
                         IntentIntegrator.forSupportFragment(AddressListFragment.this)
-                                .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES)
-                                .initiateScan();
+                            .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES)
+                            .initiateScan();
                         return true;
                     case R.id.action_create_contact:
                         Intent intent = new Intent(getActivity(), CreateAddressActivity.class);

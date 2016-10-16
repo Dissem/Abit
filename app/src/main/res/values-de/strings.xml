@@ -5,19 +5,15 @@
     <string name="title_message_detail">Nachricht</string>
     <string name="title_subscription_detail">Abonnement</string>
     <string name="bitmessage_full_node">Bitmessage Netzknoten</string>
-    <string name="wifi_mode">Art der WLAN-Verbindung</string>
     <string name="settings">Einstellungen</string>
     <string name="wifi_only">Nur WLAN</string>
     <string name="wifi_only_summary">Nicht mit Mobilfunknetz verbinden</string>
-    <string name="subscriptions">Abonnements</string>
     <string name="to">An</string>
     <string name="subject">Betreff</string>
     <string name="manage_identity">Identität verwalten</string>
     <string name="add_identity">Identität hinzufügen</string>
     <string name="add_identity_summary">Eine neue Identität erstellen</string>
-    <string name="create_identity">Erstellen</string>
     <string name="create_identity_description">Eine neue, zufällige Identität erstellen</string>
-    <string name="import_identity">Importieren</string>
     <string name="import_identity_description">Eine existierende Identität von PyBitmessage oder einem Export importieren</string>
     <string name="add_deterministic_address">Deterministische Identität</string>
     <string name="add_deterministic_address_description">Eine deterministische Identität erstellen oder wiederherstellen</string>
@@ -25,11 +21,8 @@
     <string name="add_chan_description">Einen Chan erstellen oder einem beitreten</string>
     <string name="title_activity_open_bitmessage_link">Kontakt importieren</string>
 
-    <string name="action_settings">Einstellungen</string>
     <string name="connection_info_1">Stream %1$d: eine Verbindung</string>
     <string name="connection_info_n">Stream %1$d: %2$d Verbindungen</string>
-    <string name="import_address">Adresse importieren</string>
-    <string name="import_contact">Kontakt hinzufügen</string>
     <string name="label">Label</string>
     <string name="subscribe">Abonnieren</string>
     <string name="do_import">Importieren</string>
@@ -42,7 +35,6 @@
     <string name="archive">Archiv</string>
     <string name="empty_trash">Papierkorb leeren</string>
     <string name="stream_number">Stream %d</string>
-    <string name="enabled">Aktiv</string>
     <string name="trusted_node">Vertrauenswürdiger Knoten</string>
     <string name="trusted_node_summary">Diese Adresse wird für die Synchronisation verwendet</string>
     <string name="sync_timeout">Zeitbeschränkung der Synchronisierung</string>
@@ -56,7 +48,6 @@
     <string name="proof_of_work_text_0">Arbeite am Versenden</string>
     <string name="proof_of_work_text_n">Arbeite am Versenden (%1$d in Warteschlange)</string>
     <string name="error_invalid_sync_port">Ungültiger Port in den Synchronisationseinstellungen: %s</string>
-    <string name="error_invalid_sync_host">Synchronisation fehlgeschlagen: der vertrauenswürdige Knoten konnte nicht erreicht werden.</string>
     <string name="compose_body_hint">Nachricht schreiben</string>
     <string name="contacts_and_subscriptions">Kontakte</string>
     <string name="subscribed">Abonniert</string>
@@ -78,10 +69,9 @@
     <string name="delete_contact_warning">Bist Du sicher dass dieser Kontakt gelöscht werden soll?</string>
     <string name="scan_qr_code">QR-Code scannen</string>
     <string name="create_contact">Kontakt erfassen</string>
-    <string name="full_node_description">Solange kein aktiver Knoten gestartet ist, werden keine Meldungen empfangen oder gesendet. Dies braucht jedoch viele Resourcen und Daten.
+    <string name="full_node_description">Solange kein aktiver Knoten gestartet ist, werden keine Meldungen empfangen oder gesendet. Dies braucht jedoch viele Ressourcen und Daten.
 
 Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfiguriert werden, aber im Moment muss dieser selbst bereitgestellt werden.</string>
-    <string name="got_it">Alles klar</string>
     <string name="address">Bitmessage-Adresse</string>
     <string name="error_illegal_address">Vielleicht hat es einen Tippfehler</string>
     <string name="export">Exportieren</string>
@@ -95,7 +85,7 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="toast_identity_created">Identität erstellt</string>
     <string name="toast_identities_created">Identitäten erstellt</string>
     <string name="toast_chan_created">Chan erstellt</string>
-    <string name="deterministic_address_warning">Merke dir diese Enstellungen und stelle sicher dass sie korrekt sind wenn du eine deterministische Addresse wiederherstellst.</string>
+    <string name="deterministic_address_warning">Merke dir diese Enstellungen und stelle sicher dass sie korrekt sind wenn du eine deterministische Adresse wiederherstellst.</string>
     <string name="number_of_identities">Anzahl zu generierender Identitäten</string>
     <string name="shorter">Kürzere Adressen suchen</string>
     <string name="wif_string">WIF / Inhalt von ‘keys.dat’</string>
@@ -106,5 +96,4 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="select_file_title">Datei auswählen</string>
     <string name="select_identities_to_import">Bitte wähle die zu importierenden Identitäten:</string>
     <string name="import_input_description">Du kannst einfach den Inhalt eines Exports oder einer ‘keys.dat’-Datei einfügen</string>
-    <string name="name">Name</string>
 </resources>

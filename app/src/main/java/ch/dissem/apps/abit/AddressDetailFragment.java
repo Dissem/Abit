@@ -18,7 +18,6 @@ package ch.dissem.apps.abit;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -31,7 +30,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -131,19 +129,15 @@ public class AddressDetailFragment extends Fragment {
                     warning = R.string.delete_contact_warning;
                 new AlertDialog.Builder(ctx)
                     .setMessage(warning)
-                    .setPositiveButton(android.R.string.yes, new
-                        DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Singleton.getAddressRepository(ctx).remove(item);
-                                MainActivity mainActivity = MainActivity.getInstance();
-                                if (item.getPrivateKey() != null && mainActivity != null) {
-                                    mainActivity.removeIdentityEntry(item);
-                                }
-                                item = null;
-                                ctx.onBackPressed();
-                            }
-                        })
+                    .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                        Singleton.getAddressRepository(ctx).remove(item);
+                        MainActivity mainActivity = MainActivity.getInstance();
+                        if (item.getPrivateKey() != null && mainActivity != null) {
+                            mainActivity.removeIdentityEntry(item);
+                        }
+                        item = null;
+                        ctx.onBackPressed();
+                    })
                     .setNegativeButton(android.R.string.no, null)
                     .show();
                 return true;
@@ -151,22 +145,18 @@ public class AddressDetailFragment extends Fragment {
             case R.id.export: {
                 new AlertDialog.Builder(ctx)
                     .setMessage(R.string.confirm_export)
-                    .setPositiveButton(android.R.string.yes, new
-                        DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                                shareIntent.setType("text/plain");
-                                shareIntent.putExtra(Intent.EXTRA_TITLE, item +
-                                    EXPORT_POSTFIX);
-                                WifExporter exporter = new WifExporter(Singleton
-                                    .getBitmessageContext(ctx));
-                                exporter.addIdentity(item);
-                                shareIntent.putExtra(Intent.EXTRA_TEXT, exporter.toString
-                                    ());
-                                startActivity(Intent.createChooser(shareIntent, null));
-                            }
-                        })
+                    .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                        shareIntent.setType("text/plain");
+                        shareIntent.putExtra(Intent.EXTRA_TITLE, item +
+                            EXPORT_POSTFIX);
+                        WifExporter exporter = new WifExporter(Singleton
+                            .getBitmessageContext(ctx));
+                        exporter.addIdentity(item);
+                        shareIntent.putExtra(Intent.EXTRA_TEXT, exporter.toString
+                            ());
+                        startActivity(Intent.createChooser(shareIntent, null));
+                    })
                     .setNegativeButton(android.R.string.no, null)
                     .show();
                 return true;
@@ -216,12 +206,8 @@ public class AddressDetailFragment extends Fragment {
             if (item.getPrivateKey() == null) {
                 Switch active = (Switch) rootView.findViewById(R.id.active);
                 active.setChecked(item.isSubscribed());
-                active.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        item.setSubscribed(isChecked);
-                    }
-                });
+                active.setOnCheckedChangeListener((buttonView, isChecked) ->
+                    item.setSubscribed(isChecked));
 
                 ImageView pubkeyAvailableImg = (ImageView) rootView.findViewById(R.id
                     .pubkey_available);

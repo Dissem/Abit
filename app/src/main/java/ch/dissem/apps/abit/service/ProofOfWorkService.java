@@ -40,7 +40,7 @@ public class ProofOfWorkService extends Service {
     private static ProofOfWorkEngine engine = new MultiThreadedPOWEngine();
     private static boolean calculating;
     private static final Queue<PowItem> queue = new LinkedList<>();
-    private static ProofOfWorkNotification notification;
+    private ProofOfWorkNotification notification;
 
     @Override
     public void onCreate() {
@@ -55,16 +55,18 @@ public class ProofOfWorkService extends Service {
 
     public static class PowBinder extends Binder {
         private final ProofOfWorkService service;
+        private final ProofOfWorkNotification notification;
 
         private PowBinder(ProofOfWorkService service) {
             this.service = service;
+            this.notification = service.notification;
         }
 
-        public void process(PowItem item) {
+        void process(PowItem item) {
             synchronized (queue) {
                 service.startService(new Intent(service, ProofOfWorkService.class));
                 service.startForeground(ONGOING_NOTIFICATION_ID,
-                        notification.getNotification());
+                    notification.getNotification());
                 if (!calculating) {
                     calculating = true;
                     service.calculateNonce(item);
@@ -90,26 +92,23 @@ public class ProofOfWorkService extends Service {
     }
 
     private void calculateNonce(final PowItem item) {
-        engine.calculateNonce(item.initialHash, item.targetValue, new ProofOfWorkEngine.Callback() {
-            @Override
-            public void onNonceCalculated(byte[] initialHash, byte[] nonce) {
-                try {
-                    item.callback.onNonceCalculated(initialHash, nonce);
-                } finally {
-                    PowItem item;
-                    synchronized (queue) {
-                        item = queue.poll();
-                        if (item == null) {
-                            calculating = false;
-                            stopForeground(true);
-                            stopSelf();
-                        } else {
-                            notification.update(queue.size()).show();
-                        }
+        engine.calculateNonce(item.initialHash, item.targetValue, (initialHash, nonce) -> {
+            try {
+                item.callback.onNonceCalculated(initialHash, nonce);
+            } finally {
+                PowItem next;
+                synchronized (queue) {
+                    next = queue.poll();
+                    if (next == null) {
+                        calculating = false;
+                        stopForeground(true);
+                        stopSelf();
+                    } else {
+                        notification.update(queue.size()).show();
                     }
-                    if (item != null) {
-                        calculateNonce(item);
-                    }
+                }
+                if (next != null) {
+                    calculateNonce(next);
                 }
             }
         });

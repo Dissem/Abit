@@ -1,22 +1,18 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Abit</string>
     <string name="about_app">A Bitmessage client for Android</string>
     <string name="title_message_detail">Message Detail</string>
     <string name="title_subscription_detail">Subscription Detail</string>
     <string name="bitmessage_full_node">Bitmessage Node</string>
-    <string name="wifi_mode">Wi-Fi Connection Mode</string>
     <string name="settings">Settings</string>
     <string name="wifi_only">Wi-Fi only</string>
     <string name="wifi_only_summary">Don\'t connect to the mobile network</string>
-    <string name="subscriptions">Subscriptions</string>
     <string name="to">To</string>
     <string name="subject">Subject</string>
     <string name="manage_identity">Manage Identity</string>
     <string name="add_identity">Add Identity</string>
     <string name="add_identity_summary">Create new identity</string>
-    <string name="create_identity">Create new</string>
     <string name="create_identity_description">Create a new, random identity</string>
-    <string name="import_identity">Import existing</string>
     <string name="import_identity_description">Import an existing identity from PyBitmessage or from an export</string>
     <string name="add_deterministic_address">Deterministic identity</string>
     <string name="add_deterministic_address_description">Create or recreate a deterministic identity</string>
@@ -24,24 +20,20 @@
     <string name="add_chan_description">Create or join a chan</string>
     <string name="title_activity_open_bitmessage_link">Import Contact</string>
 
-    <string name="action_settings">Settings</string>
     <string name="connection_info_1">Stream #%1$d: one connection</string>
-    <string name="connection_info_n">Stream #%1$d: %2$d connections</string>
-    <string name="import_address">Import Address</string>
-    <string name="import_contact">Add to contacts</string>
+    <string name="connection_info_n" tools:ignore="PluralsCandidate">Stream #%1$d: %2$d connections</string>
     <string name="label">Label</string>
     <string name="subscribe">Subscribe</string>
     <string name="do_import">Import</string>
     <string name="cancel">Cancel</string>
     <string name="broadcast">Broadcast</string>
-    <string name="n_new_messages">%d new messages</string>
+    <string name="n_new_messages" tools:ignore="PluralsCandidate">%d new messages</string>
     <string name="reply">Reply</string>
     <string name="delete">Delete</string>
     <string name="mark_unread">Mark unread</string>
     <string name="archive">Archive</string>
     <string name="empty_trash">Empty Trash</string>
     <string name="stream_number">Stream #%d</string>
-    <string name="enabled">Enabled</string>
     <string name="trusted_node">Trusted node</string>
     <string name="trusted_node_summary">Use this node for synchronization</string>
     <string name="sync_timeout">Synchronization Timeout</string>
@@ -53,9 +45,8 @@
     <string name="connection_info_pending">Connecting…</string>
     <string name="proof_of_work_title">Proof of Work</string>
     <string name="proof_of_work_text_0">Doing work to send message</string>
-    <string name="proof_of_work_text_n">Doing work to send message (%1$d queued)</string>
+    <string name="proof_of_work_text_n" tools:ignore="PluralsCandidate">Doing work to send message (%1$d queued)</string>
     <string name="error_invalid_sync_port">Invalid port in synchronization settings: %s</string>
-    <string name="error_invalid_sync_host">Synchronization failed: Trusted node could not be reached.</string>
     <string name="compose_body_hint">Write message</string>
     <string name="contacts_and_subscriptions">Contacts</string>
     <string name="subscribed">Subscribed</string>
@@ -80,7 +71,6 @@
     <string name="full_node_description">You can\'t receive or send messages unless you start a full node. But be aware that this uses a lot of resources and internet traffic.
 
 As an alternative you could configure a trusted node in the settings, but as of now you\'ll need to deploy your own.</string>
-    <string name="got_it">Got it</string>
     <string name="address">Bitmessage Address</string>
     <string name="error_illegal_address">There might be a typo</string>
     <string name="export">Export</string>
@@ -105,5 +95,4 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="select_file_title">Select a File</string>
     <string name="select_identities_to_import">Please select the identities you want to import:</string>
     <string name="import_input_description">You can just paste the contents of an export or a ‘keys.dat’ file</string>
-    <string name="name">Name</string>
 </resources>

@@ -42,9 +42,6 @@ import ch.dissem.bitmessage.wif.WifImporter;
 
 public class ImportIdentitiesFragment extends Fragment {
     public static final String WIF_DATA = "wif_data";
-    private BitmessageContext bmc;
-    private RecyclerView recyclerView;
-    private LinearLayoutManager layoutManager;
     private AddressSelectorAdapter adapter;
     private WifImporter importer;
 
@@ -53,14 +50,15 @@ public class ImportIdentitiesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
         savedInstanceState) {
         String wifData = getArguments().getString(WIF_DATA);
-        bmc = Singleton.getBitmessageContext(getActivity());
+        BitmessageContext bmc = Singleton.getBitmessageContext(getActivity());
         View view = inflater.inflate(R.layout.fragment_import_select_identities, container, false);
         try {
             importer = new WifImporter(bmc, wifData);
             adapter = new AddressSelectorAdapter(importer.getIdentities());
-            layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL,
+            LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(),
+                LinearLayoutManager.VERTICAL,
                 false);
-            recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
             recyclerView.setLayoutManager(layoutManager);
             recyclerView.setAdapter(adapter);
 
@@ -69,18 +67,15 @@ public class ImportIdentitiesFragment extends Fragment {
         } catch (IOException e) {
             return super.onCreateView(inflater, container, savedInstanceState);
         }
-        view.findViewById(R.id.finish).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                importer.importAll(adapter.getSelected());
-                MainActivity mainActivity = MainActivity.getInstance();
-                if (mainActivity != null) {
-                    for (BitmessageAddress selected : adapter.getSelected()) {
-                        mainActivity.addIdentityEntry(selected);
-                    }
+        view.findViewById(R.id.finish).setOnClickListener(v -> {
+            importer.importAll(adapter.getSelected());
+            MainActivity mainActivity = MainActivity.getInstance();
+            if (mainActivity != null) {
+                for (BitmessageAddress selected : adapter.getSelected()) {
+                    mainActivity.addIdentityEntry(selected);
                 }
-                getActivity().finish();
             }
+            getActivity().finish();
         });
         return view;
     }

@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="UnusedResources">
     <string name="define_zxing" translatable="false"/>
     <!-- Author section -->
     <string name="library_zxing_author" translatable="false">Google, Inc.</string>

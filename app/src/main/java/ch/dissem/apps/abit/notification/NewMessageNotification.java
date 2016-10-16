@@ -36,7 +36,7 @@ import ch.dissem.bitmessage.entity.Plaintext;
 import static ch.dissem.apps.abit.util.Drawables.toBitmap;
 
 public class NewMessageNotification extends AbstractNotification {
-    public static final int NEW_MESSAGE_NOTIFICATION_ID = 1;
+    private static final int NEW_MESSAGE_NOTIFICATION_ID = 1;
     private static final StyleSpan SPAN_EMPHASIS = new StyleSpan(Typeface.BOLD);
 
     public NewMessageNotification(Context ctx) {
@@ -62,6 +62,7 @@ public class NewMessageNotification extends AbstractNotification {
                 PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(pendingIntent);
 
+        // TODO: add proper intents to reply/delete
         builder.addAction(R.drawable.ic_action_reply, ctx.getString(R.string.reply), pendingIntent);
         builder.addAction(R.drawable.ic_action_delete, ctx.getString(R.string.delete),
                 pendingIntent);

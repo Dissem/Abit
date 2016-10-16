@@ -18,7 +18,6 @@ package ch.dissem.apps.abit;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.Selection;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -90,12 +89,9 @@ public class ComposeMessageFragment extends Fragment {
         recipientInput = (AutoCompleteTextView) rootView.findViewById(R.id.recipient);
         final ContactAdapter adapter = new ContactAdapter(getContext());
         recipientInput.setAdapter(adapter);
-        recipientInput.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                recipient = adapter.getItem(position);
-            }
-        });
+        recipientInput.setOnItemClickListener(
+            (parent, view, position, id) -> recipient = adapter.getItem(position)
+        );
         recipientInput.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

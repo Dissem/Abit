@@ -23,7 +23,6 @@ import android.view.View;
 import android.widget.ListView;
 
 import ch.dissem.apps.abit.listener.ListSelectionListener;
-import ch.dissem.bitmessage.entity.valueobject.Label;
 
 /**
  * @author Christian Basler
@@ -38,11 +37,7 @@ public abstract class AbstractItemListFragment<T> extends ListFragment implement
      * A dummy implementation of the {@link ListSelectionListener} interface that does
      * nothing. Used only when this fragment is not attached to an activity.
      */
-    private static ListSelectionListener<Object> dummyCallbacks = new
-            ListSelectionListener<Object>() {
-        @Override
-        public void onItemSelected(Object plaintext) {
-        }
+    private static ListSelectionListener<Object> dummyCallbacks = plaintext -> {
     };
     /**
      * The fragment's current callback object, which is notified of list item
@@ -61,7 +56,7 @@ public abstract class AbstractItemListFragment<T> extends ListFragment implement
 
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null
-                && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
+            && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
     }
@@ -73,8 +68,8 @@ public abstract class AbstractItemListFragment<T> extends ListFragment implement
         // When setting CHOICE_MODE_SINGLE, ListView will automatically
         // give items the 'activated' state when touched.
         getListView().setChoiceMode(activateOnItemClick
-                ? ListView.CHOICE_MODE_SINGLE
-                : ListView.CHOICE_MODE_NONE);
+            ? ListView.CHOICE_MODE_SINGLE
+            : ListView.CHOICE_MODE_NONE);
     }
 
     @Override
@@ -129,8 +124,8 @@ public abstract class AbstractItemListFragment<T> extends ListFragment implement
             // When setting CHOICE_MODE_SINGLE, ListView will automatically
             // give items the 'activated' state when touched.
             getListView().setChoiceMode(activateOnItemClick
-                    ? ListView.CHOICE_MODE_SINGLE
-                    : ListView.CHOICE_MODE_NONE);
+                ? ListView.CHOICE_MODE_SINGLE
+                : ListView.CHOICE_MODE_NONE);
         }
     }
 

@@ -46,7 +46,6 @@ import static ch.dissem.bitmessage.utils.UnixTime.DAY;
  * Provides singleton objects across the application.
  */
 public class Singleton {
-    public static final Object lock = new Object();
     private static BitmessageContext bitmessageContext;
     private static MessageListener messageListener;
     private static BitmessageAddress identity;
@@ -54,28 +53,28 @@ public class Singleton {
 
     public static BitmessageContext getBitmessageContext(Context context) {
         if (bitmessageContext == null) {
-            synchronized (lock) {
+            synchronized (Singleton.class) {
                 if (bitmessageContext == null) {
                     final Context ctx = context.getApplicationContext();
                     SqlHelper sqlHelper = new SqlHelper(ctx);
                     powRepo = new AndroidProofOfWorkRepository(sqlHelper);
                     TTL.pubkey(2 * DAY);
                     bitmessageContext = new BitmessageContext.Builder()
-                            .proofOfWorkEngine(new SwitchingProofOfWorkEngine(
-                                    ctx, Constants.PREFERENCE_SERVER_POW,
-                                    new ServerPowEngine(ctx),
-                                    new ServicePowEngine(ctx)
-                            ))
-                            .cryptography(new AndroidCryptography())
-                            .nodeRegistry(new AndroidNodeRegistry(sqlHelper))
-                            .inventory(new AndroidInventory(sqlHelper))
-                            .addressRepo(new AndroidAddressRepository(sqlHelper))
-                            .messageRepo(new AndroidMessageRepository(sqlHelper, ctx))
-                            .powRepo(powRepo)
-                            .networkHandler(new NioNetworkHandler())
-                            .listener(getMessageListener(ctx))
-                            .doNotSendPubkeyOnIdentityCreation()
-                            .build();
+                        .proofOfWorkEngine(new SwitchingProofOfWorkEngine(
+                            ctx, Constants.PREFERENCE_SERVER_POW,
+                            new ServerPowEngine(ctx),
+                            new ServicePowEngine(ctx)
+                        ))
+                        .cryptography(new AndroidCryptography())
+                        .nodeRegistry(new AndroidNodeRegistry(sqlHelper))
+                        .inventory(new AndroidInventory(sqlHelper))
+                        .addressRepo(new AndroidAddressRepository(sqlHelper))
+                        .messageRepo(new AndroidMessageRepository(sqlHelper, ctx))
+                        .powRepo(powRepo)
+                        .networkHandler(new NioNetworkHandler())
+                        .listener(getMessageListener(ctx))
+                        .doNotSendPubkeyOnIdentityCreation()
+                        .build();
                 }
             }
         }
@@ -108,11 +107,12 @@ public class Singleton {
 
     public static BitmessageAddress getIdentity(Context ctx) {
         if (identity == null) {
+            BitmessageContext bmc = getBitmessageContext(ctx);
             synchronized (Singleton.class) {
                 if (identity == null) {
-                    BitmessageContext bmc = getBitmessageContext(ctx);
+                    // FIXME: this may block the UI, there must be a better way!
                     List<BitmessageAddress> identities = bmc.addresses()
-                            .getIdentities();
+                        .getIdentities();
                     if (identities.size() > 0) {
                         identity = identities.get(0);
                     } else {

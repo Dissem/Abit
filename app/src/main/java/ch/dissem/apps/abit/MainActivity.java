@@ -19,7 +19,6 @@ package ch.dissem.apps.abit;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Point;
@@ -34,7 +33,6 @@ import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.Target;
 import com.mikepenz.community_material_typeface_library.CommunityMaterial;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -42,7 +40,6 @@ import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.interfaces.OnCheckedChangeListener;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
@@ -102,7 +99,8 @@ public class MainActivity extends AppCompatActivity
     private static final Logger LOG = LoggerFactory.getLogger(MainActivity.class);
     private static final int ADD_IDENTITY = 1;
     private static final int MANAGE_IDENTITY = 2;
-    private static final int ADD_CHAN = 3;
+
+    private static final long ID_NODE_SWITCH = 1;
 
     private static WeakReference<MainActivity> instance;
 
@@ -134,7 +132,7 @@ public class MainActivity extends AppCompatActivity
     private AccountHeader accountHeader;
 
     private Drawer drawer;
-    private ShowcaseView showcaseView;
+    private SwitchDrawerItem nodeSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,7 +150,9 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         MessageListFragment listFragment = new MessageListFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.item_list, listFragment)
+        getSupportFragmentManager()
+            .beginTransaction()
+            .replace(R.id.item_list, listFragment)
             .commit();
 
         if (findViewById(R.id.message_detail_container) != null) {
@@ -189,27 +189,23 @@ public class MainActivity extends AppCompatActivity
             int margin = ((Number) (getResources().getDisplayMetrics().density * 12)).intValue();
             lps.setMargins(margin, margin, margin, margin);
 
-            showcaseView = new ShowcaseView.Builder(this)
+            new ShowcaseView.Builder(this)
                 .withMaterialShowcase()
                 .setStyle(R.style.CustomShowcaseTheme)
                 .setContentTitle(R.string.full_node)
                 .setContentText(R.string.full_node_description)
-                .setTarget(new Target() {
-                               @Override
-                               public Point getPoint() {
-                                   View view = drawer.getStickyFooter();
-                                   int[] location = new int[2];
-                                   view.getLocationInWindow(location);
-                                   int x = location[0] + 7 * view.getWidth() / 8;
-                                   int y = location[1] + view.getHeight() / 2;
-                                   return new Point(x, y);
-                               }
-                           }
-                )
+                .setTarget(() -> {
+                    View view = drawer.getStickyFooter();
+                    int[] location = new int[2];
+                    view.getLocationInWindow(location);
+                    int x = location[0] + 7 * view.getWidth() / 8;
+                    int y = location[1] + view.getHeight() / 2;
+                    return new Point(x, y);
+                })
                 .replaceEndButton(R.layout.showcase_button)
                 .hideOnTouchOutside()
-                .build();
-            showcaseView.setButtonPosition(lps);
+                .build()
+                .setButtonPosition(lps);
         }
     }
 
@@ -268,32 +264,28 @@ public class MainActivity extends AppCompatActivity
             .withActivity(this)
             .withHeaderBackground(R.drawable.header)
             .withProfiles(profiles)
-            .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
-                @Override
-                public boolean onProfileChanged(View view, IProfile profile, boolean
-                    currentProfile) {
-                    switch ((int) profile.getIdentifier()) {
-                        case ADD_IDENTITY:
-                            addIdentityDialog();
-                            break;
-                        case MANAGE_IDENTITY:
-                            Intent show = new Intent(MainActivity.this,
-                                AddressDetailActivity.class);
-                            show.putExtra(AddressDetailFragment.ARG_ITEM,
-                                Singleton.getIdentity(getApplicationContext()));
-                            startActivity(show);
-                            break;
-                        default:
-                            if (profile instanceof ProfileDrawerItem) {
-                                Object tag = ((ProfileDrawerItem) profile).getTag();
-                                if (tag instanceof BitmessageAddress) {
-                                    Singleton.setIdentity((BitmessageAddress) tag);
-                                }
+            .withOnAccountHeaderListener((view, profile, currentProfile) -> {
+                switch ((int) profile.getIdentifier()) {
+                    case ADD_IDENTITY:
+                        addIdentityDialog();
+                        break;
+                    case MANAGE_IDENTITY:
+                        Intent show = new Intent(MainActivity.this,
+                            AddressDetailActivity.class);
+                        show.putExtra(AddressDetailFragment.ARG_ITEM,
+                            Singleton.getIdentity(getApplicationContext()));
+                        startActivity(show);
+                        break;
+                    default:
+                        if (profile instanceof ProfileDrawerItem) {
+                            Object tag = ((ProfileDrawerItem) profile).getTag();
+                            if (tag instanceof BitmessageAddress) {
+                                Singleton.setIdentity((BitmessageAddress) tag);
                             }
-                    }
-                    // false if it should close the drawer
-                    return false;
+                        }
                 }
+                // false if it should close the drawer
+                return false;
             })
             .build();
         if (profiles.size() > 2) { // There's always the add and manage identity items
@@ -346,62 +338,55 @@ public class MainActivity extends AppCompatActivity
             .withName(R.string.settings)
             .withIcon(GoogleMaterial.Icon.gmd_settings));
 
+        nodeSwitch = new SwitchDrawerItem()
+            .withIdentifier(ID_NODE_SWITCH)
+            .withName(R.string.full_node)
+            .withIcon(CommunityMaterial.Icon.cmd_cloud_outline)
+            .withChecked(isRunning())
+            .withOnCheckedChangeListener((drawerItem, buttonView, isChecked) -> {
+                if (isChecked) {
+                    checkAndStartNode(buttonView);
+                } else {
+                    service.shutdownNode();
+                }
+            });
+
         drawer = new DrawerBuilder()
             .withActivity(this)
             .withToolbar(toolbar)
             .withAccountHeader(accountHeader)
             .withDrawerItems(drawerItems)
-            .addStickyDrawerItems(
-                new SwitchDrawerItem()
-                    .withName(R.string.full_node)
-                    .withIcon(CommunityMaterial.Icon.cmd_cloud_outline)
-                    .withChecked(isRunning())
-                    .withOnCheckedChangeListener(new OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(IDrawerItem drawerItem,
-                                                     CompoundButton buttonView,
-                                                     boolean isChecked) {
-                            if (isChecked) {
-                                checkAndStartNode(buttonView);
-                            } else {
-                                service.shutdownNode();
-                            }
-                        }
-                    })
-            )
-            .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                @Override
-                public boolean onItemClick(View view, int position, IDrawerItem item) {
-                    if (item.getTag() instanceof Label) {
-                        selectedLabel = (Label) item.getTag();
-                        showSelectedLabel();
-                        return false;
-                    } else if (item instanceof Nameable<?>) {
-                        Nameable<?> ni = (Nameable<?>) item;
-                        switch (ni.getName().getTextRes()) {
-                            case R.string.contacts_and_subscriptions:
-                                if (!(getSupportFragmentManager().findFragmentById(R.id
-                                    .item_list) instanceof AddressListFragment)) {
-                                    changeList(new AddressListFragment());
-                                } else {
-                                    ((AddressListFragment) getSupportFragmentManager()
-                                        .findFragmentById(R.id.item_list)).updateList();
-                                }
-                                break;
-                            case R.string.settings:
-                                startActivity(new Intent(MainActivity.this, SettingsActivity
-                                    .class));
-                                break;
-                            case R.string.archive:
-                                selectedLabel = null;
-                                showSelectedLabel();
-                                break;
-                            case R.string.full_node:
-                                return true;
-                        }
-                    }
+            .addStickyDrawerItems(nodeSwitch)
+            .withOnDrawerItemClickListener((view, position, item) -> {
+                if (item.getTag() instanceof Label) {
+                    selectedLabel = (Label) item.getTag();
+                    showSelectedLabel();
                     return false;
+                } else if (item instanceof Nameable<?>) {
+                    Nameable<?> ni = (Nameable<?>) item;
+                    switch (ni.getName().getTextRes()) {
+                        case R.string.contacts_and_subscriptions:
+                            if (!(getSupportFragmentManager().findFragmentById(R.id
+                                .item_list) instanceof AddressListFragment)) {
+                                changeList(new AddressListFragment());
+                            } else {
+                                ((AddressListFragment) getSupportFragmentManager()
+                                    .findFragmentById(R.id.item_list)).updateList();
+                            }
+                            break;
+                        case R.string.settings:
+                            startActivity(new Intent(MainActivity.this, SettingsActivity
+                                .class));
+                            break;
+                        case R.string.archive:
+                            selectedLabel = null;
+                            showSelectedLabel();
+                            break;
+                        case R.string.full_node:
+                            return true;
+                    }
                 }
+                return false;
             })
             .withShowDrawerOnFirstLaunch(true)
             .build();
@@ -415,6 +400,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         updateUnread();
+        updateNodeSwitch();
         super.onResume();
     }
 
@@ -470,18 +456,14 @@ public class MainActivity extends AppCompatActivity
         } else {
             new AlertDialog.Builder(MainActivity.this)
                 .setMessage(R.string.full_node_warning)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        service.startupNode();
-                    }
-                })
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        buttonView.setChecked(false);
-                    }
-                })
+                .setPositiveButton(
+                    android.R.string.yes,
+                    (dialog, which) -> service.startupNode()
+                )
+                .setNegativeButton(
+                    android.R.string.no,
+                    (dialog, which) -> updateNodeSwitch()
+                )
                 .show();
         }
     }
@@ -499,6 +481,13 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         }
+    }
+
+    public void updateNodeSwitch() {
+        runOnUiThread(() -> {
+            nodeSwitch.withChecked(bmc.isRunning());
+            drawer.updateStickyFooterItem(nodeSwitch);
+        });
     }
 
     private void showSelectedLabel() {

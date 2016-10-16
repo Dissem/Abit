@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import ch.dissem.apps.abit.R;
 import ch.dissem.apps.abit.listener.WifiReceiver;
@@ -39,8 +38,6 @@ import static ch.dissem.apps.abit.util.Constants.PREFERENCE_WIFI_ONLY;
  * @author Christian Basler
  */
 public class Preferences {
-    private static Logger LOG = LoggerFactory.getLogger(Preferences.class);
-
     public static boolean useTrustedNode(Context ctx) {
         String trustedNode = getPreference(ctx, PREFERENCE_TRUSTED_NODE);
         return trustedNode != null && !trustedNode.trim().isEmpty();

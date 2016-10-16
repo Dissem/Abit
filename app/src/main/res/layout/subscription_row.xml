@@ -34,10 +34,11 @@
 
     <TextView
         android:id="@+id/name"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/avatar"
         android:layout_toEndOf="@+id/avatar"
+        android:layout_toStartOf="@+id/subscribed"
         android:ellipsize="end"
         android:lines="1"
         android:paddingBottom="0dp"
@@ -60,7 +61,8 @@
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        tools:text="Stream #"/>
+        tools:text="Stream #"
+        tools:ignore="RelativeOverlap"/>
 
     <com.mikepenz.iconics.view.IconicsImageView
         android:id="@+id/subscribed"

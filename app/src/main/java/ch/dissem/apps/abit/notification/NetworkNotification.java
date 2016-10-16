@@ -17,7 +17,6 @@
 package ch.dissem.apps.abit.notification;
 
 import android.annotation.SuppressLint;
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -28,7 +27,7 @@ import java.util.TimerTask;
 
 import ch.dissem.apps.abit.MainActivity;
 import ch.dissem.apps.abit.R;
-import ch.dissem.bitmessage.BitmessageContext;
+import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.bitmessage.utils.Property;
 
 /**
@@ -37,31 +36,32 @@ import ch.dissem.bitmessage.utils.Property;
 public class NetworkNotification extends AbstractNotification {
     public static final int ONGOING_NOTIFICATION_ID = 2;
 
-    private final BitmessageContext bmc;
     private NotificationCompat.Builder builder;
 
-    public NetworkNotification(Context ctx, BitmessageContext bmc) {
+    public NetworkNotification(Context ctx) {
         super(ctx);
-        this.bmc = bmc;
+        Intent showMessageIntent = new Intent(ctx, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 1, showMessageIntent, 0);
         builder = new NotificationCompat.Builder(ctx);
         builder.setSmallIcon(R.drawable.ic_notification_full_node)
-                .setContentTitle(ctx.getString(R.string.bitmessage_full_node))
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-    }
-
-    @Override
-    public Notification getNotification() {
-        update();
-        return notification;
+            .setContentTitle(ctx.getString(R.string.bitmessage_full_node))
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setShowWhen(false)
+            .setContentIntent(pendingIntent);
     }
 
     @SuppressLint("StringFormatMatches")
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean update() {
-        boolean running = bmc.isRunning();
+        boolean running = BitmessageService.isRunning();
         builder.setOngoing(running);
-        Property connections = bmc.status().getProperty("network").getProperty("connections");
+        Property connections = BitmessageService.getStatus().getProperty("network", "connections");
         if (!running) {
             builder.setContentText(ctx.getString(R.string.connection_info_disconnected));
+            MainActivity mainActivity = MainActivity.getInstance();
+            if (mainActivity != null) {
+                mainActivity.updateNodeSwitch();
+            }
         } else if (connections.getProperties().length == 0) {
             builder.setContentText(ctx.getString(R.string.connection_info_pending));
         } else {
@@ -71,29 +71,24 @@ public class NetworkNotification extends AbstractNotification {
                 Integer nodeCount = (Integer) stream.getProperty("nodes").getValue();
                 if (nodeCount == 1) {
                     info.append(ctx.getString(R.string.connection_info_1,
-                            streamNumber));
+                        streamNumber));
                 } else {
                     info.append(ctx.getString(R.string.connection_info_n,
-                            streamNumber, nodeCount));
+                        streamNumber, nodeCount));
                 }
                 info.append('\n');
             }
             builder.setContentText(info);
         }
-        Intent showMessageIntent = new Intent(ctx, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 1, showMessageIntent, 0);
-        builder.setContentIntent(pendingIntent);
         notification = builder.build();
         return running;
     }
 
     @Override
     public void show() {
-        update();
         super.show();
 
-        final Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
+        new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 if (!update()) {
@@ -107,5 +102,11 @@ public class NetworkNotification extends AbstractNotification {
     @Override
     protected int getNotificationId() {
         return ONGOING_NOTIFICATION_ID;
+    }
+
+    public void connecting() {
+        builder.setOngoing(true);
+        builder.setContentText(ctx.getString(R.string.connection_info_pending));
+        notification = builder.build();
     }
 }

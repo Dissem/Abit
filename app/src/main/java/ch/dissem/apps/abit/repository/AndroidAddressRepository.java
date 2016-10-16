@@ -196,7 +196,9 @@ public class AndroidAddressRepository implements AddressRepository {
             SQLiteDatabase db = sql.getWritableDatabase();
             // Create a new map of values, where column names are the keys
             ContentValues values = new ContentValues();
-            values.put(COLUMN_ALIAS, address.getAlias());
+            if (address.getAlias() != null) {
+                values.put(COLUMN_ALIAS, address.getAlias());
+            }
             if (address.getPubkey() != null) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 address.getPubkey().writeUnencrypted(out);
@@ -207,7 +209,9 @@ public class AndroidAddressRepository implements AddressRepository {
             if (address.getPrivateKey() != null) {
                 values.put(COLUMN_PRIVATE_KEY, Encode.bytes(address.getPrivateKey()));
             }
-            values.put(COLUMN_CHAN, address.isChan());
+            if (address.isChan()) {
+                values.put(COLUMN_CHAN, true);
+            }
             values.put(COLUMN_SUBSCRIBED, address.isSubscribed());
 
             int update = db.update(TABLE_NAME, values, "address=?",
