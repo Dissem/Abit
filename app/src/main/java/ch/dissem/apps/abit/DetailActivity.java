@@ -12,7 +12,7 @@ import com.mikepenz.materialize.MaterializeBuilder;
 /**
  * @author Christian Basler
  */
-public class DetailActivity extends AppCompatActivity {
+public abstract class DetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

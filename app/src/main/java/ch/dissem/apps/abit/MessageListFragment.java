@@ -130,15 +130,12 @@ public class MessageListFragment extends Fragment implements ListHolder {
         // Show the dummy content as text in a TextView.
         FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id
             .fab_compose_message);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity().getApplicationContext(),
-                    ComposeMessageActivity.class);
-                intent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, Singleton.getIdentity
-                    (getActivity()));
-                startActivity(intent);
-            }
+        fab.setOnClickListener(view -> {
+            Intent intent = new Intent(getActivity().getApplicationContext(),
+                ComposeMessageActivity.class);
+            intent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, Singleton.getIdentity
+                (getActivity()));
+            startActivity(intent);
         });
 
         // touch guard manager  (this class is required to suppress scrolling while swipe-dismiss
@@ -173,7 +170,7 @@ public class MessageListFragment extends Fragment implements ListHolder {
             }
 
             @Override
-            public void onItemViewClicked(View v, boolean pinned) {
+            public void onItemViewClicked(View v) {
                 int position = recyclerView.getChildAdapterPosition(v);
                 adapter.setSelectedPosition(position);
                 if (position != RecyclerView.NO_POSITION) {

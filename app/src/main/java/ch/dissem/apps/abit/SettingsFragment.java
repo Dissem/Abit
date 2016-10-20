@@ -36,8 +36,8 @@ import static ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE;
  * @author Christian Basler
  */
 public class SettingsFragment
-        extends PreferenceFragment
-        implements SharedPreferences.OnSharedPreferenceChangeListener {
+    extends PreferenceFragment
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,27 +46,21 @@ public class SettingsFragment
         addPreferencesFromResource(R.xml.preferences);
 
         Preference about = findPreference("about");
-        about.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                new LibsBuilder()
-                        .withActivityTitle(getActivity().getString(R.string.about))
-                        .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
-                        .withAboutIconShown(true)
-                        .withAboutVersionShown(true)
-                        .withAboutDescription(getString(R.string.about_app))
-                        .start(getActivity());
-                return true;
-            }
+        about.setOnPreferenceClickListener(preference -> {
+            new LibsBuilder()
+                .withActivityTitle(getActivity().getString(R.string.about))
+                .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
+                .withAboutIconShown(true)
+                .withAboutVersionShown(true)
+                .withAboutDescription(getString(R.string.about_app))
+                .start(getActivity());
+            return true;
         });
 
         Preference status = findPreference("status");
-        status.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                startActivity(new Intent(getActivity(), StatusActivity.class));
-                return true;
-            }
+        status.setOnPreferenceClickListener(preference -> {
+            startActivity(new Intent(getActivity(), StatusActivity.class));
+            return true;
         });
     }
 
@@ -74,7 +68,7 @@ public class SettingsFragment
     public void onAttach(Context ctx) {
         super.onAttach(ctx);
         PreferenceManager.getDefaultSharedPreferences(ctx)
-                .registerOnSharedPreferenceChangeListener(this);
+            .registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override

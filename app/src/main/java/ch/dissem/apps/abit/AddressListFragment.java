@@ -145,11 +145,6 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
     }
 
     @Override
-    public void startActivityForResult(Intent intent, int requestCode) {
-        super.startActivityForResult(intent, requestCode);
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (data != null && data.hasExtra("SCAN_RESULT")) {
             Uri uri = Uri.parse(data.getStringExtra("SCAN_RESULT"));

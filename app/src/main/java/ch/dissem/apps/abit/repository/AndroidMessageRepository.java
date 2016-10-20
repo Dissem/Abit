@@ -275,14 +275,12 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
             db.setTransactionSuccessful();
         } catch (SQLiteConstraintException e) {
             LOG.trace(e.getMessage(), e);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
         } finally {
             db.endTransaction();
         }
     }
 
-    private void insert(SQLiteDatabase db, Plaintext message) throws IOException {
+    private void insert(SQLiteDatabase db, Plaintext message) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_IV, message.getInventoryVector() == null ? null : message
             .getInventoryVector().getHash());
@@ -302,7 +300,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
         message.setId(id);
     }
 
-    private void update(SQLiteDatabase db, Plaintext message) throws IOException {
+    private void update(SQLiteDatabase db, Plaintext message) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_IV, message.getInventoryVector() == null ? null : message
             .getInventoryVector().getHash());

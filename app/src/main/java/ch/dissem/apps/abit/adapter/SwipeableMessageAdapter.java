@@ -59,8 +59,8 @@ public class SwipeableMessageAdapter
 
     private List<Plaintext> data = Collections.emptyList();
     private EventListener eventListener;
-    private View.OnClickListener itemViewOnClickListener;
-    private View.OnClickListener swipeableViewContainerOnClickListener;
+    private final View.OnClickListener itemViewOnClickListener;
+    private final View.OnClickListener swipeableViewContainerOnClickListener;
 
     private Label label;
     private int selectedPosition;
@@ -75,12 +75,12 @@ public class SwipeableMessageAdapter
 
         void onItemArchived(Plaintext item);
 
-        void onItemViewClicked(View v, boolean pinned);
+        void onItemViewClicked(View v);
     }
 
     @SuppressWarnings("WeakerAccess")
     static class ViewHolder extends AbstractSwipeableItemViewHolder {
-        public FrameLayout container;
+        public final FrameLayout container;
         public final ImageView avatar;
         public final TextView sender;
         public final TextView subject;
@@ -102,18 +102,8 @@ public class SwipeableMessageAdapter
     }
 
     public SwipeableMessageAdapter() {
-        itemViewOnClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onItemViewClick(v);
-            }
-        };
-        swipeableViewContainerOnClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onSwipeableViewContainerClick(v);
-            }
-        };
+        itemViewOnClickListener = this::onItemViewClick;
+        swipeableViewContainerOnClickListener = this::onSwipeableViewContainerClick;
 
         // SwipeableItemAdapter requires stable ID, and also
         // have to implement the getItemId() method appropriately.
@@ -127,14 +117,14 @@ public class SwipeableMessageAdapter
 
     private void onItemViewClick(View v) {
         if (eventListener != null) {
-            eventListener.onItemViewClicked(v, true); // pinned
+            eventListener.onItemViewClicked(v);
         }
     }
 
     private void onSwipeableViewContainerClick(View v) {
         if (eventListener != null) {
             eventListener.onItemViewClicked(
-                RecyclerViewAdapterUtils.getParentViewHolderItemView(v), false);  // not pinned
+                RecyclerViewAdapterUtils.getParentViewHolderItemView(v));
         }
     }
 

@@ -38,14 +38,14 @@ public class ServicePowEngine implements ProofOfWorkEngine {
     private final Context ctx;
 
     private static final Object lock = new Object();
-    private Queue<PowItem> queue = new LinkedList<>();
+    private final Queue<PowItem> queue = new LinkedList<>();
     private PowBinder service;
 
     public ServicePowEngine(Context ctx) {
         this.ctx = ctx;
     }
 
-    private ServiceConnection connection = new ServiceConnection() {
+    private final ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             synchronized (lock) {

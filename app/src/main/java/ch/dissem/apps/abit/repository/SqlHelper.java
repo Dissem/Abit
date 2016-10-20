@@ -27,10 +27,10 @@ import ch.dissem.apps.abit.util.Assets;
  */
 public class SqlHelper extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 5;
-    public static final String DATABASE_NAME = "jabit.db";
+    private static final int DATABASE_VERSION = 5;
+    private static final String DATABASE_NAME = "jabit.db";
 
-    protected final Context ctx;
+    private final Context ctx;
 
     public SqlHelper(Context ctx) {
         super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -65,7 +65,7 @@ public class SqlHelper extends SQLiteOpenHelper {
         }
     }
 
-    protected void executeMigration(SQLiteDatabase db, String name) {
+    private void executeMigration(SQLiteDatabase db, String name) {
         for (String statement : Assets.readSqlStatements(ctx, "db/migration/" + name + ".sql")) {
             db.execSQL(statement);
         }

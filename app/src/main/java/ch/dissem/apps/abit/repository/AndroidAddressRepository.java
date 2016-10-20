@@ -169,14 +169,10 @@ public class AndroidAddressRepository implements AddressRepository {
 
     @Override
     public void save(BitmessageAddress address) {
-        try {
-            if (exists(address)) {
-                update(address);
-            } else {
-                insert(address);
-            }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+        if (exists(address)) {
+            update(address);
+        } else {
+            insert(address);
         }
     }
 
@@ -191,7 +187,7 @@ public class AndroidAddressRepository implements AddressRepository {
         }
     }
 
-    private void update(BitmessageAddress address) throws IOException {
+    private void update(BitmessageAddress address) {
         try {
             SQLiteDatabase db = sql.getWritableDatabase();
             // Create a new map of values, where column names are the keys
@@ -224,7 +220,7 @@ public class AndroidAddressRepository implements AddressRepository {
         }
     }
 
-    private void insert(BitmessageAddress address) throws IOException {
+    private void insert(BitmessageAddress address) {
         try {
             SQLiteDatabase db = sql.getWritableDatabase();
             // Create a new map of values, where column names are the keys

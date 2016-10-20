@@ -37,7 +37,7 @@ public abstract class AbstractItemListFragment<T> extends ListFragment implement
      * A dummy implementation of the {@link ListSelectionListener} interface that does
      * nothing. Used only when this fragment is not attached to an activity.
      */
-    private static ListSelectionListener<Object> dummyCallbacks = plaintext -> {
+    private static final ListSelectionListener<Object> dummyCallbacks = plaintext -> {
     };
     /**
      * The fragment's current callback object, which is notified of list item

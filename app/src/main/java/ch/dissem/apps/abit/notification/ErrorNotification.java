@@ -31,7 +31,7 @@ import ch.dissem.apps.abit.R;
 public class ErrorNotification extends AbstractNotification {
     public static final int ERROR_NOTIFICATION_ID = 4;
 
-    private NotificationCompat.Builder builder;
+    private final NotificationCompat.Builder builder;
 
     public ErrorNotification(Context ctx) {
         super(ctx);

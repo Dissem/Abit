@@ -31,10 +31,10 @@ public class Identicon extends Drawable {
     private static final int CENTER_COLUMN = 5;
 
     private final Paint paint;
-    private int color;
-    private int background;
-    private boolean[][] fields;
-    private boolean chan;
+    private final int color;
+    private final int background;
+    private final boolean[][] fields;
+    private final boolean chan;
     private final TextPaint textPaint;
 
     public Identicon(BitmessageAddress input) {

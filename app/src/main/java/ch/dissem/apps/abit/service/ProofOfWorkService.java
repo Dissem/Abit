@@ -37,9 +37,9 @@ import static ch.dissem.apps.abit.notification.ProofOfWorkNotification.ONGOING_N
  */
 public class ProofOfWorkService extends Service {
     // Object to use as a thread-safe lock
-    private static ProofOfWorkEngine engine = new MultiThreadedPOWEngine();
-    private static boolean calculating;
+    private static final ProofOfWorkEngine engine = new MultiThreadedPOWEngine();
     private static final Queue<PowItem> queue = new LinkedList<>();
+    private static boolean calculating;
     private ProofOfWorkNotification notification;
 
     @Override

@@ -29,11 +29,13 @@ import ch.dissem.bitmessage.BitmessageContext;
 public class WifiReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context ctx, Intent intent) {
-        if (Preferences.isWifiOnly(ctx)) {
-            BitmessageContext bmc = Singleton.getBitmessageContext(ctx);
+        if ("android.net.conn.CONNECTIVITY_CHANGE".equals(intent.getAction())) {
+            if (Preferences.isWifiOnly(ctx)) {
+                BitmessageContext bmc = Singleton.getBitmessageContext(ctx);
 
-            if (isConnectedToMeteredNetwork(ctx) && bmc.isRunning()) {
-                bmc.shutdown();
+                if (isConnectedToMeteredNetwork(ctx) && bmc.isRunning()) {
+                    bmc.shutdown();
+                }
             }
         }
     }
@@ -43,7 +45,7 @@ public class WifiReceiver extends BroadcastReceiver {
         if (netInfo == null || !netInfo.isConnectedOrConnecting()) {
             return false;
         }
-        switch (netInfo.getType()){
+        switch (netInfo.getType()) {
             case ConnectivityManager.TYPE_ETHERNET:
             case ConnectivityManager.TYPE_WIFI:
                 return false;
