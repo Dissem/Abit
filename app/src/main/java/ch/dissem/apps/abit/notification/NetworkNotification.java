@@ -27,21 +27,26 @@ import java.util.TimerTask;
 
 import ch.dissem.apps.abit.MainActivity;
 import ch.dissem.apps.abit.R;
+import ch.dissem.apps.abit.service.BitmessageIntentService;
 import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.bitmessage.utils.Property;
+
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+import static ch.dissem.apps.abit.MainActivity.updateNodeSwitch;
 
 /**
  * Shows the network status (as long as the client is connected as a full node)
  */
 public class NetworkNotification extends AbstractNotification {
-    public static final int ONGOING_NOTIFICATION_ID = 2;
+    public static final int NETWORK_NOTIFICATION_ID = 2;
 
-    private NotificationCompat.Builder builder;
+    private final NotificationCompat.Builder builder;
+    private Timer timer;
 
     public NetworkNotification(Context ctx) {
         super(ctx);
-        Intent showMessageIntent = new Intent(ctx, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 1, showMessageIntent, 0);
+        Intent showAppIntent = new Intent(ctx, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 1, showAppIntent, 0);
         builder = new NotificationCompat.Builder(ctx);
         builder.setSmallIcon(R.drawable.ic_notification_full_node)
             .setContentTitle(ctx.getString(R.string.bitmessage_full_node))
@@ -58,10 +63,7 @@ public class NetworkNotification extends AbstractNotification {
         Property connections = BitmessageService.getStatus().getProperty("network", "connections");
         if (!running) {
             builder.setContentText(ctx.getString(R.string.connection_info_disconnected));
-            MainActivity mainActivity = MainActivity.getInstance();
-            if (mainActivity != null) {
-                mainActivity.updateNodeSwitch();
-            }
+            updateNodeSwitch();
         } else if (connections.getProperties().length == 0) {
             builder.setContentText(ctx.getString(R.string.connection_info_pending));
         } else {
@@ -80,6 +82,19 @@ public class NetworkNotification extends AbstractNotification {
             }
             builder.setContentText(info);
         }
+        builder.mActions.clear();
+        Intent intent = new Intent(ctx, BitmessageIntentService.class);
+        if (running) {
+            intent.putExtra(BitmessageIntentService.EXTRA_SHUTDOWN_NODE, true);
+            builder.addAction(R.drawable.ic_notification_node_stop,
+                ctx.getString(R.string.full_node_stop),
+                PendingIntent.getService(ctx, 0, intent, FLAG_UPDATE_CURRENT));
+        } else {
+            intent.putExtra(BitmessageIntentService.EXTRA_STARTUP_NODE, true);
+            builder.addAction(R.drawable.ic_notification_node_start,
+                ctx.getString(R.string.full_node_restart),
+                PendingIntent.getService(ctx, 1, intent, FLAG_UPDATE_CURRENT));
+        }
         notification = builder.build();
         return running;
     }
@@ -88,7 +103,8 @@ public class NetworkNotification extends AbstractNotification {
     public void show() {
         super.show();
 
-        new Timer().schedule(new TimerTask() {
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 if (!update()) {
@@ -99,14 +115,28 @@ public class NetworkNotification extends AbstractNotification {
         }, 10_000, 10_000);
     }
 
+    public void showShutdown() {
+        if (timer != null) {
+            timer.cancel();
+        }
+        update();
+        super.show();
+    }
+
     @Override
     protected int getNotificationId() {
-        return ONGOING_NOTIFICATION_ID;
+        return NETWORK_NOTIFICATION_ID;
     }
 
     public void connecting() {
         builder.setOngoing(true);
         builder.setContentText(ctx.getString(R.string.connection_info_pending));
+        Intent intent = new Intent(ctx, BitmessageIntentService.class);
+        intent.putExtra(BitmessageIntentService.EXTRA_SHUTDOWN_NODE, true);
+        builder.mActions.clear();
+        builder.addAction(R.drawable.ic_notification_node_stop,
+            ctx.getString(R.string.full_node_stop),
+            PendingIntent.getService(ctx, 0, intent, FLAG_UPDATE_CURRENT));
         notification = builder.build();
     }
 }

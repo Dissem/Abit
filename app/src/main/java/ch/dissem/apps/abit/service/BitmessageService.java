@@ -18,14 +18,14 @@ package ch.dissem.apps.abit.service;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 
 import ch.dissem.apps.abit.notification.NetworkNotification;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.utils.Property;
 
-import static ch.dissem.apps.abit.notification.NetworkNotification.ONGOING_NOTIFICATION_ID;
+import static ch.dissem.apps.abit.notification.NetworkNotification.NETWORK_NOTIFICATION_ID;
 
 /**
  * Define a Service that returns an IBinder for the
@@ -44,55 +44,41 @@ public class BitmessageService extends Service {
 
     @Override
     public void onCreate() {
-        synchronized (BitmessageService.class) {
-            if (bmc == null) {
-                bmc = Singleton.getBitmessageContext(this);
-            }
-            notification = new NetworkNotification(this);
+        if (bmc == null) {
+            bmc = Singleton.getBitmessageContext(this);
         }
+        notification = new NetworkNotification(this);
+        running = false;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        return Service.START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-        if (bmc.isRunning()) bmc.shutdown();
-        running = false;
-    }
-
-    /**
-     * Return an object that allows the system to invoke
-     * the sync adapter.
-     */
-    @Override
-    public IBinder onBind(Intent intent) {
-        return new BitmessageBinder();
-    }
-
-    public class BitmessageBinder extends Binder {
-        public void startupNode() {
-            startService(new Intent(BitmessageService.this, BitmessageService.class));
+        if (!isRunning()) {
             running = true;
             notification.connecting();
-            startForeground(ONGOING_NOTIFICATION_ID, notification.getNotification());
+            startForeground(NETWORK_NOTIFICATION_ID, notification.getNotification());
             if (!bmc.isRunning()) {
                 bmc.startup();
             }
             notification.show();
         }
+        return Service.START_STICKY;
+    }
 
-        public void shutdownNode() {
-            if (bmc.isRunning()) {
-                bmc.shutdown();
-            }
-            running = false;
-            stopForeground(true);
-            notification.show();
-            stopSelf();
+    @Override
+    public void onDestroy() {
+        if (bmc.isRunning()) {
+            bmc.shutdown();
         }
+        running = false;
+        notification.showShutdown();
+        stopSelf();
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
     public static Property getStatus() {

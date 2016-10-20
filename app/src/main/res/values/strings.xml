@@ -95,4 +95,7 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="select_file_title">Select a File</string>
     <string name="select_identities_to_import">Please select the identities you want to import:</string>
     <string name="import_input_description">You can just paste the contents of an export or a ‘keys.dat’ file</string>
+    <string name="full_node_stop">shutdown node</string>
+    <string name="full_node_restart">restart node</string>
+    <string name="startup_node">Startup node</string>
 </resources>

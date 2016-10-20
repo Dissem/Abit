@@ -96,4 +96,7 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="select_file_title">Datei auswählen</string>
     <string name="select_identities_to_import">Bitte wähle die zu importierenden Identitäten:</string>
     <string name="import_input_description">Du kannst einfach den Inhalt eines Exports oder einer ‘keys.dat’-Datei einfügen</string>
+    <string name="full_node_restart">Knoten starten</string>
+    <string name="full_node_stop">Knoten beenden</string>
+    <string name="startup_node">Knoten starten</string>
 </resources>

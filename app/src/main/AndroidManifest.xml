@@ -48,6 +48,10 @@
                 android:value=".MainActivity"/>
         </activity>
         <activity
+            android:name=".dialog.FullNodeDialogActivity"
+            android:label="@string/full_node"
+            android:theme="@style/Theme.AppCompat.Light.Dialog"/>
+        <activity
             android:name=".ComposeMessageActivity"
             android:label="@string/compose_message"
             android:parentActivityName=".MainActivity">
@@ -125,8 +129,12 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.BitmessageService"/>
-        <service android:name=".service.ProofOfWorkService"/>
+        <service
+            android:name=".service.BitmessageService"
+            android:exported="false"/>
+        <service
+            android:name=".service.ProofOfWorkService"
+            android:exported="false"/>
 
         <!-- Synchronization -->
         <provider
@@ -137,6 +145,7 @@
 
         <service
             android:name=".synchronization.AuthenticatorService"
+            android:exported="true"
             tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>
@@ -158,6 +167,9 @@
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter"/>
         </service>
+        <service
+            android:name=".service.BitmessageIntentService"
+            android:exported="false"/>
 
         <!-- Receive Wi-Fi connection state changes -->
         <receiver android:name=".listener.WifiReceiver">

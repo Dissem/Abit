@@ -16,11 +16,9 @@
 
 package ch.dissem.apps.abit;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.util.Linkify;
-import android.text.util.Linkify.TransformFilter;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,7 +31,6 @@ import android.widget.TextView;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 
 import java.util.Iterator;
-import java.util.regex.Matcher;
 
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.service.Singleton;
@@ -44,10 +41,6 @@ import ch.dissem.bitmessage.entity.valueobject.Label;
 import ch.dissem.bitmessage.ports.MessageRepository;
 
 import static android.text.util.Linkify.WEB_URLS;
-import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_CONTENT;
-import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_IDENTITY;
-import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_RECIPIENT;
-import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_SUBJECT;
 import static ch.dissem.apps.abit.util.Constants.BITMESSAGE_ADDRESS_PATTERN;
 import static ch.dissem.apps.abit.util.Constants.BITMESSAGE_URL_SCHEMA;
 
@@ -113,11 +106,8 @@ public class MessageDetailFragment extends Fragment {
 
             Linkify.addLinks(messageBody, WEB_URLS);
             Linkify.addLinks(messageBody, BITMESSAGE_ADDRESS_PATTERN, BITMESSAGE_URL_SCHEMA, null,
-                new TransformFilter() {
-                    public final String transformUrl(final Matcher match, String url) {
-                        return match.group();
-                    }
-                });
+                (match, url) -> match.group()
+            );
 
             messageBody.setLinksClickable(true);
             messageBody.setTextIsSelectable(true);
@@ -158,22 +148,7 @@ public class MessageDetailFragment extends Fragment {
         MessageRepository messageRepo = Singleton.getMessageRepository(getContext());
         switch (menuItem.getItemId()) {
             case R.id.reply:
-                Intent replyIntent = new Intent(getActivity().getApplicationContext(),
-                    ComposeMessageActivity.class);
-                replyIntent.putExtra(EXTRA_RECIPIENT, item.getFrom());
-                replyIntent.putExtra(EXTRA_IDENTITY, item.getTo());
-                String prefix;
-                if (item.getSubject().length() >= 3 && item.getSubject().substring(0, 3)
-                    .equalsIgnoreCase("RE:")) {
-                    prefix = "";
-                } else {
-                    prefix = "RE: ";
-                }
-                replyIntent.putExtra(EXTRA_SUBJECT, prefix + item.getSubject());
-                replyIntent.putExtra(EXTRA_CONTENT,
-                    "\n\n------------------------------------------------------\n"
-                        + item.getText());
-                startActivity(replyIntent);
+                ComposeMessageActivity.launchReplyTo(this, item);
                 return true;
             case R.id.delete:
                 if (isInTrash(item)) {

@@ -17,19 +17,14 @@
 package ch.dissem.apps.abit;
 
 import android.app.AlertDialog;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
@@ -59,10 +54,10 @@ import java.util.Collection;
 import java.util.List;
 
 import ch.dissem.apps.abit.dialog.AddIdentityDialogFragment;
+import ch.dissem.apps.abit.dialog.FullNodeDialogActivity;
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
 import ch.dissem.apps.abit.service.BitmessageService;
-import ch.dissem.apps.abit.service.BitmessageService.BitmessageBinder;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
 import ch.dissem.apps.abit.util.Preferences;
@@ -71,6 +66,7 @@ import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 
+import static ch.dissem.apps.abit.ComposeMessageActivity.launchReplyTo;
 import static ch.dissem.apps.abit.service.BitmessageService.isRunning;
 
 
@@ -94,6 +90,7 @@ import static ch.dissem.apps.abit.service.BitmessageService.isRunning;
 public class MainActivity extends AppCompatActivity
     implements ListSelectionListener<Serializable>, ActionBarListener {
     public static final String EXTRA_SHOW_MESSAGE = "ch.dissem.abit.ShowMessage";
+    public static final String EXTRA_REPLY_TO_MESSAGE = "ch.dissem.abit.ReplyToMessage";
     public static final String ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox";
 
     private static final Logger LOG = LoggerFactory.getLogger(MainActivity.class);
@@ -109,22 +106,6 @@ public class MainActivity extends AppCompatActivity
      * device.
      */
     private boolean twoPane;
-
-    private static BitmessageBinder service;
-    private static boolean bound;
-    private static ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MainActivity.service = (BitmessageBinder) service;
-            MainActivity.bound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            service = null;
-            bound = false;
-        }
-    };
 
     private Label selectedLabel;
 
@@ -172,8 +153,13 @@ public class MainActivity extends AppCompatActivity
         Singleton.getMessageListener(this).resetNotification();
 
         // handle intents
-        if (getIntent().hasExtra(EXTRA_SHOW_MESSAGE)) {
-            onItemSelected(getIntent().getSerializableExtra(EXTRA_SHOW_MESSAGE));
+        Intent intent = getIntent();
+        if (intent.hasExtra(EXTRA_SHOW_MESSAGE)) {
+            onItemSelected(intent.getSerializableExtra(EXTRA_SHOW_MESSAGE));
+        }
+        if (intent.hasExtra(EXTRA_REPLY_TO_MESSAGE)) {
+            Plaintext item = (Plaintext) intent.getSerializableExtra(EXTRA_REPLY_TO_MESSAGE);
+            launchReplyTo(this, item);
         }
 
         if (Preferences.useTrustedNode(this)) {
@@ -345,9 +331,9 @@ public class MainActivity extends AppCompatActivity
             .withChecked(isRunning())
             .withOnCheckedChangeListener((drawerItem, buttonView, isChecked) -> {
                 if (isChecked) {
-                    checkAndStartNode(buttonView);
+                    checkAndStartNode();
                 } else {
-                    service.shutdownNode();
+                    stopService(new Intent(this, BitmessageService.class));
                 }
             });
 
@@ -448,23 +434,11 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void checkAndStartNode(final CompoundButton buttonView) {
-        if (service == null) return;
-
+    private void checkAndStartNode() {
         if (Preferences.isConnectionAllowed(MainActivity.this)) {
-            service.startupNode();
+            startService(new Intent(this, BitmessageService.class));
         } else {
-            new AlertDialog.Builder(MainActivity.this)
-                .setMessage(R.string.full_node_warning)
-                .setPositiveButton(
-                    android.R.string.yes,
-                    (dialog, which) -> service.startupNode()
-                )
-                .setNegativeButton(
-                    android.R.string.no,
-                    (dialog, which) -> updateNodeSwitch()
-                )
-                .show();
+            startActivity(new Intent(this, FullNodeDialogActivity.class));
         }
     }
 
@@ -483,11 +457,14 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void updateNodeSwitch() {
-        runOnUiThread(() -> {
-            nodeSwitch.withChecked(bmc.isRunning());
-            drawer.updateStickyFooterItem(nodeSwitch);
-        });
+    public static void updateNodeSwitch() {
+        MainActivity i = getInstance();
+        if (i != null) {
+            i.runOnUiThread(() -> {
+                i.nodeSwitch.withChecked(i.bmc.isRunning());
+                i.drawer.updateStickyFooterItem(i.nodeSwitch);
+            });
+        }
     }
 
     private void showSelectedLabel() {
@@ -554,22 +531,6 @@ public class MainActivity extends AppCompatActivity
 
     public Label getSelectedLabel() {
         return selectedLabel;
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        bindService(new Intent(this, BitmessageService.class), connection, Context
-            .BIND_AUTO_CREATE);
-    }
-
-    @Override
-    protected void onStop() {
-        if (bound) {
-            unbindService(connection);
-            bound = false;
-        }
-        super.onStop();
     }
 
     public static MainActivity getInstance() {

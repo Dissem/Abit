@@ -16,9 +16,15 @@
 
 package ch.dissem.apps.abit;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+
+import ch.dissem.bitmessage.entity.Plaintext;
 
 /**
  * Compose a new message.
@@ -46,7 +52,33 @@ public class ComposeMessageActivity extends AppCompatActivity {
         ComposeMessageFragment fragment = new ComposeMessageFragment();
         fragment.setArguments(getIntent().getExtras());
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.content, fragment)
-                .commit();
+            .replace(R.id.content, fragment)
+            .commit();
+    }
+
+    public static void launchReplyTo(Fragment fragment, Plaintext item) {
+        fragment.startActivity(getReplyIntent(fragment.getActivity(), item));
+    }
+
+    public static void launchReplyTo(Activity activity, Plaintext item) {
+        activity.startActivity(getReplyIntent(activity, item));
+    }
+
+    private static Intent getReplyIntent(Context ctx, Plaintext item) {
+        Intent replyIntent = new Intent(ctx, ComposeMessageActivity.class);
+        replyIntent.putExtra(EXTRA_RECIPIENT, item.getFrom());
+        replyIntent.putExtra(EXTRA_IDENTITY, item.getTo());
+        String prefix;
+        if (item.getSubject().length() >= 3 && item.getSubject().substring(0, 3)
+            .equalsIgnoreCase("RE:")) {
+            prefix = "";
+        } else {
+            prefix = "RE: ";
+        }
+        replyIntent.putExtra(EXTRA_SUBJECT, prefix + item.getSubject());
+        replyIntent.putExtra(EXTRA_CONTENT,
+            "\n\n------------------------------------------------------\n"
+                + item.getText());
+        return replyIntent;
     }
 }
