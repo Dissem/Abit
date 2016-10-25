@@ -18,7 +18,6 @@ package ch.dissem.apps.abit;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,6 +28,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
@@ -43,10 +43,15 @@ import ch.dissem.apps.abit.adapter.SwipeableMessageAdapter;
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
 import ch.dissem.apps.abit.service.Singleton;
+import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 import ch.dissem.bitmessage.ports.MessageRepository;
+import io.github.yavski.fabspeeddial.FabSpeedDial;
+import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
 
+import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_BROADCAST;
+import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_IDENTITY;
 import static ch.dissem.apps.abit.MessageDetailFragment.isInTrash;
 
 /**
@@ -128,14 +133,36 @@ public class MessageListFragment extends Fragment implements ListHolder {
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
 
         // Show the dummy content as text in a TextView.
-        FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id
+        FabSpeedDial fab = (FabSpeedDial) rootView.findViewById(R.id
             .fab_compose_message);
-        fab.setOnClickListener(view -> {
-            Intent intent = new Intent(getActivity().getApplicationContext(),
-                ComposeMessageActivity.class);
-            intent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, Singleton.getIdentity
-                (getActivity()));
-            startActivity(intent);
+        fab.setMenuListener(new SimpleMenuListenerAdapter() {
+            @Override
+            public boolean onMenuItemSelected(MenuItem menuItem) {
+                BitmessageAddress identity = Singleton.getIdentity(getActivity());
+                if (identity == null) {
+                    Toast.makeText(getActivity(), R.string.no_identity_warning,
+                        Toast.LENGTH_LONG).show();
+                    return false;
+                } else {
+                    switch (menuItem.getItemId()) {
+                        case R.id.action_compose_message: {
+                            Intent intent = new Intent(getActivity(), ComposeMessageActivity.class);
+                            intent.putExtra(EXTRA_IDENTITY, identity);
+                            startActivity(intent);
+                            return true;
+                        }
+                        case R.id.action_compose_broadcast: {
+                            Intent intent = new Intent(getActivity(), ComposeMessageActivity.class);
+                            intent.putExtra(EXTRA_IDENTITY, identity);
+                            intent.putExtra(EXTRA_BROADCAST, true);
+                            startActivity(intent);
+                            return true;
+                        }
+                        default:
+                            return false;
+                    }
+                }
+            }
         });
 
         // touch guard manager  (this class is required to suppress scrolling while swipe-dismiss

@@ -33,6 +33,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -115,10 +116,15 @@ public class AddressDetailFragment extends Fragment {
         final Activity ctx = getActivity();
         switch (menuItem.getItemId()) {
             case R.id.write_message: {
-                Intent intent = new Intent(ctx, ComposeMessageActivity.class);
-                intent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, Singleton.getIdentity(ctx));
-                intent.putExtra(ComposeMessageActivity.EXTRA_RECIPIENT, item);
-                startActivity(intent);
+                BitmessageAddress identity = Singleton.getIdentity(ctx);
+                if (identity == null) {
+                    Toast.makeText(ctx, R.string.no_identity_warning, Toast.LENGTH_LONG).show();
+                } else {
+                    Intent intent = new Intent(ctx, ComposeMessageActivity.class);
+                    intent.putExtra(ComposeMessageActivity.EXTRA_IDENTITY, identity);
+                    intent.putExtra(ComposeMessageActivity.EXTRA_RECIPIENT, item);
+                    startActivity(intent);
+                }
                 return true;
             }
             case R.id.delete: {

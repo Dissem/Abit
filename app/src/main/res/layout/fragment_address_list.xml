@@ -8,12 +8,10 @@
         android:id="@id/android:list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:choiceMode="singleChoice"
-
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-
+        android:choiceMode="singleChoice"
         android:clipToPadding="false"
         android:paddingBottom="88dp"
         android:scrollbarStyle="outsideOverlay"/>
@@ -26,8 +24,8 @@
         android:layout_alignParentEnd="true"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_action_add_contact"
         app:elevation="8dp"
+        app:fabDrawable="@drawable/ic_action_add_contact"
         app:fabGravity="bottom_end"
         app:fabMenu="@menu/fab_address"/>
 </RelativeLayout>

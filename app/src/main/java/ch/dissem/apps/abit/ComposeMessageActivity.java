@@ -34,6 +34,7 @@ public class ComposeMessageActivity extends AppCompatActivity {
     public static final String EXTRA_RECIPIENT = "ch.dissem.abit.Message.RECIPIENT";
     public static final String EXTRA_SUBJECT = "ch.dissem.abit.Message.SUBJECT";
     public static final String EXTRA_CONTENT = "ch.dissem.abit.Message.CONTENT";
+    public static final String EXTRA_BROADCAST = "ch.dissem.abit.Message.IS_BROADCAST";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

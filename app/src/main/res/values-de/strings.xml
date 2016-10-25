@@ -99,4 +99,6 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="full_node_restart">Knoten starten</string>
     <string name="full_node_stop">Knoten beenden</string>
     <string name="startup_node">Knoten starten</string>
+    <string name="personal_message">Nachricht</string>
+    <string name="no_identity_warning">Bitte versuchs nochmals wenn eine Identität verfügbar ist.</string>
 </resources>

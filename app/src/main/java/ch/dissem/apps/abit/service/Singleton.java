@@ -17,9 +17,12 @@
 package ch.dissem.apps.abit.service;
 
 import android.content.Context;
+import android.os.AsyncTask;
+import android.widget.Toast;
 
 import java.util.List;
 
+import ch.dissem.apps.abit.MainActivity;
 import ch.dissem.apps.abit.R;
 import ch.dissem.apps.abit.adapter.AndroidCryptography;
 import ch.dissem.apps.abit.adapter.SwitchingProofOfWorkEngine;
@@ -34,6 +37,7 @@ import ch.dissem.apps.abit.repository.SqlHelper;
 import ch.dissem.apps.abit.util.Constants;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
+import ch.dissem.bitmessage.entity.payload.Pubkey;
 import ch.dissem.bitmessage.networking.nio.NioNetworkHandler;
 import ch.dissem.bitmessage.ports.AddressRepository;
 import ch.dissem.bitmessage.ports.MessageRepository;
@@ -50,6 +54,7 @@ public class Singleton {
     private static MessageListener messageListener;
     private static BitmessageAddress identity;
     private static AndroidProofOfWorkRepository powRepo;
+    private static boolean creatingIdentity;
 
     public static BitmessageContext getBitmessageContext(Context context) {
         if (bitmessageContext == null) {
@@ -110,15 +115,39 @@ public class Singleton {
             BitmessageContext bmc = getBitmessageContext(ctx);
             synchronized (Singleton.class) {
                 if (identity == null) {
-                    // FIXME: this may block the UI, there must be a better way!
                     List<BitmessageAddress> identities = bmc.addresses()
                         .getIdentities();
                     if (identities.size() > 0) {
                         identity = identities.get(0);
                     } else {
-                        identity = bmc.createIdentity(false);
-                        identity.setAlias(ctx.getString(R.string.alias_default_identity));
-                        bmc.addresses().save(identity);
+                        if (!creatingIdentity) {
+                            creatingIdentity = true;
+                            new AsyncTask<Void, Void, BitmessageAddress>() {
+                                @Override
+                                protected BitmessageAddress doInBackground(Void... args) {
+                                    BitmessageAddress identity = bmc.createIdentity(false,
+                                        Pubkey.Feature.DOES_ACK);
+                                    identity.setAlias(
+                                        ctx.getString(R.string.alias_default_identity)
+                                    );
+                                    bmc.addresses().save(identity);
+                                    return identity;
+                                }
+
+                                @Override
+                                protected void onPostExecute(BitmessageAddress identity) {
+                                    Singleton.identity = identity;
+                                    Toast.makeText(ctx,
+                                        R.string.toast_identity_created,
+                                        Toast.LENGTH_SHORT).show();
+                                    MainActivity mainActivity = MainActivity.getInstance();
+                                    if (mainActivity != null) {
+                                        mainActivity.addIdentityEntry(identity);
+                                    }
+                                }
+                            }.execute();
+                        }
+                        return null;
                     }
                 }
             }

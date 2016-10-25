@@ -53,6 +53,7 @@ public class BitmessageIntentService extends IntentService {
             Plaintext item = (Plaintext) intent.getSerializableExtra(EXTRA_DELETE_MESSAGE);
             bmc.labeler().delete(item);
             bmc.messages().save(item);
+            Singleton.getMessageListener(this).resetNotification();
         }
         if (intent.hasExtra(EXTRA_STARTUP_NODE)) {
             if (Preferences.isConnectionAllowed(this)) {

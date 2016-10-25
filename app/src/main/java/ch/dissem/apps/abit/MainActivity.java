@@ -16,7 +16,6 @@
 
 package ch.dissem.apps.abit;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -26,6 +25,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.mikepenz.community_material_typeface_library.CommunityMaterial;
@@ -66,6 +66,7 @@ import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 
+import static android.widget.Toast.LENGTH_LONG;
 import static ch.dissem.apps.abit.ComposeMessageActivity.launchReplyTo;
 import static ch.dissem.apps.abit.service.BitmessageService.isRunning;
 
@@ -223,13 +224,7 @@ public class MainActivity extends AppCompatActivity
         }
         if (profiles.isEmpty()) {
             // Create an initial identity
-            BitmessageAddress identity = Singleton.getIdentity(this);
-            profiles.add(new ProfileDrawerItem()
-                .withIcon(new Identicon(identity))
-                .withName(identity.toString())
-                .withEmail(identity.getAddress())
-                .withTag(identity)
-            );
+            Singleton.getIdentity(this);
         }
         profiles.add(new ProfileSettingDrawerItem()
             .withName(getString(R.string.add_identity))
@@ -256,11 +251,15 @@ public class MainActivity extends AppCompatActivity
                         addIdentityDialog();
                         break;
                     case MANAGE_IDENTITY:
-                        Intent show = new Intent(MainActivity.this,
-                            AddressDetailActivity.class);
-                        show.putExtra(AddressDetailFragment.ARG_ITEM,
-                            Singleton.getIdentity(getApplicationContext()));
-                        startActivity(show);
+                        BitmessageAddress identity = Singleton.getIdentity(this);
+                        if (identity == null) {
+                            Toast.makeText(this, R.string.no_identity_warning, LENGTH_LONG).show();
+                        } else {
+                            Intent show = new Intent(MainActivity.this,
+                                AddressDetailActivity.class);
+                            show.putExtra(AddressDetailFragment.ARG_ITEM, identity);
+                            startActivity(show);
+                        }
                         break;
                     default:
                         if (profile instanceof ProfileDrawerItem) {

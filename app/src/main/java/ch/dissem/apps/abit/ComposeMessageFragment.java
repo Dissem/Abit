@@ -34,6 +34,7 @@ import ch.dissem.apps.abit.adapter.ContactAdapter;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 
+import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_BROADCAST;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_CONTENT;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_IDENTITY;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_RECIPIENT;
@@ -50,6 +51,7 @@ public class ComposeMessageFragment extends Fragment {
     private AutoCompleteTextView recipientInput;
     private EditText subjectInput;
     private EditText bodyInput;
+    private boolean broadcast;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -67,6 +69,7 @@ public class ComposeMessageFragment extends Fragment {
             } else {
                 throw new RuntimeException("No identity set for ComposeMessageFragment");
             }
+            broadcast = getArguments().getBoolean(EXTRA_BROADCAST, false);
             if (getArguments().containsKey(EXTRA_RECIPIENT)) {
                 recipient = (BitmessageAddress) getArguments().getSerializable(EXTRA_RECIPIENT);
             }
@@ -87,23 +90,28 @@ public class ComposeMessageFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_compose_message, container, false);
         recipientInput = (AutoCompleteTextView) rootView.findViewById(R.id.recipient);
-        final ContactAdapter adapter = new ContactAdapter(getContext());
-        recipientInput.setAdapter(adapter);
-        recipientInput.setOnItemClickListener(
-            (parent, view, position, id) -> recipient = adapter.getItem(position)
-        );
-        recipientInput.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                recipient = adapter.getItem(position);
-            }
+        if (broadcast) {
+            recipientInput.setVisibility(View.GONE);
+        } else {
+            final ContactAdapter adapter = new ContactAdapter(getContext());
+            recipientInput.setAdapter(adapter);
+            recipientInput.setOnItemClickListener(
+                (parent, view, position, id) -> recipient = adapter.getItem(position)
+            );
+            recipientInput.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long
+                    id) {
+                    recipient = adapter.getItem(position);
+                }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
+            if (recipient != null) {
+                recipientInput.setText(recipient.toString());
             }
-        });
-        if (recipient != null) {
-            recipientInput.setText(recipient.toString());
         }
         subjectInput = (EditText) rootView.findViewById(R.id.subject);
         subjectInput.setText(subject);
@@ -132,25 +140,31 @@ public class ComposeMessageFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.send:
-                String inputString = recipientInput.getText().toString();
-                if (recipient == null || !recipient.toString().equals(inputString)) {
-                    try {
-                        recipient = new BitmessageAddress(inputString);
-                    } catch (Exception e) {
-                        List<BitmessageAddress> contacts = Singleton.getAddressRepository
-                            (getContext()).getContacts();
-                        for (BitmessageAddress contact : contacts) {
-                            if (inputString.equalsIgnoreCase(contact.getAlias())) {
-                                recipient = contact;
-                                if (inputString.equals(contact.getAlias()))
-                                    break;
+                if (broadcast) {
+                    Singleton.getBitmessageContext(getContext()).broadcast(identity,
+                        subjectInput.getText().toString(),
+                        bodyInput.getText().toString());
+                } else {
+                    String inputString = recipientInput.getText().toString();
+                    if (recipient == null || !recipient.toString().equals(inputString)) {
+                        try {
+                            recipient = new BitmessageAddress(inputString);
+                        } catch (Exception e) {
+                            List<BitmessageAddress> contacts = Singleton.getAddressRepository
+                                (getContext()).getContacts();
+                            for (BitmessageAddress contact : contacts) {
+                                if (inputString.equalsIgnoreCase(contact.getAlias())) {
+                                    recipient = contact;
+                                    if (inputString.equals(contact.getAlias()))
+                                        break;
+                                }
                             }
                         }
                     }
+                    Singleton.getBitmessageContext(getContext()).send(identity, recipient,
+                        subjectInput.getText().toString(),
+                        bodyInput.getText().toString());
                 }
-                Singleton.getBitmessageContext(getContext()).send(identity, recipient,
-                    subjectInput.getText().toString(),
-                    bodyInput.getText().toString());
                 getActivity().finish();
                 return true;
             default:

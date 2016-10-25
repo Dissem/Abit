@@ -244,15 +244,18 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
             db.beginTransaction();
 
             // save from address if necessary
+            BitmessageAddress savedAddress = ctx.getAddressRepository().getAddress(message
+                .getFrom().getAddress());
             if (message.getId() == null) {
-                BitmessageAddress savedAddress = ctx.getAddressRepository().getAddress(message
-                    .getFrom().getAddress());
-                if (savedAddress == null || savedAddress.getPrivateKey() == null) {
-                    if (savedAddress != null && savedAddress.getAlias() != null) {
-                        message.getFrom().setAlias(savedAddress.getAlias());
-                    }
+                if (savedAddress == null) {
                     ctx.getAddressRepository().save(message.getFrom());
+                } else if (savedAddress.getPubkey() == null) {
+                    savedAddress.setPubkey(message.getFrom().getPubkey());
+                    ctx.getAddressRepository().save(savedAddress);
                 }
+            }
+            if (savedAddress != null) {
+                message.getFrom().setAlias(savedAddress.getAlias());
             }
 
             // save message
