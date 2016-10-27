@@ -27,7 +27,7 @@ import ch.dissem.apps.abit.util.Assets;
  */
 public class SqlHelper extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
     private static final String DATABASE_NAME = "jabit.db";
 
     private final Context ctx;
@@ -59,6 +59,8 @@ public class SqlHelper extends SQLiteOpenHelper {
                 executeMigration(db, "V3.2__Update_table_message");
             case 4:
                 executeMigration(db, "V3.3__Create_table_node");
+            case 5:
+                executeMigration(db, "V3.4__Add_label_outbox");
             default:
                 // Nothing to do. Let's assume we won't upgrade from a version that's newer than
                 // DATABASE_VERSION.

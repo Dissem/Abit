@@ -151,8 +151,6 @@ public class MainActivity extends AppCompatActivity
 
         createDrawer(toolbar, labels);
 
-        Singleton.getMessageListener(this).resetNotification();
-
         // handle intents
         Intent intent = getIntent();
         if (intent.hasExtra(EXTRA_SHOW_MESSAGE)) {
@@ -283,7 +281,8 @@ public class MainActivity extends AppCompatActivity
                 .withName(label.toString())
                 .withTag(label);
             if (label.getType() == null) {
-                item.withIcon(CommunityMaterial.Icon.cmd_label);
+                item.withIcon(CommunityMaterial.Icon.cmd_label)
+                    .withIconColor(label.getColor());
             } else {
                 switch (label.getType()) {
                     case INBOX:
@@ -291,6 +290,9 @@ public class MainActivity extends AppCompatActivity
                         break;
                     case DRAFT:
                         item.withIcon(CommunityMaterial.Icon.cmd_file);
+                        break;
+                    case OUTBOX:
+                        item.withIcon(CommunityMaterial.Icon.cmd_outbox);
                         break;
                     case SENT:
                         item.withIcon(CommunityMaterial.Icon.cmd_send);
@@ -386,6 +388,7 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         updateUnread();
         updateNodeSwitch();
+        Singleton.getMessageListener(this).resetNotification();
         super.onResume();
     }
 
@@ -397,13 +400,10 @@ public class MainActivity extends AppCompatActivity
             .withEmail(identity.getAddress())
             .withTag(identity);
         if (accountHeader.getProfiles() != null) {
-            // we know that there are 2 setting
-            // elements.
+            // we know that there are 2 setting elements.
             // Set the new profile above them ;)
             accountHeader.addProfile(
-                newProfile, accountHeader
-                    .getProfiles().size()
-                    - 2);
+                newProfile, accountHeader.getProfiles().size() - 2);
         } else {
             accountHeader.addProfiles(newProfile);
         }

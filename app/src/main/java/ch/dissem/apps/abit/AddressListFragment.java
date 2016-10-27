@@ -93,13 +93,14 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
                     convertView = inflater.inflate(R.layout.subscription_row, parent, false);
                 }
                 BitmessageAddress item = getItem(position);
+                assert item != null;
                 ((ImageView) convertView.findViewById(R.id.avatar)).setImageDrawable(new
                     Identicon(item));
                 TextView name = (TextView) convertView.findViewById(R.id.name);
                 name.setText(item.toString());
                 TextView streamNumber = (TextView) convertView.findViewById(R.id.stream_number);
-                streamNumber.setText(getContext().getString(R.string.stream_number, item
-                    .getStream()));
+                streamNumber.setText(getContext().getString(R.string.stream_number,
+                    item.getStream()));
                 convertView.findViewById(R.id.subscribed).setVisibility(item.isSubscribed() ?
                     View.VISIBLE : View.INVISIBLE);
                 return convertView;

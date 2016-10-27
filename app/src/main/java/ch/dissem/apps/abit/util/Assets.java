@@ -17,12 +17,17 @@
 package ch.dissem.apps.abit.util;
 
 import android.content.Context;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.StringRes;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
+
+import ch.dissem.apps.abit.R;
+import ch.dissem.bitmessage.entity.Plaintext;
 
 /**
  * Helper class to work with Assets.
@@ -42,6 +47,46 @@ public class Assets {
             return result;
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @DrawableRes
+    public static int getStatusDrawable(Plaintext.Status status) {
+        switch (status) {
+            case RECEIVED:
+                return 0;
+            case DRAFT:
+                return R.drawable.draft;
+            case PUBKEY_REQUESTED:
+                return R.drawable.public_key;
+            case DOING_PROOF_OF_WORK:
+                return R.drawable.ic_notification_proof_of_work;
+            case SENT:
+                return R.drawable.sent;
+            case SENT_ACKNOWLEDGED:
+                return R.drawable.sent_acknowledged;
+            default:
+                return 0;
+        }
+    }
+
+    @StringRes
+    public static int getStatusString(Plaintext.Status status) {
+        switch (status) {
+            case RECEIVED:
+                return R.string.status_received;
+            case DRAFT:
+                return R.string.status_draft;
+            case PUBKEY_REQUESTED:
+                return R.string.status_public_key;
+            case DOING_PROOF_OF_WORK:
+                return R.string.proof_of_work_title;
+            case SENT:
+                return R.string.status_sent;
+            case SENT_ACKNOWLEDGED:
+                return R.string.status_sent_acknowledged;
+            default:
+                return 0;
         }
     }
 }

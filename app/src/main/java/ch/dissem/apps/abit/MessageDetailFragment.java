@@ -34,6 +34,7 @@ import java.util.Iterator;
 
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.service.Singleton;
+import ch.dissem.apps.abit.util.Assets;
 import ch.dissem.apps.abit.util.Drawables;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
@@ -92,9 +93,12 @@ public class MessageDetailFragment extends Fragment {
         // Show the dummy content as text in a TextView.
         if (item != null) {
             ((TextView) rootView.findViewById(R.id.subject)).setText(item.getSubject());
+            ImageView status = (ImageView) rootView.findViewById(R.id.status);
+            status.setImageResource(Assets.getStatusDrawable(item.getStatus()));
+            status.setContentDescription(getString(Assets.getStatusString(item.getStatus())));
             BitmessageAddress sender = item.getFrom();
-            ((ImageView) rootView.findViewById(R.id.avatar)).setImageDrawable(new Identicon
-                (sender));
+            ((ImageView) rootView.findViewById(R.id.avatar))
+                .setImageDrawable(new Identicon(sender));
             ((TextView) rootView.findViewById(R.id.sender)).setText(sender.toString());
             if (item.getTo() != null) {
                 ((TextView) rootView.findViewById(R.id.recipient)).setText(item.getTo().toString());

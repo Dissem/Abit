@@ -123,6 +123,9 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
                 case DRAFT:
                     text = context.getString(R.string.draft);
                     break;
+                case OUTBOX:
+                    text = context.getString(R.string.outbox);
+                    break;
                 case SENT:
                     text = context.getString(R.string.sent);
                     break;
@@ -197,7 +200,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
             TABLE_NAME, projection,
             where,
             null, null, null,
-            COLUMN_RECEIVED + " DESC"
+            COLUMN_RECEIVED + " DESC, " + COLUMN_SENT + " DESC"
         )) {
             while (c.moveToNext()) {
                 byte[] iv = c.getBlob(c.getColumnIndex(COLUMN_IV));

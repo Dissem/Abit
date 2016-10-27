@@ -2,34 +2,47 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
-    android:layout_height="match_parent">
+            android:layout_height="match_parent">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
+        android:focusableInTouchMode="true"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/subject"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/status"
             android:elegantTextHeight="false"
             android:enabled="false"
             android:gravity="center_vertical"
             android:padding="16dp"
-            tools:text="Subject"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            tools:ignore="UnusedAttribute"/>
+            tools:ignore="UnusedAttribute"
+            tools:text="Subject"/>
+
+        <ImageView
+            android:id="@+id/status"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:tint="@color/colorAccent"
+            tools:src="@drawable/ic_notification_proof_of_work"
+            android:padding="16dp"
+            tools:ignore="ContentDescription"/>
 
         <View
             android:id="@+id/divider"
             android:layout_width="fill_parent"
             android:layout_height="2dip"
             android:layout_below="@id/subject"
-            android:background="@color/divider" />
+            android:background="@color/divider"/>
 
         <ImageView
             android:id="@+id/avatar"
@@ -50,8 +63,8 @@
             android:gravity="center_vertical"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
-            tools:text="Sender"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="Sender"/>
 
         <TextView
             android:id="@+id/recipient"
@@ -62,7 +75,7 @@
             android:gravity="center_vertical"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
-            tools:text="Recipient" />
+            tools:text="Recipient"/>
 
         <TextView
             android:id="@+id/text"
@@ -75,6 +88,6 @@
             android:layout_marginTop="32dp"
             android:paddingBottom="64dp"
             android:text="New Text"
-            android:textIsSelectable="true" />
+            android:textIsSelectable="true"/>
     </RelativeLayout>
 </ScrollView>

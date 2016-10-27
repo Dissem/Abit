@@ -41,6 +41,7 @@ import java.util.List;
 
 import ch.dissem.apps.abit.Identicon;
 import ch.dissem.apps.abit.R;
+import ch.dissem.apps.abit.util.Assets;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 
@@ -82,6 +83,7 @@ public class SwipeableMessageAdapter
     static class ViewHolder extends AbstractSwipeableItemViewHolder {
         public final FrameLayout container;
         public final ImageView avatar;
+        public final ImageView status;
         public final TextView sender;
         public final TextView subject;
         public final TextView extract;
@@ -90,6 +92,7 @@ public class SwipeableMessageAdapter
             super(v);
             container = (FrameLayout) v.findViewById(R.id.container);
             avatar = (ImageView) v.findViewById(R.id.avatar);
+            status = (ImageView) v.findViewById(R.id.status);
             sender = (TextView) v.findViewById(R.id.sender);
             subject = (TextView) v.findViewById(R.id.subject);
             extract = (TextView) v.findViewById(R.id.text);
@@ -164,6 +167,9 @@ public class SwipeableMessageAdapter
 
         // set data
         holder.avatar.setImageDrawable(new Identicon(item.getFrom()));
+        holder.status.setImageResource(Assets.getStatusDrawable(item.getStatus()));
+        holder.status.setContentDescription(
+            holder.status.getContext().getString(Assets.getStatusString(item.getStatus())));
         holder.sender.setText(item.getFrom().toString());
         holder.subject.setText(normalizeWhitespaces(item.getSubject()));
         holder.extract.setText(normalizeWhitespaces(item.getText()));

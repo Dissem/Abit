@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -101,10 +102,11 @@ public class AddressDetailFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.address, menu);
 
-        Drawables.addIcon(getActivity(), menu, R.id.write_message, GoogleMaterial.Icon.gmd_mail);
-        Drawables.addIcon(getActivity(), menu, R.id.share, GoogleMaterial.Icon.gmd_share);
-        Drawables.addIcon(getActivity(), menu, R.id.delete, GoogleMaterial.Icon.gmd_delete);
-        Drawables.addIcon(getActivity(), menu, R.id.export,
+        FragmentActivity activity = getActivity();
+        Drawables.addIcon(activity, menu, R.id.write_message, GoogleMaterial.Icon.gmd_mail);
+        Drawables.addIcon(activity, menu, R.id.share, GoogleMaterial.Icon.gmd_share);
+        Drawables.addIcon(activity, menu, R.id.delete, GoogleMaterial.Icon.gmd_delete);
+        Drawables.addIcon(activity, menu, R.id.export,
             CommunityMaterial.Icon.cmd_export)
             .setVisible(item != null && item.getPrivateKey() != null);
 
@@ -185,6 +187,17 @@ public class AddressDetailFragment extends Fragment {
 
         // Show the dummy content as text in a TextView.
         if (item != null) {
+            FragmentActivity activity = getActivity();
+            if (item.isChan()) {
+                activity.setTitle(R.string.title_chan_detail);
+            } else if (item.getPrivateKey() != null) {
+                activity.setTitle(R.string.title_identity_detail);
+            } else if (item.isSubscribed()) {
+                activity.setTitle(R.string.title_subscription_detail);
+            } else {
+                activity.setTitle(R.string.title_contact_detail);
+            }
+
             ((ImageView) rootView.findViewById(R.id.avatar)).setImageDrawable(new Identicon(item));
             TextView name = (TextView) rootView.findViewById(R.id.name);
             name.setText(item.toString());
@@ -207,8 +220,8 @@ public class AddressDetailFragment extends Fragment {
             TextView address = (TextView) rootView.findViewById(R.id.address);
             address.setText(item.getAddress());
             address.setSelected(true);
-            ((TextView) rootView.findViewById(R.id.stream_number)).setText(getActivity()
-                .getString(R.string.stream_number, item.getStream()));
+            ((TextView) rootView.findViewById(R.id.stream_number)).setText(
+                getString(R.string.stream_number, item.getStream()));
             if (item.getPrivateKey() == null) {
                 Switch active = (Switch) rootView.findViewById(R.id.active);
                 active.setChecked(item.isSubscribed());

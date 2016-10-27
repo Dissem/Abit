@@ -37,7 +37,7 @@ public class Identicon extends Drawable {
     private final boolean chan;
     private final TextPaint textPaint;
 
-    public Identicon(BitmessageAddress input) {
+    public Identicon(@NonNull BitmessageAddress input) {
         paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
         paint.setAntiAlias(true);

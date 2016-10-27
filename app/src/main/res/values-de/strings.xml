@@ -101,4 +101,13 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="startup_node">Knoten starten</string>
     <string name="personal_message">Nachricht</string>
     <string name="no_identity_warning">Bitte versuchs nochmals wenn eine Identität verfügbar ist.</string>
+    <string name="title_chan_detail">Chan</string>
+    <string name="title_contact_detail">Kontakt</string>
+    <string name="title_identity_detail">Identität</string>
+    <string name="outbox">Postausgang</string>
+    <string name="status_draft">Entwurf</string>
+    <string name="status_public_key">öffentlicher Schlüssel angefordert</string>
+    <string name="status_received">empfangen</string>
+    <string name="status_sent">gesendet</string>
+    <string name="status_sent_acknowledged">Empfang bestätigt</string>
 </resources>

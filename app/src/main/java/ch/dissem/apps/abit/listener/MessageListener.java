@@ -20,6 +20,8 @@ import android.content.Context;
 
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import ch.dissem.apps.abit.MainActivity;
 import ch.dissem.apps.abit.notification.NewMessageNotification;
@@ -38,6 +40,7 @@ public class MessageListener implements BitmessageContext.Listener {
     private final Deque<Plaintext> unacknowledged = new LinkedList<>();
     private int numberOfUnacknowledgedMessages = 0;
     private final NewMessageNotification notification;
+    private final ExecutorService pool = Executors.newSingleThreadExecutor();
 
     public MessageListener(Context ctx) {
         this.notification = new NewMessageNotification(ctx);
@@ -45,33 +48,32 @@ public class MessageListener implements BitmessageContext.Listener {
 
     @Override
     public void receive(final Plaintext plaintext) {
-        synchronized (unacknowledged) {
+        pool.submit(() -> {
             unacknowledged.addFirst(plaintext);
             numberOfUnacknowledgedMessages++;
             if (unacknowledged.size() > 5) {
                 unacknowledged.removeLast();
             }
-        }
+            if (numberOfUnacknowledgedMessages == 1) {
+                notification.singleNotification(plaintext);
+            } else {
+                notification.multiNotification(unacknowledged, numberOfUnacknowledgedMessages);
+            }
+            notification.show();
 
-        if (numberOfUnacknowledgedMessages == 1) {
-            notification.singleNotification(plaintext);
-        } else {
-            notification.multiNotification(unacknowledged, numberOfUnacknowledgedMessages);
-        }
-        notification.show();
-
-        // If MainActivity is shown, update the sidebar badges
-        MainActivity main = MainActivity.getInstance();
-        if (main != null) {
-            main.updateUnread();
-        }
+            // If MainActivity is shown, update the sidebar badges
+            MainActivity main = MainActivity.getInstance();
+            if (main != null) {
+                main.updateUnread();
+            }
+        });
     }
 
     public void resetNotification() {
-        notification.hide();
-        synchronized (unacknowledged) {
+        pool.submit(() -> {
+            notification.hide();
             unacknowledged.clear();
             numberOfUnacknowledgedMessages = 0;
-        }
+        });
     }
 }
