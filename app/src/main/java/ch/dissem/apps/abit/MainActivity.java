@@ -452,6 +452,7 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     ((PrimaryDrawerItem) item).withBadge((String) null);
                 }
+                drawer.updateItem(item);
             }
         }
     }
