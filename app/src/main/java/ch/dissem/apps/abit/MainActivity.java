@@ -91,6 +91,7 @@ import static ch.dissem.apps.abit.service.BitmessageService.isRunning;
 public class MainActivity extends AppCompatActivity
     implements ListSelectionListener<Serializable>, ActionBarListener {
     public static final String EXTRA_SHOW_MESSAGE = "ch.dissem.abit.ShowMessage";
+    public static final String EXTRA_SHOW_LABEL = "ch.dissem.abit.ShowLabel";
     public static final String EXTRA_REPLY_TO_MESSAGE = "ch.dissem.abit.ReplyToMessage";
     public static final String ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox";
 
@@ -122,7 +123,9 @@ public class MainActivity extends AppCompatActivity
         instance = new WeakReference<>(this);
         bmc = Singleton.getBitmessageContext(this);
         List<Label> labels = bmc.messages().getLabels();
-        if (selectedLabel == null) {
+        if (getIntent().hasExtra(EXTRA_SHOW_LABEL)) {
+            selectedLabel = (Label) getIntent().getSerializableExtra(EXTRA_SHOW_LABEL);
+        } else if (selectedLabel == null) {
             selectedLabel = labels.get(0);
         }
 
@@ -508,15 +511,16 @@ public class MainActivity extends AppCompatActivity
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent;
-            if (item instanceof Plaintext)
+            if (item instanceof Plaintext) {
                 detailIntent = new Intent(this, MessageDetailActivity.class);
-            else if (item instanceof BitmessageAddress)
+                detailIntent.putExtra(EXTRA_SHOW_LABEL, selectedLabel);
+            } else if (item instanceof BitmessageAddress) {
                 detailIntent = new Intent(this, AddressDetailActivity.class);
-            else
+            } else {
                 throw new IllegalArgumentException("Plaintext or BitmessageAddress expected, but " +
                     "was "
                     + item.getClass().getSimpleName());
-
+            }
             detailIntent.putExtra(MessageDetailFragment.ARG_ITEM, item);
             startActivity(detailIntent);
         }

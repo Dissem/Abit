@@ -1,6 +1,11 @@
 package ch.dissem.apps.abit;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
+import android.view.MenuItem;
+
+import ch.dissem.bitmessage.entity.valueobject.Label;
 
 
 /**
@@ -13,6 +18,7 @@ import android.os.Bundle;
  * more than a {@link MessageDetailFragment}.
  */
 public class MessageDetailActivity extends DetailActivity {
+    private Label label;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,16 +34,30 @@ public class MessageDetailActivity extends DetailActivity {
         // http://developer.android.com/guide/components/fragments.html
         //
         if (savedInstanceState == null) {
+            label = (Label) getIntent().getSerializableExtra(MainActivity.EXTRA_SHOW_LABEL);
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
             arguments.putSerializable(MessageDetailFragment.ARG_ITEM,
-                    getIntent().getSerializableExtra(MessageDetailFragment.ARG_ITEM));
+                getIntent().getSerializableExtra(MessageDetailFragment.ARG_ITEM));
             MessageDetailFragment fragment = new MessageDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.content, fragment)
-                    .commit();
+                .add(R.id.content, fragment)
+                .commit();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Intent parentIntent = new Intent(this, MainActivity.class);
+                parentIntent.putExtra(MainActivity.EXTRA_SHOW_LABEL, label);
+                NavUtils.navigateUpTo(this, parentIntent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }
