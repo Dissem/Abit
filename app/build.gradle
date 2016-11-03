@@ -20,11 +20,11 @@ android {
         targetSdkVersion 25
         versionCode 9
         versionName "1.0-beta9"
-        jackOptions.enabled = true
+        jackOptions.enabled = false
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
     buildTypes {
         release {

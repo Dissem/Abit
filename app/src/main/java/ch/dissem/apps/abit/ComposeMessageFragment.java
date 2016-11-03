@@ -96,7 +96,12 @@ public class ComposeMessageFragment extends Fragment {
             final ContactAdapter adapter = new ContactAdapter(getContext());
             recipientInput.setAdapter(adapter);
             recipientInput.setOnItemClickListener(
-                (parent, view, position, id) -> recipient = adapter.getItem(position)
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+                        adapter.getItem(pos);
+                    }
+                }
             );
             recipientInput.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override

@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -60,28 +61,34 @@ public class CreateAddressActivity extends AppCompatActivity {
         }
 
         final Button cancel = (Button) findViewById(R.id.cancel);
-        cancel.setOnClickListener(v -> {
-            setResult(Activity.RESULT_CANCELED);
-            finish();
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setResult(Activity.RESULT_CANCELED);
+                finish();
+            }
         });
         final Button ok = (Button) findViewById(R.id.do_import);
-        ok.setOnClickListener(v -> {
-            String addressText = String.valueOf(address.getText()).trim();
-            try {
-                BitmessageAddress bmAddress = new BitmessageAddress(addressText);
-                bmAddress.setAlias(label.getText().toString());
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String addressText = String.valueOf(address.getText()).trim();
+                try {
+                    BitmessageAddress bmAddress = new BitmessageAddress(addressText);
+                    bmAddress.setAlias(label.getText().toString());
 
-                BitmessageContext bmc = Singleton.getBitmessageContext
-                    (CreateAddressActivity.this);
-                bmc.addContact(bmAddress);
-                if (subscribe.isChecked()) {
-                    bmc.addSubscribtion(bmAddress);
+                    BitmessageContext bmc = Singleton.getBitmessageContext
+                        (CreateAddressActivity.this);
+                    bmc.addContact(bmAddress);
+                    if (subscribe.isChecked()) {
+                        bmc.addSubscribtion(bmAddress);
+                    }
+
+                    setResult(Activity.RESULT_OK);
+                    finish();
+                } catch (RuntimeException e) {
+                    address.setError(getString(R.string.error_illegal_address));
                 }
-
-                setResult(Activity.RESULT_OK);
-                finish();
-            } catch (RuntimeException e) {
-                address.setError(getString(R.string.error_illegal_address));
             }
         });
     }

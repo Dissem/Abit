@@ -19,6 +19,7 @@ package ch.dissem.apps.abit.dialog;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import ch.dissem.apps.abit.R;
 import ch.dissem.apps.abit.service.BitmessageService;
@@ -34,11 +35,19 @@ public class FullNodeDialogActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_full_node);
-        findViewById(R.id.ok).setOnClickListener(v -> {
-            startService(new Intent(this, BitmessageService.class));
-            updateNodeSwitch();
-            finish();
+        findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startService(new Intent(FullNodeDialogActivity.this, BitmessageService.class));
+                updateNodeSwitch();
+                finish();
+            }
         });
-        findViewById(R.id.dismiss).setOnClickListener(v -> finish());
+        findViewById(R.id.dismiss).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
     }
 }

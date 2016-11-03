@@ -46,21 +46,27 @@ public class SettingsFragment
         addPreferencesFromResource(R.xml.preferences);
 
         Preference about = findPreference("about");
-        about.setOnPreferenceClickListener(preference -> {
-            new LibsBuilder()
-                .withActivityTitle(getActivity().getString(R.string.about))
-                .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
-                .withAboutIconShown(true)
-                .withAboutVersionShown(true)
-                .withAboutDescription(getString(R.string.about_app))
-                .start(getActivity());
-            return true;
+        about.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                new LibsBuilder()
+                    .withActivityTitle(getActivity().getString(R.string.about))
+                    .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
+                    .withAboutIconShown(true)
+                    .withAboutVersionShown(true)
+                    .withAboutDescription(getString(R.string.about_app))
+                    .start(getActivity());
+                return true;
+            }
         });
 
         Preference status = findPreference("status");
-        status.setOnPreferenceClickListener(preference -> {
-            startActivity(new Intent(getActivity(), StatusActivity.class));
-            return true;
+        status.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                startActivity(new Intent(getActivity(), StatusActivity.class));
+                return true;
+            }
         });
     }
 

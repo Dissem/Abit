@@ -24,10 +24,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.Target;
 import com.mikepenz.community_material_typeface_library.CommunityMaterial;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -35,6 +37,7 @@ import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.interfaces.OnCheckedChangeListener;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
@@ -182,13 +185,16 @@ public class MainActivity extends AppCompatActivity
                 .setStyle(R.style.CustomShowcaseTheme)
                 .setContentTitle(R.string.full_node)
                 .setContentText(R.string.full_node_description)
-                .setTarget(() -> {
-                    View view = drawer.getStickyFooter();
-                    int[] location = new int[2];
-                    view.getLocationInWindow(location);
-                    int x = location[0] + 7 * view.getWidth() / 8;
-                    int y = location[1] + view.getHeight() / 2;
-                    return new Point(x, y);
+                .setTarget(new Target() {
+                    @Override
+                    public Point getPoint() {
+                        View view = drawer.getStickyFooter();
+                        int[] location = new int[2];
+                        view.getLocationInWindow(location);
+                        int x = location[0] + 7 * view.getWidth() / 8;
+                        int y = location[1] + view.getHeight() / 2;
+                        return new Point(x, y);
+                    }
                 })
                 .replaceEndButton(R.layout.showcase_button)
                 .hideOnTouchOutside()
@@ -246,32 +252,36 @@ public class MainActivity extends AppCompatActivity
             .withActivity(this)
             .withHeaderBackground(R.drawable.header)
             .withProfiles(profiles)
-            .withOnAccountHeaderListener((view, profile, currentProfile) -> {
-                switch ((int) profile.getIdentifier()) {
-                    case ADD_IDENTITY:
-                        addIdentityDialog();
-                        break;
-                    case MANAGE_IDENTITY:
-                        BitmessageAddress identity = Singleton.getIdentity(this);
-                        if (identity == null) {
-                            Toast.makeText(this, R.string.no_identity_warning, LENGTH_LONG).show();
-                        } else {
-                            Intent show = new Intent(MainActivity.this,
-                                AddressDetailActivity.class);
-                            show.putExtra(AddressDetailFragment.ARG_ITEM, identity);
-                            startActivity(show);
-                        }
-                        break;
-                    default:
-                        if (profile instanceof ProfileDrawerItem) {
-                            Object tag = ((ProfileDrawerItem) profile).getTag();
-                            if (tag instanceof BitmessageAddress) {
-                                Singleton.setIdentity((BitmessageAddress) tag);
+            .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+                @Override
+                public boolean onProfileChanged(View view, IProfile profile, boolean current) {
+                    switch ((int) profile.getIdentifier()) {
+                        case ADD_IDENTITY:
+                            addIdentityDialog();
+                            break;
+                        case MANAGE_IDENTITY:
+                            BitmessageAddress identity = Singleton.getIdentity(MainActivity.this);
+                            if (identity == null) {
+                                Toast.makeText(MainActivity.this,
+                                    R.string.no_identity_warning, LENGTH_LONG).show();
+                            } else {
+                                Intent show = new Intent(MainActivity.this,
+                                    AddressDetailActivity.class);
+                                show.putExtra(AddressDetailFragment.ARG_ITEM, identity);
+                                startActivity(show);
                             }
-                        }
+                            break;
+                        default:
+                            if (profile instanceof ProfileDrawerItem) {
+                                Object tag = ((ProfileDrawerItem) profile).getTag();
+                                if (tag instanceof BitmessageAddress) {
+                                    Singleton.setIdentity((BitmessageAddress) tag);
+                                }
+                            }
+                    }
+                    // false if it should close the drawer
+                    return false;
                 }
-                // false if it should close the drawer
-                return false;
             })
             .build();
         if (profiles.size() > 2) { // There's always the add and manage identity items
@@ -333,11 +343,15 @@ public class MainActivity extends AppCompatActivity
             .withName(R.string.full_node)
             .withIcon(CommunityMaterial.Icon.cmd_cloud_outline)
             .withChecked(isRunning())
-            .withOnCheckedChangeListener((drawerItem, buttonView, isChecked) -> {
-                if (isChecked) {
-                    checkAndStartNode();
-                } else {
-                    stopService(new Intent(this, BitmessageService.class));
+            .withOnCheckedChangeListener(new OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(IDrawerItem drawerItem, CompoundButton buttonView,
+                                             boolean isChecked) {
+                    if (isChecked) {
+                        checkAndStartNode();
+                    } else {
+                        stopService(new Intent(MainActivity.this, BitmessageService.class));
+                    }
                 }
             });
 
@@ -347,36 +361,39 @@ public class MainActivity extends AppCompatActivity
             .withAccountHeader(accountHeader)
             .withDrawerItems(drawerItems)
             .addStickyDrawerItems(nodeSwitch)
-            .withOnDrawerItemClickListener((view, position, item) -> {
-                if (item.getTag() instanceof Label) {
-                    selectedLabel = (Label) item.getTag();
-                    showSelectedLabel();
-                    return false;
-                } else if (item instanceof Nameable<?>) {
-                    Nameable<?> ni = (Nameable<?>) item;
-                    switch (ni.getName().getTextRes()) {
-                        case R.string.contacts_and_subscriptions:
-                            if (!(getSupportFragmentManager().findFragmentById(R.id
-                                .item_list) instanceof AddressListFragment)) {
-                                changeList(new AddressListFragment());
-                            } else {
-                                ((AddressListFragment) getSupportFragmentManager()
-                                    .findFragmentById(R.id.item_list)).updateList();
-                            }
-                            break;
-                        case R.string.settings:
-                            startActivity(new Intent(MainActivity.this, SettingsActivity
-                                .class));
-                            break;
-                        case R.string.archive:
-                            selectedLabel = null;
-                            showSelectedLabel();
-                            break;
-                        case R.string.full_node:
-                            return true;
+            .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                @Override
+                public boolean onItemClick(View view, int position, IDrawerItem item) {
+                    if (item.getTag() instanceof Label) {
+                        selectedLabel = (Label) item.getTag();
+                        showSelectedLabel();
+                        return false;
+                    } else if (item instanceof Nameable<?>) {
+                        Nameable<?> ni = (Nameable<?>) item;
+                        switch (ni.getName().getTextRes()) {
+                            case R.string.contacts_and_subscriptions:
+                                if (!(getSupportFragmentManager().findFragmentById(R.id
+                                    .item_list) instanceof AddressListFragment)) {
+                                    changeList(new AddressListFragment());
+                                } else {
+                                    ((AddressListFragment) getSupportFragmentManager()
+                                        .findFragmentById(R.id.item_list)).updateList();
+                                }
+                                break;
+                            case R.string.settings:
+                                startActivity(new Intent(MainActivity.this, SettingsActivity
+                                    .class));
+                                break;
+                            case R.string.archive:
+                                selectedLabel = null;
+                                showSelectedLabel();
+                                break;
+                            case R.string.full_node:
+                                return true;
+                        }
                     }
+                    return false;
                 }
-                return false;
             })
             .withShowDrawerOnFirstLaunch(true)
             .build();
@@ -461,11 +478,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     public static void updateNodeSwitch() {
-        MainActivity i = getInstance();
+        final MainActivity i = getInstance();
         if (i != null) {
-            i.runOnUiThread(() -> {
-                i.nodeSwitch.withChecked(i.bmc.isRunning());
-                i.drawer.updateStickyFooterItem(i.nodeSwitch);
+            i.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    i.nodeSwitch.withChecked(i.bmc.isRunning());
+                    i.drawer.updateStickyFooterItem(i.nodeSwitch);
+                }
             });
         }
     }

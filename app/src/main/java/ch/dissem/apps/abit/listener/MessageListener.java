@@ -48,32 +48,38 @@ public class MessageListener implements BitmessageContext.Listener {
 
     @Override
     public void receive(final Plaintext plaintext) {
-        pool.submit(() -> {
-            unacknowledged.addFirst(plaintext);
-            numberOfUnacknowledgedMessages++;
-            if (unacknowledged.size() > 5) {
-                unacknowledged.removeLast();
-            }
-            if (numberOfUnacknowledgedMessages == 1) {
-                notification.singleNotification(plaintext);
-            } else {
-                notification.multiNotification(unacknowledged, numberOfUnacknowledgedMessages);
-            }
-            notification.show();
+        pool.submit(new Runnable() {
+            @Override
+            public void run() {
+                unacknowledged.addFirst(plaintext);
+                numberOfUnacknowledgedMessages++;
+                if (unacknowledged.size() > 5) {
+                    unacknowledged.removeLast();
+                }
+                if (numberOfUnacknowledgedMessages == 1) {
+                    notification.singleNotification(plaintext);
+                } else {
+                    notification.multiNotification(unacknowledged, numberOfUnacknowledgedMessages);
+                }
+                notification.show();
 
-            // If MainActivity is shown, update the sidebar badges
-            MainActivity main = MainActivity.getInstance();
-            if (main != null) {
-                main.updateUnread();
+                // If MainActivity is shown, update the sidebar badges
+                MainActivity main = MainActivity.getInstance();
+                if (main != null) {
+                    main.updateUnread();
+                }
             }
         });
     }
 
     public void resetNotification() {
-        pool.submit(() -> {
-            notification.hide();
-            unacknowledged.clear();
-            numberOfUnacknowledgedMessages = 0;
+        pool.submit(new Runnable() {
+            @Override
+            public void run() {
+                notification.hide();
+                unacknowledged.clear();
+                numberOfUnacknowledgedMessages = 0;
+            }
         });
     }
 }

@@ -110,9 +110,9 @@ public class Singleton {
         return powRepo;
     }
 
-    public static BitmessageAddress getIdentity(Context ctx) {
+    public static BitmessageAddress getIdentity(final Context ctx) {
         if (identity == null) {
-            BitmessageContext bmc = getBitmessageContext(ctx);
+            final BitmessageContext bmc = getBitmessageContext(ctx);
             synchronized (Singleton.class) {
                 if (identity == null) {
                     List<BitmessageAddress> identities = bmc.addresses()

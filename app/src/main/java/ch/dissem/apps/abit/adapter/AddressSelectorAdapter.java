@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -75,9 +76,12 @@ public class AddressSelectorAdapter
             super(v);
             checkbox = (CheckBox) v.findViewById(R.id.checkbox);
             address = (TextView) v.findViewById(R.id.address);
-            checkbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (data != null) {
-                    data.selected = isChecked;
+            checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                    if (data != null) {
+                        data.selected = isChecked;
+                    }
                 }
             });
         }

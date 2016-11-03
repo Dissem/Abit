@@ -33,6 +33,7 @@ import android.widget.TextView;
 import com.google.zxing.integration.android.IntentIntegrator;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import ch.dissem.apps.abit.listener.ActionBarListener;
@@ -56,28 +57,31 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
     public void updateList() {
         List<BitmessageAddress> addresses = Singleton.getAddressRepository(getContext())
             .getContacts();
-        Collections.sort(addresses, (lhs, rhs) -> {
-            // Yields the following order:
-            // * Subscribed addresses come first
-            // * Addresses with Aliases (alphabetically)
-            // * Addresses (alphabetically)
-            if (lhs.isSubscribed() == rhs.isSubscribed()) {
-                if (lhs.getAlias() != null) {
-                    if (rhs.getAlias() != null) {
-                        return lhs.getAlias().compareTo(rhs.getAlias());
+        Collections.sort(addresses, new Comparator<BitmessageAddress>() {
+            @Override
+            public int compare(BitmessageAddress lhs, BitmessageAddress rhs) {
+                // Yields the following order:
+                // * Subscribed addresses come first
+                // * Addresses with Aliases (alphabetically)
+                // * Addresses (alphabetically)
+                if (lhs.isSubscribed() == rhs.isSubscribed()) {
+                    if (lhs.getAlias() != null) {
+                        if (rhs.getAlias() != null) {
+                            return lhs.getAlias().compareTo(rhs.getAlias());
+                        } else {
+                            return -1;
+                        }
+                    } else if (rhs.getAlias() != null) {
+                        return 1;
                     } else {
-                        return -1;
+                        return lhs.getAddress().compareTo(rhs.getAddress());
                     }
-                } else if (rhs.getAlias() != null) {
-                    return 1;
-                } else {
-                    return lhs.getAddress().compareTo(rhs.getAddress());
                 }
-            }
-            if (lhs.isSubscribed()) {
-                return -1;
-            } else {
-                return 1;
+                if (lhs.isSubscribed()) {
+                    return -1;
+                } else {
+                    return 1;
+                }
             }
         });
         setListAdapter(new ArrayAdapter<BitmessageAddress>(

@@ -67,15 +67,18 @@ public class ImportIdentitiesFragment extends Fragment {
         } catch (IOException e) {
             return super.onCreateView(inflater, container, savedInstanceState);
         }
-        view.findViewById(R.id.finish).setOnClickListener(v -> {
-            importer.importAll(adapter.getSelected());
-            MainActivity mainActivity = MainActivity.getInstance();
-            if (mainActivity != null) {
-                for (BitmessageAddress selected : adapter.getSelected()) {
-                    mainActivity.addIdentityEntry(selected);
+        view.findViewById(R.id.finish).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                importer.importAll(adapter.getSelected());
+                MainActivity mainActivity = MainActivity.getInstance();
+                if (mainActivity != null) {
+                    for (BitmessageAddress selected : adapter.getSelected()) {
+                        mainActivity.addIdentityEntry(selected);
+                    }
                 }
+                getActivity().finish();
             }
-            getActivity().finish();
         });
         return view;
     }

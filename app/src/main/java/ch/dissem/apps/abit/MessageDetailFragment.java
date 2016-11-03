@@ -31,6 +31,7 @@ import android.widget.TextView;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 
 import java.util.Iterator;
+import java.util.regex.Matcher;
 
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.service.Singleton;
@@ -110,7 +111,12 @@ public class MessageDetailFragment extends Fragment {
 
             Linkify.addLinks(messageBody, WEB_URLS);
             Linkify.addLinks(messageBody, BITMESSAGE_ADDRESS_PATTERN, BITMESSAGE_URL_SCHEMA, null,
-                (match, url) -> match.group()
+                new Linkify.TransformFilter() {
+                    @Override
+                    public String transformUrl(Matcher match, String url) {
+                        return match.group();
+                    }
+                }
             );
 
             messageBody.setLinksClickable(true);

@@ -92,23 +92,26 @@ public class ProofOfWorkService extends Service {
     }
 
     private void calculateNonce(final PowItem item) {
-        engine.calculateNonce(item.initialHash, item.targetValue, (initialHash, nonce) -> {
-            try {
-                item.callback.onNonceCalculated(initialHash, nonce);
-            } finally {
-                PowItem next;
-                synchronized (queue) {
-                    next = queue.poll();
-                    if (next == null) {
-                        calculating = false;
-                        stopForeground(true);
-                        stopSelf();
-                    } else {
-                        notification.update(queue.size()).show();
+        engine.calculateNonce(item.initialHash, item.targetValue, new ProofOfWorkEngine.Callback() {
+            @Override
+            public void onNonceCalculated(byte[] initialHash, byte[] nonce) {
+                try {
+                    item.callback.onNonceCalculated(initialHash, nonce);
+                } finally {
+                    PowItem next;
+                    synchronized (queue) {
+                        next = queue.poll();
+                        if (next == null) {
+                            calculating = false;
+                            stopForeground(true);
+                            stopSelf();
+                        } else {
+                            notification.update(queue.size()).show();
+                        }
                     }
-                }
-                if (next != null) {
-                    calculateNonce(next);
+                    if (next != null) {
+                        calculateNonce(next);
+                    }
                 }
             }
         });

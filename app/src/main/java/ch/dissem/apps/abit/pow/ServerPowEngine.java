@@ -17,12 +17,14 @@
 package ch.dissem.apps.abit.pow;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
@@ -50,34 +52,40 @@ public class ServerPowEngine implements ProofOfWorkEngine, InternalContext
 
     public ServerPowEngine(Context ctx) {
         this.ctx = ctx;
-        pool = Executors.newCachedThreadPool(r -> {
-            Thread thread = Executors.defaultThreadFactory().newThread(r);
-            thread.setPriority(Thread.MIN_PRIORITY);
-            return thread;
+        pool = Executors.newCachedThreadPool(new ThreadFactory() {
+            @Override
+            public Thread newThread(@NonNull Runnable r) {
+                Thread thread = Executors.defaultThreadFactory().newThread(r);
+                thread.setPriority(Thread.MIN_PRIORITY);
+                return thread;
+            }
         });
     }
 
     @Override
     public void calculateNonce(final byte[] initialHash, final byte[] target, Callback callback) {
-        pool.execute(() -> {
-            BitmessageAddress identity = Singleton.getIdentity(ctx);
-            if (identity == null) throw new RuntimeException("No Identity for calculating POW");
+        pool.execute(new Runnable() {
+            @Override
+            public void run() {
+                BitmessageAddress identity = Singleton.getIdentity(ctx);
+                if (identity == null) throw new RuntimeException("No Identity for calculating POW");
 
-            ProofOfWorkRequest request = new ProofOfWorkRequest(identity, initialHash,
-                CALCULATE, target);
-            SyncAdapter.startPowSync(ctx);
-            try {
-                CryptoCustomMessage<ProofOfWorkRequest> cryptoMsg = new CryptoCustomMessage<>
-                    (request);
-                cryptoMsg.signAndEncrypt(
-                    identity,
-                    cryptography().createPublicKey(identity.getPublicDecryptionKey())
-                );
-                context.getNetworkHandler().send(
-                    Preferences.getTrustedNode(ctx), Preferences.getTrustedNodePort(ctx),
-                    cryptoMsg);
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+                ProofOfWorkRequest request = new ProofOfWorkRequest(identity, initialHash,
+                    CALCULATE, target);
+                SyncAdapter.startPowSync(ctx);
+                try {
+                    CryptoCustomMessage<ProofOfWorkRequest> cryptoMsg = new CryptoCustomMessage<>
+                        (request);
+                    cryptoMsg.signAndEncrypt(
+                        identity,
+                        cryptography().createPublicKey(identity.getPublicDecryptionKey())
+                    );
+                    context.getNetworkHandler().send(
+                        Preferences.getTrustedNode(ctx), Preferences.getTrustedNodePort(ctx),
+                        cryptoMsg);
+                } catch (Exception e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
         });
     }

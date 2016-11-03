@@ -19,6 +19,7 @@ package ch.dissem.apps.abit.dialog;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -60,47 +61,55 @@ public class AddIdentityDialogFragment extends AppCompatDialogFragment {
         getDialog().setTitle(R.string.add_identity);
         View view = inflater.inflate(R.layout.dialog_add_identity, container, false);
         final RadioGroup radioGroup = (RadioGroup) view.findViewById(R.id.radioGroup);
-        view.findViewById(R.id.ok).setOnClickListener(v -> {
-            final Context ctx = getActivity().getBaseContext();
-            switch (radioGroup.getCheckedRadioButtonId()) {
-                case R.id.create_identity:
-                    Toast.makeText(ctx,
-                        R.string.toast_long_running_operation,
-                        Toast.LENGTH_SHORT).show();
-                    new AsyncTask<Void, Void, BitmessageAddress>() {
-                        @Override
-                        protected BitmessageAddress doInBackground(Void... args) {
-                            return bmc.createIdentity(false, Pubkey.Feature.DOES_ACK);
-                        }
-
-                        @Override
-                        protected void onPostExecute(BitmessageAddress chan) {
-                            Toast.makeText(ctx,
-                                R.string.toast_identity_created,
-                                Toast.LENGTH_SHORT).show();
-                            MainActivity mainActivity = MainActivity.getInstance();
-                            if (mainActivity != null) {
-                                mainActivity.addIdentityEntry(chan);
+        view.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final Context ctx = getActivity().getBaseContext();
+                switch (radioGroup.getCheckedRadioButtonId()) {
+                    case R.id.create_identity:
+                        Toast.makeText(ctx,
+                            R.string.toast_long_running_operation,
+                            Toast.LENGTH_SHORT).show();
+                        new AsyncTask<Void, Void, BitmessageAddress>() {
+                            @Override
+                            protected BitmessageAddress doInBackground(Void... args) {
+                                return bmc.createIdentity(false, Pubkey.Feature.DOES_ACK);
                             }
-                        }
-                    }.execute();
-                    break;
-                case R.id.import_identity:
-                    startActivity(new Intent(ctx, ImportIdentityActivity.class));
-                    break;
-                case R.id.add_chan:
-                    addChanDialog();
-                    break;
-                case R.id.add_deterministic_address:
-                    new DeterministicIdentityDialogFragment().show(getFragmentManager(),
-                        "dialog");
-                    break;
-                default:
-                    return;
+
+                            @Override
+                            protected void onPostExecute(BitmessageAddress chan) {
+                                Toast.makeText(ctx,
+                                    R.string.toast_identity_created,
+                                    Toast.LENGTH_SHORT).show();
+                                MainActivity mainActivity = MainActivity.getInstance();
+                                if (mainActivity != null) {
+                                    mainActivity.addIdentityEntry(chan);
+                                }
+                            }
+                        }.execute();
+                        break;
+                    case R.id.import_identity:
+                        startActivity(new Intent(ctx, ImportIdentityActivity.class));
+                        break;
+                    case R.id.add_chan:
+                        addChanDialog();
+                        break;
+                    case R.id.add_deterministic_address:
+                        new DeterministicIdentityDialogFragment().show(getFragmentManager(),
+                            "dialog");
+                        break;
+                    default:
+                        return;
+                }
+                dismiss();
             }
-            dismiss();
         });
-        view.findViewById(R.id.dismiss).setOnClickListener(v -> dismiss());
+        view.findViewById(R.id.dismiss).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dismiss();
+            }
+        });
         return view;
     }
 
@@ -113,31 +122,34 @@ public class AddIdentityDialogFragment extends AppCompatDialogFragment {
         new AlertDialog.Builder(activity)
             .setTitle(R.string.add_chan)
             .setView(dialogView)
-            .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
-                TextView passphrase = (TextView) dialogView.findViewById(R.id.passphrase);
-                Toast.makeText(ctx, R.string.toast_long_running_operation,
-                    Toast.LENGTH_SHORT).show();
-                new AsyncTask<String, Void, BitmessageAddress>() {
-                    @Override
-                    protected BitmessageAddress doInBackground(String... args) {
-                        String pass = args[0];
-                        BitmessageAddress chan = bmc.createChan(pass);
-                        chan.setAlias(pass);
-                        bmc.addresses().save(chan);
-                        return chan;
-                    }
-
-                    @Override
-                    protected void onPostExecute(BitmessageAddress chan) {
-                        Toast.makeText(ctx,
-                            R.string.toast_chan_created,
-                            Toast.LENGTH_SHORT).show();
-                        MainActivity mainActivity = MainActivity.getInstance();
-                        if (mainActivity != null) {
-                            mainActivity.addIdentityEntry(chan);
+            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    TextView passphrase = (TextView) dialogView.findViewById(R.id.passphrase);
+                    Toast.makeText(ctx, R.string.toast_long_running_operation,
+                        Toast.LENGTH_SHORT).show();
+                    new AsyncTask<String, Void, BitmessageAddress>() {
+                        @Override
+                        protected BitmessageAddress doInBackground(String... args) {
+                            String pass = args[0];
+                            BitmessageAddress chan = bmc.createChan(pass);
+                            chan.setAlias(pass);
+                            bmc.addresses().save(chan);
+                            return chan;
                         }
-                    }
-                }.execute(passphrase.getText().toString());
+
+                        @Override
+                        protected void onPostExecute(BitmessageAddress chan) {
+                            Toast.makeText(ctx,
+                                R.string.toast_chan_created,
+                                Toast.LENGTH_SHORT).show();
+                            MainActivity mainActivity = MainActivity.getInstance();
+                            if (mainActivity != null) {
+                                mainActivity.addIdentityEntry(chan);
+                            }
+                        }
+                    }.execute(passphrase.getText().toString());
+                }
             })
             .setNegativeButton(R.string.cancel, null)
             .show();

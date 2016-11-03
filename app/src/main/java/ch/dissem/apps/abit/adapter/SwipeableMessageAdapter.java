@@ -105,8 +105,18 @@ public class SwipeableMessageAdapter
     }
 
     public SwipeableMessageAdapter() {
-        itemViewOnClickListener = this::onItemViewClick;
-        swipeableViewContainerOnClickListener = this::onSwipeableViewContainerClick;
+        itemViewOnClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onItemViewClick(view);
+            }
+        };
+        swipeableViewContainerOnClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onSwipeableViewContainerClick(view);
+            }
+        };
 
         // SwipeableItemAdapter requires stable ID, and also
         // have to implement the getItemId() method appropriately.
