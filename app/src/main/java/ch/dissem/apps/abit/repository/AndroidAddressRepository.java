@@ -110,7 +110,7 @@ public class AndroidAddressRepository implements AddressRepository {
 
     @Override
     public List<BitmessageAddress> getContacts() {
-        return find("private_key IS NULL");
+        return find("private_key IS NULL OR chan = '1'");
     }
 
     private List<BitmessageAddress> find(String where) {

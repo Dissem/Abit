@@ -24,6 +24,8 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
+import ch.dissem.apps.abit.service.Singleton;
+import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 
 /**
@@ -68,7 +70,13 @@ public class ComposeMessageActivity extends AppCompatActivity {
     private static Intent getReplyIntent(Context ctx, Plaintext item) {
         Intent replyIntent = new Intent(ctx, ComposeMessageActivity.class);
         replyIntent.putExtra(EXTRA_RECIPIENT, item.getFrom());
-        replyIntent.putExtra(EXTRA_IDENTITY, item.getTo());
+        BitmessageAddress receivingIdentity = item.getTo();
+        if (receivingIdentity.isChan()) {
+            // I hate when people send as chan, so it won't be the default behaviour.
+            replyIntent.putExtra(EXTRA_IDENTITY, Singleton.getIdentity(ctx));
+        } else {
+            replyIntent.putExtra(EXTRA_IDENTITY, receivingIdentity);
+        }
         String prefix;
         if (item.getSubject().length() >= 3 && item.getSubject().substring(0, 3)
             .equalsIgnoreCase("RE:")) {

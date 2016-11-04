@@ -18,8 +18,8 @@ android {
         applicationId "ch.dissem.apps." + appName.toLowerCase()
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 9
-        versionName "1.0-beta9"
+        versionCode 11
+        versionName "1.0-beta11"
         jackOptions.enabled = false
     }
     compileOptions {
@@ -28,8 +28,8 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
