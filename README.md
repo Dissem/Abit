@@ -2,9 +2,13 @@
 
 A Bitmessage client for Android.
 
-**Please be aware that at the current state, it most probably will suck your
-battery dry and use up your data plan within hours. Use at your own peril.**
+**Please be aware that due to the protocol, sending messages might suck your
+battery dry. Also, it causes a lot of traffic and may use up your data plan
+rather quickly. Use at your own peril.**
 
-It uses the [Jabit Bitmessage library](https://github.com/Dissem/Jabit). (I
-know, the names are getting increasingly ridiculus. I fear it might turn into
-a Habit.)
+Abit uses the [Jabit Bitmessage library](https://github.com/Dissem/Jabit).
+
+## Requirements
+You'll need at least Android 4.4 KitKat. Due to the Proof of Work that comes
+with the protocol you might want as fast a processor and as many cores as
+you can get.
