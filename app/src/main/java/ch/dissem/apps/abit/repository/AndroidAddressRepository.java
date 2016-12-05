@@ -199,8 +199,6 @@ public class AndroidAddressRepository implements AddressRepository {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 address.getPubkey().writeUnencrypted(out);
                 values.put(COLUMN_PUBLIC_KEY, out.toByteArray());
-            } else {
-                values.put(COLUMN_PUBLIC_KEY, (byte[]) null);
             }
             if (address.getPrivateKey() != null) {
                 values.put(COLUMN_PRIVATE_KEY, Encode.bytes(address.getPrivateKey()));

@@ -110,4 +110,5 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="status_received">empfangen</string>
     <string name="status_sent">gesendet</string>
     <string name="status_sent_acknowledged">Empfang bestätigt</string>
+    <string name="error_unsupported_encoding">Codierung ‘%s’ wird nicht unterstützt, es wird ‘SIMPLE’ verwendet.</string>
 </resources>

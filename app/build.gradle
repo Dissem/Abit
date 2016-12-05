@@ -36,13 +36,13 @@ android {
     }
 }
 
-ext.jabitVersion = '2.0.4'
+//ext.jabitVersion = '2.0.4'
+ext.jabitVersion = 'feature-extended-encoding-SNAPSHOT'
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.0.0'
-    compile 'com.android.support:support-v4:25.0.0'
-    compile 'com.android.support:design:25.0.0'
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta1'
+    compile 'com.android.support:appcompat-v7:25.0.1'
+    compile 'com.android.support:support-v4:25.0.1'
+    compile 'com.android.support:design:25.0.1'
 
     compile "ch.dissem.jabit:jabit-core:$jabitVersion"
     compile "ch.dissem.jabit:jabit-networking:$jabitVersion"
@@ -73,6 +73,7 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:1.10.19'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
 }
 
 idea.module {

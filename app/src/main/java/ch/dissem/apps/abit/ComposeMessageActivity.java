@@ -28,6 +28,8 @@ import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 
+import static ch.dissem.bitmessage.entity.Plaintext.Encoding.EXTENDED;
+
 /**
  * Compose a new message.
  */
@@ -37,6 +39,8 @@ public class ComposeMessageActivity extends AppCompatActivity {
     public static final String EXTRA_SUBJECT = "ch.dissem.abit.Message.SUBJECT";
     public static final String EXTRA_CONTENT = "ch.dissem.abit.Message.CONTENT";
     public static final String EXTRA_BROADCAST = "ch.dissem.abit.Message.IS_BROADCAST";
+    public static final String EXTRA_ENCODING = "ch.dissem.abit.Message.ENCODING";
+    public static final String EXTRA_PARENT = "ch.dissem.abit.Message.PARENT";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,13 +73,21 @@ public class ComposeMessageActivity extends AppCompatActivity {
 
     private static Intent getReplyIntent(Context ctx, Plaintext item) {
         Intent replyIntent = new Intent(ctx, ComposeMessageActivity.class);
-        replyIntent.putExtra(EXTRA_RECIPIENT, item.getFrom());
         BitmessageAddress receivingIdentity = item.getTo();
         if (receivingIdentity.isChan()) {
+            // reply to chan, not to the sender of the message
+            replyIntent.putExtra(EXTRA_RECIPIENT, receivingIdentity);
             // I hate when people send as chan, so it won't be the default behaviour.
             replyIntent.putExtra(EXTRA_IDENTITY, Singleton.getIdentity(ctx));
         } else {
+            replyIntent.putExtra(EXTRA_RECIPIENT, item.getFrom());
             replyIntent.putExtra(EXTRA_IDENTITY, receivingIdentity);
+        }
+        // if the original message was sent using extended encoding, use it as well
+        // so features like threading can be supported
+        if (item.getEncoding() == EXTENDED) {
+            replyIntent.putExtra(EXTRA_ENCODING, EXTENDED);
+            replyIntent.putExtra(EXTRA_PARENT, item);
         }
         String prefix;
         if (item.getSubject().length() >= 3 && item.getSubject().substring(0, 3)

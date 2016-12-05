@@ -6,4 +6,10 @@
             app:showAsAction="always"
             android:icon="@drawable/ic_action_send"
             android:title="@string/send"/>
+    <item
+        android:id="@+id/select_encoding"
+        app:showAsAction="never"
+        android:icon="@drawable/ic_action_encoding"
+        android:title="Select encoding"
+        />
 </menu>

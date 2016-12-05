@@ -16,6 +16,7 @@
 
 package ch.dissem.apps.abit;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -27,18 +28,28 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.List;
 
 import ch.dissem.apps.abit.adapter.ContactAdapter;
+import ch.dissem.apps.abit.dialog.SelectEncodingDialogFragment;
 import ch.dissem.apps.abit.service.Singleton;
+import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
+import ch.dissem.bitmessage.entity.Plaintext;
+import ch.dissem.bitmessage.entity.valueobject.ExtendedEncoding;
 
+import static android.app.Activity.RESULT_OK;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_BROADCAST;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_CONTENT;
+import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_ENCODING;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_IDENTITY;
+import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_PARENT;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_RECIPIENT;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_SUBJECT;
+import static ch.dissem.bitmessage.entity.Plaintext.Type.BROADCAST;
+import static ch.dissem.bitmessage.entity.Plaintext.Type.MSG;
 
 /**
  * Compose a new message.
@@ -52,6 +63,8 @@ public class ComposeMessageFragment extends Fragment {
     private EditText subjectInput;
     private EditText bodyInput;
     private boolean broadcast;
+    private Plaintext.Encoding encoding;
+    private Plaintext parent;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -78,6 +91,14 @@ public class ComposeMessageFragment extends Fragment {
             }
             if (getArguments().containsKey(EXTRA_CONTENT)) {
                 content = getArguments().getString(EXTRA_CONTENT);
+            }
+            if (getArguments().containsKey(EXTRA_ENCODING)) {
+                encoding = (Plaintext.Encoding) getArguments().getSerializable(EXTRA_ENCODING);
+            } else {
+                encoding = Plaintext.Encoding.SIMPLE;
+            }
+            if (getArguments().containsKey(EXTRA_PARENT)) {
+                parent = (Plaintext) getArguments().getSerializable(EXTRA_PARENT);
             }
         } else {
             throw new RuntimeException("No identity set for ComposeMessageFragment");
@@ -145,36 +166,83 @@ public class ComposeMessageFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.send:
-                if (broadcast) {
-                    Singleton.getBitmessageContext(getContext()).broadcast(identity,
-                        subjectInput.getText().toString(),
-                        bodyInput.getText().toString());
-                } else {
-                    String inputString = recipientInput.getText().toString();
-                    if (recipient == null || !recipient.toString().equals(inputString)) {
-                        try {
-                            recipient = new BitmessageAddress(inputString);
-                        } catch (Exception e) {
-                            List<BitmessageAddress> contacts = Singleton.getAddressRepository
-                                (getContext()).getContacts();
-                            for (BitmessageAddress contact : contacts) {
-                                if (inputString.equalsIgnoreCase(contact.getAlias())) {
-                                    recipient = contact;
-                                    if (inputString.equals(contact.getAlias()))
-                                        break;
-                                }
-                            }
-                        }
-                    }
-                    Singleton.getBitmessageContext(getContext()).send(identity, recipient,
-                        subjectInput.getText().toString(),
-                        bodyInput.getText().toString());
-                }
-                getActivity().finish();
+                send();
+                return true;
+            case R.id.select_encoding:
+                SelectEncodingDialogFragment encodingDialog = new SelectEncodingDialogFragment();
+                encodingDialog.setTargetFragment(this, 0);
+                encodingDialog.show(getFragmentManager(), "select encoding dialog");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0 && resultCode == RESULT_OK) {
+            encoding = (Plaintext.Encoding) data.getSerializableExtra(EXTRA_ENCODING);
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private void send() {
+        Plaintext.Builder builder;
+        BitmessageContext bmc = Singleton.getBitmessageContext(getContext());
+        if (broadcast) {
+            builder = new Plaintext.Builder(BROADCAST)
+                .from(identity);
+        } else {
+            String inputString = recipientInput.getText().toString();
+            if (recipient == null || !recipient.toString().equals(inputString)) {
+                try {
+                    recipient = new BitmessageAddress(inputString);
+                } catch (Exception e) {
+                    List<BitmessageAddress> contacts = Singleton.getAddressRepository
+                        (getContext()).getContacts();
+                    for (BitmessageAddress contact : contacts) {
+                        if (inputString.equalsIgnoreCase(contact.getAlias())) {
+                            recipient = contact;
+                            if (inputString.equals(contact.getAlias()))
+                                break;
+                        }
+                    }
+                }
+            }
+            builder = new Plaintext.Builder(MSG)
+                .from(identity)
+                .to(recipient);
+        }
+        switch (encoding) {
+            case SIMPLE:
+                builder.message(
+                    subjectInput.getText().toString(),
+                    bodyInput.getText().toString()
+                );
+                break;
+            case EXTENDED:
+                builder.message(
+                    new ExtendedEncoding.Builder()
+                        .message()
+                        .subject(subjectInput.getText().toString())
+                        .body(bodyInput.getText().toString())
+                        .build()
+                );
+                break;
+            default:
+                Toast.makeText(
+                    getContext(),
+                    getContext().getString(R.string.error_unsupported_encoding, encoding),
+                    Toast.LENGTH_LONG
+                ).show();
+                builder.message(
+                    subjectInput.getText().toString(),
+                    bodyInput.getText().toString()
+                );
+        }
+        bmc.send(builder.build());
+        getActivity().finish();
     }
 }
 
