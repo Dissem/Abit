@@ -16,9 +16,7 @@
 
 package ch.dissem.apps.abit.dialog;
 
-import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatDialogFragment;
@@ -26,14 +24,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
-import ch.dissem.apps.abit.ImportIdentityActivity;
-import ch.dissem.apps.abit.MainActivity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.dissem.apps.abit.R;
-import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
-import ch.dissem.bitmessage.entity.payload.Pubkey;
 
 import static android.app.Activity.RESULT_OK;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_ENCODING;
@@ -45,6 +41,7 @@ import static ch.dissem.bitmessage.entity.Plaintext.Encoding.SIMPLE;
  */
 
 public class SelectEncodingDialogFragment extends AppCompatDialogFragment {
+    private static final Logger LOG = LoggerFactory.getLogger(SelectEncodingDialogFragment.class);
     private Plaintext.Encoding encoding;
 
     @Nullable
@@ -67,6 +64,9 @@ public class SelectEncodingDialogFragment extends AppCompatDialogFragment {
             case EXTENDED:
                 radioGroup.check(R.id.extended);
                 break;
+            default:
+                LOG.warn("Unexpected encoding: " + encoding);
+                break;
         }
         view.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,9 +76,10 @@ public class SelectEncodingDialogFragment extends AppCompatDialogFragment {
                         encoding = EXTENDED;
                         break;
                     case R.id.simple:
+                        encoding = SIMPLE;
                         break;
                     default:
-                        encoding = SIMPLE;
+                        dismiss();
                         return;
                 }
                 Intent result = new Intent();

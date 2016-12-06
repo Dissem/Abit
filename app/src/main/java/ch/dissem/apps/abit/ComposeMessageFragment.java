@@ -240,6 +240,7 @@ public class ComposeMessageFragment extends Fragment {
                     subjectInput.getText().toString(),
                     bodyInput.getText().toString()
                 );
+                break;
         }
         bmc.send(builder.build());
         getActivity().finish();
