@@ -38,7 +38,7 @@ import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
-import ch.dissem.bitmessage.entity.valueobject.ExtendedEncoding;
+import ch.dissem.bitmessage.entity.valueobject.extended.Message;
 
 import static android.app.Activity.RESULT_OK;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_BROADCAST;
@@ -223,10 +223,10 @@ public class ComposeMessageFragment extends Fragment {
                 break;
             case EXTENDED:
                 builder.message(
-                    new ExtendedEncoding.Builder()
-                        .message()
+                    new Message.Builder()
                         .subject(subjectInput.getText().toString())
                         .body(bodyInput.getText().toString())
+                        .addParent(parent)
                         .build()
                 );
                 break;

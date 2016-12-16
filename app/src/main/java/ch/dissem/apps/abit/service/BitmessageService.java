@@ -33,10 +33,10 @@ import static ch.dissem.apps.abit.notification.NetworkNotification.NETWORK_NOTIF
  * onPerformSync().
  */
 public class BitmessageService extends Service {
-    private NetworkNotification notification = null;
     private static BitmessageContext bmc = null;
-
     private static volatile boolean running = false;
+
+    private NetworkNotification notification = null;
 
     public static boolean isRunning() {
         return running && bmc.isRunning();

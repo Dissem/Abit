@@ -112,4 +112,8 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="error_unsupported_encoding">Unsupported encoding ‘%s’, using ‘SIMPLE’ instead.</string>
     <string name="select_encoding_warning">‘EXTENDED’ is a new message format that\'s not widely supported yet but has some interesting features. To stay on the save side, select ‘SIMPLE’.</string>
     <string name="select_encoding_title">Select Message Encoding</string>
+    <string name="cleanup">Cleanup</string>
+    <string name="cleanup_summary">Remove outdated inventory entries</string>
+    <string name="cleanup_notification_start">Cleanup started</string>
+    <string name="cleanup_notification_end">Cleanup finished</string>
 </resources>

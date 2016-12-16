@@ -45,6 +45,11 @@
             android:data="@string/help_out_link"/>
     </Preference>
     <Preference
+        android:key="cleanup"
+        android:title="@string/cleanup"
+        android:summary="@string/cleanup_summary"
+        />
+    <Preference
         android:key="status"
         android:summary="@string/status_summary"
         android:title="@string/status"

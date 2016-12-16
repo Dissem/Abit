@@ -19,14 +19,17 @@ package ch.dissem.apps.abit;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 import com.mikepenz.aboutlibraries.Libs;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
+import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
 
 import static ch.dissem.apps.abit.util.Constants.PREFERENCE_SERVER_POW;
@@ -56,6 +59,37 @@ public class SettingsFragment
                     .withAboutVersionShown(true)
                     .withAboutDescription(getString(R.string.about_app))
                     .start(getActivity());
+                return true;
+            }
+        });
+        final Preference cleanup = findPreference("cleanup");
+        cleanup.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected void onPreExecute() {
+                        cleanup.setEnabled(false);
+                        Toast.makeText(getActivity(), R.string.cleanup_notification_start, Toast
+                            .LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        Singleton.getBitmessageContext(getActivity()).cleanup();
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        Toast.makeText(
+                            getActivity(),
+                            R.string.cleanup_notification_end,
+                            Toast.LENGTH_LONG
+                        ).show();
+                        cleanup.setEnabled(true);
+                    }
+                }.execute();
                 return true;
             }
         });
