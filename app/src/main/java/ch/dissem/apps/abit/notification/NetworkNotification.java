@@ -109,6 +109,7 @@ public class NetworkNotification extends AbstractNotification {
             public void run() {
                 if (!update()) {
                     cancel();
+                    ctx.stopService(new Intent(ctx, BitmessageService.class));
                 }
                 NetworkNotification.super.show();
             }
