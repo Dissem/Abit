@@ -33,7 +33,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import ch.dissem.apps.abit.R;
-import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.InventoryVector;
 import ch.dissem.bitmessage.entity.valueobject.Label;
@@ -242,24 +241,11 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
 
     @Override
     public void save(Plaintext message) {
+        saveContactIfNecessary(message.getFrom());
+        saveContactIfNecessary(message.getTo());
         SQLiteDatabase db = sql.getWritableDatabase();
         try {
             db.beginTransaction();
-
-            // save from address if necessary
-            BitmessageAddress savedAddress = ctx.getAddressRepository().getAddress(message
-                .getFrom().getAddress());
-            if (message.getId() == null) {
-                if (savedAddress == null) {
-                    ctx.getAddressRepository().save(message.getFrom());
-                } else if (savedAddress.getPubkey() == null) {
-                    savedAddress.setPubkey(message.getFrom().getPubkey());
-                    ctx.getAddressRepository().save(savedAddress);
-                }
-            }
-            if (savedAddress != null) {
-                message.getFrom().setAlias(savedAddress.getAlias());
-            }
 
             // save message
             if (message.getId() == null) {
