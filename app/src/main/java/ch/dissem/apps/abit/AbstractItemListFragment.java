@@ -16,20 +16,18 @@
 
 package ch.dissem.apps.abit;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ListView;
-import ch.dissem.apps.abit.listeners.ListSelectionListener;
-import ch.dissem.apps.abit.service.Singleton;
-import ch.dissem.bitmessage.BitmessageContext;
-import ch.dissem.bitmessage.entity.valueobject.Label;
+
+import ch.dissem.apps.abit.listener.ListSelectionListener;
 
 /**
- * Created by chris on 07.09.15.
+ * @author Christian Basler
  */
-public abstract class AbstractItemListFragment<T> extends ListFragment {
+public abstract class AbstractItemListFragment<T> extends ListFragment implements ListHolder {
     /**
      * The serialization (saved instance state) Bundle key representing the
      * activated item position. Only used on tablets.
@@ -39,12 +37,13 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
      * A dummy implementation of the {@link ListSelectionListener} interface that does
      * nothing. Used only when this fragment is not attached to an activity.
      */
-    private static ListSelectionListener<Object> dummyCallbacks = new ListSelectionListener<Object>() {
-        @Override
-        public void onItemSelected(Object plaintext) {
-        }
-    };
-    protected BitmessageContext bmc;
+    private static final ListSelectionListener<Object> dummyCallbacks =
+        new ListSelectionListener<Object>() {
+            @Override
+            public void onItemSelected(Object item) {
+                // NO OP
+            }
+        };
     /**
      * The fragment's current callback object, which is notified of list item
      * clicks.
@@ -54,15 +53,7 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
      * The current activated item position. Only used on tablets.
      */
     private int activatedPosition = ListView.INVALID_POSITION;
-
-    abstract void updateList(Label label);
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        bmc = Singleton.getBitmessageContext(getActivity());
-    }
+    private boolean activateOnItemClick;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -70,21 +61,34 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
 
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null
-                && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
+            && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onResume() {
+        super.onResume();
+
+        // When setting CHOICE_MODE_SINGLE, ListView will automatically
+        // give items the 'activated' state when touched.
+        getListView().setChoiceMode(activateOnItemClick
+            ? ListView.CHOICE_MODE_SINGLE
+            : ListView.CHOICE_MODE_NONE);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
         // Activities containing this fragment must implement its callbacks.
-        if (!(activity instanceof ListSelectionListener)) {
+        if (context instanceof ListSelectionListener) {
+            //noinspection unchecked
+            callbacks = (ListSelectionListener) context;
+        } else {
             throw new IllegalStateException("Activity must implement fragment's callbacks.");
         }
 
-        callbacks = (ListSelectionListener) activity;
     }
 
     @Override
@@ -101,6 +105,7 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
 
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
+        //noinspection unchecked
         callbacks.onItemSelected((T) listView.getItemAtPosition(position));
     }
 
@@ -118,11 +123,15 @@ public abstract class AbstractItemListFragment<T> extends ListFragment {
      * given the 'activated' state when touched.
      */
     public void setActivateOnItemClick(boolean activateOnItemClick) {
-        // When setting CHOICE_MODE_SINGLE, ListView will automatically
-        // give items the 'activated' state when touched.
-        getListView().setChoiceMode(activateOnItemClick
+        this.activateOnItemClick = activateOnItemClick;
+
+        if (isVisible()) {
+            // When setting CHOICE_MODE_SINGLE, ListView will automatically
+            // give items the 'activated' state when touched.
+            getListView().setChoiceMode(activateOnItemClick
                 ? ListView.CHOICE_MODE_SINGLE
                 : ListView.CHOICE_MODE_NONE);
+        }
     }
 
     private void setActivatedPosition(int position) {

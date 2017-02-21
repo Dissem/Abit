@@ -1,22 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="ch.dissem.apps.abit">
+<manifest
+    package="ch.dissem.apps.abit"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
     <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
 
     <application
-            android:allowBackup="true"
-            android:icon="@mipmap/ic_launcher"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme">
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme"
+        tools:replace="android:allowBackup">
         <activity
-                android:name=".MessageListActivity"
-                android:label="@string/app_name">
+            android:name=".MainActivity"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -24,30 +30,34 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".MessageDetailActivity"
-                android:label="@string/title_message_detail"
-                android:parentActivityName=".MessageListActivity"
-                tools:ignore="UnusedAttribute">
+            android:name=".MessageDetailActivity"
+            android:label="@string/title_message_detail"
+            android:parentActivityName=".MainActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".MessageListActivity"/>
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
         </activity>
         <activity
-                android:name=".SubscriptionDetailActivity"
-                android:label="@string/title_subscription_detail"
-                android:parentActivityName=".MessageListActivity"
-                tools:ignore="UnusedAttribute">
+            android:name=".AddressDetailActivity"
+            android:label="@string/title_subscription_detail"
+            android:parentActivityName=".MainActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".MessageListActivity"/>
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
         </activity>
         <activity
-                android:name=".ComposeMessageActivity"
-                android:label="Compose"
-                android:parentActivityName=".MessageListActivity">
+            android:name=".dialog.FullNodeDialogActivity"
+            android:label="@string/full_node"
+            android:theme="@style/Theme.AppCompat.Light.Dialog"/>
+        <activity
+            android:name=".ComposeMessageActivity"
+            android:label="@string/compose_message"
+            android:parentActivityName=".MainActivity">
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".MessageListActivity"/>
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
 
             <intent-filter>
                 <action android:name="android.intent.action.SENDTO"/>
@@ -74,20 +84,19 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".SettingsActivity"
-                android:label="@string/settings"
-                android:parentActivityName=".MessageListActivity">
+            android:name=".SettingsActivity"
+            android:label="@string/settings"
+            android:parentActivityName=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-
         <activity
-                android:name=".OpenBitmessageLinkActivity"
-                android:label="@string/title_activity_open_bitmessage_link"
-                android:theme="@style/Theme.AppCompat.Light.Dialog">
+            android:name=".CreateAddressActivity"
+            android:label="@string/title_activity_open_bitmessage_link"
+            android:theme="@style/Theme.AppCompat.Light.Dialog">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
 
@@ -98,6 +107,84 @@
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".ImportIdentityActivity"
+            android:label="@string/title_import_identity"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <data
+                    android:host="*"
+                    android:mimeType="*/*"
+                    android:pathPattern=".*\\.dat"
+                    android:scheme="file"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".service.BitmessageService"
+            android:exported="false"/>
+        <service
+            android:name=".service.ProofOfWorkService"
+            android:exported="false"/>
+
+        <!-- Synchronization -->
+        <provider
+            android:name=".synchronization.StubProvider"
+            android:authorities="ch.dissem.apps.abit.provider"
+            android:exported="false"
+            android:syncable="true"/>
+
+        <service
+            android:name=".synchronization.AuthenticatorService"
+            android:exported="true"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator"/>
+        </service>
+        <service
+            android:name=".synchronization.SyncService"
+            android:exported="true"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter"/>
+            </intent-filter>
+
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter"/>
+        </service>
+        <service
+            android:name=".service.BitmessageIntentService"
+            android:exported="false"/>
+
+        <!-- Receive Wi-Fi connection state changes -->
+        <receiver android:name=".listener.WifiReceiver">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".StatusActivity"
+            android:label="@string/title_activity_status"
+            android:parentActivityName=".SettingsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".SettingsActivity"/>
         </activity>
     </application>
 

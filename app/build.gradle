@@ -1,42 +1,79 @@
 apply plugin: 'idea'
 apply plugin: 'com.android.application'
 
+ext {
+    appName = "Abit"
+}
+if (project.hasProperty("project.configs")
+    && new File(project.property("project.configs") + appName + ".gradle").exists()) {
+    apply from: project.property("project.configs") + appName + ".gradle";
+}
+
+//noinspection GroovyMissingReturnStatement
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
 
     defaultConfig {
-        applicationId "ch.dissem.apps.abit"
-        minSdkVersion 15
-        targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        applicationId "ch.dissem.apps." + appName.toLowerCase()
+        minSdkVersion 19
+        targetSdkVersion 25
+        versionCode 11
+        versionName "1.0-beta11"
+        jackOptions.enabled = false
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
     buildTypes {
         release {
             minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
 
+//ext.jabitVersion = '2.0.4'
+ext.jabitVersion = 'feature-extended-encoding-SNAPSHOT'
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.0.1'
-    compile 'com.android.support:support-v4:23.0.1'
-    compile 'com.android.support:design:23.0.1'
+    compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'com.android.support:support-v4:25.1.0'
+    compile 'com.android.support:design:25.1.0'
 
-    compile 'ch.dissem.jabit:jabit-domain:0.2.1-SNAPSHOT'
-    compile 'ch.dissem.jabit:jabit-networking:0.2.1-SNAPSHOT'
-    compile 'ch.dissem.jabit:jabit-security-spongy:0.2.1-SNAPSHOT'
+    compile "ch.dissem.jabit:jabit-core:$jabitVersion"
+    compile "ch.dissem.jabit:jabit-networking:$jabitVersion"
+    compile "ch.dissem.jabit:jabit-cryptography-spongy:$jabitVersion"
+    compile "ch.dissem.jabit:jabit-extensions:$jabitVersion"
+    compile "ch.dissem.jabit:jabit-wif:$jabitVersion"
 
     compile 'org.slf4j:slf4j-android:1.7.12'
 
-    compile('com.mikepenz:materialdrawer:3.1.0@aar') {
+    compile 'com.mikepenz:materialize:1.0.0@aar'
+    compile('com.mikepenz:materialdrawer:5.6.0@aar') {
+        transitive = true
+    }
+    compile('com.mikepenz:aboutlibraries:5.8.1@aar') {
         transitive = true
     }
     compile 'com.mikepenz:iconics:1.6.2@aar'
-    compile 'com.mikepenz:community-material-typeface:1.1.71@aar'
+    compile 'com.mikepenz:community-material-typeface:1.5.54.2@aar'
+
+    compile 'com.journeyapps:zxing-android-embedded:3.3.0@aar'
+    compile 'com.google.zxing:core:3.3.0'
+    compile 'io.github.yavski:fab-speed-dial:1.0.6'
+    compile 'com.github.amlcurran.showcaseview:library:5.4.3'
+    compile('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.9.3@aar') {
+        transitive = true
+    }
+    compile 'com.github.angads25:filepicker:1.0.6'
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:1.10.19'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
 }
 
 idea.module {

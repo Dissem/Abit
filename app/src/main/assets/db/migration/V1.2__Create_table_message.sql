@@ -8,6 +8,7 @@ CREATE TABLE Message (
   sent                    INTEGER,
   received                INTEGER,
   status                  VARCHAR(20)   NOT NULL,
+  initial_hash            BINARY(64)    UNIQUE,
 
   FOREIGN KEY (sender)    REFERENCES Address (address),
   FOREIGN KEY (recipient) REFERENCES Address (address)

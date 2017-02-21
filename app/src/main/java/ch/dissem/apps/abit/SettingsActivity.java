@@ -1,23 +1,14 @@
 package ch.dissem.apps.abit;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 
 /**
- * Created by chris on 14.07.15.
+ * @author Christian Basler
  */
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends DetailActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.toolbar_layout);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(false);
 
         // Display the fragment as the main content.
         getFragmentManager().beginTransaction()

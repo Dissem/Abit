@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <ListView
+        android:id="@id/android:list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:choiceMode="singleChoice"
+        android:clipToPadding="false"
+        android:paddingBottom="88dp"
+        android:scrollbarStyle="outsideOverlay"/>
+
+    <io.github.yavski.fabspeeddial.FabSpeedDial
+        android:id="@+id/fab_add_contact"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        app:elevation="8dp"
+        app:fabDrawable="@drawable/ic_action_add_contact"
+        app:fabGravity="bottom_end"
+        app:fabMenu="@menu/fab_address"/>
+</RelativeLayout>

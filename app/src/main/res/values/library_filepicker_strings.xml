@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="UnusedResources">
+    <string name="define_int_filepicker" translatable="false"/>
+    <!-- Author section -->
+    <string name="library_filepicker_author" translatable="false">Angad Singh</string>
+    <string name="library_filepicker_authorWebsite" translatable="false">https://github.com/Angads25</string>
+    <!-- Library section -->
+    <string name="library_filepicker_libraryName" translatable="false">FilePicker</string>
+    <string name="library_filepicker_libraryDescription">Android Library to select files/directories from Device Storage.</string>
+    <string name="library_filepicker_libraryWebsite" translatable="false">https://github.com/Angads25/android-filepicker</string>
+    <string name="library_filepicker_libraryVersion" translatable="false">1.0.6</string>
+    <!-- OpenSource section -->
+    <string name="library_filepicker_isOpenSource" translatable="false">true</string>
+    <string name="library_filepicker_repositoryLink" translatable="false">https://github.com/Angads25/android-filepicker</string>
+    <!-- ClassPath for autoDetect section -->
+    <string name="library_filepicker_classPath" translatable="false">com.github.angads25.filepicker.view.FilePickerDialog</string>
+    <!-- License section -->
+    <string name="library_filepicker_licenseId" translatable="false">apache_2_0</string>
+    <!-- Custom variables section -->
+</resources>

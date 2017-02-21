@@ -1,26 +1,25 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme.Base" parent="MaterialDrawerTheme.Light.DarkToolbar.TranslucentStatus">
-
-        <item name="android:activatedBackgroundIndicator">@color/primary_light</item>
-        <item name="android:textColor">@color/primary_text</item>
-        <item name="android:textColorSecondary">@color/secondary_text</item>
-
-        <!-- MaterialDrawer specific values -->
-        <item name="material_drawer_background">@color/primary_dark</item>
-        <item name="material_drawer_icons">@color/primary_text</item>
-        <item name="material_drawer_primary_icon">@color/icons</item>
-        <item name="material_drawer_primary_text">@color/primary_text</item>
-        <item name="material_drawer_secondary_text">@color/secondary_text</item>
-        <item name="material_drawer_hint_text">@color/secondary_text</item>
-        <item name="material_drawer_divider">@color/divider</item>
-        <item name="material_drawer_selected">@color/primary</item>
-        <item name="material_drawer_selected_text">@color/primary_text</item>
-        <item name="material_drawer_header_selection_text">@color/primary_text</item>
-
+    <style name="AppTheme" parent="MaterialDrawerTheme.Light.DarkToolbar.TranslucentStatus">
+        <item name="android:activatedBackgroundIndicator">@drawable/bg_item_activated</item>
+        <item name="android:textColor">@color/colorPrimaryText</item>
+        <item name="android:textColorSecondary">@color/colorSecondaryText</item>
     </style>
 
-    <style name="AppTheme" parent="AppTheme.Base"/>
+    <style name="CustomShowcaseTheme" parent="ShowcaseView">
+        <item name="sv_backgroundColor">#eeffc107</item>
+        <item name="sv_showcaseColor">#ffc107</item>
+        <item name="sv_buttonText">Hide</item>
+        <item name="sv_tintButtonColor">false</item>
+        <item name="sv_titleTextAppearance">@style/CustomTitle</item>
+    </style>
 
+    <style name="CustomTitle" parent="TextAppearance.ShowcaseView.Title">
+        <item name="android:textColor">@color/colorAccent</item>
+    </style>
+
+    <style name="FixedDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="windowNoTitle">false</item>
+    </style>
 </resources>
