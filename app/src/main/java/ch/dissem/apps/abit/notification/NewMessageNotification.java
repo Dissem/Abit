@@ -92,14 +92,12 @@ public class NewMessageNotification extends AbstractNotification {
         numberOfUnacknowledgedMessages) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx);
         builder.setSmallIcon(R.drawable.ic_notification_new_message)
-            .setContentTitle(ctx.getString(R.string.n_new_messages, unacknowledged.size()))
+            .setContentTitle(ctx.getString(R.string.n_new_messages, numberOfUnacknowledgedMessages))
             .setContentText(ctx.getString(R.string.app_name));
 
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (unacknowledged) {
-            inboxStyle.setBigContentTitle(ctx.getString(R.string.n_new_messages,
-                numberOfUnacknowledgedMessages));
             for (Plaintext msg : unacknowledged) {
                 Spannable sb = new SpannableString(msg.getFrom() + " " + msg.getSubject());
                 sb.setSpan(SPAN_EMPHASIS, 0, String.valueOf(msg.getFrom()).length(), Spannable
