@@ -17,6 +17,7 @@
 package ch.dissem.apps.abit;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -37,7 +38,9 @@ import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeMana
 import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import ch.dissem.apps.abit.adapter.SwipeableMessageAdapter;
 import ch.dissem.apps.abit.listener.ActionBarListener;
@@ -102,27 +105,54 @@ public class MessageListFragment extends Fragment implements ListHolder {
 
     @Override
     public void updateList(Label label) {
-        currentLabel = label;
+        if (!isResumed()) {
+            currentLabel = label;
+            return;
+        }
 
-        if (!isVisible()) return;
-
+        if (!Objects.equals(currentLabel, label)) {
+            adapter.setData(label, Collections.<Plaintext>emptyList());
+            adapter.notifyDataSetChanged();
+        }
         doUpdateList(label);
     }
 
-    private void doUpdateList(Label label) {
-        List<Plaintext> messages = Singleton.getMessageRepository(getContext()).findMessages(label);
+    private void doUpdateList(final Label label) {
+        if (label == null) {
+            if (getActivity() instanceof ActionBarListener) {
+                ((ActionBarListener) getActivity()).updateTitle(getString(R.string.app_name));
+            }
+            adapter.setData(null, Collections.<Plaintext>emptyList());
+            adapter.notifyDataSetChanged();
+            return;
+        }
+        currentLabel = label;
+        if (emptyTrashMenuItem != null) {
+            emptyTrashMenuItem.setVisible(label.getType() == Label.Type.TRASH);
+        }
         if (getActivity() instanceof ActionBarListener) {
-            if (label != null) {
-                ((ActionBarListener) getActivity()).updateTitle(label.toString());
+            ActionBarListener actionBarListener = (ActionBarListener) getActivity();
+            if ("archive".equals(label.toString())) {
+                actionBarListener.updateTitle(getString(R.string.archive));
             } else {
-                ((ActionBarListener) getActivity()).updateTitle(getString(R.string.archive));
+                actionBarListener.updateTitle(label.toString());
             }
         }
-        if (emptyTrashMenuItem != null) {
-            emptyTrashMenuItem.setVisible(label != null && label.getType() == Label.Type.TRASH);
-        }
-        adapter.setData(label, messages);
-        adapter.notifyDataSetChanged();
+        new AsyncTask<Void, Void, List<Plaintext>>() {
+
+            @Override
+            protected List<Plaintext> doInBackground(Void... params) {
+                return messageRepo.findMessages(label);
+            }
+
+            @Override
+            protected void onPostExecute(List<Plaintext> messages) {
+                if (adapter != null) {
+                    adapter.setData(label, messages);
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        }.execute();
     }
 
     @Override
@@ -276,11 +306,20 @@ public class MessageListFragment extends Fragment implements ListHolder {
             case R.id.empty_trash:
                 if (currentLabel.getType() != Label.Type.TRASH) return true;
 
-                MessageRepository repo = Singleton.getMessageRepository(getContext());
-                for (Plaintext message : repo.findMessages(currentLabel)) {
-                    repo.remove(message);
-                }
-                updateList(currentLabel);
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        for (Plaintext message : messageRepo.findMessages(currentLabel)) {
+                            messageRepo.remove(message);
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        updateList(currentLabel);
+                    }
+                }.execute();
                 return true;
             default:
                 return false;

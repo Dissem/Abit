@@ -18,6 +18,7 @@ package ch.dissem.apps.abit;
 
 import android.content.Intent;
 import android.graphics.Point;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -53,13 +54,13 @@ import org.slf4j.LoggerFactory;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import ch.dissem.apps.abit.dialog.AddIdentityDialogFragment;
 import ch.dissem.apps.abit.dialog.FullNodeDialogActivity;
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
+import ch.dissem.apps.abit.repository.AndroidMessageRepository;
 import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
@@ -125,12 +126,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         instance = new WeakReference<>(this);
         bmc = Singleton.getBitmessageContext(this);
-        List<Label> labels = bmc.messages().getLabels();
-        if (getIntent().hasExtra(EXTRA_SHOW_LABEL)) {
-            selectedLabel = (Label) getIntent().getSerializableExtra(EXTRA_SHOW_LABEL);
-        } else if (selectedLabel == null) {
-            selectedLabel = labels.get(0);
-        }
 
         setContentView(R.layout.activity_message_list);
 
@@ -155,7 +150,7 @@ public class MainActivity extends AppCompatActivity
             listFragment.setActivateOnItemClick(true);
         }
 
-        createDrawer(toolbar, labels);
+        createDrawer(toolbar);
 
         // handle intents
         Intent intent = getIntent();
@@ -217,22 +212,8 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void createDrawer(Toolbar toolbar, Collection<Label> labels) {
+    private void createDrawer(Toolbar toolbar) {
         final ArrayList<IProfile> profiles = new ArrayList<>();
-        for (BitmessageAddress identity : bmc.addresses().getIdentities()) {
-            LOG.info("Adding identity " + identity.getAddress());
-            profiles.add(new ProfileDrawerItem()
-                .withIcon(new Identicon(identity))
-                .withName(identity.toString())
-                .withNameShown(true)
-                .withEmail(identity.getAddress())
-                .withTag(identity)
-            );
-        }
-        if (profiles.isEmpty()) {
-            // Create an initial identity
-            Singleton.getIdentity(this);
-        }
         profiles.add(new ProfileSettingDrawerItem()
             .withName(getString(R.string.add_identity))
             .withDescription(getString(R.string.add_identity_summary))
@@ -288,46 +269,10 @@ public class MainActivity extends AppCompatActivity
             accountHeader.setActiveProfile(profiles.get(0), true);
         }
 
-        ArrayList<IDrawerItem> drawerItems = new ArrayList<>();
-        for (Label label : labels) {
-            PrimaryDrawerItem item = new PrimaryDrawerItem()
-                .withName(label.toString())
-                .withTag(label);
-            if (label.getType() == null) {
-                item.withIcon(CommunityMaterial.Icon.cmd_label)
-                    .withIconColor(label.getColor());
-            } else {
-                switch (label.getType()) {
-                    case INBOX:
-                        item.withIcon(GoogleMaterial.Icon.gmd_inbox);
-                        break;
-                    case DRAFT:
-                        item.withIcon(CommunityMaterial.Icon.cmd_file);
-                        break;
-                    case OUTBOX:
-                        item.withIcon(CommunityMaterial.Icon.cmd_outbox);
-                        break;
-                    case SENT:
-                        item.withIcon(CommunityMaterial.Icon.cmd_send);
-                        break;
-                    case BROADCAST:
-                        item.withIcon(CommunityMaterial.Icon.cmd_rss);
-                        break;
-                    case UNREAD:
-                        item.withIcon(GoogleMaterial.Icon.gmd_markunread_mailbox);
-                        break;
-                    case TRASH:
-                        item.withIcon(GoogleMaterial.Icon.gmd_delete);
-                        break;
-                    default:
-                        item.withIcon(CommunityMaterial.Icon.cmd_label);
-                }
-            }
-            drawerItems.add(item);
-        }
+        final ArrayList<IDrawerItem> drawerItems = new ArrayList<>();
         drawerItems.add(new PrimaryDrawerItem()
             .withName(R.string.archive)
-            .withTag(null)
+            .withTag(AndroidMessageRepository.LABEL_ARCHIVE)
             .withIcon(CommunityMaterial.Icon.cmd_archive)
         );
         drawerItems.add(new DividerDrawerItem());
@@ -384,10 +329,6 @@ public class MainActivity extends AppCompatActivity
                                 startActivity(new Intent(MainActivity.this, SettingsActivity
                                     .class));
                                 break;
-                            case R.string.archive:
-                                selectedLabel = null;
-                                showSelectedLabel();
-                                break;
                             case R.string.full_node:
                                 return true;
                         }
@@ -397,6 +338,59 @@ public class MainActivity extends AppCompatActivity
             })
             .withShowDrawerOnFirstLaunch(true)
             .build();
+
+        new AsyncTask<Void, Void, List<BitmessageAddress>>() {
+            @Override
+            protected List<BitmessageAddress> doInBackground(Void... params) {
+                List<BitmessageAddress> identities = bmc.addresses().getIdentities();
+                if (identities.isEmpty()) {
+                    // Create an initial identity
+                    Singleton.getIdentity(MainActivity.this);
+                }
+                return identities;
+            }
+
+            @Override
+            protected void onPostExecute(List<BitmessageAddress> identities) {
+                for (BitmessageAddress identity : identities) {
+                    addIdentityEntry(identity);
+                }
+            }
+        }.execute();
+
+        new AsyncTask<Void, Void, List<Label>>() {
+            @Override
+            protected List<Label> doInBackground(Void... params) {
+                return bmc.messages().getLabels();
+            }
+
+            @Override
+            protected void onPostExecute(List<Label> labels) {
+                if (getIntent().hasExtra(EXTRA_SHOW_LABEL)) {
+                    selectedLabel = (Label) getIntent().getSerializableExtra(EXTRA_SHOW_LABEL);
+                } else if (selectedLabel == null) {
+                    selectedLabel = labels.get(0);
+                }
+                for (Label label : labels) {
+                    addLabelEntry(label);
+                }
+                showSelectedLabel();
+            }
+        }.execute();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putSerializable("selectedLabel", selectedLabel);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        selectedLabel = (Label) savedInstanceState.getSerializable("selectedLabel");
+        showSelectedLabel();
+        super.onRestoreInstanceState(savedInstanceState);
     }
 
     private void addIdentityDialog() {
@@ -427,6 +421,43 @@ public class MainActivity extends AppCompatActivity
         } else {
             accountHeader.addProfiles(newProfile);
         }
+    }
+
+    public void addLabelEntry(Label label) {
+        PrimaryDrawerItem item = new PrimaryDrawerItem()
+            .withName(label.toString())
+            .withTag(label);
+        if (label.getType() == null) {
+            item.withIcon(CommunityMaterial.Icon.cmd_label)
+                .withIconColor(label.getColor());
+        } else {
+            switch (label.getType()) {
+                case INBOX:
+                    item.withIcon(GoogleMaterial.Icon.gmd_inbox);
+                    break;
+                case DRAFT:
+                    item.withIcon(CommunityMaterial.Icon.cmd_file);
+                    break;
+                case OUTBOX:
+                    item.withIcon(CommunityMaterial.Icon.cmd_outbox);
+                    break;
+                case SENT:
+                    item.withIcon(CommunityMaterial.Icon.cmd_send);
+                    break;
+                case BROADCAST:
+                    item.withIcon(CommunityMaterial.Icon.cmd_rss);
+                    break;
+                case UNREAD:
+                    item.withIcon(GoogleMaterial.Icon.gmd_markunread_mailbox);
+                    break;
+                case TRASH:
+                    item.withIcon(GoogleMaterial.Icon.gmd_delete);
+                    break;
+                default:
+                    item.withIcon(CommunityMaterial.Icon.cmd_label);
+            }
+        }
+        drawer.addItemAtPosition(item, drawer.getDrawerItems().size() - 3);
     }
 
     public void updateIdentityEntry(BitmessageAddress identity) {

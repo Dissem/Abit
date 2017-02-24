@@ -67,23 +67,25 @@ public class SettingsFragment
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 new AsyncTask<Void, Void, Void>() {
+                    private Context ctx = getActivity().getApplicationContext();
+
                     @Override
                     protected void onPreExecute() {
                         cleanup.setEnabled(false);
-                        Toast.makeText(getActivity(), R.string.cleanup_notification_start, Toast
+                        Toast.makeText(ctx, R.string.cleanup_notification_start, Toast
                             .LENGTH_SHORT).show();
                     }
 
                     @Override
                     protected Void doInBackground(Void... voids) {
-                        Singleton.getBitmessageContext(getActivity()).cleanup();
+                        Singleton.getBitmessageContext(ctx).cleanup();
                         return null;
                     }
 
                     @Override
                     protected void onPostExecute(Void aVoid) {
                         Toast.makeText(
-                            getActivity(),
+                            ctx,
                             R.string.cleanup_notification_end,
                             Toast.LENGTH_LONG
                         ).show();
