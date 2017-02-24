@@ -48,6 +48,8 @@ import static java.lang.String.valueOf;
 public class AndroidMessageRepository extends AbstractMessageRepository {
     private static final Logger LOG = LoggerFactory.getLogger(AndroidMessageRepository.class);
 
+    public static final Label LABEL_ARCHIVE = new Label("archive", null, 0);
+
     private static final String TABLE_NAME = "Message";
     private static final String COLUMN_ID = "id";
     private static final String COLUMN_IV = "iv";
@@ -80,6 +82,15 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
     public AndroidMessageRepository(SqlHelper sql, Context ctx) {
         this.sql = sql;
         this.context = ctx;
+    }
+
+    @Override
+    public List<Plaintext> findMessages(Label label) {
+        if (label == LABEL_ARCHIVE) {
+            return super.findMessages((Label) null);
+        } else {
+            return super.findMessages(label);
+        }
     }
 
     public List<Label> findLabels(String where) {
@@ -153,15 +164,18 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
     public int countUnread(Label label) {
         String[] args;
         String where;
-        if (label != null) {
-            where = "id IN (SELECT message_id FROM Message_Label WHERE label_id=?) AND ";
+        if (label == null){
+            return 0;
+        }
+        if (label == LABEL_ARCHIVE) {
+            where = "";
             args = new String[]{
-                label.getId().toString(),
                 Label.Type.UNREAD.name()
             };
         } else {
-            where = "";
+            where = "id IN (SELECT message_id FROM Message_Label WHERE label_id=?) AND ";
             args = new String[]{
+                label.getId().toString(),
                 Label.Type.UNREAD.name()
             };
         }

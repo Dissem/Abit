@@ -54,14 +54,13 @@ import org.slf4j.LoggerFactory;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import ch.dissem.apps.abit.dialog.AddIdentityDialogFragment;
 import ch.dissem.apps.abit.dialog.FullNodeDialogActivity;
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
+import ch.dissem.apps.abit.repository.AndroidMessageRepository;
 import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
@@ -273,7 +272,7 @@ public class MainActivity extends AppCompatActivity
         final ArrayList<IDrawerItem> drawerItems = new ArrayList<>();
         drawerItems.add(new PrimaryDrawerItem()
             .withName(R.string.archive)
-            .withTag(null)
+            .withTag(AndroidMessageRepository.LABEL_ARCHIVE)
             .withIcon(CommunityMaterial.Icon.cmd_archive)
         );
         drawerItems.add(new DividerDrawerItem());
@@ -329,10 +328,6 @@ public class MainActivity extends AppCompatActivity
                             case R.string.settings:
                                 startActivity(new Intent(MainActivity.this, SettingsActivity
                                     .class));
-                                break;
-                            case R.string.archive:
-                                selectedLabel = null;
-                                showSelectedLabel();
                                 break;
                             case R.string.full_node:
                                 return true;

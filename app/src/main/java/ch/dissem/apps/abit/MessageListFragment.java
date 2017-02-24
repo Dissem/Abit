@@ -100,8 +100,7 @@ public class MessageListFragment extends Fragment implements ListHolder {
         MainActivity activity = (MainActivity) getActivity();
         messageRepo = Singleton.getMessageRepository(activity);
 
-        currentLabel = activity.getSelectedLabel();
-        doUpdateList(currentLabel);
+        doUpdateList(activity.getSelectedLabel());
     }
 
     @Override
@@ -119,15 +118,24 @@ public class MessageListFragment extends Fragment implements ListHolder {
     }
 
     private void doUpdateList(final Label label) {
+        if (label == null) {
+            if (getActivity() instanceof ActionBarListener) {
+                ((ActionBarListener) getActivity()).updateTitle(getString(R.string.app_name));
+            }
+            adapter.setData(null, Collections.<Plaintext>emptyList());
+            adapter.notifyDataSetChanged();
+            return;
+        }
         currentLabel = label;
         if (emptyTrashMenuItem != null) {
-            emptyTrashMenuItem.setVisible(label != null && label.getType() == Label.Type.TRASH);
+            emptyTrashMenuItem.setVisible(label.getType() == Label.Type.TRASH);
         }
         if (getActivity() instanceof ActionBarListener) {
-            if (label != null) {
-                ((ActionBarListener) getActivity()).updateTitle(label.toString());
+            ActionBarListener actionBarListener = (ActionBarListener) getActivity();
+            if ("archive".equals(label.toString())) {
+                actionBarListener.updateTitle(getString(R.string.archive));
             } else {
-                ((ActionBarListener) getActivity()).updateTitle(getString(R.string.archive));
+                actionBarListener.updateTitle(label.toString());
             }
         }
         new AsyncTask<Void, Void, List<Plaintext>>() {
