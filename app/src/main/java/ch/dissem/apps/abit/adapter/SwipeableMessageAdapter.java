@@ -45,6 +45,7 @@ import ch.dissem.apps.abit.util.Assets;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 
+import static ch.dissem.apps.abit.repository.AndroidMessageRepository.LABEL_ARCHIVE;
 import static ch.dissem.apps.abit.util.Strings.normalizeWhitespaces;
 
 /**
@@ -199,7 +200,7 @@ public class SwipeableMessageAdapter
 
     @Override
     public int onGetSwipeReactionType(ViewHolder holder, int position, int x, int y) {
-        if (label == null || label.getType() == Label.Type.TRASH) {
+        if (label == LABEL_ARCHIVE || label.getType() == Label.Type.TRASH) {
             return REACTION_CAN_SWIPE_LEFT | REACTION_CAN_NOT_SWIPE_RIGHT_WITH_RUBBER_BAND_EFFECT;
         }
         return REACTION_CAN_SWIPE_BOTH_H;
@@ -217,7 +218,7 @@ public class SwipeableMessageAdapter
                 bgRes = R.drawable.bg_swipe_item_left;
                 break;
             case DRAWABLE_SWIPE_RIGHT_BACKGROUND:
-                if (label == null || label.getType() == Label.Type.TRASH) {
+                if (label == LABEL_ARCHIVE || label.getType() == Label.Type.TRASH) {
                     bgRes = R.drawable.bg_swipe_item_neutral;
                 } else {
                     bgRes = R.drawable.bg_swipe_item_right;
