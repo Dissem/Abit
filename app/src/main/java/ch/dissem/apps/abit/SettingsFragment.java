@@ -29,8 +29,10 @@ import android.widget.Toast;
 import com.mikepenz.aboutlibraries.Libs;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
+import ch.dissem.apps.abit.repository.AndroidNodeRegistry;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
+import ch.dissem.bitmessage.BitmessageContext;
 
 import static ch.dissem.apps.abit.util.Constants.PREFERENCE_SERVER_POW;
 import static ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE;
@@ -78,7 +80,9 @@ public class SettingsFragment
 
                     @Override
                     protected Void doInBackground(Void... voids) {
-                        Singleton.getBitmessageContext(ctx).cleanup();
+                        BitmessageContext bmc = Singleton.getBitmessageContext(ctx);
+                        bmc.cleanup();
+                        bmc.internals().getNodeRegistry().clear();
                         return null;
                     }
 

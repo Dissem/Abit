@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,12 @@ public class AndroidNodeRegistry implements NodeRegistry {
     private void cleanUp() {
         SQLiteDatabase db = sql.getWritableDatabase();
         db.delete(TABLE_NAME, "time < ?", new String[]{valueOf(now(-28 * DAY))});
+    }
+
+    @Override
+    public void clear() {
+        SQLiteDatabase db = sql.getWritableDatabase();
+        db.delete(TABLE_NAME, null, null);
     }
 
     private Long loadExistingTime(NetworkAddress node) {

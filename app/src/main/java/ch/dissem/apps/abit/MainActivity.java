@@ -55,6 +55,7 @@ import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import ch.dissem.apps.abit.dialog.AddIdentityDialogFragment;
 import ch.dissem.apps.abit.dialog.FullNodeDialogActivity;
@@ -311,7 +312,15 @@ public class MainActivity extends AppCompatActivity
                 public boolean onItemClick(View view, int position, IDrawerItem item) {
                     if (item.getTag() instanceof Label) {
                         selectedLabel = (Label) item.getTag();
-                        showSelectedLabel();
+                        if (getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof
+                            MessageListFragment) {
+                            ((MessageListFragment) getSupportFragmentManager()
+                                .findFragmentById(R.id.item_list)).updateList(selectedLabel);
+                        } else {
+                            MessageListFragment listFragment = new MessageListFragment();
+                            changeList(listFragment);
+                            listFragment.updateList(selectedLabel);
+                        }
                         return false;
                     } else if (item instanceof Nameable<?>) {
                         Nameable<?> ni = (Nameable<?>) item;
@@ -374,7 +383,7 @@ public class MainActivity extends AppCompatActivity
                 for (Label label : labels) {
                     addLabelEntry(label);
                 }
-                showSelectedLabel();
+                drawer.setSelection(drawer.getDrawerItem(selectedLabel));
             }
         }.execute();
     }
@@ -389,7 +398,9 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("unchecked")
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         selectedLabel = (Label) savedInstanceState.getSerializable("selectedLabel");
-        showSelectedLabel();
+
+        drawer.setSelection(drawer.getDrawerItem(selectedLabel));
+
         super.onRestoreInstanceState(savedInstanceState);
     }
 
@@ -439,7 +450,7 @@ public class MainActivity extends AppCompatActivity
                     item.withIcon(CommunityMaterial.Icon.cmd_file);
                     break;
                 case OUTBOX:
-                    item.withIcon(CommunityMaterial.Icon.cmd_outbox);
+                    item.withIcon(CommunityMaterial.Icon.cmd_inbox_arrow_up);
                     break;
                 case SENT:
                     item.withIcon(CommunityMaterial.Icon.cmd_send);
@@ -518,18 +529,6 @@ public class MainActivity extends AppCompatActivity
                     i.drawer.updateStickyFooterItem(i.nodeSwitch);
                 }
             });
-        }
-    }
-
-    private void showSelectedLabel() {
-        if (getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof
-            MessageListFragment) {
-            ((MessageListFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.item_list)).updateList(selectedLabel);
-        } else {
-            MessageListFragment listFragment = new MessageListFragment();
-            changeList(listFragment);
-            listFragment.updateList(selectedLabel);
         }
     }
 
