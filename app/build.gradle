@@ -50,7 +50,7 @@ dependencies {
     compile "ch.dissem.jabit:jabit-extensions:$jabitVersion"
     compile "ch.dissem.jabit:jabit-wif:$jabitVersion"
 
-    compile 'org.slf4j:slf4j-android:1.7.12'
+    compile 'org.slf4j:slf4j-android:1.7.25'
 
     compile 'com.mikepenz:materialize:1.0.1@aar'
     compile('com.mikepenz:materialdrawer:5.8.2@aar') {
@@ -69,11 +69,11 @@ dependencies {
     compile('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.10.4@aar') {
         transitive = true
     }
-    compile 'com.github.angads25:filepicker:1.0.9'
+    compile 'com.github.angads25:filepicker:1.1.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:1.10.19'
+    testCompile 'org.mockito:mockito-core:2.7.19'
 }
 
 idea.module {
