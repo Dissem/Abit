@@ -33,7 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import ch.dissem.apps.abit.R;
+import ch.dissem.apps.abit.util.Labels;
 import ch.dissem.apps.abit.util.UuidUtils;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.InventoryVector;
@@ -129,35 +129,9 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
     private Label getLabel(Cursor c) {
         String typeName = c.getString(c.getColumnIndex(LBL_COLUMN_TYPE));
         Label.Type type = typeName == null ? null : Label.Type.valueOf(typeName);
-        String text;
-        if (type == null) {
+        String text = Labels.getText(type, null, context);
+        if (text == null) {
             text = c.getString(c.getColumnIndex(LBL_COLUMN_LABEL));
-        } else {
-            switch (type) {
-                case INBOX:
-                    text = context.getString(R.string.inbox);
-                    break;
-                case DRAFT:
-                    text = context.getString(R.string.draft);
-                    break;
-                case OUTBOX:
-                    text = context.getString(R.string.outbox);
-                    break;
-                case SENT:
-                    text = context.getString(R.string.sent);
-                    break;
-                case UNREAD:
-                    text = context.getString(R.string.unread);
-                    break;
-                case TRASH:
-                    text = context.getString(R.string.trash);
-                    break;
-                case BROADCAST:
-                    text = context.getString(R.string.broadcasts);
-                    break;
-                default:
-                    text = c.getString(c.getColumnIndex(LBL_COLUMN_LABEL));
-            }
         }
         Label label = new Label(
             text,

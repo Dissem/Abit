@@ -48,14 +48,10 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import ch.dissem.apps.abit.dialog.AddIdentityDialogFragment;
 import ch.dissem.apps.abit.dialog.FullNodeDialogActivity;
@@ -65,6 +61,7 @@ import ch.dissem.apps.abit.repository.AndroidMessageRepository;
 import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
+import ch.dissem.apps.abit.util.Labels;
 import ch.dissem.apps.abit.util.Preferences;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
@@ -100,7 +97,6 @@ public class MainActivity extends AppCompatActivity
     public static final String EXTRA_REPLY_TO_MESSAGE = "ch.dissem.abit.ReplyToMessage";
     public static final String ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox";
 
-    private static final Logger LOG = LoggerFactory.getLogger(MainActivity.class);
     private static final int ADD_IDENTITY = 1;
     private static final int MANAGE_IDENTITY = 2;
 
@@ -437,37 +433,9 @@ public class MainActivity extends AppCompatActivity
     public void addLabelEntry(Label label) {
         PrimaryDrawerItem item = new PrimaryDrawerItem()
             .withName(label.toString())
-            .withTag(label);
-        if (label.getType() == null) {
-            item.withIcon(CommunityMaterial.Icon.cmd_label)
-                .withIconColor(label.getColor());
-        } else {
-            switch (label.getType()) {
-                case INBOX:
-                    item.withIcon(GoogleMaterial.Icon.gmd_inbox);
-                    break;
-                case DRAFT:
-                    item.withIcon(CommunityMaterial.Icon.cmd_file);
-                    break;
-                case OUTBOX:
-                    item.withIcon(CommunityMaterial.Icon.cmd_inbox_arrow_up);
-                    break;
-                case SENT:
-                    item.withIcon(CommunityMaterial.Icon.cmd_send);
-                    break;
-                case BROADCAST:
-                    item.withIcon(CommunityMaterial.Icon.cmd_rss);
-                    break;
-                case UNREAD:
-                    item.withIcon(GoogleMaterial.Icon.gmd_markunread_mailbox);
-                    break;
-                case TRASH:
-                    item.withIcon(GoogleMaterial.Icon.gmd_delete);
-                    break;
-                default:
-                    item.withIcon(CommunityMaterial.Icon.cmd_label);
-            }
-        }
+            .withTag(label)
+            .withIcon(Labels.getIcon(label))
+            .withIconColor(Labels.getColor(label));
         drawer.addItemAtPosition(item, drawer.getDrawerItems().size() - 3);
     }
 

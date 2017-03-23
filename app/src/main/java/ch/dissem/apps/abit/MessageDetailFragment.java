@@ -16,8 +16,11 @@
 
 package ch.dissem.apps.abit;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,14 +32,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.view.IconicsImageView;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.util.Assets;
 import ch.dissem.apps.abit.util.Drawables;
+import ch.dissem.apps.abit.util.Labels;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
@@ -106,6 +114,11 @@ public class MessageDetailFragment extends Fragment {
             } else if (item.getType() == Plaintext.Type.BROADCAST) {
                 ((TextView) rootView.findViewById(R.id.recipient)).setText(R.string.broadcast);
             }
+            RecyclerView labelView = (RecyclerView) rootView.findViewById(R.id.labels);
+            LabelAdapter labelAdapter = new LabelAdapter(getActivity(), item.getLabels());
+            labelView.setAdapter(labelAdapter);
+            labelView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
+
             TextView messageBody = (TextView) rootView.findViewById(R.id.text);
             messageBody.setText(item.getText());
 
@@ -196,5 +209,66 @@ public class MessageDetailFragment extends Fragment {
             }
         }
         return false;
+    }
+
+    private static class LabelAdapter extends
+        RecyclerView.Adapter<LabelAdapter.ViewHolder> {
+
+        private final List<Label> labels;
+        private final Context ctx;
+
+        private LabelAdapter(Context ctx, Set<Label> labels) {
+            this.labels = new ArrayList<>(labels);
+            this.ctx = ctx;
+        }
+
+        @Override
+        public LabelAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            Context context = parent.getContext();
+            LayoutInflater inflater = LayoutInflater.from(context);
+
+            // Inflate the custom layout
+            View contactView = inflater.inflate(R.layout.item_label, parent, false);
+
+            // Return a new holder instance
+            return new ViewHolder(contactView);
+        }
+
+        // Involves populating data into the item through holder
+        @Override
+        public void onBindViewHolder(LabelAdapter.ViewHolder viewHolder, int position) {
+            // Get the data model based on position
+            Label label = labels.get(position);
+
+            viewHolder.icon.setColor(Labels.getColor(label));
+            viewHolder.icon.setIcon(Labels.getIcon(label));
+            viewHolder.label.setText(Labels.getText(label, ctx));
+        }
+
+        // Returns the total count of items in the list
+        @Override
+        public int getItemCount() {
+            return labels.size();
+        }
+
+        // Provide a direct reference to each of the views within a data item
+        // Used to cache the views within the item layout for fast access
+        static class ViewHolder extends RecyclerView.ViewHolder {
+            // Your holder should contain a member variable
+            // for any view that will be set as you render a row
+            public IconicsImageView icon;
+            public TextView label;
+
+            // We also create a constructor that accepts the entire item row
+            // and does the view lookups to find each subview
+            ViewHolder(View itemView) {
+                // Stores the itemView in a public final member variable that can be used
+                // to access the context from any ViewHolder instance.
+                super(itemView);
+
+                icon = (IconicsImageView) itemView.findViewById(R.id.icon);
+                label = (TextView) itemView.findViewById(R.id.label);
+            }
+        }
     }
 }
