@@ -88,7 +88,7 @@
             android:layout_marginRight="16dp"
             android:layout_marginTop="32dp"
             android:paddingBottom="16dp"
-            android:text="New Text"
+            tools:text="Message Body"
             android:textIsSelectable="true" />
 
         <android.support.v7.widget.RecyclerView
@@ -96,7 +96,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/text"
-            android:paddingEnd="16dp"
-            android:paddingStart="16dp" />
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp" />
     </RelativeLayout>
 </ScrollView>
