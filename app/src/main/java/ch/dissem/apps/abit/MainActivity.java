@@ -379,7 +379,10 @@ public class MainActivity extends AppCompatActivity
                 for (Label label : labels) {
                     addLabelEntry(label);
                 }
-                drawer.setSelection(drawer.getDrawerItem(selectedLabel));
+                IDrawerItem selectedDrawerItem = drawer.getDrawerItem(selectedLabel);
+                if (selectedDrawerItem != null) {
+                    drawer.setSelection(selectedDrawerItem);
+                }
             }
         }.execute();
     }
@@ -395,8 +398,10 @@ public class MainActivity extends AppCompatActivity
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         selectedLabel = (Label) savedInstanceState.getSerializable("selectedLabel");
 
-        drawer.setSelection(drawer.getDrawerItem(selectedLabel));
-
+        IDrawerItem selectedItem = drawer.getDrawerItem(selectedLabel);
+        if (selectedItem != null) {
+            drawer.setSelection(selectedItem);
+        }
         super.onRestoreInstanceState(savedInstanceState);
     }
 
