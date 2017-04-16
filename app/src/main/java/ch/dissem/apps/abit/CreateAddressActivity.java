@@ -20,17 +20,32 @@ import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
+import ch.dissem.bitmessage.entity.payload.Pubkey;
+import ch.dissem.bitmessage.entity.payload.V2Pubkey;
+import ch.dissem.bitmessage.entity.payload.V3Pubkey;
+import ch.dissem.bitmessage.entity.payload.V4Pubkey;
+
+import static android.util.Base64.URL_SAFE;
 
 public class CreateAddressActivity extends AppCompatActivity {
+    private static final Pattern KEY_VALUE_PATTERN = Pattern.compile("^([a-zA-Z]+)=(.*)$");
+    private byte[] pubkeyBytes;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,12 +63,19 @@ public class CreateAddressActivity extends AppCompatActivity {
             String addressText = getAddress(uri);
             String[] parameters = getParameters(uri);
             for (String parameter : parameters) {
-                String name = parameter.substring(0, 6).toLowerCase();
-                if (name.startsWith("label")) {
-                    label.setText(parameter.substring(parameter.indexOf('=') + 1).trim());
-                } else if (name.startsWith("action")) {
-                    parameter = parameter.toLowerCase();
-                    subscribe.setChecked(parameter.contains("subscribe"));
+                Matcher matcher = KEY_VALUE_PATTERN.matcher(parameter);
+                String key = matcher.group(1).toLowerCase();
+                String value = matcher.group(2);
+                switch (key) {
+                    case "label":
+                        label.setText(value.trim());
+                        break;
+                    case "action":
+                        subscribe.setChecked(value.trim().equalsIgnoreCase("subscribe"));
+                        break;
+                    case "pubkey":
+                        pubkeyBytes = Base64.decode(value, URL_SAFE);
+                        break;
                 }
             }
 
@@ -82,6 +104,30 @@ public class CreateAddressActivity extends AppCompatActivity {
                     bmc.addContact(bmAddress);
                     if (subscribe.isChecked()) {
                         bmc.addSubscribtion(bmAddress);
+                    }
+                    if (pubkeyBytes != null) {
+                        try {
+                            final Pubkey pubkey;
+                            InputStream pubkeyStream = new ByteArrayInputStream(pubkeyBytes);
+                            long stream = bmAddress.getStream();
+                            switch ((int) bmAddress.getVersion()) {
+                                case 2:
+                                    pubkey = V2Pubkey.read(pubkeyStream, stream);
+                                    break;
+                                case 3:
+                                    pubkey = V3Pubkey.read(pubkeyStream, stream);
+                                    break;
+                                case 4:
+                                    pubkey = new V4Pubkey(V3Pubkey.read(pubkeyStream, stream));
+                                    break;
+                                default:
+                                    pubkey = null;
+                            }
+                            if (pubkey != null) {
+                                bmAddress.setPubkey(pubkey);
+                            }
+                        } catch (Exception ignore) {
+                        }
                     }
 
                     setResult(Activity.RESULT_OK);

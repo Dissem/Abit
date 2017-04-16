@@ -26,6 +26,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -48,13 +49,18 @@ import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.util.Drawables;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
+import ch.dissem.bitmessage.exception.ApplicationException;
 import ch.dissem.bitmessage.wif.WifExporter;
 
 import static android.graphics.Color.BLACK;
 import static android.graphics.Color.WHITE;
+import static android.util.Base64.URL_SAFE;
 
 
 /**
@@ -268,6 +274,16 @@ public class AddressDetailFragment extends Fragment {
         link.append(address.getAddress());
         if (address.getAlias() != null) {
             link.append("?label=").append(address.getAlias());
+        }
+        if (address.getPubkey() != null) {
+            link.append(address.getAlias() == null ? '?' : '&');
+            ByteArrayOutputStream pubkey = new ByteArrayOutputStream();
+            try {
+                address.getPubkey().writeUnencrypted(pubkey);
+            } catch (IOException e) {
+                throw new ApplicationException(e);
+            }
+            link.append("pubkey=").append(Base64.encodeToString(pubkey.toByteArray(), URL_SAFE));
         }
         BitMatrix result;
         try {
