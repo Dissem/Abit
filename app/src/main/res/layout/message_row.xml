@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2015 Christian Basler
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +14,7 @@
   ~ limitations under the License.
   -->
 
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -31,11 +29,10 @@
         android:foreground="?attr/selectableItemBackground"
         tools:ignore="UselessParent">
 
-        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                        xmlns:tools="http://schemas.android.com/tools"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackground">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground">
 
             <ImageView
                 android:id="@+id/avatar"
@@ -45,7 +42,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_margin="16dp"
                 android:src="@color/colorPrimaryDark"
-                tools:ignore="ContentDescription"/>
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:id="@+id/sender"
@@ -63,8 +60,7 @@
                 android:paddingTop="0dp"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textStyle="bold"
-                tools:text="Sender"
-                />
+                tools:text="Sender" />
 
             <TextView
                 android:id="@+id/subject"
@@ -78,7 +74,7 @@
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                tools:text="Subject"/>
+                tools:text="Subject" />
 
             <TextView
                 android:id="@+id/text"
@@ -94,7 +90,7 @@
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                tools:text="Text"/>
+                tools:text="Text" />
 
             <ImageView
                 android:id="@+id/status"
@@ -106,7 +102,7 @@
                 android:layout_marginEnd="-8dp"
                 android:tint="@color/colorAccent"
                 tools:ignore="ContentDescription"
-                tools:src="@drawable/ic_notification_proof_of_work"/>
+                tools:src="@drawable/ic_notification_proof_of_work" />
 
         </RelativeLayout>
 

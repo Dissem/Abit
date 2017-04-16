@@ -42,6 +42,7 @@ import ch.dissem.bitmessage.networking.nio.NioNetworkHandler;
 import ch.dissem.bitmessage.ports.AddressRepository;
 import ch.dissem.bitmessage.ports.MessageRepository;
 import ch.dissem.bitmessage.ports.ProofOfWorkRepository;
+import ch.dissem.bitmessage.utils.ConversationService;
 import ch.dissem.bitmessage.utils.TTL;
 
 import static ch.dissem.bitmessage.utils.UnixTime.DAY;
@@ -51,6 +52,7 @@ import static ch.dissem.bitmessage.utils.UnixTime.DAY;
  */
 public class Singleton {
     private static BitmessageContext bitmessageContext;
+    private static ConversationService conversationService;
     private static MessageListener messageListener;
     private static BitmessageAddress identity;
     private static AndroidProofOfWorkRepository powRepo;
@@ -159,5 +161,17 @@ public class Singleton {
         if (identity.getPrivateKey() == null)
             throw new IllegalArgumentException("Identity expected, but no private key available");
         Singleton.identity = identity;
+    }
+
+    public static ConversationService getConversationService(Context ctx) {
+        if (conversationService == null) {
+            final BitmessageContext bmc = getBitmessageContext(ctx);
+            synchronized (Singleton.class) {
+                if (conversationService == null) {
+                    conversationService = new ConversationService(bmc.messages());
+                }
+            }
+        }
+        return conversationService;
     }
 }

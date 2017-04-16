@@ -78,12 +78,20 @@
             android:paddingRight="8dp"
             tools:text="Recipient" />
 
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/parents"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/avatar"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp" />
+
         <TextView
             android:id="@+id/text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/avatar"
+            android:layout_below="@+id/parents"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:layout_marginTop="32dp"
@@ -93,6 +101,14 @@
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/labels"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/text"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/responses"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/text"

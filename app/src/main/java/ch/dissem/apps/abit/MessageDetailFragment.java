@@ -18,8 +18,10 @@ package ch.dissem.apps.abit;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
@@ -47,12 +49,14 @@ import ch.dissem.apps.abit.util.Drawables;
 import ch.dissem.apps.abit.util.Labels;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
+import ch.dissem.bitmessage.entity.valueobject.InventoryVector;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 import ch.dissem.bitmessage.ports.MessageRepository;
 
 import static android.text.util.Linkify.WEB_URLS;
 import static ch.dissem.apps.abit.util.Constants.BITMESSAGE_ADDRESS_PATTERN;
 import static ch.dissem.apps.abit.util.Constants.BITMESSAGE_URL_SCHEMA;
+import static ch.dissem.apps.abit.util.Strings.normalizeWhitespaces;
 
 
 /**
@@ -143,14 +147,28 @@ public class MessageDetailFragment extends Fragment {
                     removed = true;
                 }
             }
+            MessageRepository messageRepo = Singleton.getMessageRepository(inflater.getContext());
             if (removed) {
                 if (getActivity() instanceof ActionBarListener) {
                     ((ActionBarListener) getActivity()).updateUnread();
                 }
-                Singleton.getMessageRepository(inflater.getContext()).save(item);
+                messageRepo.save(item);
             }
+            List<Plaintext> parents = new ArrayList<>(item.getParents().size());
+            for (InventoryVector parentIV : item.getParents()) {
+                parents.add(messageRepo.getMessage(parentIV));
+            }
+            showRelatedMessages(rootView, R.id.parents, parents);
+            showRelatedMessages(rootView, R.id.responses, messageRepo.findResponses(item));
         }
         return rootView;
+    }
+
+    private void showRelatedMessages(View rootView, @IdRes int id, List<Plaintext> messages) {
+        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.parents);
+        RelatedMessageAdapter adapter = new RelatedMessageAdapter(getActivity(), messages);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
     @Override
@@ -209,6 +227,61 @@ public class MessageDetailFragment extends Fragment {
             }
         }
         return false;
+    }
+
+    private static class RelatedMessageAdapter extends RecyclerView.Adapter<RelatedMessageAdapter.ViewHolder> {
+        private final List<Plaintext> messages;
+        private final Context ctx;
+
+        private RelatedMessageAdapter(Context ctx, List<Plaintext> messages) {
+            this.messages = messages;
+            this.ctx = ctx;
+        }
+
+        @Override
+        public RelatedMessageAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            Context context = parent.getContext();
+            LayoutInflater inflater = LayoutInflater.from(context);
+
+            // Inflate the custom layout
+            View contactView = inflater.inflate(R.layout.item_message_minimized, parent, false);
+
+            // Return a new holder instance
+            return new RelatedMessageAdapter.ViewHolder(contactView);
+        }
+
+        // Involves populating data into the item through holder
+        @Override
+        public void onBindViewHolder(RelatedMessageAdapter.ViewHolder viewHolder, int position) {
+            // Get the data model based on position
+            Plaintext message = messages.get(position);
+
+            viewHolder.avatar.setImageDrawable(new Identicon(message.getFrom()));
+            viewHolder.status.setImageResource(Assets.getStatusDrawable(message.getStatus()));
+            viewHolder.sender.setText(message.getFrom().toString());
+            viewHolder.extract.setText(normalizeWhitespaces(message.getText()));
+        }
+
+        // Returns the total count of items in the list
+        @Override
+        public int getItemCount() {
+            return messages.size();
+        }
+
+        static class ViewHolder extends RecyclerView.ViewHolder {
+            private final ImageView avatar;
+            private final ImageView status;
+            private final TextView sender;
+            private final TextView extract;
+
+            ViewHolder(View itemView) {
+                super(itemView);
+                avatar = (ImageView) itemView.findViewById(R.id.avatar);
+                status = (ImageView) itemView.findViewById(R.id.status);
+                sender = (TextView) itemView.findViewById(R.id.sender);
+                extract = (TextView) itemView.findViewById(R.id.text);
+            }
+        }
     }
 
     private static class LabelAdapter extends
