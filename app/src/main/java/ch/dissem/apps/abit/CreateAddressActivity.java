@@ -64,18 +64,20 @@ public class CreateAddressActivity extends AppCompatActivity {
             String[] parameters = getParameters(uri);
             for (String parameter : parameters) {
                 Matcher matcher = KEY_VALUE_PATTERN.matcher(parameter);
-                String key = matcher.group(1).toLowerCase();
-                String value = matcher.group(2);
-                switch (key) {
-                    case "label":
-                        label.setText(value.trim());
-                        break;
-                    case "action":
-                        subscribe.setChecked(value.trim().equalsIgnoreCase("subscribe"));
-                        break;
-                    case "pubkey":
-                        pubkeyBytes = Base64.decode(value, URL_SAFE);
-                        break;
+                if (matcher.find()) {
+                    String key = matcher.group(1).toLowerCase();
+                    String value = matcher.group(2);
+                    switch (key) {
+                        case "label":
+                            label.setText(value.trim());
+                            break;
+                        case "action":
+                            subscribe.setChecked(value.trim().equalsIgnoreCase("subscribe"));
+                            break;
+                        case "pubkey":
+                            pubkeyBytes = Base64.decode(value, URL_SAFE);
+                            break;
+                    }
                 }
             }
 

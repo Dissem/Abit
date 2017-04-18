@@ -43,6 +43,7 @@ import ch.dissem.bitmessage.exception.ApplicationException;
 
 import static android.graphics.Color.BLACK;
 import static android.graphics.Color.WHITE;
+import static android.util.Base64.NO_WRAP;
 import static android.util.Base64.URL_SAFE;
 
 /**
@@ -85,7 +86,7 @@ public class Drawables {
             } catch (IOException e) {
                 throw new ApplicationException(e);
             }
-            link.append("pubkey=").append(Base64.encodeToString(pubkey.toByteArray(), URL_SAFE));
+            link.append("pubkey=").append(Base64.encodeToString(pubkey.toByteArray(), URL_SAFE | NO_WRAP));
         }
         BitMatrix result;
         try {
