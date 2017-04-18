@@ -16,16 +16,23 @@
 
 package ch.dissem.apps.abit;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -61,6 +68,7 @@ import ch.dissem.apps.abit.repository.AndroidMessageRepository;
 import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
+import ch.dissem.apps.abit.util.Drawables;
 import ch.dissem.apps.abit.util.Labels;
 import ch.dissem.apps.abit.util.Preferences;
 import ch.dissem.bitmessage.BitmessageContext;
@@ -230,6 +238,50 @@ public class MainActivity extends AppCompatActivity
             .withActivity(this)
             .withHeaderBackground(R.drawable.header)
             .withProfiles(profiles)
+            .withOnAccountHeaderProfileImageListener(new AccountHeader.OnAccountHeaderProfileImageListener() {
+                @Override
+                public boolean onProfileImageClick(View view, IProfile profile, boolean current) {
+                    if (current) {
+                        //  Show QR code in modal dialog
+                        final Dialog dialog = new Dialog(MainActivity.this);
+                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+                        ImageView imageView = new ImageView(MainActivity.this);
+                        imageView.setImageBitmap(Drawables.qrCode(Singleton.getIdentity(MainActivity.this)));
+                        imageView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.addContentView(imageView, new RelativeLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT));
+                        Window window = dialog.getWindow();
+                        if (window != null) {
+                            Display display = window.getWindowManager().getDefaultDisplay();
+                            Point size = new Point();
+                            display.getSize(size);
+                            int dim = size.x < size.y ? size.x : size.y;
+
+                            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                            lp.copyFrom(window.getAttributes());
+                            lp.width = dim;
+                            lp.height = dim;
+
+                            window.setAttributes(lp);
+                        }
+                        dialog.show();
+                        return true;
+                    }
+                    return false;
+                }
+
+                @Override
+                public boolean onProfileImageLongClick(View view, IProfile iProfile, boolean b) {
+                    return false;
+                }
+            })
             .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                 @Override
                 public boolean onProfileChanged(View view, IProfile profile, boolean current) {
