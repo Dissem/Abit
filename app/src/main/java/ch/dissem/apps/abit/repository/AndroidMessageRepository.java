@@ -201,9 +201,9 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
             // There are no parents to save yet (they are saved in the extended data, that's enough for now)
             return;
         }
-        db.delete(PARENTS_TABLE_NAME, "child=?", new String[]{hex(message.getInitialHash()).toString()});
-
         byte[] childIV = message.getInventoryVector().getHash();
+        db.delete(PARENTS_TABLE_NAME, "child=?", new String[]{hex(childIV).toString()});
+
         // save new parents
         int order = 0;
         for (InventoryVector parentIV : message.getParents()) {

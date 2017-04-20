@@ -105,13 +105,14 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/text"
             android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp" />
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="16dp"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/responses"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/text"
+            android:layout_below="@+id/labels"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp" />
     </RelativeLayout>

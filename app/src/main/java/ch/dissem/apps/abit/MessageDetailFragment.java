@@ -156,7 +156,10 @@ public class MessageDetailFragment extends Fragment {
             }
             List<Plaintext> parents = new ArrayList<>(item.getParents().size());
             for (InventoryVector parentIV : item.getParents()) {
-                parents.add(messageRepo.getMessage(parentIV));
+                Plaintext parent = messageRepo.getMessage(parentIV);
+                if (parent != null) {
+                    parents.add(parent);
+                }
             }
             showRelatedMessages(rootView, R.id.parents, parents);
             showRelatedMessages(rootView, R.id.responses, messageRepo.findResponses(item));
@@ -165,7 +168,7 @@ public class MessageDetailFragment extends Fragment {
     }
 
     private void showRelatedMessages(View rootView, @IdRes int id, List<Plaintext> messages) {
-        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.parents);
+        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(id);
         RelatedMessageAdapter adapter = new RelatedMessageAdapter(getActivity(), messages);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
