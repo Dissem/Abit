@@ -17,6 +17,7 @@
 package ch.dissem.apps.abit;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
@@ -263,6 +264,7 @@ public class MessageDetailFragment extends Fragment {
             viewHolder.status.setImageResource(Assets.getStatusDrawable(message.getStatus()));
             viewHolder.sender.setText(message.getFrom().toString());
             viewHolder.extract.setText(normalizeWhitespaces(message.getText()));
+            viewHolder.item = message;
         }
 
         // Returns the total count of items in the list
@@ -271,18 +273,33 @@ public class MessageDetailFragment extends Fragment {
             return messages.size();
         }
 
-        static class ViewHolder extends RecyclerView.ViewHolder {
+        class ViewHolder extends RecyclerView.ViewHolder {
             private final ImageView avatar;
             private final ImageView status;
             private final TextView sender;
             private final TextView extract;
+            private Plaintext item;
 
-            ViewHolder(View itemView) {
+            ViewHolder(final View itemView) {
                 super(itemView);
                 avatar = (ImageView) itemView.findViewById(R.id.avatar);
                 status = (ImageView) itemView.findViewById(R.id.status);
                 sender = (TextView) itemView.findViewById(R.id.sender);
                 extract = (TextView) itemView.findViewById(R.id.text);
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (ctx instanceof MainActivity) {
+                            ((MainActivity) ctx).onItemSelected(item);
+                        } else {
+                            Intent detailIntent;
+                            detailIntent = new Intent(ctx, MessageDetailActivity.class);
+                            detailIntent.putExtra(MessageDetailFragment.ARG_ITEM, item);
+                            ctx.startActivity(detailIntent);
+                        }
+                    }
+                });
+
             }
         }
     }
