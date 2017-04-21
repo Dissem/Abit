@@ -78,6 +78,7 @@ import ch.dissem.bitmessage.entity.valueobject.Label;
 
 import static android.widget.Toast.LENGTH_LONG;
 import static ch.dissem.apps.abit.ComposeMessageActivity.launchReplyTo;
+import static ch.dissem.apps.abit.repository.AndroidMessageRepository.LABEL_ARCHIVE;
 import static ch.dissem.apps.abit.service.BitmessageService.isRunning;
 
 
@@ -321,7 +322,7 @@ public class MainActivity extends AppCompatActivity
         final ArrayList<IDrawerItem> drawerItems = new ArrayList<>();
         drawerItems.add(new PrimaryDrawerItem()
             .withName(R.string.archive)
-            .withTag(AndroidMessageRepository.LABEL_ARCHIVE)
+            .withTag(LABEL_ARCHIVE)
             .withIcon(CommunityMaterial.Icon.cmd_archive)
         );
         drawerItems.add(new DividerDrawerItem());
@@ -533,13 +534,15 @@ public class MainActivity extends AppCompatActivity
         for (IDrawerItem item : drawer.getDrawerItems()) {
             if (item.getTag() instanceof Label) {
                 Label label = (Label) item.getTag();
-                int unread = bmc.messages().countUnread(label);
-                if (unread > 0) {
-                    ((PrimaryDrawerItem) item).withBadge(String.valueOf(unread));
-                } else {
-                    ((PrimaryDrawerItem) item).withBadge((String) null);
+                if (label != LABEL_ARCHIVE) {
+                    int unread = bmc.messages().countUnread(label);
+                    if (unread > 0) {
+                        ((PrimaryDrawerItem) item).withBadge(String.valueOf(unread));
+                    } else {
+                        ((PrimaryDrawerItem) item).withBadge((String) null);
+                    }
+                    drawer.updateItem(item);
                 }
-                drawer.updateItem(item);
             }
         }
     }
