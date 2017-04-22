@@ -18,6 +18,7 @@ package ch.dissem.apps.abit.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
@@ -37,6 +38,17 @@ public class BitmessageService extends Service {
     private static volatile boolean running = false;
 
     private NetworkNotification notification = null;
+
+    private final Handler cleanupHandler = new Handler();
+    private final Runnable cleanupTask = new Runnable() {
+        @Override
+        public void run() {
+            bmc.cleanup();
+            if (isRunning()) {
+                cleanupHandler.postDelayed(this, 24 * 60 * 60 * 1000L);
+            }
+        }
+    };
 
     public static boolean isRunning() {
         return running && bmc.isRunning();
@@ -61,6 +73,7 @@ public class BitmessageService extends Service {
                 bmc.startup();
             }
             notification.show();
+            cleanupHandler.postDelayed(cleanupTask, 24 * 60 * 60 * 1000L);
         }
         return Service.START_STICKY;
     }
@@ -72,6 +85,8 @@ public class BitmessageService extends Service {
         }
         running = false;
         notification.showShutdown();
+        cleanupHandler.removeCallbacks(cleanupTask);
+        bmc.cleanup();
         stopSelf();
     }
 
