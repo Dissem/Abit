@@ -16,62 +16,94 @@
 
 package ch.dissem.apps.abit;
 
-
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.text.TextPaint;
+
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 
 /**
- *
+ * @author Christian Basler
  */
 public class Identicon extends Drawable {
     private static final int SIZE = 9;
     private static final int CENTER_COLUMN = 5;
 
     private final Paint paint;
-    private float width;
-    private float height;
+    private final int color;
+    private final int background;
+    private final boolean[][] fields;
+    private final boolean chan;
+    private final TextPaint textPaint;
 
-    private float cellWidth;
-    private float cellHeight;
-    private byte[] hash;
-    private int color;
-    private int background;
-    private boolean[][] fields;
-
-    public Identicon(BitmessageAddress input) {
+    public Identicon(@NonNull BitmessageAddress input) {
         paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
         paint.setAntiAlias(true);
+        textPaint = new TextPaint();
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setColor(0xFF607D8B);
+        textPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
 
-        hash = input.getRipe();
+        chan = input.isChan();
+
+        byte[] hash = input.getRipe();
 
         fields = new boolean[SIZE][SIZE];
-        color = Color.HSVToColor(new float[]{Math.abs(hash[0] * hash[1] + hash[2]) % 360, 0.8f, 1.0f});
-        background = Color.HSVToColor(new float[]{Math.abs(hash[1] * hash[2] + hash[0]) % 360, 0.8f, 1.0f});
+        color = Color.HSVToColor(new float[]{
+            Math.abs(hash[0] * hash[1] + hash[2]) % 360,
+            0.8f,
+            1.0f
+        });
+        background = Color.HSVToColor(new float[]{
+            Math.abs(hash[1] * hash[2] + hash[0]) % 360,
+            0.8f,
+            1.0f
+        });
 
         for (int row = 0; row < SIZE; row++) {
-            for (int column = 0; column < SIZE; column++) {
-                fields[row][column] = hash[(row * (column < CENTER_COLUMN ? column : SIZE - column - 1)) % hash.length] >= 0;
+            if (!chan || row < 5 || row > 6) {
+                for (int column = 0; column <= CENTER_COLUMN; column++) {
+                    if (
+                        (row - SIZE / 2) * (row - SIZE / 2)
+                            + (column - SIZE / 2) * (column - SIZE / 2)
+                            < SIZE / 2 * SIZE / 2
+                        ) {
+                        fields[row][column] = hash[(row * CENTER_COLUMN + column) % hash.length]
+                            >= 0;
+                        fields[row][SIZE - column - 1] = fields[row][column];
+                    }
+                }
             }
         }
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void draw(@NonNull Canvas canvas) {
         float x, y;
+        float width = canvas.getWidth();
+        float height = canvas.getHeight();
+        float cellWidth = width / (float) SIZE;
+        float cellHeight = height / (float) SIZE;
         paint.setColor(background);
-        canvas.drawCircle(width/2, height/2, width/2, paint);
+        canvas.drawCircle(width / 2, height / 2, width / 2, paint);
         paint.setColor(color);
         for (int row = 0; row < SIZE; row++) {
             for (int column = 0; column < SIZE; column++) {
                 if (fields[row][column]) {
                     x = cellWidth * column;
                     y = cellHeight * row;
-
-                    canvas.drawCircle(x + cellWidth / 2, y + cellHeight / 2, cellHeight / 2, paint);
+                    canvas.drawCircle(
+                        x + cellWidth / 2, y + cellHeight / 2, cellHeight / 2,
+                        paint
+                    );
                 }
             }
+        }
+        if (chan) {
+            textPaint.setTextSize(2 * cellHeight);
+            canvas.drawText("[chan]", width / 2, 6.7f * cellHeight, textPaint);
         }
     }
 
@@ -89,16 +121,4 @@ public class Identicon extends Drawable {
     public int getOpacity() {
         return PixelFormat.TRANSPARENT;
     }
-
-    @Override
-    protected void onBoundsChange(Rect bounds) {
-        super.onBoundsChange(bounds);
-
-        width = bounds.width();
-        height = bounds.height();
-
-        cellWidth = bounds.width() / (float) SIZE;
-        cellHeight = bounds.height() / (float) SIZE;
-    }
-
 }

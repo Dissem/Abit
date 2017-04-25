@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="UnusedResources">
+    <string name="define_jabit" translatable="false"/>
+    <!-- Author section -->
+    <string name="library_jabit_author" translatable="false">Christian Basler</string>
+    <string name="library_jabit_authorWebsite" translatable="false">dissem.ch</string>
+    <!-- Library section -->
+    <string name="library_jabit_libraryName" translatable="false">Jabit</string>
+    <string name="library_jabit_libraryDescription">Jabit strives to be an easy to use Bitmessage library for Java developers to quickly implement their own Bitmessage clients.</string>
+    <string name="library_jabit_libraryWebsite" translatable="false">https://github.com/Dissem/Jabit/wiki</string>
+    <string name="library_jabit_libraryVersion" translatable="false">1.0.0</string>
+    <!-- OpenSource section -->
+    <string name="library_jabit_isOpenSource" translatable="false">true</string>
+    <string name="library_jabit_repositoryLink" translatable="false">https://github.com/Dissem/Jabit</string>
+    <!-- ClassPath for autoDetect section -->
+    <string name="library_jabit_classPath" translatable="false">ch.dissem.bitmessage.BitmessageContext</string>
+    <!-- License section -->
+    <string name="library_jabit_licenseId" translatable="false">apache_2_0</string>
+    <!-- Language specific section -->
+</resources>

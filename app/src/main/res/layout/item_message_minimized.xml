@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:background="@drawable/border_bottom">
+
+    <ImageView
+        android:id="@+id/avatar"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="5dp"
+        android:src="@color/colorPrimaryDark"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/sender"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/avatar"
+        android:ellipsize="end"
+        android:lines="1"
+        android:paddingBottom="0dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:textStyle="bold"
+        tools:text="Sender" />
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/sender"
+        android:layout_toEndOf="@+id/avatar"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:lines="1"
+        android:paddingBottom="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        tools:text="Text" />
+
+    <ImageView
+        android:id="@+id/status"
+        android:layout_width="24dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/avatar"
+        android:layout_alignEnd="@+id/avatar"
+        android:layout_marginBottom="-8dp"
+        android:layout_marginEnd="-8dp"
+        android:tint="@color/colorAccent"
+        tools:ignore="ContentDescription"
+        tools:src="@drawable/ic_notification_proof_of_work" />
+
+</RelativeLayout>
