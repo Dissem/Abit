@@ -46,8 +46,7 @@ public class SelectEncodingDialogFragment extends AppCompatDialogFragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
-        savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (getArguments() != null && getArguments().containsKey(EXTRA_ENCODING)) {
             encoding = (Plaintext.Encoding) getArguments().getSerializable(EXTRA_ENCODING);
         }

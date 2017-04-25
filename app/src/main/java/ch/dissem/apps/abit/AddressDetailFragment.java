@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -38,23 +37,13 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
 import com.mikepenz.community_material_typeface_library.CommunityMaterial;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.util.Drawables;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.wif.WifExporter;
-
-import static android.graphics.Color.BLACK;
-import static android.graphics.Color.WHITE;
 
 
 /**
@@ -64,15 +53,12 @@ import static android.graphics.Color.WHITE;
  * on handsets.
  */
 public class AddressDetailFragment extends Fragment {
-    private static final Logger LOG = LoggerFactory.getLogger(AddressDetailFragment.class);
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
      */
     public static final String ARG_ITEM = "item";
     public static final String EXPORT_POSTFIX = ".keys.dat";
-
-    private static final int QR_CODE_SIZE = 350;
 
     /**
      * The content this fragment is presenting.
@@ -257,38 +243,10 @@ public class AddressDetailFragment extends Fragment {
 
             // QR code
             ImageView qrCode = (ImageView) rootView.findViewById(R.id.qr_code);
-            qrCode.setImageBitmap(qrCode(item));
+            qrCode.setImageBitmap(Drawables.qrCode(item));
         }
 
         return rootView;
-    }
-
-    Bitmap qrCode(BitmessageAddress address) {
-        StringBuilder link = new StringBuilder("bitmessage:");
-        link.append(address.getAddress());
-        if (address.getAlias() != null) {
-            link.append("?label=").append(address.getAlias());
-        }
-        BitMatrix result;
-        try {
-            result = new MultiFormatWriter().encode(link.toString(),
-                BarcodeFormat.QR_CODE, QR_CODE_SIZE, QR_CODE_SIZE, null);
-        } catch (WriterException e) {
-            LOG.error(e.getMessage(), e);
-            return null;
-        }
-        int w = result.getWidth();
-        int h = result.getHeight();
-        int[] pixels = new int[w * h];
-        for (int y = 0; y < h; y++) {
-            int offset = y * w;
-            for (int x = 0; x < w; x++) {
-                pixels[offset + x] = result.get(x, y) ? BLACK : WHITE;
-            }
-        }
-        Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        bitmap.setPixels(pixels, 0, QR_CODE_SIZE, 0, 0, w, h);
-        return bitmap;
     }
 
     @Override

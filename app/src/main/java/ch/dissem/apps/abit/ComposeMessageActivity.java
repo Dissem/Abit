@@ -87,8 +87,8 @@ public class ComposeMessageActivity extends AppCompatActivity {
         // so features like threading can be supported
         if (item.getEncoding() == EXTENDED) {
             replyIntent.putExtra(EXTRA_ENCODING, EXTENDED);
-            replyIntent.putExtra(EXTRA_PARENT, item);
         }
+        replyIntent.putExtra(EXTRA_PARENT, item);
         String prefix;
         if (item.getSubject().length() >= 3 && item.getSubject().substring(0, 3)
             .equalsIgnoreCase("RE:")) {

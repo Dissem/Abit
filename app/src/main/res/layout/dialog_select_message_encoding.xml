@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<android.support.constraint.ConstraintLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -31,10 +31,9 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/select_encoding_warning"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_constraintLeft_creator="1"
-        tools:layout_constraintTop_creator="1"/>
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"/>
 
 
     <RadioGroup
@@ -43,9 +42,9 @@
         android:layout_height="wrap_content"
         android:paddingBottom="24dp"
         android:paddingTop="24dp"
-        app:layout_constraintLeft_toLeftOf="@+id/description"
-        app:layout_constraintRight_toRightOf="@+id/description"
-        app:layout_constraintTop_toBottomOf="@+id/description">
+        android:layout_alignStart="@+id/description"
+        android:layout_alignEnd="@+id/description"
+        android:layout_below="@+id/description">
 
         <RadioButton
             android:id="@+id/simple"
@@ -72,10 +71,8 @@
         android:text="@string/ok"
         android:textColor="@color/colorAccent"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintRight_toRightOf="@+id/radioGroup"
-        app:layout_constraintTop_toBottomOf="@+id/radioGroup"
-        tools:layout_constraintRight_creator="1"
-        tools:layout_constraintTop_creator="1"/>
+        android:layout_alignRight="@+id/radioGroup"
+        android:layout_below="@+id/radioGroup"/>
 
     <Button
         android:id="@+id/dismiss"
@@ -84,7 +81,7 @@
         android:layout_height="wrap_content"
         android:text="@string/cancel"
         android:textColor="@color/colorAccent"
-        app:layout_constraintRight_toLeftOf="@+id/ok"
-        app:layout_constraintTop_toBottomOf="@+id/radioGroup"/>
+        android:layout_toLeftOf="@+id/ok"
+        android:layout_below="@+id/radioGroup"/>
 
-</android.support.constraint.ConstraintLayout>
+</RelativeLayout>

@@ -16,16 +16,23 @@
 
 package ch.dissem.apps.abit;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -48,9 +55,6 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -64,6 +68,8 @@ import ch.dissem.apps.abit.repository.AndroidMessageRepository;
 import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
+import ch.dissem.apps.abit.util.Drawables;
+import ch.dissem.apps.abit.util.Labels;
 import ch.dissem.apps.abit.util.Preferences;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
@@ -72,6 +78,7 @@ import ch.dissem.bitmessage.entity.valueobject.Label;
 
 import static android.widget.Toast.LENGTH_LONG;
 import static ch.dissem.apps.abit.ComposeMessageActivity.launchReplyTo;
+import static ch.dissem.apps.abit.repository.AndroidMessageRepository.LABEL_ARCHIVE;
 import static ch.dissem.apps.abit.service.BitmessageService.isRunning;
 
 
@@ -99,7 +106,6 @@ public class MainActivity extends AppCompatActivity
     public static final String EXTRA_REPLY_TO_MESSAGE = "ch.dissem.abit.ReplyToMessage";
     public static final String ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox";
 
-    private static final Logger LOG = LoggerFactory.getLogger(MainActivity.class);
     private static final int ADD_IDENTITY = 1;
     private static final int MANAGE_IDENTITY = 2;
 
@@ -233,6 +239,50 @@ public class MainActivity extends AppCompatActivity
             .withActivity(this)
             .withHeaderBackground(R.drawable.header)
             .withProfiles(profiles)
+            .withOnAccountHeaderProfileImageListener(new AccountHeader.OnAccountHeaderProfileImageListener() {
+                @Override
+                public boolean onProfileImageClick(View view, IProfile profile, boolean current) {
+                    if (current) {
+                        //  Show QR code in modal dialog
+                        final Dialog dialog = new Dialog(MainActivity.this);
+                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+                        ImageView imageView = new ImageView(MainActivity.this);
+                        imageView.setImageBitmap(Drawables.qrCode(Singleton.getIdentity(MainActivity.this)));
+                        imageView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.addContentView(imageView, new RelativeLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT));
+                        Window window = dialog.getWindow();
+                        if (window != null) {
+                            Display display = window.getWindowManager().getDefaultDisplay();
+                            Point size = new Point();
+                            display.getSize(size);
+                            int dim = size.x < size.y ? size.x : size.y;
+
+                            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                            lp.copyFrom(window.getAttributes());
+                            lp.width = dim;
+                            lp.height = dim;
+
+                            window.setAttributes(lp);
+                        }
+                        dialog.show();
+                        return true;
+                    }
+                    return false;
+                }
+
+                @Override
+                public boolean onProfileImageLongClick(View view, IProfile iProfile, boolean b) {
+                    return false;
+                }
+            })
             .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                 @Override
                 public boolean onProfileChanged(View view, IProfile profile, boolean current) {
@@ -272,7 +322,7 @@ public class MainActivity extends AppCompatActivity
         final ArrayList<IDrawerItem> drawerItems = new ArrayList<>();
         drawerItems.add(new PrimaryDrawerItem()
             .withName(R.string.archive)
-            .withTag(AndroidMessageRepository.LABEL_ARCHIVE)
+            .withTag(LABEL_ARCHIVE)
             .withIcon(CommunityMaterial.Icon.cmd_archive)
         );
         drawerItems.add(new DividerDrawerItem());
@@ -311,7 +361,15 @@ public class MainActivity extends AppCompatActivity
                 public boolean onItemClick(View view, int position, IDrawerItem item) {
                     if (item.getTag() instanceof Label) {
                         selectedLabel = (Label) item.getTag();
-                        showSelectedLabel();
+                        if (getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof
+                            MessageListFragment) {
+                            ((MessageListFragment) getSupportFragmentManager()
+                                .findFragmentById(R.id.item_list)).updateList(selectedLabel);
+                        } else {
+                            MessageListFragment listFragment = new MessageListFragment();
+                            changeList(listFragment);
+                            listFragment.updateList(selectedLabel);
+                        }
                         return false;
                     } else if (item instanceof Nameable<?>) {
                         Nameable<?> ni = (Nameable<?>) item;
@@ -374,7 +432,10 @@ public class MainActivity extends AppCompatActivity
                 for (Label label : labels) {
                     addLabelEntry(label);
                 }
-                showSelectedLabel();
+                IDrawerItem selectedDrawerItem = drawer.getDrawerItem(selectedLabel);
+                if (selectedDrawerItem != null) {
+                    drawer.setSelection(selectedDrawerItem);
+                }
             }
         }.execute();
     }
@@ -389,7 +450,11 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("unchecked")
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         selectedLabel = (Label) savedInstanceState.getSerializable("selectedLabel");
-        showSelectedLabel();
+
+        IDrawerItem selectedItem = drawer.getDrawerItem(selectedLabel);
+        if (selectedItem != null) {
+            drawer.setSelection(selectedItem);
+        }
         super.onRestoreInstanceState(savedInstanceState);
     }
 
@@ -426,37 +491,9 @@ public class MainActivity extends AppCompatActivity
     public void addLabelEntry(Label label) {
         PrimaryDrawerItem item = new PrimaryDrawerItem()
             .withName(label.toString())
-            .withTag(label);
-        if (label.getType() == null) {
-            item.withIcon(CommunityMaterial.Icon.cmd_label)
-                .withIconColor(label.getColor());
-        } else {
-            switch (label.getType()) {
-                case INBOX:
-                    item.withIcon(GoogleMaterial.Icon.gmd_inbox);
-                    break;
-                case DRAFT:
-                    item.withIcon(CommunityMaterial.Icon.cmd_file);
-                    break;
-                case OUTBOX:
-                    item.withIcon(CommunityMaterial.Icon.cmd_outbox);
-                    break;
-                case SENT:
-                    item.withIcon(CommunityMaterial.Icon.cmd_send);
-                    break;
-                case BROADCAST:
-                    item.withIcon(CommunityMaterial.Icon.cmd_rss);
-                    break;
-                case UNREAD:
-                    item.withIcon(GoogleMaterial.Icon.gmd_markunread_mailbox);
-                    break;
-                case TRASH:
-                    item.withIcon(GoogleMaterial.Icon.gmd_delete);
-                    break;
-                default:
-                    item.withIcon(CommunityMaterial.Icon.cmd_label);
-            }
-        }
+            .withTag(label)
+            .withIcon(Labels.getIcon(label))
+            .withIconColor(Labels.getColor(label));
         drawer.addItemAtPosition(item, drawer.getDrawerItems().size() - 3);
     }
 
@@ -497,13 +534,15 @@ public class MainActivity extends AppCompatActivity
         for (IDrawerItem item : drawer.getDrawerItems()) {
             if (item.getTag() instanceof Label) {
                 Label label = (Label) item.getTag();
-                int unread = bmc.messages().countUnread(label);
-                if (unread > 0) {
-                    ((PrimaryDrawerItem) item).withBadge(String.valueOf(unread));
-                } else {
-                    ((PrimaryDrawerItem) item).withBadge((String) null);
+                if (label != LABEL_ARCHIVE) {
+                    int unread = bmc.messages().countUnread(label);
+                    if (unread > 0) {
+                        ((PrimaryDrawerItem) item).withBadge(String.valueOf(unread));
+                    } else {
+                        ((PrimaryDrawerItem) item).withBadge((String) null);
+                    }
+                    drawer.updateItem(item);
                 }
-                drawer.updateItem(item);
             }
         }
     }
@@ -518,18 +557,6 @@ public class MainActivity extends AppCompatActivity
                     i.drawer.updateStickyFooterItem(i.nodeSwitch);
                 }
             });
-        }
-    }
-
-    private void showSelectedLabel() {
-        if (getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof
-            MessageListFragment) {
-            ((MessageListFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.item_list)).updateList(selectedLabel);
-        } else {
-            MessageListFragment listFragment = new MessageListFragment();
-            changeList(listFragment);
-            listFragment.updateList(selectedLabel);
         }
     }
 

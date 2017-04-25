@@ -21,6 +21,7 @@ android {
         versionCode 11
         versionName "1.0-beta11"
         jackOptions.enabled = false
+        multiDexEnabled true
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -38,11 +39,14 @@ android {
 
 //ext.jabitVersion = '2.0.4'
 ext.jabitVersion = 'feature-extended-encoding-SNAPSHOT'
+ext.supportVersion = '25.3.1'
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.1.0'
-    compile 'com.android.support:support-v4:25.1.0'
-    compile 'com.android.support:design:25.1.0'
+
+    compile "com.android.support:appcompat-v7:$supportVersion"
+    compile "com.android.support:support-v4:$supportVersion"
+    compile "com.android.support:design:$supportVersion"
+    compile "com.android.support:multidex:1.0.1"
 
     compile "ch.dissem.jabit:jabit-core:$jabitVersion"
     compile "ch.dissem.jabit:jabit-networking:$jabitVersion"
@@ -50,30 +54,32 @@ dependencies {
     compile "ch.dissem.jabit:jabit-extensions:$jabitVersion"
     compile "ch.dissem.jabit:jabit-wif:$jabitVersion"
 
-    compile 'org.slf4j:slf4j-android:1.7.12'
+    compile 'org.slf4j:slf4j-android:1.7.25'
 
-    compile 'com.mikepenz:materialize:1.0.0@aar'
-    compile('com.mikepenz:materialdrawer:5.6.0@aar') {
+    compile 'com.mikepenz:materialize:1.0.1@aar'
+    compile('com.mikepenz:materialdrawer:5.9.0@aar') {
         transitive = true
     }
-    compile('com.mikepenz:aboutlibraries:5.8.1@aar') {
+    compile('com.mikepenz:aboutlibraries:5.9.5@aar') {
         transitive = true
     }
-    compile 'com.mikepenz:iconics:1.6.2@aar'
-    compile 'com.mikepenz:community-material-typeface:1.5.54.2@aar'
+    compile "com.mikepenz:iconics-core:2.8.3@aar"
+    compile 'com.mikepenz:google-material-typeface:3.0.1.0.original@aar'
+    compile 'com.mikepenz:community-material-typeface:1.9.32.1@aar'
 
-    compile 'com.journeyapps:zxing-android-embedded:3.3.0@aar'
+    compile 'com.journeyapps:zxing-android-embedded:3.5.0@aar'
     compile 'com.google.zxing:core:3.3.0'
+
     compile 'io.github.yavski:fab-speed-dial:1.0.6'
     compile 'com.github.amlcurran.showcaseview:library:5.4.3'
-    compile('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.9.3@aar') {
+    compile('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.10.4@aar') {
         transitive = true
     }
-    compile 'com.github.angads25:filepicker:1.0.6'
+    compile 'com.github.angads25:filepicker:1.1.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
 
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:1.10.19'
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
+    testCompile 'org.mockito:mockito-core:2.7.22'
 }
 
 idea.module {

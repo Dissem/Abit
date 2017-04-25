@@ -31,8 +31,10 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
-import ch.dissem.apps.abit.R;
+import ch.dissem.apps.abit.util.Labels;
+import ch.dissem.apps.abit.util.UuidUtils;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.InventoryVector;
 import ch.dissem.bitmessage.entity.valueobject.Label;
@@ -40,6 +42,8 @@ import ch.dissem.bitmessage.ports.AbstractMessageRepository;
 import ch.dissem.bitmessage.ports.MessageRepository;
 import ch.dissem.bitmessage.utils.Encode;
 
+import static ch.dissem.apps.abit.util.UuidUtils.asUuid;
+import static ch.dissem.bitmessage.utils.Strings.hex;
 import static java.lang.String.valueOf;
 
 /**
@@ -65,6 +69,9 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
     private static final String COLUMN_RETRIES = "retries";
     private static final String COLUMN_NEXT_TRY = "next_try";
     private static final String COLUMN_INITIAL_HASH = "initial_hash";
+    private static final String COLUMN_CONVERSATION = "conversation";
+
+    private static final String PARENTS_TABLE_NAME = "Message_Parent";
 
     private static final String JOIN_TABLE_NAME = "Message_Label";
     private static final String JT_COLUMN_MESSAGE = "message_id";
@@ -122,35 +129,9 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
     private Label getLabel(Cursor c) {
         String typeName = c.getString(c.getColumnIndex(LBL_COLUMN_TYPE));
         Label.Type type = typeName == null ? null : Label.Type.valueOf(typeName);
-        String text;
-        if (type == null) {
+        String text = Labels.getText(type, null, context);
+        if (text == null) {
             text = c.getString(c.getColumnIndex(LBL_COLUMN_LABEL));
-        } else {
-            switch (type) {
-                case INBOX:
-                    text = context.getString(R.string.inbox);
-                    break;
-                case DRAFT:
-                    text = context.getString(R.string.draft);
-                    break;
-                case OUTBOX:
-                    text = context.getString(R.string.outbox);
-                    break;
-                case SENT:
-                    text = context.getString(R.string.sent);
-                    break;
-                case UNREAD:
-                    text = context.getString(R.string.unread);
-                    break;
-                case TRASH:
-                    text = context.getString(R.string.trash);
-                    break;
-                case BROADCAST:
-                    text = context.getString(R.string.broadcasts);
-                    break;
-                default:
-                    text = c.getString(c.getColumnIndex(LBL_COLUMN_LABEL));
-            }
         }
         Label label = new Label(
             text,
@@ -164,7 +145,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
     public int countUnread(Label label) {
         String[] args;
         String where;
-        if (label == null){
+        if (label == null) {
             return 0;
         }
         if (label == LABEL_ARCHIVE) {
@@ -187,6 +168,72 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
         );
     }
 
+    @Override
+    public List<UUID> findConversations(Label label) {
+        String[] projection = {
+            COLUMN_CONVERSATION,
+        };
+
+        String where;
+        if (label == null) {
+            where = "id NOT IN (SELECT message_id FROM Message_Label)";
+        } else {
+            where = "id IN (SELECT message_id FROM Message_Label WHERE label_id=" + label.getId() + ")";
+        }
+        List<UUID> result = new LinkedList<>();
+        SQLiteDatabase db = sql.getReadableDatabase();
+        try (Cursor c = db.query(
+            TABLE_NAME, projection,
+            where,
+            null, null, null, null
+        )) {
+            while (c.moveToNext()) {
+                byte[] uuidBytes = c.getBlob(c.getColumnIndex(COLUMN_CONVERSATION));
+                result.add(asUuid(uuidBytes));
+            }
+        }
+        return result;
+    }
+
+
+    private void updateParents(SQLiteDatabase db, Plaintext message) {
+        if (message.getInventoryVector() == null || message.getParents().isEmpty()) {
+            // There are no parents to save yet (they are saved in the extended data, that's enough for now)
+            return;
+        }
+        byte[] childIV = message.getInventoryVector().getHash();
+        db.delete(PARENTS_TABLE_NAME, "child=?", new String[]{hex(childIV).toString()});
+
+        // save new parents
+        int order = 0;
+        for (InventoryVector parentIV : message.getParents()) {
+            Plaintext parent = getMessage(parentIV);
+            mergeConversations(db, parent.getConversationId(), message.getConversationId());
+            order++;
+            ContentValues values = new ContentValues();
+            values.put("parent", parentIV.getHash());
+            values.put("child", childIV);
+            values.put("pos", order);
+            values.put("conversation", UuidUtils.asBytes(message.getConversationId()));
+            db.insertOrThrow(PARENTS_TABLE_NAME, null, values);
+        }
+    }
+
+    /**
+     * Replaces every occurrence of the source conversation ID with the target ID
+     *
+     * @param db     is used to keep everything within one transaction
+     * @param source ID of the conversation to be merged
+     * @param target ID of the merge target
+     */
+    private void mergeConversations(SQLiteDatabase db, UUID source, UUID target) {
+        ContentValues values = new ContentValues();
+        values.put("conversation", UuidUtils.asBytes(target));
+        String[] whereArgs = {hex(UuidUtils.asBytes(source)).toString()};
+        db.update(TABLE_NAME, values, "conversation=?", whereArgs);
+        db.update(PARENTS_TABLE_NAME, values, "conversation=?", whereArgs);
+    }
+
     protected List<Plaintext> find(String where) {
         List<Plaintext> result = new LinkedList<>();
 
@@ -205,7 +252,8 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
             COLUMN_STATUS,
             COLUMN_TTL,
             COLUMN_RETRIES,
-            COLUMN_NEXT_TRY
+            COLUMN_NEXT_TRY,
+            COLUMN_CONVERSATION
         };
 
         SQLiteDatabase db = sql.getReadableDatabase();
@@ -220,8 +268,8 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
                 byte[] data = c.getBlob(c.getColumnIndex(COLUMN_DATA));
                 Plaintext.Type type = Plaintext.Type.valueOf(c.getString(c.getColumnIndex
                     (COLUMN_TYPE)));
-                Plaintext.Builder builder = Plaintext.readWithoutSignature(type, new
-                    ByteArrayInputStream(data));
+                Plaintext.Builder builder = Plaintext.readWithoutSignature(type,
+                    new ByteArrayInputStream(data));
                 long id = c.getLong(c.getColumnIndex(COLUMN_ID));
                 builder.id(id);
                 builder.IV(new InventoryVector(iv));
@@ -240,6 +288,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
                 if (!c.isNull(nextTryColumn)) {
                     builder.nextTry(c.getLong(nextTryColumn));
                 }
+                builder.conversation(asUuid(c.getBlob(c.getColumnIndex(COLUMN_CONVERSATION))));
                 builder.labels(findLabels(id));
                 result.add(builder.build());
             }
@@ -267,6 +316,8 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
             } else {
                 update(db, message);
             }
+
+            updateParents(db, message);
 
             // remove existing labels
             db.delete(JOIN_TABLE_NAME, "message_id=?", new String[]{valueOf(message.getId())});
@@ -302,6 +353,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
         values.put(COLUMN_TTL, message.getTTL());
         values.put(COLUMN_RETRIES, message.getRetries());
         values.put(COLUMN_NEXT_TRY, message.getNextTry());
+        values.put(COLUMN_CONVERSATION, UuidUtils.asBytes(message.getConversationId()));
         long id = db.insertOrThrow(TABLE_NAME, null, values);
         message.setId(id);
     }
@@ -322,6 +374,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
         values.put(COLUMN_TTL, message.getTTL());
         values.put(COLUMN_RETRIES, message.getRetries());
         values.put(COLUMN_NEXT_TRY, message.getNextTry());
+        values.put(COLUMN_CONVERSATION, UuidUtils.asBytes(message.getConversationId()));
         db.update(TABLE_NAME, values, "id = " + message.getId(), null);
     }
 

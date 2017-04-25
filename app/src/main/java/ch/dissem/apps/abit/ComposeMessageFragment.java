@@ -16,6 +16,7 @@
 
 package ch.dissem.apps.abit;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -79,6 +80,11 @@ public class ComposeMessageFragment extends Fragment {
         if (getArguments() != null) {
             if (getArguments().containsKey(EXTRA_IDENTITY)) {
                 identity = (BitmessageAddress) getArguments().getSerializable(EXTRA_IDENTITY);
+                if (getActivity() != null) {
+                    if (identity == null || identity.getPrivateKey() == null) {
+                        identity = Singleton.getIdentity(getActivity());
+                    }
+                }
             } else {
                 throw new RuntimeException("No identity set for ComposeMessageFragment");
             }
@@ -157,6 +163,14 @@ public class ComposeMessageFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (identity == null || identity.getPrivateKey() == null) {
+            identity = Singleton.getIdentity(context);
+        }
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.compose, menu);
         super.onCreateOptionsMenu(menu, inflater);
@@ -170,6 +184,9 @@ public class ComposeMessageFragment extends Fragment {
                 return true;
             case R.id.select_encoding:
                 SelectEncodingDialogFragment encodingDialog = new SelectEncodingDialogFragment();
+                Bundle args = new Bundle();
+                args.putSerializable(EXTRA_ENCODING, encoding);
+                encodingDialog.setArguments(args);
                 encodingDialog.setTargetFragment(this, 0);
                 encodingDialog.show(getFragmentManager(), "select encoding dialog");
                 return true;

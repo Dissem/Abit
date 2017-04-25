@@ -27,7 +27,7 @@ import ch.dissem.apps.abit.util.Assets;
  */
 public class SqlHelper extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
     private static final String DATABASE_NAME = "jabit.db";
 
     private final Context ctx;
@@ -61,6 +61,8 @@ public class SqlHelper extends SQLiteOpenHelper {
                 executeMigration(db, "V3.3__Create_table_node");
             case 5:
                 executeMigration(db, "V3.4__Add_label_outbox");
+            case 6:
+                executeMigration(db, "V4.0__Create_table_message_parent");
             default:
                 // Nothing to do. Let's assume we won't upgrade from a version that's newer than
                 // DATABASE_VERSION.
@@ -73,7 +75,7 @@ public class SqlHelper extends SQLiteOpenHelper {
         }
     }
 
-    public static StringBuilder join(long... numbers) {
+    static StringBuilder join(long... numbers) {
         StringBuilder streamList = new StringBuilder();
         for (int i = 0; i < numbers.length; i++) {
             if (i > 0) streamList.append(", ");
@@ -82,7 +84,7 @@ public class SqlHelper extends SQLiteOpenHelper {
         return streamList;
     }
 
-    public static StringBuilder join(Enum<?>... types) {
+    static StringBuilder join(Enum<?>... types) {
         StringBuilder streamList = new StringBuilder();
         for (int i = 0; i < types.length; i++) {
             if (i > 0) streamList.append(", ");
