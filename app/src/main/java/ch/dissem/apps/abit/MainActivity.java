@@ -16,25 +16,17 @@
 
 package ch.dissem.apps.abit;
 
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
-import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
@@ -60,15 +52,14 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.dissem.apps.abit.dialog.AddIdentityDialogFragment;
 import ch.dissem.apps.abit.dialog.FullNodeDialogActivity;
+import ch.dissem.apps.abit.drawer.ProfileImageListener;
+import ch.dissem.apps.abit.drawer.ProfileSelectionListener;
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
-import ch.dissem.apps.abit.repository.AndroidMessageRepository;
 import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
-import ch.dissem.apps.abit.util.Drawables;
 import ch.dissem.apps.abit.util.Labels;
 import ch.dissem.apps.abit.util.Preferences;
 import ch.dissem.bitmessage.BitmessageContext;
@@ -76,7 +67,6 @@ import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 
-import static android.widget.Toast.LENGTH_LONG;
 import static ch.dissem.apps.abit.ComposeMessageActivity.launchReplyTo;
 import static ch.dissem.apps.abit.repository.AndroidMessageRepository.LABEL_ARCHIVE;
 import static ch.dissem.apps.abit.service.BitmessageService.isRunning;
@@ -106,8 +96,8 @@ public class MainActivity extends AppCompatActivity
     public static final String EXTRA_REPLY_TO_MESSAGE = "ch.dissem.abit.ReplyToMessage";
     public static final String ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox";
 
-    private static final int ADD_IDENTITY = 1;
-    private static final int MANAGE_IDENTITY = 2;
+    public static final int ADD_IDENTITY = 1;
+    public static final int MANAGE_IDENTITY = 2;
 
     private static final long ID_NODE_SWITCH = 1;
 
@@ -239,81 +229,8 @@ public class MainActivity extends AppCompatActivity
             .withActivity(this)
             .withHeaderBackground(R.drawable.header)
             .withProfiles(profiles)
-            .withOnAccountHeaderProfileImageListener(new AccountHeader.OnAccountHeaderProfileImageListener() {
-                @Override
-                public boolean onProfileImageClick(View view, IProfile profile, boolean current) {
-                    if (current) {
-                        //  Show QR code in modal dialog
-                        final Dialog dialog = new Dialog(MainActivity.this);
-                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-                        ImageView imageView = new ImageView(MainActivity.this);
-                        imageView.setImageBitmap(Drawables.qrCode(Singleton.getIdentity(MainActivity.this)));
-                        imageView.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                dialog.dismiss();
-                            }
-                        });
-                        dialog.addContentView(imageView, new RelativeLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT));
-                        Window window = dialog.getWindow();
-                        if (window != null) {
-                            Display display = window.getWindowManager().getDefaultDisplay();
-                            Point size = new Point();
-                            display.getSize(size);
-                            int dim = size.x < size.y ? size.x : size.y;
-
-                            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-                            lp.copyFrom(window.getAttributes());
-                            lp.width = dim;
-                            lp.height = dim;
-
-                            window.setAttributes(lp);
-                        }
-                        dialog.show();
-                        return true;
-                    }
-                    return false;
-                }
-
-                @Override
-                public boolean onProfileImageLongClick(View view, IProfile iProfile, boolean b) {
-                    return false;
-                }
-            })
-            .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
-                @Override
-                public boolean onProfileChanged(View view, IProfile profile, boolean current) {
-                    switch ((int) profile.getIdentifier()) {
-                        case ADD_IDENTITY:
-                            addIdentityDialog();
-                            break;
-                        case MANAGE_IDENTITY:
-                            BitmessageAddress identity = Singleton.getIdentity(MainActivity.this);
-                            if (identity == null) {
-                                Toast.makeText(MainActivity.this,
-                                    R.string.no_identity_warning, LENGTH_LONG).show();
-                            } else {
-                                Intent show = new Intent(MainActivity.this,
-                                    AddressDetailActivity.class);
-                                show.putExtra(AddressDetailFragment.ARG_ITEM, identity);
-                                startActivity(show);
-                            }
-                            break;
-                        default:
-                            if (profile instanceof ProfileDrawerItem) {
-                                Object tag = ((ProfileDrawerItem) profile).getTag();
-                                if (tag instanceof BitmessageAddress) {
-                                    Singleton.setIdentity((BitmessageAddress) tag);
-                                }
-                            }
-                    }
-                    // false if it should close the drawer
-                    return false;
-                }
-            })
+            .withOnAccountHeaderProfileImageListener(new ProfileImageListener(this))
+            .withOnAccountHeaderListener(new ProfileSelectionListener(MainActivity.this, getSupportFragmentManager()))
             .build();
         if (profiles.size() > 2) { // There's always the add and manage identity items
             accountHeader.setActiveProfile(profiles.get(0), true);
@@ -356,44 +273,7 @@ public class MainActivity extends AppCompatActivity
             .withAccountHeader(accountHeader)
             .withDrawerItems(drawerItems)
             .addStickyDrawerItems(nodeSwitch)
-            .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                @Override
-                public boolean onItemClick(View view, int position, IDrawerItem item) {
-                    if (item.getTag() instanceof Label) {
-                        selectedLabel = (Label) item.getTag();
-                        if (getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof
-                            MessageListFragment) {
-                            ((MessageListFragment) getSupportFragmentManager()
-                                .findFragmentById(R.id.item_list)).updateList(selectedLabel);
-                        } else {
-                            MessageListFragment listFragment = new MessageListFragment();
-                            changeList(listFragment);
-                            listFragment.updateList(selectedLabel);
-                        }
-                        return false;
-                    } else if (item instanceof Nameable<?>) {
-                        Nameable<?> ni = (Nameable<?>) item;
-                        switch (ni.getName().getTextRes()) {
-                            case R.string.contacts_and_subscriptions:
-                                if (!(getSupportFragmentManager().findFragmentById(R.id
-                                    .item_list) instanceof AddressListFragment)) {
-                                    changeList(new AddressListFragment());
-                                } else {
-                                    ((AddressListFragment) getSupportFragmentManager()
-                                        .findFragmentById(R.id.item_list)).updateList();
-                                }
-                                break;
-                            case R.string.settings:
-                                startActivity(new Intent(MainActivity.this, SettingsActivity
-                                    .class));
-                                break;
-                            case R.string.full_node:
-                                return true;
-                        }
-                    }
-                    return false;
-                }
-            })
+            .withOnDrawerItemClickListener(new DrawerItemClickListener())
             .withShowDrawerOnFirstLaunch(true)
             .build();
 
@@ -440,6 +320,47 @@ public class MainActivity extends AppCompatActivity
         }.execute();
     }
 
+    private class DrawerItemClickListener implements Drawer.OnDrawerItemClickListener {
+        @Override
+        public boolean onItemClick(View view, int position, IDrawerItem item) {
+            if (item.getTag() instanceof Label) {
+                selectedLabel = (Label) item.getTag();
+                if (getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof
+                    MessageListFragment) {
+                    ((MessageListFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.item_list)).updateList(selectedLabel);
+                } else {
+                    MessageListFragment listFragment = new MessageListFragment();
+                    changeList(listFragment);
+                    listFragment.updateList(selectedLabel);
+                }
+                return false;
+            } else if (item instanceof Nameable<?>) {
+                Nameable<?> ni = (Nameable<?>) item;
+                switch (ni.getName().getTextRes()) {
+                    case R.string.contacts_and_subscriptions:
+                        if (!(getSupportFragmentManager().findFragmentById(R.id
+                            .item_list) instanceof AddressListFragment)) {
+                            changeList(new AddressListFragment());
+                        } else {
+                            ((AddressListFragment) getSupportFragmentManager()
+                                .findFragmentById(R.id.item_list)).updateList();
+                        }
+                        return false;
+                    case R.string.settings:
+                        startActivity(new Intent(MainActivity.this, SettingsActivity
+                            .class));
+                        return false;
+                    case R.string.full_node:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+            return false;
+        }
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
@@ -456,11 +377,6 @@ public class MainActivity extends AppCompatActivity
             drawer.setSelection(selectedItem);
         }
         super.onRestoreInstanceState(savedInstanceState);
-    }
-
-    private void addIdentityDialog() {
-        AddIdentityDialogFragment dialog = new AddIdentityDialogFragment();
-        dialog.show(getSupportFragmentManager(), "dialog");
     }
 
     @Override
@@ -500,8 +416,9 @@ public class MainActivity extends AppCompatActivity
     public void updateIdentityEntry(BitmessageAddress identity) {
         for (IProfile profile : accountHeader.getProfiles()) {
             if (profile instanceof ProfileDrawerItem) {
-                if (identity.equals(((ProfileDrawerItem) profile).getTag())) {
-                    ((ProfileDrawerItem) profile)
+                ProfileDrawerItem profileDrawerItem = (ProfileDrawerItem) profile;
+                if (identity.equals(profileDrawerItem.getTag())) {
+                    profileDrawerItem
                         .withName(identity.toString())
                         .withTag(identity);
                     return;
@@ -513,7 +430,8 @@ public class MainActivity extends AppCompatActivity
     public void removeIdentityEntry(BitmessageAddress identity) {
         for (IProfile profile : accountHeader.getProfiles()) {
             if (profile instanceof ProfileDrawerItem) {
-                if (identity.equals(((ProfileDrawerItem) profile).getTag())) {
+                ProfileDrawerItem profileDrawerItem = (ProfileDrawerItem) profile;
+                if (identity.equals(profileDrawerItem.getTag())) {
                     accountHeader.removeProfile(profile);
                     return;
                 }

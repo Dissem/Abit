@@ -67,26 +67,17 @@ public class ComposeMessageFragment extends Fragment {
     private Plaintext.Encoding encoding;
     private Plaintext parent;
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
-    public ComposeMessageFragment() {
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             if (getArguments().containsKey(EXTRA_IDENTITY)) {
                 identity = (BitmessageAddress) getArguments().getSerializable(EXTRA_IDENTITY);
-                if (getActivity() != null) {
-                    if (identity == null || identity.getPrivateKey() == null) {
-                        identity = Singleton.getIdentity(getActivity());
-                    }
+                if (getActivity() != null && (identity == null || identity.getPrivateKey() == null)) {
+                    identity = Singleton.getIdentity(getActivity());
                 }
             } else {
-                throw new RuntimeException("No identity set for ComposeMessageFragment");
+                throw new IllegalStateException("No identity set for ComposeMessageFragment");
             }
             broadcast = getArguments().getBoolean(EXTRA_BROADCAST, false);
             if (getArguments().containsKey(EXTRA_RECIPIENT)) {
@@ -107,7 +98,7 @@ public class ComposeMessageFragment extends Fragment {
                 parent = (Plaintext) getArguments().getSerializable(EXTRA_PARENT);
             }
         } else {
-            throw new RuntimeException("No identity set for ComposeMessageFragment");
+            throw new IllegalStateException("No identity set for ComposeMessageFragment");
         }
         setHasOptionsMenu(true);
     }
@@ -139,6 +130,7 @@ public class ComposeMessageFragment extends Fragment {
 
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
+                    // leave current selection
                 }
             });
             if (recipient != null) {
