@@ -27,6 +27,9 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.regex.Matcher;
@@ -43,6 +46,8 @@ import ch.dissem.bitmessage.entity.payload.V4Pubkey;
 import static android.util.Base64.URL_SAFE;
 
 public class CreateAddressActivity extends AppCompatActivity {
+    private static final Logger LOG = LoggerFactory.getLogger(CreateAddressActivity.class);
+
     private static final Pattern KEY_VALUE_PATTERN = Pattern.compile("^([a-zA-Z]+)=(.*)$");
     private byte[] pubkeyBytes;
 
@@ -77,6 +82,9 @@ public class CreateAddressActivity extends AppCompatActivity {
                         case "pubkey":
                             pubkeyBytes = Base64.decode(value, URL_SAFE);
                             break;
+                        default:
+                            LOG.debug("Unknown attribute: " + key + "=" + value);
+                            break;
                     }
                 }
             }
@@ -92,53 +100,58 @@ public class CreateAddressActivity extends AppCompatActivity {
                 finish();
             }
         });
-        final Button ok = (Button) findViewById(R.id.do_import);
-        ok.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.do_import).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String addressText = String.valueOf(address.getText()).trim();
-                try {
-                    BitmessageAddress bmAddress = new BitmessageAddress(addressText);
-                    bmAddress.setAlias(label.getText().toString());
-
-                    BitmessageContext bmc = Singleton.getBitmessageContext
-                        (CreateAddressActivity.this);
-                    bmc.addContact(bmAddress);
-                    if (subscribe.isChecked()) {
-                        bmc.addSubscribtion(bmAddress);
-                    }
-                    if (pubkeyBytes != null) {
-                        try {
-                            final Pubkey pubkey;
-                            InputStream pubkeyStream = new ByteArrayInputStream(pubkeyBytes);
-                            long stream = bmAddress.getStream();
-                            switch ((int) bmAddress.getVersion()) {
-                                case 2:
-                                    pubkey = V2Pubkey.read(pubkeyStream, stream);
-                                    break;
-                                case 3:
-                                    pubkey = V3Pubkey.read(pubkeyStream, stream);
-                                    break;
-                                case 4:
-                                    pubkey = new V4Pubkey(V3Pubkey.read(pubkeyStream, stream));
-                                    break;
-                                default:
-                                    pubkey = null;
-                            }
-                            if (pubkey != null) {
-                                bmAddress.setPubkey(pubkey);
-                            }
-                        } catch (Exception ignore) {
-                        }
-                    }
-
-                    setResult(Activity.RESULT_OK);
-                    finish();
-                } catch (RuntimeException e) {
-                    address.setError(getString(R.string.error_illegal_address));
-                }
+                onOK(address, label, subscribe);
             }
         });
+    }
+
+
+    private void onOK(TextView address, EditText label, Switch subscribe) {
+        String addressText = String.valueOf(address.getText()).trim();
+        try {
+            BitmessageAddress bmAddress = new BitmessageAddress(addressText);
+            bmAddress.setAlias(label.getText().toString());
+
+            BitmessageContext bmc = Singleton.getBitmessageContext
+                (CreateAddressActivity.this);
+            bmc.addContact(bmAddress);
+            if (subscribe.isChecked()) {
+                bmc.addSubscribtion(bmAddress);
+            }
+            if (pubkeyBytes != null) {
+                try {
+                    final Pubkey pubkey;
+                    InputStream pubkeyStream = new ByteArrayInputStream(pubkeyBytes);
+                    long stream = bmAddress.getStream();
+                    switch ((int) bmAddress.getVersion()) {
+                        case 2:
+                            pubkey = V2Pubkey.read(pubkeyStream, stream);
+                            break;
+                        case 3:
+                            pubkey = V3Pubkey.read(pubkeyStream, stream);
+                            break;
+                        case 4:
+                            pubkey = new V4Pubkey(V3Pubkey.read(pubkeyStream, stream));
+                            break;
+                        default:
+                            pubkey = null;
+                            break;
+                    }
+                    if (pubkey != null) {
+                        bmAddress.setPubkey(pubkey);
+                    }
+                } catch (Exception ignore) {
+                }
+            }
+
+            setResult(Activity.RESULT_OK);
+            finish();
+        } catch (RuntimeException e) {
+            address.setError(getString(R.string.error_illegal_address));
+        }
     }
 
     private String getAddress(Uri uri) {

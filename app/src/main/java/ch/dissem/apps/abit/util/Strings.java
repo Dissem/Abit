@@ -24,8 +24,19 @@ import java.util.regex.Pattern;
 public class Strings {
     private final static Pattern WHITESPACES = Pattern.compile("\\s+");
 
-    public static String normalizeWhitespaces(CharSequence string) {
-        string = string.subSequence(0, Math.min(string.length(), 200));
-        return WHITESPACES.matcher(string).replaceAll(" ");
+    private static CharSequence trim(CharSequence string, int length) {
+        if (string.length() <= length) {
+            return string;
+        } else {
+            return string.subSequence(0, length);
+        }
+    }
+
+    /**
+     * Trime the string to 200 characters and normalizes all whitespaces by replacing any sequence
+     * of whitespace characters with a single space character.
+     */
+    public static String prepareMessageExtract(CharSequence string) {
+        return WHITESPACES.matcher(trim(string, 200)).replaceAll(" ");
     }
 }

@@ -57,7 +57,7 @@ import ch.dissem.bitmessage.ports.MessageRepository;
 import static android.text.util.Linkify.WEB_URLS;
 import static ch.dissem.apps.abit.util.Constants.BITMESSAGE_ADDRESS_PATTERN;
 import static ch.dissem.apps.abit.util.Constants.BITMESSAGE_URL_SCHEMA;
-import static ch.dissem.apps.abit.util.Strings.normalizeWhitespaces;
+import static ch.dissem.apps.abit.util.Strings.prepareMessageExtract;
 
 
 /**
@@ -263,7 +263,7 @@ public class MessageDetailFragment extends Fragment {
             viewHolder.avatar.setImageDrawable(new Identicon(message.getFrom()));
             viewHolder.status.setImageResource(Assets.getStatusDrawable(message.getStatus()));
             viewHolder.sender.setText(message.getFrom().toString());
-            viewHolder.extract.setText(normalizeWhitespaces(message.getText()));
+            viewHolder.extract.setText(prepareMessageExtract(message.getText()));
             viewHolder.item = message;
         }
 

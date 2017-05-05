@@ -277,6 +277,10 @@ public class MainActivity extends AppCompatActivity
             .withShowDrawerOnFirstLaunch(true)
             .build();
 
+        loadDrawerItemsAsynchronously();
+    }
+
+    private void loadDrawerItemsAsynchronously() {
         new AsyncTask<Void, Void, List<BitmessageAddress>>() {
             @Override
             protected List<BitmessageAddress> doInBackground(Void... params) {

@@ -120,7 +120,7 @@ public class SettingsFragment
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         switch (key) {
-            case PREFERENCE_TRUSTED_NODE:
+            case PREFERENCE_TRUSTED_NODE: {
                 String node = sharedPreferences.getString(PREFERENCE_TRUSTED_NODE, null);
                 if (node != null) {
                     SyncAdapter.startSync(getActivity());
@@ -128,13 +128,18 @@ public class SettingsFragment
                     SyncAdapter.stopSync(getActivity());
                 }
                 break;
-            case PREFERENCE_SERVER_POW:
-                if (sharedPreferences.getBoolean(PREFERENCE_SERVER_POW, false)) {
-                    SyncAdapter.startPowSync(getActivity());
-                } else {
-                    SyncAdapter.stopPowSync(getActivity());
+            }
+            case PREFERENCE_SERVER_POW: {
+                String node = sharedPreferences.getString(PREFERENCE_TRUSTED_NODE, null);
+                if (node != null) {
+                    if (sharedPreferences.getBoolean(PREFERENCE_SERVER_POW, false)) {
+                        SyncAdapter.startPowSync(getActivity());
+                    } else {
+                        SyncAdapter.stopPowSync(getActivity());
+                    }
                 }
                 break;
+            }
         }
     }
 }

@@ -46,7 +46,7 @@ import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 
 import static ch.dissem.apps.abit.repository.AndroidMessageRepository.LABEL_ARCHIVE;
-import static ch.dissem.apps.abit.util.Strings.normalizeWhitespaces;
+import static ch.dissem.apps.abit.util.Strings.prepareMessageExtract;
 
 /**
  * Adapted from the basic swipeable example by Haruki Hasegawa. See
@@ -182,8 +182,8 @@ public class SwipeableMessageAdapter
         holder.status.setContentDescription(
             holder.status.getContext().getString(Assets.getStatusString(item.getStatus())));
         holder.sender.setText(item.getFrom().toString());
-        holder.subject.setText(normalizeWhitespaces(item.getSubject()));
-        holder.extract.setText(normalizeWhitespaces(item.getText()));
+        holder.subject.setText(prepareMessageExtract(item.getSubject()));
+        holder.extract.setText(prepareMessageExtract(item.getText()));
         if (item.isUnread()) {
             holder.sender.setTypeface(Typeface.DEFAULT_BOLD);
             holder.subject.setTypeface(Typeface.DEFAULT_BOLD);
