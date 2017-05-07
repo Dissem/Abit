@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.util.Preferences;
 import ch.dissem.bitmessage.BitmessageContext;
@@ -30,12 +31,12 @@ public class WifiReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context ctx, Intent intent) {
         if ("android.net.conn.CONNECTIVITY_CHANGE".equals(intent.getAction())) {
-            if (Preferences.isWifiOnly(ctx)) {
-                BitmessageContext bmc = Singleton.getBitmessageContext(ctx);
-
-                if (isConnectedToMeteredNetwork(ctx) && bmc.isRunning()) {
-                    bmc.shutdown();
-                }
+            BitmessageContext bmc = Singleton.getBitmessageContext(ctx);
+            if (Preferences.isWifiOnly(ctx) && isConnectedToMeteredNetwork(ctx) && bmc.isRunning()) {
+                bmc.shutdown();
+            }
+            if (!bmc.isRunning() && !(Preferences.isWifiOnly(ctx) && isConnectedToMeteredNetwork(ctx))) {
+                ctx.startService(new Intent(ctx, BitmessageService.class));
             }
         }
     }

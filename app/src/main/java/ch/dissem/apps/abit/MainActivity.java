@@ -259,6 +259,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onCheckedChanged(IDrawerItem drawerItem, CompoundButton buttonView,
                                              boolean isChecked) {
+                    Preferences.setFullNodeActive(MainActivity.this, isChecked);
                     if (isChecked) {
                         checkAndStartNode();
                     } else {
@@ -386,6 +387,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         updateUnread();
+        if (Preferences.isFullNodeActive(this)){
+            checkAndStartNode();
+        }
         updateNodeSwitch();
         Singleton.getMessageListener(this).resetNotification();
         super.onResume();

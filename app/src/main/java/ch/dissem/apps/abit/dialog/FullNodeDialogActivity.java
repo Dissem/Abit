@@ -17,14 +17,11 @@
 package ch.dissem.apps.abit.dialog;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
 import ch.dissem.apps.abit.R;
-import ch.dissem.apps.abit.service.BitmessageService;
-
-import static ch.dissem.apps.abit.MainActivity.updateNodeSwitch;
+import ch.dissem.apps.abit.util.Preferences;
 
 /**
  * @author Christian Basler
@@ -38,8 +35,7 @@ public class FullNodeDialogActivity extends Activity {
         findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startService(new Intent(FullNodeDialogActivity.this, BitmessageService.class));
-                updateNodeSwitch();
+                Preferences.setWifiOnly(FullNodeDialogActivity.this, true);
                 finish();
             }
         });

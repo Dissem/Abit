@@ -71,11 +71,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
         try {
-            if (account.equals(Authenticator.ACCOUNT_SYNC)) {
+            if (account.equals(ACCOUNT_SYNC)) {
                 if (Preferences.isConnectionAllowed(getContext())) {
                     syncData();
                 }
-            } else if (account.equals(Authenticator.ACCOUNT_POW)) {
+            } else if (account.equals(ACCOUNT_POW)) {
                 syncPOW();
             } else {
                 syncResult.stats.numAuthExceptions++;

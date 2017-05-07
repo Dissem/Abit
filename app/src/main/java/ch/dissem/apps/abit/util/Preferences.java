@@ -27,6 +27,7 @@ import ch.dissem.apps.abit.R;
 import ch.dissem.apps.abit.listener.WifiReceiver;
 import ch.dissem.apps.abit.notification.ErrorNotification;
 
+import static ch.dissem.apps.abit.util.Constants.PREFERENCE_FULL_NODE;
 import static ch.dissem.apps.abit.util.Constants.PREFERENCE_SYNC_TIMEOUT;
 import static ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE;
 import static ch.dissem.apps.abit.util.Constants.PREFERENCE_WIFI_ONLY;
@@ -54,7 +55,7 @@ public class Preferences {
             int index = trustedNode.lastIndexOf(':');
             trustedNode = trustedNode.substring(0, index);
         }
-            return InetAddress.getByName(trustedNode);
+        return InetAddress.getByName(trustedNode);
     }
 
     public static int getTrustedNodePort(Context ctx) {
@@ -69,8 +70,8 @@ public class Preferences {
                 return Integer.parseInt(portString);
             } catch (NumberFormatException e) {
                 new ErrorNotification(ctx)
-                        .setError(R.string.error_invalid_sync_port, portString)
-                        .show();
+                    .setError(R.string.error_invalid_sync_port, portString)
+                    .show();
             }
         }
         return 8444;
@@ -94,5 +95,20 @@ public class Preferences {
     public static boolean isWifiOnly(Context ctx) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
         return preferences.getBoolean(PREFERENCE_WIFI_ONLY, true);
+    }
+
+    public static void setWifiOnly(Context ctx, boolean status) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+        preferences.edit().putBoolean(PREFERENCE_WIFI_ONLY, status).apply();
+    }
+
+    public static boolean isFullNodeActive(Context ctx) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+        return preferences.getBoolean(PREFERENCE_FULL_NODE, false);
+    }
+
+    public static void setFullNodeActive(Context ctx, boolean status) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+        preferences.edit().putBoolean(PREFERENCE_FULL_NODE, status).apply();
     }
 }

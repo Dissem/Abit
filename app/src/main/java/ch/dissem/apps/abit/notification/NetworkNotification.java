@@ -32,7 +32,6 @@ import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.bitmessage.utils.Property;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
-import static ch.dissem.apps.abit.MainActivity.updateNodeSwitch;
 
 /**
  * Shows the network status (as long as the client is connected as a full node)
@@ -63,7 +62,6 @@ public class NetworkNotification extends AbstractNotification {
         Property connections = BitmessageService.getStatus().getProperty("network", "connections");
         if (!running) {
             builder.setContentText(ctx.getString(R.string.connection_info_disconnected));
-            updateNodeSwitch();
         } else if (connections.getProperties().length == 0) {
             builder.setContentText(ctx.getString(R.string.connection_info_pending));
         } else {

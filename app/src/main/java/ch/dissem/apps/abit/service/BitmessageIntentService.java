@@ -57,6 +57,7 @@ public class BitmessageIntentService extends IntentService {
         }
         if (intent.hasExtra(EXTRA_STARTUP_NODE)) {
             if (Preferences.isConnectionAllowed(this)) {
+                Preferences.setFullNodeActive(this, true);
                 startService(new Intent(this, BitmessageService.class));
                 updateNodeSwitch();
             } else {
@@ -67,6 +68,7 @@ public class BitmessageIntentService extends IntentService {
             }
         }
         if (intent.hasExtra(EXTRA_SHUTDOWN_NODE)) {
+            Preferences.setFullNodeActive(this, false);
             stopService(new Intent(this, BitmessageService.class));
         }
     }
