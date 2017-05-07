@@ -160,6 +160,7 @@ public class AddressDetailFragment extends Fragment {
                 shareIntent.setType("text/plain");
                 shareIntent.putExtra(Intent.EXTRA_TEXT, item.getAddress());
                 startActivity(Intent.createChooser(shareIntent, null));
+                return true;
             }
             default:
                 return false;

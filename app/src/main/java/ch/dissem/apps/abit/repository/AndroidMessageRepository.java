@@ -337,7 +337,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
         }
     }
 
-    private void insert(SQLiteDatabase db, Plaintext message) {
+    private ContentValues getValues(Plaintext message) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_IV, message.getInventoryVector() == null ? null : message
             .getInventoryVector().getHash());
@@ -354,28 +354,16 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
         values.put(COLUMN_RETRIES, message.getRetries());
         values.put(COLUMN_NEXT_TRY, message.getNextTry());
         values.put(COLUMN_CONVERSATION, UuidUtils.asBytes(message.getConversationId()));
-        long id = db.insertOrThrow(TABLE_NAME, null, values);
+        return values;
+    }
+
+    private void insert(SQLiteDatabase db, Plaintext message) {
+        long id = db.insertOrThrow(TABLE_NAME, null, getValues(message));
         message.setId(id);
     }
 
     private void update(SQLiteDatabase db, Plaintext message) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_IV, message.getInventoryVector() == null ? null : message
-            .getInventoryVector().getHash());
-        values.put(COLUMN_TYPE, message.getType().name());
-        values.put(COLUMN_SENDER, message.getFrom().getAddress());
-        values.put(COLUMN_RECIPIENT, message.getTo() == null ? null : message.getTo().getAddress());
-        values.put(COLUMN_DATA, Encode.bytes(message));
-        values.put(COLUMN_ACK_DATA, message.getAckData());
-        values.put(COLUMN_SENT, message.getSent());
-        values.put(COLUMN_RECEIVED, message.getReceived());
-        values.put(COLUMN_STATUS, message.getStatus() == null ? null : message.getStatus().name());
-        values.put(COLUMN_INITIAL_HASH, message.getInitialHash());
-        values.put(COLUMN_TTL, message.getTTL());
-        values.put(COLUMN_RETRIES, message.getRetries());
-        values.put(COLUMN_NEXT_TRY, message.getNextTry());
-        values.put(COLUMN_CONVERSATION, UuidUtils.asBytes(message.getConversationId()));
-        db.update(TABLE_NAME, values, "id = " + message.getId(), null);
+        db.update(TABLE_NAME, getValues(message), "id = " + message.getId(), null);
     }
 
     @Override

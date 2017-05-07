@@ -29,7 +29,6 @@ import android.widget.Toast;
 import com.mikepenz.aboutlibraries.Libs;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
-import ch.dissem.apps.abit.repository.AndroidNodeRegistry;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
 import ch.dissem.bitmessage.BitmessageContext;
