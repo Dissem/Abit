@@ -45,6 +45,7 @@ import static android.graphics.Color.BLACK;
 import static android.graphics.Color.WHITE;
 import static android.util.Base64.NO_WRAP;
 import static android.util.Base64.URL_SAFE;
+import static ch.dissem.apps.abit.util.Constants.BITMESSAGE_URL_SCHEMA;
 
 /**
  * Some helper methods to work with drawables.
@@ -73,7 +74,8 @@ public class Drawables {
     }
 
     public static Bitmap qrCode(BitmessageAddress address) {
-        StringBuilder link = new StringBuilder("bitmessage:");
+        StringBuilder link = new StringBuilder();
+        link.append(BITMESSAGE_URL_SCHEMA);
         link.append(address.getAddress());
         if (address.getAlias() != null) {
             link.append("?label=").append(address.getAlias());

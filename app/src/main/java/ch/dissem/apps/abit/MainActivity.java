@@ -387,8 +387,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         updateUnread();
-        if (Preferences.isFullNodeActive(this)){
-            checkAndStartNode();
+        if (Preferences.isFullNodeActive(this) && Preferences.isConnectionAllowed(MainActivity.this)) {
+            startService(new Intent(this, BitmessageService.class));
         }
         updateNodeSwitch();
         Singleton.getMessageListener(this).resetNotification();

@@ -35,7 +35,7 @@ public class FullNodeDialogActivity extends Activity {
         findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Preferences.setWifiOnly(FullNodeDialogActivity.this, true);
+                Preferences.setWifiOnly(FullNodeDialogActivity.this, false);
                 finish();
             }
         });
