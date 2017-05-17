@@ -100,7 +100,7 @@ public class AndroidInventory implements Inventory {
                         while (c.moveToNext()) {
                             byte[] blob = c.getBlob(c.getColumnIndex(COLUMN_HASH));
                             long expires = c.getLong(c.getColumnIndex(COLUMN_EXPIRES));
-                            result.put(new InventoryVector(blob), expires);
+                            result.put(InventoryVector.fromHash(blob), expires);
                         }
                     }
                     LOG.info("Stream #" + stream + " inventory size: " + result.size());

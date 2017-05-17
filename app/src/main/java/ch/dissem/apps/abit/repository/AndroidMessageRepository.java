@@ -272,7 +272,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
                     new ByteArrayInputStream(data));
                 long id = c.getLong(c.getColumnIndex(COLUMN_ID));
                 builder.id(id);
-                builder.IV(new InventoryVector(iv));
+                builder.IV(InventoryVector.fromHash(iv));
                 builder.from(ctx.getAddressRepository().getAddress(c.getString(c.getColumnIndex
                     (COLUMN_SENDER))));
                 builder.to(ctx.getAddressRepository().getAddress(c.getString(c.getColumnIndex

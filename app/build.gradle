@@ -38,7 +38,7 @@ android {
 }
 
 //ext.jabitVersion = '2.0.4'
-ext.jabitVersion = 'feature-extended-encoding-SNAPSHOT'
+ext.jabitVersion = 'development-SNAPSHOT'
 ext.supportVersion = '25.3.1'
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
