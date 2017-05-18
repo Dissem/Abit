@@ -479,7 +479,7 @@ public class MainActivity extends AppCompatActivity
             i.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    i.nodeSwitch.withChecked(i.bmc.isRunning());
+                    i.nodeSwitch.withChecked(Preferences.isFullNodeActive(i));
                     i.drawer.updateStickyFooterItem(i.nodeSwitch);
                 }
             });

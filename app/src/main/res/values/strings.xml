@@ -100,7 +100,7 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="import_input_description">You can just paste the contents of an export or a ‘keys.dat’ file</string>
     <string name="full_node_stop">shutdown node</string>
     <string name="full_node_restart">restart node</string>
-    <string name="startup_node">Startup node</string>
+    <string name="use_mobile_network">Use mobile network</string>
     <string name="personal_message">Message</string>
     <string name="no_identity_warning">Please try again once an identity is available.</string>
     <string name="status_public_key">public key requested</string>
@@ -116,4 +116,5 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="cleanup_summary">Remove outdated inventory entries</string>
     <string name="cleanup_notification_start">Cleanup started</string>
     <string name="cleanup_notification_end">Cleanup finished</string>
+    <string name="wait_for_wifi">Wait for Wi-Fi</string>
 </resources>
