@@ -37,6 +37,7 @@ import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractSwipeableItemView
 import com.h6ah4i.android.widget.advrecyclerview.utils.RecyclerViewAdapterUtils;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import ch.dissem.apps.abit.Identicon;
@@ -59,7 +60,7 @@ public class SwipeableMessageAdapter
     extends RecyclerView.Adapter<SwipeableMessageAdapter.ViewHolder>
     implements SwipeableItemAdapter<SwipeableMessageAdapter.ViewHolder>, SwipeableItemConstants {
 
-    private List<Plaintext> data = Collections.emptyList();
+    private List<Plaintext> data = new LinkedList<>();
     private EventListener eventListener;
     private final View.OnClickListener itemViewOnClickListener;
     private final View.OnClickListener swipeableViewContainerOnClickListener;
@@ -124,9 +125,15 @@ public class SwipeableMessageAdapter
         setHasStableIds(true);
     }
 
-    public void setData(Label label, List<Plaintext> data) {
-        this.label = label;
-        this.data = data;
+    public void add(Plaintext item) {
+        data.add(item);
+        notifyDataSetChanged();
+    }
+
+    public void clear(Label newLabel) {
+        label = newLabel;
+        data.clear();
+        notifyDataSetChanged();
     }
 
     private void onItemViewClick(View v) {

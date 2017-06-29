@@ -102,6 +102,15 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
     }
 
     @NonNull
+    public List<Long> findMessageIds(Label label) {
+        if (label == LABEL_ARCHIVE) {
+            return findIds("id NOT IN (SELECT message_id FROM Message_Label)");
+        } else {
+            return findIds("id IN (SELECT message_id FROM Message_Label WHERE label_id=" + label.getId() + ")");
+        }
+    }
+
+    @NonNull
     public List<Label> findLabels(String where) {
         List<Label> result = new LinkedList<>();
 
@@ -240,6 +249,31 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
     }
 
     @NonNull
+    protected List<Long> findIds(String where) {
+        List<Long> result = new LinkedList<>();
+
+        // Define a projection that specifies which columns from the database
+        // you will actually use after this query.
+        String[] projection = {
+            COLUMN_ID
+        };
+
+        SQLiteDatabase db = sql.getReadableDatabase();
+        try (Cursor c = db.query(
+            TABLE_NAME, projection,
+            where,
+            null, null, null,
+            COLUMN_RECEIVED + " DESC, " + COLUMN_SENT + " DESC"
+        )) {
+            while (c.moveToNext()) {
+                long id = c.getLong(c.getColumnIndex(COLUMN_ID));
+                result.add(id);
+            }
+        }
+        return result;
+    }
+
+    @NonNull
     protected List<Plaintext> find(String where) {
         List<Plaintext> result = new LinkedList<>();
 
@@ -279,10 +313,14 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
                 long id = c.getLong(c.getColumnIndex(COLUMN_ID));
                 builder.id(id);
                 builder.IV(InventoryVector.fromHash(iv));
-                builder.from(ctx.getAddressRepository().getAddress(c.getString(c.getColumnIndex
-                    (COLUMN_SENDER))));
-                builder.to(ctx.getAddressRepository().getAddress(c.getString(c.getColumnIndex
-                    (COLUMN_RECIPIENT))));
+                String sender = c.getString(c.getColumnIndex(COLUMN_SENDER));
+                if (sender != null) {
+                    builder.from(ctx.getAddressRepository().getAddress(sender));
+                }
+                String recipient = c.getString(c.getColumnIndex(COLUMN_RECIPIENT));
+                if (recipient != null) {
+                    builder.to(ctx.getAddressRepository().getAddress(recipient));
+                }
                 builder.ackData(c.getBlob(c.getColumnIndex(COLUMN_ACK_DATA)));
                 builder.sent(c.getLong(c.getColumnIndex(COLUMN_SENT)));
                 builder.received(c.getLong(c.getColumnIndex(COLUMN_RECEIVED)));

@@ -39,12 +39,14 @@ import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchAct
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
 import ch.dissem.apps.abit.adapter.SwipeableMessageAdapter;
 import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
+import ch.dissem.apps.abit.repository.AndroidMessageRepository;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
@@ -77,7 +79,7 @@ public class MessageListFragment extends Fragment implements ListHolder {
 
     private Label currentLabel;
     private MenuItem emptyTrashMenuItem;
-    private MessageRepository messageRepo;
+    private AndroidMessageRepository messageRepo;
     private boolean activateOnItemClick;
 
     @Override
@@ -103,19 +105,15 @@ public class MessageListFragment extends Fragment implements ListHolder {
             return;
         }
 
-        if (!Objects.equals(currentLabel, label)) {
-            adapter.setData(label, Collections.<Plaintext>emptyList());
-            adapter.notifyDataSetChanged();
-        }
         doUpdateList(label);
     }
 
     private void doUpdateList(final Label label) {
+        adapter.clear(label);
         if (label == null) {
             if (getActivity() instanceof ActionBarListener) {
                 ((ActionBarListener) getActivity()).updateTitle(getString(R.string.app_name));
             }
-            adapter.setData(null, Collections.<Plaintext>emptyList());
             adapter.notifyDataSetChanged();
             return;
         }
@@ -131,18 +129,24 @@ public class MessageListFragment extends Fragment implements ListHolder {
                 actionBarListener.updateTitle(label.toString());
             }
         }
-        new AsyncTask<Void, Void, List<Plaintext>>() {
 
+        new AsyncTask<Void, Plaintext, Void>() {
             @Override
-            protected List<Plaintext> doInBackground(Void... params) {
-                return messageRepo.findMessages(label);
+            protected Void doInBackground(Void... params) {
+                List<Long> ids = messageRepo.findMessageIds(label);
+                for (Long id : ids) {
+                    Plaintext message = messageRepo.getMessage(id);
+                    publishProgress(message);
+                }
+                return null;
             }
 
             @Override
-            protected void onPostExecute(List<Plaintext> messages) {
+            protected void onProgressUpdate(Plaintext... values) {
                 if (adapter != null) {
-                    adapter.setData(label, messages);
-                    adapter.notifyDataSetChanged();
+                    for (Plaintext message : values) {
+                        adapter.add(message);
+                    }
                 }
             }
         }.execute();
