@@ -15,9 +15,13 @@ import java.util.UUID;
  * </p>
  */
 public class UuidUtils {
+    /**
+     * @param bytes that represent a UUID, or null for a random UUID
+     * @return the UUID from the given bytes, or a random UUID if bytes is null.
+     */
     public static UUID asUuid(byte[] bytes) {
         if (bytes == null) {
-            return null;
+            return UUID.randomUUID();
         }
         ByteBuffer bb = ByteBuffer.wrap(bytes);
         long firstLong = bb.getLong();

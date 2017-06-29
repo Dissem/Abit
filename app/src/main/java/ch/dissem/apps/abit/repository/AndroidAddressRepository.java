@@ -19,25 +19,26 @@ package ch.dissem.apps.abit.repository;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
-import ch.dissem.bitmessage.entity.BitmessageAddress;
-import ch.dissem.bitmessage.entity.payload.Pubkey;
-import ch.dissem.bitmessage.entity.payload.V3Pubkey;
-import ch.dissem.bitmessage.entity.payload.V4Pubkey;
-import ch.dissem.bitmessage.entity.valueobject.PrivateKey;
-import ch.dissem.bitmessage.factory.Factory;
-import ch.dissem.bitmessage.ports.AddressRepository;
-import ch.dissem.bitmessage.utils.Encode;
+import android.support.annotation.NonNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+
+import ch.dissem.bitmessage.entity.BitmessageAddress;
+import ch.dissem.bitmessage.entity.payload.Pubkey;
+import ch.dissem.bitmessage.entity.payload.V3Pubkey;
+import ch.dissem.bitmessage.entity.payload.V4Pubkey;
+import ch.dissem.bitmessage.entity.valueobject.PrivateKey;
+import ch.dissem.bitmessage.exception.ApplicationException;
+import ch.dissem.bitmessage.factory.Factory;
+import ch.dissem.bitmessage.ports.AddressRepository;
+import ch.dissem.bitmessage.utils.Encode;
 
 /**
  * {@link AddressRepository} implementation using the Android SQL API.
@@ -84,21 +85,25 @@ public class AndroidAddressRepository implements AddressRepository {
         return null;
     }
 
+    @NonNull
     @Override
     public List<BitmessageAddress> getIdentities() {
         return find("private_key IS NOT NULL");
     }
 
+    @NonNull
     @Override
     public List<BitmessageAddress> getChans() {
         return find("chan = '1'");
     }
 
+    @NonNull
     @Override
     public List<BitmessageAddress> getSubscriptions() {
         return find("subscribed = '1'");
     }
 
+    @NonNull
     @Override
     public List<BitmessageAddress> getSubscriptions(long broadcastVersion) {
         if (broadcastVersion > 4) {
@@ -108,11 +113,55 @@ public class AndroidAddressRepository implements AddressRepository {
         }
     }
 
+    @NonNull
     @Override
     public List<BitmessageAddress> getContacts() {
         return find("private_key IS NULL OR chan = '1'");
     }
 
+    /**
+     * Returns the contacts in the following order:
+     * <ul>
+     * <li>Subscribed addresses come first
+     * <li>Addresses with Aliases (alphabetically)
+     * <li>Addresses (alphabetically)
+     * </ul>
+     *
+     * @return the ordered list of ids (address strings)
+     */
+    @NonNull
+    public List<String> getContactIds() {
+        return findIds(
+            "private_key IS NULL OR chan = '1'",
+            COLUMN_SUBSCRIBED + " DESC, " + COLUMN_ALIAS + " IS NULL, " + COLUMN_ALIAS + ", " + COLUMN_ADDRESS
+        );
+    }
+
+    @NonNull
+    private List<String> findIds(String where, String orderBy) {
+        List<String> result = new LinkedList<>();
+
+        // Define a projection that specifies which columns from the database
+        // you will actually use after this query.
+        String[] projection = {
+            COLUMN_ADDRESS
+        };
+
+        SQLiteDatabase db = sql.getReadableDatabase();
+        try (Cursor c = db.query(
+            TABLE_NAME, projection,
+            where,
+            null, null, null,
+            orderBy
+        )) {
+            while (c.moveToNext()) {
+                result.add(c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
+            }
+        }
+        return result;
+    }
+
+    @NonNull
     private List<BitmessageAddress> find(String where) {
         List<BitmessageAddress> result = new LinkedList<>();
 
@@ -161,8 +210,6 @@ public class AndroidAddressRepository implements AddressRepository {
 
                 result.add(address);
             }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
         }
         return result;
     }
@@ -188,61 +235,55 @@ public class AndroidAddressRepository implements AddressRepository {
     }
 
     private void update(BitmessageAddress address) {
-        try {
-            SQLiteDatabase db = sql.getWritableDatabase();
-            // Create a new map of values, where column names are the keys
-            ContentValues values = new ContentValues();
-            if (address.getAlias() != null) {
-                values.put(COLUMN_ALIAS, address.getAlias());
-            }
-            if (address.getPubkey() != null) {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                address.getPubkey().writeUnencrypted(out);
-                values.put(COLUMN_PUBLIC_KEY, out.toByteArray());
-            }
-            if (address.getPrivateKey() != null) {
-                values.put(COLUMN_PRIVATE_KEY, Encode.bytes(address.getPrivateKey()));
-            }
-            if (address.isChan()) {
-                values.put(COLUMN_CHAN, true);
-            }
-            values.put(COLUMN_SUBSCRIBED, address.isSubscribed());
+        SQLiteDatabase db = sql.getWritableDatabase();
+        // Create a new map of values, where column names are the keys
+        ContentValues values = new ContentValues();
+        if (address.getAlias() != null) {
+            values.put(COLUMN_ALIAS, address.getAlias());
+        }
+        if (address.getPubkey() != null) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            address.getPubkey().writeUnencrypted(out);
+            values.put(COLUMN_PUBLIC_KEY, out.toByteArray());
+        }
+        if (address.getPrivateKey() != null) {
+            values.put(COLUMN_PRIVATE_KEY, Encode.bytes(address.getPrivateKey()));
+        }
+        if (address.isChan()) {
+            values.put(COLUMN_CHAN, true);
+        }
+        values.put(COLUMN_SUBSCRIBED, address.isSubscribed());
 
-            int update = db.update(TABLE_NAME, values, "address=?",
-                new String[]{address.getAddress()});
-            if (update < 0) {
-                LOG.error("Could not update address " + address);
-            }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+        int update = db.update(TABLE_NAME, values, "address=?",
+            new String[]{address.getAddress()});
+        if (update < 0) {
+            LOG.error("Could not update address " + address);
         }
     }
 
     private void insert(BitmessageAddress address) {
-        try {
-            SQLiteDatabase db = sql.getWritableDatabase();
-            // Create a new map of values, where column names are the keys
-            ContentValues values = new ContentValues();
-            values.put(COLUMN_ADDRESS, address.getAddress());
-            values.put(COLUMN_VERSION, address.getVersion());
-            values.put(COLUMN_ALIAS, address.getAlias());
-            if (address.getPubkey() != null) {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                address.getPubkey().writeUnencrypted(out);
-                values.put(COLUMN_PUBLIC_KEY, out.toByteArray());
-            } else {
-                values.put(COLUMN_PUBLIC_KEY, (byte[]) null);
-            }
+        SQLiteDatabase db = sql.getWritableDatabase();
+        // Create a new map of values, where column names are the keys
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_ADDRESS, address.getAddress());
+        values.put(COLUMN_VERSION, address.getVersion());
+        values.put(COLUMN_ALIAS, address.getAlias());
+        if (address.getPubkey() != null) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            address.getPubkey().writeUnencrypted(out);
+            values.put(COLUMN_PUBLIC_KEY, out.toByteArray());
+        } else {
+            values.put(COLUMN_PUBLIC_KEY, (byte[]) null);
+        }
+        if (address.getPrivateKey() != null) {
             values.put(COLUMN_PRIVATE_KEY, Encode.bytes(address.getPrivateKey()));
-            values.put(COLUMN_CHAN, address.isChan());
-            values.put(COLUMN_SUBSCRIBED, address.isSubscribed());
+        }
+        values.put(COLUMN_CHAN, address.isChan());
+        values.put(COLUMN_SUBSCRIBED, address.isSubscribed());
 
-            long insert = db.insert(TABLE_NAME, null, values);
-            if (insert < 0) {
-                LOG.error("Could not insert address " + address);
-            }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+        long insert = db.insert(TABLE_NAME, null, values);
+        if (insert < 0) {
+            LOG.error("Could not insert address " + address);
         }
     }
 
@@ -252,10 +293,21 @@ public class AndroidAddressRepository implements AddressRepository {
         db.delete(TABLE_NAME, "address = ?", new String[]{address.getAddress()});
     }
 
+    @NonNull
+    public BitmessageAddress getById(String id) {
+        List<BitmessageAddress> result = find("address = '" + id + "'");
+        if (result.size() > 0) {
+            return result.get(0);
+        } else {
+            throw new ApplicationException("Address with id " + id + " not found.");
+        }
+    }
+
+    @NonNull
     @Override
     public BitmessageAddress getAddress(String address) {
         List<BitmessageAddress> result = find("address = '" + address + "'");
         if (result.size() > 0) return result.get(0);
-        return null;
+        return new BitmessageAddress(address);
     }
 }

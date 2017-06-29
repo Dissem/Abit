@@ -19,6 +19,7 @@ package ch.dissem.apps.abit;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,11 +33,11 @@ import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 import ch.dissem.apps.abit.listener.ActionBarListener;
+import ch.dissem.apps.abit.repository.AndroidAddressRepository;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.valueobject.Label;
@@ -47,6 +48,46 @@ import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
  * Fragment that shows a list of all contacts, the ones we subscribed to first.
  */
 public class AddressListFragment extends AbstractItemListFragment<BitmessageAddress> {
+    private ArrayAdapter<BitmessageAddress> adapter;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        adapter = new ArrayAdapter<BitmessageAddress>(
+            getActivity(),
+            R.layout.subscription_row,
+            R.id.name,
+            new LinkedList<BitmessageAddress>()) {
+            @NonNull
+            @Override
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+                ViewHolder v;
+                if (convertView == null) {
+                    LayoutInflater inflater = LayoutInflater.from(getContext());
+                    convertView = inflater.inflate(R.layout.subscription_row, parent, false);
+                    v = new ViewHolder();
+                    v.ctx = getContext();
+                    v.avatar = (ImageView) convertView.findViewById(R.id.avatar);
+                    v.name = (TextView) convertView.findViewById(R.id.name);
+                    v.streamNumber = (TextView) convertView.findViewById(R.id.stream_number);
+                    v.subscribed = convertView.findViewById(R.id.subscribed);
+                    convertView.setTag(v);
+                } else {
+                    v = (ViewHolder) convertView.getTag();
+                }
+                BitmessageAddress item = getItem(position);
+                assert item != null;
+                v.avatar.setImageDrawable(new Identicon(item));
+                v.name.setText(item.toString());
+                v.streamNumber.setText(v.ctx.getString(R.string.stream_number, item.getStream()));
+                v.subscribed.setVisibility(item.isSubscribed() ? View.VISIBLE : View.INVISIBLE);
+                return convertView;
+            }
+        };
+        setListAdapter(adapter);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -55,61 +96,26 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
     }
 
     public void updateList() {
-        List<BitmessageAddress> addresses = Singleton.getAddressRepository(getContext())
-            .getContacts();
-        Collections.sort(addresses, new Comparator<BitmessageAddress>() {
+        adapter.clear();
+        final AndroidAddressRepository addressRepo = Singleton.getAddressRepository(getContext());
+        new AsyncTask<Void, BitmessageAddress, Void>() {
             @Override
-            public int compare(BitmessageAddress lhs, BitmessageAddress rhs) {
-                // Yields the following order:
-                // * Subscribed addresses come first
-                // * Addresses with Aliases (alphabetically)
-                // * Addresses (alphabetically)
-                if (lhs.isSubscribed() == rhs.isSubscribed()) {
-                    if (lhs.getAlias() != null) {
-                        if (rhs.getAlias() != null) {
-                            return lhs.getAlias().compareTo(rhs.getAlias());
-                        } else {
-                            return -1;
-                        }
-                    } else if (rhs.getAlias() != null) {
-                        return 1;
-                    } else {
-                        return lhs.getAddress().compareTo(rhs.getAddress());
-                    }
+            protected Void doInBackground(Void... params) {
+                List<String> ids = addressRepo.getContactIds();
+                for (String id : ids) {
+                    BitmessageAddress address = addressRepo.getById(id);
+                    publishProgress(address);
                 }
-                if (lhs.isSubscribed()) {
-                    return -1;
-                } else {
-                    return 1;
+                return null;
+            }
+
+            @Override
+            protected void onProgressUpdate(BitmessageAddress... values) {
+                for (BitmessageAddress address : values) {
+                    adapter.add(address);
                 }
             }
-        });
-        setListAdapter(new ArrayAdapter<BitmessageAddress>(
-            getActivity(),
-            android.R.layout.simple_list_item_activated_1,
-            android.R.id.text1,
-            addresses) {
-            @NonNull
-            @Override
-            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-                if (convertView == null) {
-                    LayoutInflater inflater = LayoutInflater.from(getContext());
-                    convertView = inflater.inflate(R.layout.subscription_row, parent, false);
-                }
-                BitmessageAddress item = getItem(position);
-                assert item != null;
-                ((ImageView) convertView.findViewById(R.id.avatar)).setImageDrawable(new
-                    Identicon(item));
-                TextView name = (TextView) convertView.findViewById(R.id.name);
-                name.setText(item.toString());
-                TextView streamNumber = (TextView) convertView.findViewById(R.id.stream_number);
-                streamNumber.setText(getContext().getString(R.string.stream_number,
-                    item.getStream()));
-                convertView.findViewById(R.id.subscribed).setVisibility(item.isSubscribed() ?
-                    View.VISIBLE : View.INVISIBLE);
-                return convertView;
-            }
-        });
+        }.execute();
     }
 
     @Override
@@ -162,5 +168,13 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
     @Override
     public void updateList(Label label) {
         updateList();
+    }
+
+    private static class ViewHolder {
+        private Context ctx;
+        private ImageView avatar;
+        private TextView name;
+        private TextView streamNumber;
+        private View subscribed;
     }
 }

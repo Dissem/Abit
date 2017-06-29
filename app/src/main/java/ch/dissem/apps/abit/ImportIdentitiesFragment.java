@@ -52,21 +52,19 @@ public class ImportIdentitiesFragment extends Fragment {
         String wifData = getArguments().getString(WIF_DATA);
         BitmessageContext bmc = Singleton.getBitmessageContext(getActivity());
         View view = inflater.inflate(R.layout.fragment_import_select_identities, container, false);
-        try {
-            importer = new WifImporter(bmc, wifData);
-            adapter = new AddressSelectorAdapter(importer.getIdentities());
-            LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(),
-                LinearLayoutManager.VERTICAL,
-                false);
-            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-            recyclerView.setLayoutManager(layoutManager);
-            recyclerView.setAdapter(adapter);
 
-            recyclerView.addItemDecoration(new SimpleListDividerDecorator(
-                ContextCompat.getDrawable(getActivity(), R.drawable.list_divider_h), true));
-        } catch (IOException e) {
-            return super.onCreateView(inflater, container, savedInstanceState);
-        }
+        importer = new WifImporter(bmc, wifData);
+        adapter = new AddressSelectorAdapter(importer.getIdentities());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(),
+            LinearLayoutManager.VERTICAL,
+            false);
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(adapter);
+
+        recyclerView.addItemDecoration(new SimpleListDividerDecorator(
+            ContextCompat.getDrawable(getActivity(), R.drawable.list_divider_h), true));
+
         view.findViewById(R.id.finish).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

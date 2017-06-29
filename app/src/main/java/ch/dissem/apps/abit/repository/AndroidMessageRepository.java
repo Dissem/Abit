@@ -22,12 +22,12 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -91,6 +91,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
         this.context = ctx;
     }
 
+    @NonNull
     @Override
     public List<Plaintext> findMessages(Label label) {
         if (label == LABEL_ARCHIVE) {
@@ -100,6 +101,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
         }
     }
 
+    @NonNull
     public List<Label> findLabels(String where) {
         List<Label> result = new LinkedList<>();
 
@@ -156,7 +158,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
         } else {
             where = "id IN (SELECT message_id FROM Message_Label WHERE label_id=?) AND ";
             args = new String[]{
-                label.getId().toString(),
+                String.valueOf(label.getId()),
                 Label.Type.UNREAD.name()
             };
         }
@@ -168,6 +170,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
         );
     }
 
+    @NonNull
     @Override
     public List<UUID> findConversations(Label label) {
         String[] projection = {
@@ -202,20 +205,22 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
             return;
         }
         byte[] childIV = message.getInventoryVector().getHash();
-        db.delete(PARENTS_TABLE_NAME, "child=?", new String[]{hex(childIV).toString()});
+        db.delete(PARENTS_TABLE_NAME, "child=?", new String[]{hex(childIV)});
 
         // save new parents
         int order = 0;
         for (InventoryVector parentIV : message.getParents()) {
             Plaintext parent = getMessage(parentIV);
-            mergeConversations(db, parent.getConversationId(), message.getConversationId());
-            order++;
-            ContentValues values = new ContentValues();
-            values.put("parent", parentIV.getHash());
-            values.put("child", childIV);
-            values.put("pos", order);
-            values.put("conversation", UuidUtils.asBytes(message.getConversationId()));
-            db.insertOrThrow(PARENTS_TABLE_NAME, null, values);
+            if (parent != null) {
+                mergeConversations(db, parent.getConversationId(), message.getConversationId());
+                order++;
+                ContentValues values = new ContentValues();
+                values.put("parent", parentIV.getHash());
+                values.put("child", childIV);
+                values.put("pos", order);
+                values.put("conversation", UuidUtils.asBytes(message.getConversationId()));
+                db.insertOrThrow(PARENTS_TABLE_NAME, null, values);
+            }
         }
     }
 
@@ -229,11 +234,12 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
     private void mergeConversations(SQLiteDatabase db, UUID source, UUID target) {
         ContentValues values = new ContentValues();
         values.put("conversation", UuidUtils.asBytes(target));
-        String[] whereArgs = {hex(UuidUtils.asBytes(source)).toString()};
+        String[] whereArgs = {hex(UuidUtils.asBytes(source))};
         db.update(TABLE_NAME, values, "conversation=?", whereArgs);
         db.update(PARENTS_TABLE_NAME, values, "conversation=?", whereArgs);
     }
 
+    @NonNull
     protected List<Plaintext> find(String where) {
         List<Plaintext> result = new LinkedList<>();
 
@@ -292,8 +298,6 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
                 builder.labels(findLabels(id));
                 result.add(builder.build());
             }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
         }
         return result;
     }
@@ -348,7 +352,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
         values.put(COLUMN_ACK_DATA, message.getAckData());
         values.put(COLUMN_SENT, message.getSent());
         values.put(COLUMN_RECEIVED, message.getReceived());
-        values.put(COLUMN_STATUS, message.getStatus() == null ? null : message.getStatus().name());
+        values.put(COLUMN_STATUS, message.getStatus().name());
         values.put(COLUMN_INITIAL_HASH, message.getInitialHash());
         values.put(COLUMN_TTL, message.getTTL());
         values.put(COLUMN_RETRIES, message.getRetries());

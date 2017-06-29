@@ -20,6 +20,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +66,7 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository, Inte
         this.bmc = internalContext;
     }
 
+    @NonNull
     @Override
     public Item getItem(byte[] initialHash) {
         // Define a projection that specifies which columns from the database
@@ -111,6 +113,7 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository, Inte
             hex(initialHash));
     }
 
+    @NonNull
     @Override
     public List<byte[]> getItems() {
         // Define a projection that specifies which columns from the database
@@ -139,14 +142,14 @@ public class AndroidProofOfWorkRepository implements ProofOfWorkRepository, Inte
             SQLiteDatabase db = sql.getWritableDatabase();
             // Create a new map of values, where column names are the keys
             ContentValues values = new ContentValues();
-            values.put(COLUMN_INITIAL_HASH, cryptography().getInitialHash(item.object));
-            values.put(COLUMN_DATA, Encode.bytes(item.object));
-            values.put(COLUMN_VERSION, item.object.getVersion());
-            values.put(COLUMN_NONCE_TRIALS_PER_BYTE, item.nonceTrialsPerByte);
-            values.put(COLUMN_EXTRA_BYTES, item.extraBytes);
-            if (item.message != null) {
-                values.put(COLUMN_EXPIRATION_TIME, item.expirationTime);
-                values.put(COLUMN_MESSAGE_ID, (Long) item.message.getId());
+            values.put(COLUMN_INITIAL_HASH, cryptography().getInitialHash(item.getObjectMessage()));
+            values.put(COLUMN_DATA, Encode.bytes(item.getObjectMessage()));
+            values.put(COLUMN_VERSION, item.getObjectMessage().getVersion());
+            values.put(COLUMN_NONCE_TRIALS_PER_BYTE, item.getNonceTrialsPerByte());
+            values.put(COLUMN_EXTRA_BYTES, item.getExtraBytes());
+            if (item.getMessage() != null) {
+                values.put(COLUMN_EXPIRATION_TIME, item.getExpirationTime());
+                values.put(COLUMN_MESSAGE_ID, (Long) item.getMessage().getId());
             }
 
             db.insertOrThrow(TABLE_NAME, null, values);

@@ -100,7 +100,7 @@ public class BitmessageService extends Service {
         if (bmc != null) {
             return bmc.status();
         } else {
-            return new Property("bitmessage context", null);
+            return new Property("bitmessage context");
         }
     }
 }

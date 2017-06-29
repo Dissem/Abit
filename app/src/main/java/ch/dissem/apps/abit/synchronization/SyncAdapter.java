@@ -109,6 +109,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         LOG.info("Looking for completed POW");
 
         BitmessageAddress identity = Singleton.getIdentity(getContext());
+        @SuppressWarnings("ConstantConditions")
         byte[] privateKey = identity.getPrivateKey().getPrivateEncryptionKey();
         byte[] signingKey = cryptography().createPublicKey(identity.getPublicDecryptionKey());
         ProofOfWorkRequest.Reader reader = new ProofOfWorkRequest.Reader(identity);
@@ -116,8 +117,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         List<byte[]> items = powRepo.getItems();
         for (byte[] initialHash : items) {
             ProofOfWorkRepository.Item item = powRepo.getItem(initialHash);
-            byte[] target = cryptography().getProofOfWorkTarget(item.object, item
-                .nonceTrialsPerByte, item.extraBytes);
+            byte[] target = cryptography().getProofOfWorkTarget(item.getObjectMessage(), item.getNonceTrialsPerByte(), item.getExtraBytes());
             CryptoCustomMessage<ProofOfWorkRequest> cryptoMsg = new CryptoCustomMessage<>(
                 new ProofOfWorkRequest(identity, initialHash, CALCULATE, target));
             cryptoMsg.signAndEncrypt(identity, signingKey);

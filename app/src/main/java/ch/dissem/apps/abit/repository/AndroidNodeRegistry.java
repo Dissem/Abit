@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDoneException;
 import android.database.sqlite.SQLiteStatement;
+import android.support.annotation.NonNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,7 @@ public class AndroidNodeRegistry implements NodeRegistry {
 
     private void cleanUp() {
         SQLiteDatabase db = sql.getWritableDatabase();
-        db.delete(TABLE_NAME, "time < ?", new String[]{valueOf(now(-28 * DAY))});
+        db.delete(TABLE_NAME, "time < ?", new String[]{valueOf(now() - 28 * DAY)});
     }
 
     @Override
@@ -82,6 +83,7 @@ public class AndroidNodeRegistry implements NodeRegistry {
         }
     }
 
+    @NonNull
     @Override
     public List<NetworkAddress> getKnownAddresses(int limit, long... streams) {
         String[] projection = {
@@ -97,7 +99,7 @@ public class AndroidNodeRegistry implements NodeRegistry {
         try (Cursor c = db.query(
             TABLE_NAME, projection,
             "stream IN (?)",
-            new String[]{SqlStrings.join(streams).toString()},
+            new String[]{SqlStrings.join(streams)},
             null, null,
             "time DESC",
             valueOf(limit)
@@ -140,7 +142,7 @@ public class AndroidNodeRegistry implements NodeRegistry {
         try {
             cleanUp();
             for (NetworkAddress node : nodes) {
-                if (node.getTime() < now(+5 * MINUTE) && node.getTime() > now(-28 * DAY)) {
+                if (node.getTime() < now() + 5 * MINUTE && node.getTime() > now() - 28 * DAY) {
                     synchronized (this) {
                         Long existing = loadExistingTime(node);
                         if (existing == null) {

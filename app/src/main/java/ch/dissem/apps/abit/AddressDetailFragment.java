@@ -70,9 +70,6 @@ public class AddressDetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments().containsKey(ARG_ITEM)) {
-            // Load the dummy content specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load content from a content provider.
             item = (BitmessageAddress) getArguments().getSerializable(ARG_ITEM);
         }
         setHasOptionsMenu(true);

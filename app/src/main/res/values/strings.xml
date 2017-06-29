@@ -65,7 +65,7 @@
     <string name="pubkey_available">Public key available</string>
     <string name="pubkey_not_available">Public key not yet available</string>
     <string name="alt_qr_code">QR code</string>
-    <string name="add_identity_warning">Having more identities will reequire more resources. If you are sure you want to add an identity, please select what exactly you want to do:</string>
+    <string name="add_identity_warning">Having more identities will require more resources. If you are sure you want to add an identity, please select what exactly you want to do:</string>
     <string name="share">Share</string>
     <string name="delete_identity_warning">Are you sure you want to delete this identity? You won\'t be able to receive any messages sent to this address and can\'t undo this operation.</string>
     <string name="delete_contact_warning">Are you sure you want to delete this contact?</string>

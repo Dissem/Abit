@@ -499,14 +499,13 @@ public class MainActivity extends AppCompatActivity
             Bundle arguments = new Bundle();
             arguments.putSerializable(MessageDetailFragment.ARG_ITEM, item);
             Fragment fragment;
-            if (item instanceof Plaintext)
+            if (item instanceof Plaintext) {
                 fragment = new MessageDetailFragment();
-            else if (item instanceof BitmessageAddress)
+            } else if (item instanceof String) {
                 fragment = new AddressDetailFragment();
-            else
-                throw new IllegalArgumentException("Plaintext or BitmessageAddress expected, but " +
-                    "was "
-                    + item.getClass().getSimpleName());
+            } else {
+                throw new IllegalArgumentException("Plaintext or BitmessageAddress expected, but was " + item.getClass().getSimpleName());
+            }
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                 .replace(R.id.message_detail_container, fragment)
@@ -518,7 +517,7 @@ public class MainActivity extends AppCompatActivity
             if (item instanceof Plaintext) {
                 detailIntent = new Intent(this, MessageDetailActivity.class);
                 detailIntent.putExtra(EXTRA_SHOW_LABEL, selectedLabel);
-            } else if (item instanceof BitmessageAddress) {
+            } else if (item instanceof String) {
                 detailIntent = new Intent(this, AddressDetailActivity.class);
             } else {
                 throw new IllegalArgumentException("Plaintext or BitmessageAddress expected, but " +

@@ -99,12 +99,12 @@ public class Singleton {
         return messageListener;
     }
 
-    public static MessageRepository getMessageRepository(Context ctx) {
-        return getBitmessageContext(ctx).messages();
+    public static AndroidMessageRepository getMessageRepository(Context ctx) {
+        return (AndroidMessageRepository) getBitmessageContext(ctx).messages();
     }
 
-    public static AddressRepository getAddressRepository(Context ctx) {
-        return getBitmessageContext(ctx).addresses();
+    public static AndroidAddressRepository getAddressRepository(Context ctx) {
+        return (AndroidAddressRepository) getBitmessageContext(ctx).addresses();
     }
 
     public static ProofOfWorkRepository getProofOfWorkRepository(Context ctx) {
