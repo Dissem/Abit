@@ -85,16 +85,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingsActivity"
-            android:label="@string/settings"
-            android:parentActivityName=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MANAGE_NETWORK_USAGE"/>
-
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".CreateAddressActivity"
             android:label="@string/title_activity_open_bitmessage_link"
             android:theme="@style/Theme.AppCompat.Light.Dialog">
@@ -182,10 +172,10 @@
         <activity
             android:name=".StatusActivity"
             android:label="@string/title_activity_status"
-            android:parentActivityName=".SettingsActivity">
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".SettingsActivity"/>
+                android:value=".MainActivity"/>
         </activity>
     </application>
 

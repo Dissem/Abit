@@ -16,11 +16,16 @@
 
 package ch.dissem.apps.abit.repository;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.UUID;
+
 import ch.dissem.apps.abit.util.Assets;
+import ch.dissem.apps.abit.util.UuidUtils;
 
 /**
  * Handles database migration and provides access.
@@ -63,10 +68,35 @@ public class SqlHelper extends SQLiteOpenHelper {
                 executeMigration(db, "V3.4__Add_label_outbox");
             case 6:
                 executeMigration(db, "V4.0__Create_table_message_parent");
+            case 7:
+                setMissingConversationIds(db);
             default:
                 // Nothing to do. Let's assume we won't upgrade from a version that's newer than
                 // DATABASE_VERSION.
         }
+    }
+
+    /**
+     * Set UUIDs for all messages that have no conversation ID
+     */
+    private void setMissingConversationIds(SQLiteDatabase db) {
+        try (Cursor c = db.query(
+            "Message", new String[]{"id"},
+            "conversation IS NULL",
+            null, null, null, null
+        )) {
+            while (c.moveToNext()) {
+                long id = c.getLong(0);
+                setMissingConversationId(id, db);
+            }
+        }
+
+    }
+
+    private void setMissingConversationId(long id, SQLiteDatabase db) {
+        ContentValues values = new ContentValues(1);
+        values.put("conversation", UuidUtils.asBytes(UUID.randomUUID()));
+        db.update("Message", values, "id=?", new String[]{String.valueOf(id)});
     }
 
     private void executeMigration(SQLiteDatabase db, String name) {

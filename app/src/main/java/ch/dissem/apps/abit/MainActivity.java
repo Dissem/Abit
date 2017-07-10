@@ -21,6 +21,7 @@ import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -195,11 +196,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     private <F extends Fragment & ListHolder> void changeList(F listFragment) {
-        getSupportFragmentManager()
-            .beginTransaction()
-            .replace(R.id.item_list, listFragment)
-            .addToBackStack(null)
-            .commit();
+
+        FragmentTransaction transaction = getSupportFragmentManager()
+            .beginTransaction();
+        transaction.replace(R.id.item_list, listFragment);
+        Fragment detailFragment = getSupportFragmentManager().findFragmentById(R.id.message_detail_container);
+        if (detailFragment != null) {
+            transaction.remove(detailFragment);
+        }
+        transaction.addToBackStack(null).commit();
 
         if (twoPane) {
             // In two-pane mode, list items should be given the
@@ -325,15 +330,31 @@ public class MainActivity extends AppCompatActivity
         }.execute();
     }
 
+    @Override
+    public void onBackPressed() {
+        Fragment listFragment = getSupportFragmentManager().findFragmentById(R.id.item_list);
+        if (listFragment instanceof ListHolder) {
+            ListHolder listHolder = (ListHolder) listFragment;
+            if (listHolder.showPreviousList()) {
+                IDrawerItem drawerItem = drawer.getDrawerItem(listHolder.getCurrentLabel());
+                if (drawerItem != null){
+                    drawer.setSelection(drawerItem);
+                }
+                return;
+            }
+        }
+        super.onBackPressed();
+    }
+
     private class DrawerItemClickListener implements Drawer.OnDrawerItemClickListener {
         @Override
         public boolean onItemClick(View view, int position, IDrawerItem item) {
+            Fragment itemList = getSupportFragmentManager().findFragmentById(R.id.item_list);
             if (item.getTag() instanceof Label) {
                 selectedLabel = (Label) item.getTag();
-                if (getSupportFragmentManager().findFragmentById(R.id.item_list) instanceof
+                if (itemList instanceof
                     MessageListFragment) {
-                    ((MessageListFragment) getSupportFragmentManager()
-                        .findFragmentById(R.id.item_list)).updateList(selectedLabel);
+                    ((MessageListFragment) itemList).updateList(selectedLabel);
                 } else {
                     MessageListFragment listFragment = new MessageListFragment();
                     changeList(listFragment);
@@ -344,17 +365,18 @@ public class MainActivity extends AppCompatActivity
                 Nameable<?> ni = (Nameable<?>) item;
                 switch (ni.getName().getTextRes()) {
                     case R.string.contacts_and_subscriptions:
-                        if (!(getSupportFragmentManager().findFragmentById(R.id
-                            .item_list) instanceof AddressListFragment)) {
+                        if (!(itemList instanceof AddressListFragment)) {
                             changeList(new AddressListFragment());
                         } else {
-                            ((AddressListFragment) getSupportFragmentManager()
-                                .findFragmentById(R.id.item_list)).updateList();
+                            ((AddressListFragment) itemList).updateList();
                         }
                         return false;
                     case R.string.settings:
-                        startActivity(new Intent(MainActivity.this, SettingsActivity
-                            .class));
+                        getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.item_list, new SettingsFragment())
+                            .addToBackStack(null)
+                            .commit();
                         return false;
                     case R.string.full_node:
                         return true;
@@ -501,7 +523,7 @@ public class MainActivity extends AppCompatActivity
             Fragment fragment;
             if (item instanceof Plaintext) {
                 fragment = new MessageDetailFragment();
-            } else if (item instanceof String) {
+            } else if (item instanceof BitmessageAddress) {
                 fragment = new AddressDetailFragment();
             } else {
                 throw new IllegalArgumentException("Plaintext or BitmessageAddress expected, but was " + item.getClass().getSimpleName());
@@ -517,7 +539,7 @@ public class MainActivity extends AppCompatActivity
             if (item instanceof Plaintext) {
                 detailIntent = new Intent(this, MessageDetailActivity.class);
                 detailIntent.putExtra(EXTRA_SHOW_LABEL, selectedLabel);
-            } else if (item instanceof String) {
+            } else if (item instanceof BitmessageAddress) {
                 detailIntent = new Intent(this, AddressDetailActivity.class);
             } else {
                 throw new IllegalArgumentException("Plaintext or BitmessageAddress expected, but " +
@@ -526,6 +548,18 @@ public class MainActivity extends AppCompatActivity
             }
             detailIntent.putExtra(MessageDetailFragment.ARG_ITEM, item);
             startActivity(detailIntent);
+        }
+    }
+
+    public boolean hasDetailPane() {
+        return twoPane;
+    }
+
+    public void setDetailView(Fragment fragment) {
+        if (twoPane) {
+            getSupportFragmentManager().beginTransaction()
+                .replace(R.id.message_detail_container, fragment)
+                .commit();
         }
     }
 

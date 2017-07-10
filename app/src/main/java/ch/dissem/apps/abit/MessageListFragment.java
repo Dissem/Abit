@@ -38,10 +38,8 @@ import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeMana
 import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
 
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Stack;
 
 import ch.dissem.apps.abit.adapter.SwipeableMessageAdapter;
 import ch.dissem.apps.abit.listener.ActionBarListener;
@@ -51,7 +49,6 @@ import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
-import ch.dissem.bitmessage.ports.MessageRepository;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
 
@@ -68,7 +65,7 @@ import static ch.dissem.apps.abit.MessageDetailFragment.isInTrash;
  * Activities containing this fragment MUST implement the {@link ListSelectionListener}
  * interface.
  */
-public class MessageListFragment extends Fragment implements ListHolder {
+public class MessageListFragment extends Fragment implements ListHolder<Label> {
 
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
@@ -81,6 +78,8 @@ public class MessageListFragment extends Fragment implements ListHolder {
     private MenuItem emptyTrashMenuItem;
     private AndroidMessageRepository messageRepo;
     private boolean activateOnItemClick;
+
+    private Stack<Label> backStack = new Stack<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -95,11 +94,18 @@ public class MessageListFragment extends Fragment implements ListHolder {
         MainActivity activity = (MainActivity) getActivity();
         messageRepo = Singleton.getMessageRepository(activity);
 
-        doUpdateList(activity.getSelectedLabel());
+        if (backStack.isEmpty()) {
+            doUpdateList(activity.getSelectedLabel());
+        } else {
+            doUpdateList(backStack.peek());
+        }
     }
 
     @Override
     public void updateList(Label label) {
+        if (currentLabel != null && !currentLabel.equals(label)) {
+            backStack.push(currentLabel);
+        }
         if (!isResumed()) {
             currentLabel = label;
             return;
@@ -329,5 +335,20 @@ public class MessageListFragment extends Fragment implements ListHolder {
             adapter.setActivateOnItemClick(activateOnItemClick);
         }
         this.activateOnItemClick = activateOnItemClick;
+    }
+
+    @Override
+    public boolean showPreviousList() {
+        if (backStack.isEmpty()) {
+            return false;
+        } else {
+            doUpdateList(backStack.pop());
+            return true;
+        }
+    }
+
+    @Override
+    public Label getCurrentLabel() {
+        return currentLabel;
     }
 }

@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <!--
-    <ListPreference
-            android:key="wifi_mode"
-            android:title="@string/wifi_mode"
-            android:dialogTitle="@string/wifi_mode"
-            android:entries="@array/connection_modes"
-            android:entryValues="@array/connection_mode_values"/>
-    -->
-    <SwitchPreference
+    <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="wifi_only"
         android:summary="@string/wifi_only_summary"
@@ -24,7 +16,7 @@
         android:key="sync_timeout"
         android:summary="@string/sync_timeout_summary"
         android:title="@string/sync_timeout"/>
-    <SwitchPreference
+    <SwitchPreferenceCompat
         android:defaultValue="false"
         android:dependency="trusted_node"
         android:key="server_pow"

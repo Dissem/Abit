@@ -1,5 +1,5 @@
-apply plugin: 'idea'
 apply plugin: 'com.android.application'
+apply plugin: 'idea'
 
 ext {
     appName = "Abit"
@@ -44,6 +44,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     compile "com.android.support:appcompat-v7:$supportVersion"
+    compile "com.android.support:preference-v7:$supportVersion"
     compile "com.android.support:support-v4:$supportVersion"
     compile "com.android.support:design:$supportVersion"
     compile "com.android.support:multidex:1.0.1"

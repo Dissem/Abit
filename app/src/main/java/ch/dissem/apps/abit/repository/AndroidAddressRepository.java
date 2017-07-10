@@ -303,11 +303,10 @@ public class AndroidAddressRepository implements AddressRepository {
         }
     }
 
-    @NonNull
     @Override
     public BitmessageAddress getAddress(String address) {
         List<BitmessageAddress> result = find("address = '" + address + "'");
         if (result.size() > 0) return result.get(0);
-        return new BitmessageAddress(address);
+        return null;
     }
 }

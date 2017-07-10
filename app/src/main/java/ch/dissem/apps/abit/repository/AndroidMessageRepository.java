@@ -35,6 +35,7 @@ import java.util.UUID;
 
 import ch.dissem.apps.abit.util.Labels;
 import ch.dissem.apps.abit.util.UuidUtils;
+import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.InventoryVector;
 import ch.dissem.bitmessage.entity.valueobject.Label;
@@ -154,29 +155,30 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
 
     @Override
     public int countUnread(Label label) {
-        String[] args;
-        String where;
-        if (label == null) {
-            return 0;
-        }
         if (label == LABEL_ARCHIVE) {
-            where = "";
-            args = new String[]{
-                Label.Type.UNREAD.name()
-            };
+            return 0;
+        } else if (label == null) {
+            return (int) DatabaseUtils.queryNumEntries(
+                sql.getReadableDatabase(),
+                TABLE_NAME,
+                "id IN (SELECT message_id FROM Message_Label WHERE label_id IN (SELECT id FROM Label WHERE type=?))",
+                new String[]{
+                    String.valueOf(label.getId()),
+                    Label.Type.UNREAD.name()
+                }
+            );
         } else {
-            where = "id IN (SELECT message_id FROM Message_Label WHERE label_id=?) AND ";
-            args = new String[]{
-                String.valueOf(label.getId()),
-                Label.Type.UNREAD.name()
-            };
+            return (int) DatabaseUtils.queryNumEntries(
+                sql.getReadableDatabase(),
+                TABLE_NAME,
+                "        id IN (SELECT message_id FROM Message_Label WHERE label_id=?) " +
+                    "AND id IN (SELECT message_id FROM Message_Label WHERE label_id IN (SELECT id FROM Label WHERE type=?))",
+                new String[]{
+                    String.valueOf(label.getId()),
+                    Label.Type.UNREAD.name()
+                }
+            );
         }
-        SQLiteDatabase db = sql.getReadableDatabase();
-        return (int) DatabaseUtils.queryNumEntries(db, TABLE_NAME,
-            where + "id IN (SELECT message_id FROM Message_Label WHERE label_id IN (" +
-                "SELECT id FROM Label WHERE type=?))",
-            args
-        );
     }
 
     @NonNull
@@ -249,7 +251,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
     }
 
     @NonNull
-    protected List<Long> findIds(String where) {
+    private List<Long> findIds(String where) {
         List<Long> result = new LinkedList<>();
 
         // Define a projection that specifies which columns from the database
@@ -266,7 +268,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
             COLUMN_RECEIVED + " DESC, " + COLUMN_SENT + " DESC"
         )) {
             while (c.moveToNext()) {
-                long id = c.getLong(c.getColumnIndex(COLUMN_ID));
+                long id = c.getLong(0);
                 result.add(id);
             }
         }
@@ -315,11 +317,21 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
                 builder.IV(InventoryVector.fromHash(iv));
                 String sender = c.getString(c.getColumnIndex(COLUMN_SENDER));
                 if (sender != null) {
-                    builder.from(ctx.getAddressRepository().getAddress(sender));
+                    BitmessageAddress address = ctx.getAddressRepository().getAddress(sender);
+                    if (address != null) {
+                        builder.from(address);
+                    } else {
+                        builder.from(new BitmessageAddress(sender));
+                    }
                 }
                 String recipient = c.getString(c.getColumnIndex(COLUMN_RECIPIENT));
                 if (recipient != null) {
-                    builder.to(ctx.getAddressRepository().getAddress(recipient));
+                    BitmessageAddress address = ctx.getAddressRepository().getAddress(recipient);
+                    if (address != null) {
+                        builder.to(address);
+                    } else {
+                        builder.to(new BitmessageAddress(sender));
+                    }
                 }
                 builder.ackData(c.getBlob(c.getColumnIndex(COLUMN_ACK_DATA)));
                 builder.sent(c.getLong(c.getColumnIndex(COLUMN_SENT)));
@@ -405,7 +417,7 @@ public class AndroidMessageRepository extends AbstractMessageRepository {
     }
 
     private void update(SQLiteDatabase db, Plaintext message) {
-        db.update(TABLE_NAME, getValues(message), "id = " + message.getId(), null);
+        db.update(TABLE_NAME, getValues(message), "id=?", new String[]{valueOf(message.getId())});
     }
 
     @Override

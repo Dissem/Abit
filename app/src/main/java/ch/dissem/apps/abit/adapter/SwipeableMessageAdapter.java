@@ -30,13 +30,11 @@ import android.widget.TextView;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemConstants;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultAction;
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.action
-    .SwipeResultActionMoveToSwipedDirection;
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultActionMoveToSwipedDirection;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultActionRemoveItem;
 import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractSwipeableItemViewHolder;
 import com.h6ah4i.android.widget.advrecyclerview.utils.RecyclerViewAdapterUtils;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -66,7 +64,7 @@ public class SwipeableMessageAdapter
     private final View.OnClickListener swipeableViewContainerOnClickListener;
 
     private Label label;
-    private int selectedPosition;
+    private int selectedPosition = -1;
     private boolean activateOnItemClick;
 
     public void setActivateOnItemClick(boolean activateOnItemClick) {

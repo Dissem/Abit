@@ -27,7 +27,7 @@ import ch.dissem.apps.abit.listener.ListSelectionListener;
 /**
  * @author Christian Basler
  */
-public abstract class AbstractItemListFragment<T> extends ListFragment implements ListHolder {
+public abstract class AbstractItemListFragment<L, T> extends ListFragment implements ListHolder<L> {
     /**
      * The serialization (saved instance state) Bundle key representing the
      * activated item position. Only used on tablets.
@@ -142,5 +142,15 @@ public abstract class AbstractItemListFragment<T> extends ListFragment implement
         }
 
         activatedPosition = position;
+    }
+
+    @Override
+    public L getCurrentLabel() {
+        return null;
+    }
+
+    @Override
+    public boolean showPreviousList() {
+        return false;
     }
 }

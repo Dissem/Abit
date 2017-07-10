@@ -47,7 +47,7 @@ import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
 /**
  * Fragment that shows a list of all contacts, the ones we subscribed to first.
  */
-public class AddressListFragment extends AbstractItemListFragment<BitmessageAddress> {
+public class AddressListFragment extends AbstractItemListFragment<Void, BitmessageAddress> {
     private ArrayAdapter<BitmessageAddress> adapter;
 
     @Override
@@ -166,7 +166,7 @@ public class AddressListFragment extends AbstractItemListFragment<BitmessageAddr
     }
 
     @Override
-    public void updateList(Label label) {
+    public void updateList(Void label) {
         updateList();
     }
 

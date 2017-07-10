@@ -16,13 +16,15 @@
 
 package ch.dissem.apps.abit;
 
-import ch.dissem.bitmessage.entity.valueobject.Label;
-
 /**
  * @author Christian Basler
  */
-public interface ListHolder {
-    void updateList(Label label);
+public interface ListHolder<L> {
+    void updateList(L label);
 
     void setActivateOnItemClick(boolean activateOnItemClick);
+
+    L getCurrentLabel();
+
+    boolean showPreviousList();
 }

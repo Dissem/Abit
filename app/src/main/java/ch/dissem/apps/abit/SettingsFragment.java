@@ -21,14 +21,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.PreferenceFragmentCompat;
 import android.widget.Toast;
 
 import com.mikepenz.aboutlibraries.Libs;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
+import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
 import ch.dissem.bitmessage.BitmessageContext;
@@ -40,26 +41,29 @@ import static ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE;
  * @author Christian Basler
  */
 public class SettingsFragment
-    extends PreferenceFragment
+    extends PreferenceFragmentCompat
     implements SharedPreferences.OnSharedPreferenceChangeListener {
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
-        // Load the preferences from an XML resource
+    @Override
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.preferences);
 
         Preference about = findPreference("about");
         about.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                new LibsBuilder()
+                LibsBuilder libsBuilder = new LibsBuilder()
                     .withActivityTitle(getActivity().getString(R.string.about))
                     .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
                     .withAboutIconShown(true)
                     .withAboutVersionShown(true)
-                    .withAboutDescription(getString(R.string.about_app))
-                    .start(getActivity());
+                    .withAboutDescription(getString(R.string.about_app));
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity.hasDetailPane()) {
+                    activity.setDetailView(libsBuilder.supportFragment());
+                } else {
+                    libsBuilder.start(getActivity());
+                }
                 return true;
             }
         });
@@ -103,7 +107,12 @@ public class SettingsFragment
         status.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                startActivity(new Intent(getActivity(), StatusActivity.class));
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity.hasDetailPane()) {
+                    activity.setDetailView(new StatusFragment());
+                } else {
+                    startActivity(new Intent(getActivity(), StatusActivity.class));
+                }
                 return true;
             }
         });
@@ -114,6 +123,10 @@ public class SettingsFragment
         super.onAttach(ctx);
         PreferenceManager.getDefaultSharedPreferences(ctx)
             .registerOnSharedPreferenceChangeListener(this);
+
+        if (ctx instanceof ActionBarListener) {
+            ((ActionBarListener) ctx).updateTitle(getString(R.string.settings));
+        }
     }
 
     @Override

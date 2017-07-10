@@ -1,59 +1,61 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center">
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        tools:ignore="UnusedAttribute"/>
+        tools:ignore="UnusedAttribute"
+        tools:layout_editor_absoluteX="8dp" />
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:tools="http://schemas.android.com/tools"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:layout_below="@id/toolbar"
-                  android:baselineAligned="false"
-                  android:orientation="horizontal"
-                  android:showDividers="middle"
-                  tools:context=".MainActivity">
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.382" />
 
-        <!--
-        This layout is a two-pane layout for the Messages
-        master/detail flow.
-        -->
+    <FrameLayout
+        android:id="@+id/item_list"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/toolbar"
+        android:background="@drawable/bg_white"
+        android:elevation="2dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        tools:context=".MessageListActivity"
+        tools:layout="@layout/fragment_message_list"
+        tools:ignore="UnusedAttribute" />
 
-        <FrameLayout
-            android:id="@+id/item_list"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            tools:context=".MessageListActivity"
-            tools:layout="@layout/fragment_message_list"/>
+    <FrameLayout
+        android:id="@+id/message_detail_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_below="@+id/toolbar"
+        android:layout_weight="2"
+        android:background="@drawable/bg_white"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/guideline"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        tools:ignore="InconsistentLayout"
+        tools:layout="@layout/fragment_message_detail" />
 
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:background="@color/bg_item_selected_state">
-
-            <FrameLayout
-                android:id="@+id/message_detail_container"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="16dp"
-                android:background="@color/contentBackground"
-                android:elevation="2dp"
-                tools:layout="@layout/fragment_message_detail"
-                tools:ignore="InconsistentLayout,UnusedAttribute"/>
-        </FrameLayout>
-
-    </LinearLayout>
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>
