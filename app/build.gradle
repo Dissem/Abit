@@ -18,8 +18,8 @@ android {
         applicationId "ch.dissem.apps." + appName.toLowerCase()
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 12
-        versionName "1.0-beta12"
+        versionCode 13
+        versionName "1.0-beta13"
         jackOptions.enabled = false
         multiDexEnabled true
     }
