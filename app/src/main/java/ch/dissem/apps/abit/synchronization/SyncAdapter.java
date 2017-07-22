@@ -100,7 +100,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Preferences.getTrustedNode(getContext()),
             Preferences.getTrustedNodePort(getContext()),
             Preferences.getTimeoutInSeconds(getContext()),
-            true);
+            true
+        );
         LOG.info("Synchronization finished");
     }
 

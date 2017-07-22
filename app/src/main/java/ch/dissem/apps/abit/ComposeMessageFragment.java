@@ -219,6 +219,10 @@ public class ComposeMessageFragment extends Fragment {
                     }
                 }
             }
+            if (recipient == null){
+                Toast.makeText(getContext(), R.string.error_msg_recipient_missing, Toast.LENGTH_LONG).show();
+                return;
+            }
             builder = new Plaintext.Builder(MSG)
                 .from(identity)
                 .to(recipient);

@@ -118,4 +118,5 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="cleanup_notification_end">Aufräumarbeiten beendet</string>
     <string name="cleanup_summary">Veraltete Inventareinträge werden entfernt</string>
     <string name="wait_for_wifi">Auf W-LAN warten</string>
+    <string name="error_msg_recipient_missing">Bitte Empfänger angeben</string>
 </resources>

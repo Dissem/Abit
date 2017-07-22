@@ -35,7 +35,7 @@ public class WifiReceiver extends BroadcastReceiver {
             if (Preferences.isWifiOnly(ctx) && isConnectedToMeteredNetwork(ctx) && bmc.isRunning()) {
                 bmc.shutdown();
             }
-            if (!bmc.isRunning() && !(Preferences.isWifiOnly(ctx) && isConnectedToMeteredNetwork(ctx))) {
+            if (Preferences.isFullNodeActive(ctx) && !bmc.isRunning() && !(Preferences.isWifiOnly(ctx) && isConnectedToMeteredNetwork(ctx))) {
                 ctx.startService(new Intent(ctx, BitmessageService.class));
             }
         }
