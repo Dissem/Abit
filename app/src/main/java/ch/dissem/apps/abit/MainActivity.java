@@ -104,6 +104,8 @@ public class MainActivity extends AppCompatActivity
 
     private static WeakReference<MainActivity> instance;
 
+    private boolean active;
+
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -196,20 +198,21 @@ public class MainActivity extends AppCompatActivity
     }
 
     private <F extends Fragment & ListHolder> void changeList(F listFragment) {
+        if (active) {
+            FragmentTransaction transaction = getSupportFragmentManager()
+                .beginTransaction();
+            transaction.replace(R.id.item_list, listFragment);
+            Fragment detailFragment = getSupportFragmentManager().findFragmentById(R.id.message_detail_container);
+            if (detailFragment != null) {
+                transaction.remove(detailFragment);
+            }
+            transaction.addToBackStack(null).commit();
 
-        FragmentTransaction transaction = getSupportFragmentManager()
-            .beginTransaction();
-        transaction.replace(R.id.item_list, listFragment);
-        Fragment detailFragment = getSupportFragmentManager().findFragmentById(R.id.message_detail_container);
-        if (detailFragment != null) {
-            transaction.remove(detailFragment);
-        }
-        transaction.addToBackStack(null).commit();
-
-        if (twoPane) {
-            // In two-pane mode, list items should be given the
-            // 'activated' state when touched.
-            listFragment.setActivateOnItemClick(true);
+            if (twoPane) {
+                // In two-pane mode, list items should be given the
+                // 'activated' state when touched.
+                listFragment.setActivateOnItemClick(true);
+            }
         }
     }
 
@@ -337,7 +340,7 @@ public class MainActivity extends AppCompatActivity
             ListHolder listHolder = (ListHolder) listFragment;
             if (listHolder.showPreviousList()) {
                 IDrawerItem drawerItem = drawer.getDrawerItem(listHolder.getCurrentLabel());
-                if (drawerItem != null){
+                if (drawerItem != null) {
                     drawer.setSelection(drawerItem);
                 }
                 return;
@@ -414,7 +417,14 @@ public class MainActivity extends AppCompatActivity
         }
         updateNodeSwitch();
         Singleton.getMessageListener(this).resetNotification();
+        active = true;
         super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        active = false;
     }
 
     public void addIdentityEntry(BitmessageAddress identity) {
