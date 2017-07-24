@@ -17,7 +17,7 @@
         android:paddingBottom="88dp"
         android:scrollbarStyle="outsideOverlay" />
 
-    <io.github.yavski.fabspeeddial.FabSpeedDial
+    <io.github.kobakei.materialfabspeeddial.FabSpeedDial
         android:id="@+id/fab_add_contact"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -26,7 +26,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         app:elevation="8dp"
-        app:fabDrawable="@drawable/ic_action_add_contact"
-        app:fabGravity="bottom_end"
-        app:fabMenu="@menu/fab_address" />
+        app:fab_useTouchGuard="true"
+        app:fab_miniFabTextBackground="@color/colorPrimaryLight"
+        app:fab_fabDrawable="@drawable/ic_action_add_contact"
+        app:fab_menu="@menu/fab_address" />
 </RelativeLayout>

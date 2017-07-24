@@ -23,8 +23,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -40,9 +40,7 @@ import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.repository.AndroidAddressRepository;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
-import ch.dissem.bitmessage.entity.valueobject.Label;
-import io.github.yavski.fabspeeddial.FabSpeedDial;
-import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
+import io.github.kobakei.materialfabspeeddial.FabSpeedDial;
 
 /**
  * Fragment that shows a list of all contacts, the ones we subscribed to first.
@@ -133,21 +131,21 @@ public class AddressListFragment extends AbstractItemListFragment<Void, Bitmessa
         View view = inflater.inflate(R.layout.fragment_address_list, container, false);
 
         FabSpeedDial fabSpeedDial = (FabSpeedDial) view.findViewById(R.id.fab_add_contact);
-        fabSpeedDial.setMenuListener(new SimpleMenuListenerAdapter() {
+        fabSpeedDial.addOnMenuItemClickListener(new FabSpeedDial.OnMenuItemClickListener() {
             @Override
-            public boolean onMenuItemSelected(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
+            public void onMenuItemClick(FloatingActionButton floatingActionButton, @Nullable TextView textView, int itemId) {
+                switch (itemId) {
                     case R.id.action_read_qr_code:
                         IntentIntegrator.forSupportFragment(AddressListFragment.this)
                             .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES)
                             .initiateScan();
-                        return true;
+                        break;
                     case R.id.action_create_contact:
                         Intent intent = new Intent(getActivity(), CreateAddressActivity.class);
                         startActivity(intent);
-                        return true;
+                        break;
                     default:
-                        return false;
+                        break;
                 }
             }
         });

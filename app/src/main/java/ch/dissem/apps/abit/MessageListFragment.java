@@ -19,6 +19,8 @@ package ch.dissem.apps.abit;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,6 +31,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
@@ -49,8 +52,7 @@ import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
-import io.github.yavski.fabspeeddial.FabSpeedDial;
-import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
+import io.github.kobakei.materialfabspeeddial.FabSpeedDial;
 
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_BROADCAST;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_IDENTITY;
@@ -168,31 +170,30 @@ public class MessageListFragment extends Fragment implements ListHolder<Label> {
         // Show the dummy content as text in a TextView.
         FabSpeedDial fab = (FabSpeedDial) rootView.findViewById(R.id
             .fab_compose_message);
-        fab.setMenuListener(new SimpleMenuListenerAdapter() {
+        fab.addOnMenuItemClickListener(new FabSpeedDial.OnMenuItemClickListener() {
             @Override
-            public boolean onMenuItemSelected(MenuItem menuItem) {
+            public void onMenuItemClick(FloatingActionButton floatingActionButton, @Nullable TextView textView, int itemId) {
                 BitmessageAddress identity = Singleton.getIdentity(getActivity());
                 if (identity == null) {
                     Toast.makeText(getActivity(), R.string.no_identity_warning,
                         Toast.LENGTH_LONG).show();
-                    return false;
                 } else {
-                    switch (menuItem.getItemId()) {
+                    switch (itemId) {
                         case R.id.action_compose_message: {
                             Intent intent = new Intent(getActivity(), ComposeMessageActivity.class);
                             intent.putExtra(EXTRA_IDENTITY, identity);
                             startActivity(intent);
-                            return true;
+                            break;
                         }
                         case R.id.action_compose_broadcast: {
                             Intent intent = new Intent(getActivity(), ComposeMessageActivity.class);
                             intent.putExtra(EXTRA_IDENTITY, identity);
                             intent.putExtra(EXTRA_BROADCAST, true);
                             startActivity(intent);
-                            return true;
+                            break;
                         }
                         default:
-                            return false;
+                            break;
                     }
                 }
             }

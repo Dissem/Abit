@@ -19,7 +19,7 @@
         android:scrollbars="vertical"
         tools:listitem="@layout/message_row"/>
 
-    <io.github.yavski.fabspeeddial.FabSpeedDial
+    <io.github.kobakei.materialfabspeeddial.FabSpeedDial
         android:id="@+id/fab_compose_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,7 +28,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         app:elevation="8dp"
-        app:fabDrawable="@drawable/ic_action_compose_message"
-        app:fabGravity="bottom_end"
-        app:fabMenu="@menu/fab_message"/>
+        app:fab_useTouchGuard="true"
+        app:fab_miniFabTextBackground="@color/colorPrimaryLight"
+        app:fab_fabDrawable="@drawable/ic_action_compose_message"
+        app:fab_menu="@menu/fab_message"/>
 </RelativeLayout>
