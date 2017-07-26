@@ -36,11 +36,12 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import java.util.LinkedList;
 import java.util.List;
 
-import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.repository.AndroidAddressRepository;
 import ch.dissem.apps.abit.service.Singleton;
+import ch.dissem.apps.abit.util.FabUtils;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import io.github.kobakei.materialfabspeeddial.FabSpeedDial;
+import io.github.kobakei.materialfabspeeddial.FabSpeedDialMenu;
 
 /**
  * Fragment that shows a list of all contacts, the ones we subscribed to first.
@@ -119,8 +120,31 @@ public class AddressListFragment extends AbstractItemListFragment<Void, Bitmessa
     @Override
     public void onAttach(Context ctx) {
         super.onAttach(ctx);
-        if (ctx instanceof ActionBarListener) {
-            ((ActionBarListener) ctx).updateTitle(getString(R.string.contacts_and_subscriptions));
+        if (ctx instanceof MainActivity) {
+            MainActivity activity = (MainActivity) ctx;
+            activity.updateTitle(getString(R.string.contacts_and_subscriptions));
+            FabSpeedDialMenu menu = new FabSpeedDialMenu(ctx);
+            menu.add(R.string.scan_qr_code).setIcon(R.drawable.ic_action_qr_code);
+            menu.add(R.string.create_contact).setIcon(R.drawable.ic_action_create_contact);
+            FabUtils.initFab(activity, R.drawable.ic_action_add_contact, menu)
+                .addOnMenuItemClickListener(new FabSpeedDial.OnMenuItemClickListener() {
+                    @Override
+                    public void onMenuItemClick(FloatingActionButton floatingActionButton, @Nullable TextView textView, int itemId) {
+                        switch (itemId) {
+                            case 1:
+                                IntentIntegrator.forSupportFragment(AddressListFragment.this)
+                                    .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES)
+                                    .initiateScan();
+                                break;
+                            case 2:
+                                Intent intent = new Intent(getActivity(), CreateAddressActivity.class);
+                                startActivity(intent);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                });
         }
     }
 
@@ -128,29 +152,7 @@ public class AddressListFragment extends AbstractItemListFragment<Void, Bitmessa
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
         savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_address_list, container, false);
-
-        FabSpeedDial fabSpeedDial = (FabSpeedDial) view.findViewById(R.id.fab_add_contact);
-        fabSpeedDial.addOnMenuItemClickListener(new FabSpeedDial.OnMenuItemClickListener() {
-            @Override
-            public void onMenuItemClick(FloatingActionButton floatingActionButton, @Nullable TextView textView, int itemId) {
-                switch (itemId) {
-                    case R.id.action_read_qr_code:
-                        IntentIntegrator.forSupportFragment(AddressListFragment.this)
-                            .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES)
-                            .initiateScan();
-                        break;
-                    case R.id.action_create_contact:
-                        Intent intent = new Intent(getActivity(), CreateAddressActivity.class);
-                        startActivity(intent);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        });
-
-        return view;
+        return inflater.inflate(R.layout.fragment_address_list, container, false);
     }
 
     @Override

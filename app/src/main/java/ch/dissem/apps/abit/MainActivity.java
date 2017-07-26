@@ -56,7 +56,6 @@ import java.util.List;
 import ch.dissem.apps.abit.dialog.FullNodeDialogActivity;
 import ch.dissem.apps.abit.drawer.ProfileImageListener;
 import ch.dissem.apps.abit.drawer.ProfileSelectionListener;
-import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
 import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.apps.abit.service.Singleton;
@@ -67,6 +66,7 @@ import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
+import io.github.kobakei.materialfabspeeddial.FabSpeedDial;
 
 import static ch.dissem.apps.abit.ComposeMessageActivity.launchReplyTo;
 import static ch.dissem.apps.abit.repository.AndroidMessageRepository.LABEL_ARCHIVE;
@@ -91,7 +91,7 @@ import static ch.dissem.apps.abit.service.BitmessageService.isRunning;
  * </p>
  */
 public class MainActivity extends AppCompatActivity
-    implements ListSelectionListener<Serializable>, ActionBarListener {
+    implements ListSelectionListener<Serializable> {
     public static final String EXTRA_SHOW_MESSAGE = "ch.dissem.abit.ShowMessage";
     public static final String EXTRA_SHOW_LABEL = "ch.dissem.abit.ShowLabel";
     public static final String EXTRA_REPLY_TO_MESSAGE = "ch.dissem.abit.ReplyToMessage";
@@ -120,13 +120,17 @@ public class MainActivity extends AppCompatActivity
     private Drawer drawer;
     private SwitchDrawerItem nodeSwitch;
 
+    private FabSpeedDial fab;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         instance = new WeakReference<>(this);
         bmc = Singleton.getBitmessageContext(this);
 
-        setContentView(R.layout.activity_message_list);
+        setContentView(R.layout.activity_main);
+        fab = (FabSpeedDial) findViewById(R.id.fab);
+        fab.hide();
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -487,7 +491,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
     public void updateUnread() {
         for (IDrawerItem item : drawer.getDrawerItems()) {
             if (item.getTag() instanceof Label) {
@@ -573,7 +576,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
     public void updateTitle(CharSequence title) {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(title);
@@ -582,6 +584,10 @@ public class MainActivity extends AppCompatActivity
 
     public Label getSelectedLabel() {
         return selectedLabel;
+    }
+
+    public FabSpeedDial getFloatingActionButton() {
+        return fab;
     }
 
     public static MainActivity getInstance() {

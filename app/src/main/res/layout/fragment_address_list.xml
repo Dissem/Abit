@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -17,17 +16,4 @@
         android:paddingBottom="88dp"
         android:scrollbarStyle="outsideOverlay" />
 
-    <io.github.kobakei.materialfabspeeddial.FabSpeedDial
-        android:id="@+id/fab_add_contact"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        app:elevation="8dp"
-        app:fab_useTouchGuard="true"
-        app:fab_miniFabTextBackground="@color/colorPrimaryLight"
-        app:fab_fabDrawable="@drawable/ic_action_add_contact"
-        app:fab_menu="@menu/fab_address" />
 </RelativeLayout>

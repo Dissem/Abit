@@ -24,12 +24,12 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
+import android.view.View;
 import android.widget.Toast;
 
 import com.mikepenz.aboutlibraries.Libs;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
-import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
 import ch.dissem.bitmessage.BitmessageContext;
@@ -121,11 +121,14 @@ public class SettingsFragment
     @Override
     public void onAttach(Context ctx) {
         super.onAttach(ctx);
+        if (ctx instanceof MainActivity){
+            ((MainActivity) ctx).getFloatingActionButton().hide();
+        }
         PreferenceManager.getDefaultSharedPreferences(ctx)
             .registerOnSharedPreferenceChangeListener(this);
 
-        if (ctx instanceof ActionBarListener) {
-            ((ActionBarListener) ctx).updateTitle(getString(R.string.settings));
+        if (ctx instanceof MainActivity) {
+            ((MainActivity) ctx).updateTitle(getString(R.string.settings));
         }
     }
 

@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 
-import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.util.Assets;
 import ch.dissem.apps.abit.util.Drawables;
@@ -142,8 +141,8 @@ public class MessageDetailFragment extends Fragment {
             }
             MessageRepository messageRepo = Singleton.getMessageRepository(inflater.getContext());
             if (removed) {
-                if (getActivity() instanceof ActionBarListener) {
-                    ((ActionBarListener) getActivity()).updateUnread();
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).updateUnread();
                 }
                 messageRepo.save(item);
             }
@@ -200,13 +199,13 @@ public class MessageDetailFragment extends Fragment {
             case R.id.mark_unread:
                 item.addLabels(messageRepo.getLabels(Label.Type.UNREAD));
                 messageRepo.save(item);
-                if (getActivity() instanceof ActionBarListener) {
-                    ((ActionBarListener) getActivity()).updateUnread();
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).updateUnread();
                 }
                 return true;
             case R.id.archive:
-                if (item.isUnread() && getActivity() instanceof ActionBarListener) {
-                    ((ActionBarListener) getActivity()).updateUnread();
+                if (item.isUnread() && getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).updateUnread();
                 }
                 item.getLabels().clear();
                 messageRepo.save(item);

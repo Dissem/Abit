@@ -16,6 +16,7 @@
 
 package ch.dissem.apps.abit;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -45,14 +46,15 @@ import java.util.List;
 import java.util.Stack;
 
 import ch.dissem.apps.abit.adapter.SwipeableMessageAdapter;
-import ch.dissem.apps.abit.listener.ActionBarListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
 import ch.dissem.apps.abit.repository.AndroidMessageRepository;
 import ch.dissem.apps.abit.service.Singleton;
+import ch.dissem.apps.abit.util.FabUtils;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
 import ch.dissem.bitmessage.entity.valueobject.Label;
 import io.github.kobakei.materialfabspeeddial.FabSpeedDial;
+import io.github.kobakei.materialfabspeeddial.FabSpeedDialMenu;
 
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_BROADCAST;
 import static ch.dissem.apps.abit.ComposeMessageActivity.EXTRA_IDENTITY;
@@ -119,8 +121,8 @@ public class MessageListFragment extends Fragment implements ListHolder<Label> {
     private void doUpdateList(final Label label) {
         adapter.clear(label);
         if (label == null) {
-            if (getActivity() instanceof ActionBarListener) {
-                ((ActionBarListener) getActivity()).updateTitle(getString(R.string.app_name));
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).updateTitle(getString(R.string.app_name));
             }
             adapter.notifyDataSetChanged();
             return;
@@ -129,8 +131,8 @@ public class MessageListFragment extends Fragment implements ListHolder<Label> {
         if (emptyTrashMenuItem != null) {
             emptyTrashMenuItem.setVisible(label.getType() == Label.Type.TRASH);
         }
-        if (getActivity() instanceof ActionBarListener) {
-            ActionBarListener actionBarListener = (ActionBarListener) getActivity();
+        if (getActivity() instanceof MainActivity) {
+            MainActivity actionBarListener = (MainActivity) getActivity();
             if ("archive".equals(label.toString())) {
                 actionBarListener.updateTitle(getString(R.string.archive));
             } else {
@@ -166,38 +168,6 @@ public class MessageListFragment extends Fragment implements ListHolder<Label> {
         View rootView = inflater.inflate(R.layout.fragment_message_list, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
-
-        // Show the dummy content as text in a TextView.
-        FabSpeedDial fab = (FabSpeedDial) rootView.findViewById(R.id
-            .fab_compose_message);
-        fab.addOnMenuItemClickListener(new FabSpeedDial.OnMenuItemClickListener() {
-            @Override
-            public void onMenuItemClick(FloatingActionButton floatingActionButton, @Nullable TextView textView, int itemId) {
-                BitmessageAddress identity = Singleton.getIdentity(getActivity());
-                if (identity == null) {
-                    Toast.makeText(getActivity(), R.string.no_identity_warning,
-                        Toast.LENGTH_LONG).show();
-                } else {
-                    switch (itemId) {
-                        case R.id.action_compose_message: {
-                            Intent intent = new Intent(getActivity(), ComposeMessageActivity.class);
-                            intent.putExtra(EXTRA_IDENTITY, identity);
-                            startActivity(intent);
-                            break;
-                        }
-                        case R.id.action_compose_broadcast: {
-                            Intent intent = new Intent(getActivity(), ComposeMessageActivity.class);
-                            intent.putExtra(EXTRA_IDENTITY, identity);
-                            intent.putExtra(EXTRA_BROADCAST, true);
-                            startActivity(intent);
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                }
-            }
-        });
 
         // touch guard manager  (this class is required to suppress scrolling while swipe-dismiss
         // animation is running)
@@ -267,6 +237,45 @@ public class MessageListFragment extends Fragment implements ListHolder<Label> {
         recyclerViewSwipeManager.attachRecyclerView(recyclerView);
 
         return rootView;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        if (context instanceof MainActivity) {
+            FabSpeedDialMenu menu = new FabSpeedDialMenu(context);
+            menu.add(R.string.broadcast).setIcon(R.drawable.ic_action_broadcast);
+            menu.add(R.string.personal_message).setIcon(R.drawable.ic_action_personal);
+            FabUtils.initFab((MainActivity) context, R.drawable.ic_action_compose_message, menu)
+                .addOnMenuItemClickListener(new FabSpeedDial.OnMenuItemClickListener() {
+                    @Override
+                    public void onMenuItemClick(FloatingActionButton floatingActionButton, @Nullable TextView textView, int itemId) {
+                        BitmessageAddress identity = Singleton.getIdentity(getActivity());
+                        if (identity == null) {
+                            Toast.makeText(getActivity(), R.string.no_identity_warning,
+                                Toast.LENGTH_LONG).show();
+                        } else {
+                            switch (itemId) {
+                                case 1: {
+                                    Intent intent = new Intent(getActivity(), ComposeMessageActivity.class);
+                                    intent.putExtra(EXTRA_IDENTITY, identity);
+                                    startActivity(intent);
+                                    break;
+                                }
+                                case 2: {
+                                    Intent intent = new Intent(getActivity(), ComposeMessageActivity.class);
+                                    intent.putExtra(EXTRA_IDENTITY, identity);
+                                    intent.putExtra(EXTRA_BROADCAST, true);
+                                    startActivity(intent);
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                });
+        }
+        super.onAttach(context);
     }
 
     @Override
