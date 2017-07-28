@@ -14,34 +14,30 @@
  * limitations under the License.
  */
 
-package ch.dissem.apps.abit.synchronization;
+package ch.dissem.apps.abit.synchronization
 
-import android.app.Service;
-import android.content.Intent;
-import android.os.IBinder;
+import android.app.Service
+import android.content.Intent
+import android.os.IBinder
 
 /**
  * A bound Service that instantiates the authenticator
  * when started.
  */
-public class AuthenticatorService extends Service {
+class AuthenticatorService : Service() {
     /**
      * Instance field that stores the authenticator object
      */
-    private Authenticator authenticator;
+    private var authenticator: Authenticator? = null
 
-    @Override
-    public void onCreate() {
+    override fun onCreate() {
         // Create a new authenticator object
-        authenticator = new Authenticator(this);
+        authenticator = Authenticator(this)
     }
 
     /*
      * When the system binds to this Service to make the RPC call
      * return the authenticator's IBinder.
      */
-    @Override
-    public IBinder onBind(Intent intent) {
-        return authenticator.getIBinder();
-    }
+    override fun onBind(intent: Intent) = authenticator?.iBinder
 }
