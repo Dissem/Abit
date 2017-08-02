@@ -22,6 +22,8 @@ import ch.dissem.apps.abit.R
 import ch.dissem.apps.abit.listener.WifiReceiver
 import ch.dissem.apps.abit.notification.ErrorNotification
 import ch.dissem.apps.abit.util.Constants.*
+import org.slf4j.LoggerFactory
+import java.io.File
 import java.io.IOException
 import java.net.InetAddress
 
@@ -29,6 +31,8 @@ import java.net.InetAddress
  * @author Christian Basler
  */
 object Preferences {
+    private val LOG = LoggerFactory.getLogger(Preferences::class.java)
+
     @JvmStatic
     fun useTrustedNode(ctx: Context): Boolean {
         val trustedNode = getPreference(ctx, PREFERENCE_TRUSTED_NODE) ?: return false
@@ -111,5 +115,26 @@ object Preferences {
     fun setFullNodeActive(ctx: Context, status: Boolean) {
         val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
         preferences.edit().putBoolean(PREFERENCE_FULL_NODE, status).apply()
+    }
+
+    @JvmStatic
+    fun getExportDirectory(ctx: Context): File {
+        return File(ctx.filesDir, "exports")
+    }
+
+    @JvmStatic
+    fun cleanupExportDirectory(ctx: Context) {
+        val exportDirectory = getExportDirectory(ctx)
+        if (exportDirectory.exists()) {
+            exportDirectory.listFiles().forEach { file ->
+                try {
+                    if (!file.delete()) {
+                        file.deleteOnExit()
+                    }
+                } catch (e: Exception) {
+                    LOG.debug(e.message, e)
+                }
+            }
+        }
     }
 }

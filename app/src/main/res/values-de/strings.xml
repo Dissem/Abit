@@ -119,4 +119,6 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="cleanup_summary">Veraltete Inventareinträge werden entfernt</string>
     <string name="wait_for_wifi">Auf W-LAN warten</string>
     <string name="error_msg_recipient_missing">Bitte Empfänger angeben</string>
+    <string name="export_data">Export</string>
+    <string name="export_data_summary">Alle Nachrichten und Kontakte exportieren (aber keine Identitäten)</string>
 </resources>
