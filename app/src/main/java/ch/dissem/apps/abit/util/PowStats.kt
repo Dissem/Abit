@@ -1,31 +1,47 @@
 package ch.dissem.apps.abit.util
 
 import android.content.Context
+import android.preference.PreferenceManager
+import ch.dissem.apps.abit.util.Constants.PREFERENCE_POW_AVERAGE
+import ch.dissem.apps.abit.util.Constants.PREFERENCE_POW_COUNT
+import java.math.BigInteger
 
 /**
- * Created by chrigu on 02.08.17.
+ * POW statistics that might help estimate the POW time, depending on
  */
 object PowStats {
-    var powUnitTime: Long = 0
-    var powCount: Long = 0
+    private val TWO_POW_64 = BigInteger.valueOf(2).pow(64)!!
+
+    var averagePowUnitTime = 0L
+    var powCount = 0L
 
     @JvmStatic
-    fun getExpectedPowTime(ctx: Context, target: ByteArray): Long {
-//        val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
-//        return preferences.getLong(Constants.PREFERENCE_POW_AVERAGE, 0L)
-        return 0
+    fun getExpectedPowTimeInMilliseconds(ctx: Context, target: ByteArray): Long {
+        if (averagePowUnitTime == 0L) {
+            val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
+            synchronized(this) {
+                averagePowUnitTime = preferences.getLong(PREFERENCE_POW_AVERAGE, 0L)
+                powCount = preferences.getLong(PREFERENCE_POW_COUNT, 0L)
+            }
+        }
+        return (BigInteger.valueOf(averagePowUnitTime) * BigInteger(target) / TWO_POW_64).toLong()
     }
-
-//    fun updatePowTelemetry(ctx: Context, averagePowTime: Long, powCount: Long) {
-//        val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
-//        preferences.edit()
-//            .putLong(Constants.PREFERENCE_POW_AVERAGE, averagePowTime)
-//            .putLong(Constants.PREFERENCE_POW_COUNT, powCount)
-//            .apply()
-//    }
 
     @JvmStatic
     fun addPow(ctx: Context, time: Long, target: ByteArray) {
-        powCount++
+        val targetBigInt = BigInteger(target)
+        val powCountBefore = BigInteger.valueOf(powCount)
+        synchronized(this) {
+            powCount++
+            averagePowUnitTime = (
+                (BigInteger.valueOf(averagePowUnitTime) * powCountBefore + (BigInteger.valueOf(time) * TWO_POW_64 / targetBigInt)) / BigInteger.valueOf(powCount)
+                ).toLong()
+
+            val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
+            preferences.edit()
+                .putLong(PREFERENCE_POW_AVERAGE, averagePowUnitTime)
+                .putLong(PREFERENCE_POW_COUNT, powCount)
+                .apply()
+        }
     }
 }

@@ -20,7 +20,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Handler
 import ch.dissem.apps.abit.notification.NetworkNotification
-import ch.dissem.apps.abit.notification.NetworkNotification.NETWORK_NOTIFICATION_ID
+import ch.dissem.apps.abit.notification.NetworkNotification.Companion.NETWORK_NOTIFICATION_ID
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.utils.Property
 

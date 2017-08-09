@@ -69,9 +69,11 @@ class ProofOfWorkService : Service() {
     data class PowItem(val initialHash: ByteArray, val targetValue: ByteArray, val callback: ProofOfWorkEngine.Callback)
 
     private fun calculateNonce(item: PowItem) {
+        notification.start(item)
         val startTime = System.currentTimeMillis()
         engine.calculateNonce(item.initialHash, item.targetValue, object : ProofOfWorkEngine.Callback {
             override fun onNonceCalculated(initialHash: ByteArray, nonce: ByteArray) {
+                notification.finished(item)
                 val time = System.currentTimeMillis() - startTime
                 PowStats.addPow(this@ProofOfWorkService, time, item.targetValue)
                 try {

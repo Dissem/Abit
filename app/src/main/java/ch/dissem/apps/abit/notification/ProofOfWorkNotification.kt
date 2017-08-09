@@ -23,36 +23,44 @@ import android.support.v7.app.NotificationCompat
 
 import ch.dissem.apps.abit.MainActivity
 import ch.dissem.apps.abit.R
+import ch.dissem.apps.abit.service.ProofOfWorkService
+import ch.dissem.apps.abit.util.PowStats
+import java.util.*
+import kotlin.concurrent.fixedRateTimer
 
 /**
  * Ongoing notification while proof of work is in progress.
  */
 class ProofOfWorkNotification(ctx: Context) : AbstractNotification(ctx) {
 
+    private val builder = NotificationCompat.Builder(ctx)
+        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+        .setUsesChronometer(true)
+        .setOngoing(true)
+        .setSmallIcon(R.drawable.ic_notification_proof_of_work)
+        .setContentTitle(ctx.getString(R.string.proof_of_work_title))
+    private var startTime = 0L
+    private var progress = 0
+    private var progressMax = 0
+
+    private var timer: Timer? = null
+
     init {
         update(0)
     }
 
-    override fun getNotificationId(): Int {
-        return ONGOING_NOTIFICATION_ID
-    }
+    override val notificationId = ONGOING_NOTIFICATION_ID
 
     fun update(numberOfItems: Int): ProofOfWorkNotification {
-        val builder = NotificationCompat.Builder(ctx)
 
         val showMessageIntent = Intent(ctx, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(ctx, 0, showMessageIntent,
             PendingIntent.FLAG_UPDATE_CURRENT)
 
-        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setUsesChronometer(true)
-            .setOngoing(true)
-            .setSmallIcon(R.drawable.ic_notification_proof_of_work)
-            .setContentTitle(ctx.getString(R.string.proof_of_work_title))
-            .setContentText(if (numberOfItems == 0)
-                ctx.getString(R.string.proof_of_work_text_0)
-            else
-                ctx.getString(R.string.proof_of_work_text_n, numberOfItems))
+        builder.setContentText(if (numberOfItems == 0)
+            ctx.getString(R.string.proof_of_work_text_0)
+        else
+            ctx.getString(R.string.proof_of_work_text_n, numberOfItems))
             .setContentIntent(pendingIntent)
 
         notification = builder.build()
@@ -61,5 +69,36 @@ class ProofOfWorkNotification(ctx: Context) : AbstractNotification(ctx) {
 
     companion object {
         @JvmField val ONGOING_NOTIFICATION_ID = 3
+    }
+
+    fun start(item: ProofOfWorkService.PowItem) {
+        val expectedPowTimeInMilliseconds = PowStats.getExpectedPowTimeInMilliseconds(ctx, item.targetValue)
+        val delta = (expectedPowTimeInMilliseconds / 2).toInt()
+        startTime = System.currentTimeMillis()
+        progress = 0
+        progressMax = delta
+        builder.setProgress(progressMax, progress, false)
+        notification = builder.build()
+        show()
+
+        timer = fixedRateTimer(initialDelay = 5000, period = 5000){
+            val elapsedTime = System.currentTimeMillis() - startTime
+            progress = elapsedTime.toInt()
+            progressMax = progress + delta
+            builder.setProgress(progressMax, progress, false)
+            notification = builder.build()
+            show()
+        }
+    }
+
+    fun finished(item: ProofOfWorkService.PowItem) {
+        timer?.cancel()
+        progress = 0
+        progressMax = 0
+        if (showing) {
+            builder.setProgress(0, 0, false)
+            notification = builder.build()
+            show()
+        }
     }
 }
