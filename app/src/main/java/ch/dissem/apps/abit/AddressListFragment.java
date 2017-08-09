@@ -91,6 +91,7 @@ public class AddressListFragment extends AbstractItemListFragment<Void, Bitmessa
     public void onResume() {
         super.onResume();
 
+        initFab((MainActivity) getActivity());
         updateList();
     }
 
@@ -117,35 +118,30 @@ public class AddressListFragment extends AbstractItemListFragment<Void, Bitmessa
         }.execute();
     }
 
-    @Override
-    public void onAttach(Context ctx) {
-        super.onAttach(ctx);
-        if (ctx instanceof MainActivity) {
-            MainActivity activity = (MainActivity) ctx;
-            activity.updateTitle(getString(R.string.contacts_and_subscriptions));
-            FabSpeedDialMenu menu = new FabSpeedDialMenu(ctx);
-            menu.add(R.string.scan_qr_code).setIcon(R.drawable.ic_action_qr_code);
-            menu.add(R.string.create_contact).setIcon(R.drawable.ic_action_create_contact);
-            FabUtils.initFab(activity, R.drawable.ic_action_add_contact, menu)
-                .addOnMenuItemClickListener(new FabSpeedDial.OnMenuItemClickListener() {
-                    @Override
-                    public void onMenuItemClick(FloatingActionButton floatingActionButton, @Nullable TextView textView, int itemId) {
-                        switch (itemId) {
-                            case 1:
-                                IntentIntegrator.forSupportFragment(AddressListFragment.this)
-                                    .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES)
-                                    .initiateScan();
-                                break;
-                            case 2:
-                                Intent intent = new Intent(getActivity(), CreateAddressActivity.class);
-                                startActivity(intent);
-                                break;
-                            default:
-                                break;
-                        }
+    private void initFab(MainActivity activity){
+        activity.updateTitle(getString(R.string.contacts_and_subscriptions));
+        FabSpeedDialMenu menu = new FabSpeedDialMenu(activity);
+        menu.add(R.string.scan_qr_code).setIcon(R.drawable.ic_action_qr_code);
+        menu.add(R.string.create_contact).setIcon(R.drawable.ic_action_create_contact);
+        FabUtils.initFab(activity, R.drawable.ic_action_add_contact, menu)
+            .addOnMenuItemClickListener(new FabSpeedDial.OnMenuItemClickListener() {
+                @Override
+                public void onMenuItemClick(FloatingActionButton floatingActionButton, @Nullable TextView textView, int itemId) {
+                    switch (itemId) {
+                        case 1:
+                            IntentIntegrator.forSupportFragment(AddressListFragment.this)
+                                .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES)
+                                .initiateScan();
+                            break;
+                        case 2:
+                            Intent intent = new Intent(getActivity(), CreateAddressActivity.class);
+                            startActivity(intent);
+                            break;
+                        default:
+                            break;
                     }
-                });
-        }
+                }
+            });
     }
 
     @Nullable

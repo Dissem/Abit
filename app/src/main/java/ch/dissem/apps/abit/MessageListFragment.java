@@ -96,6 +96,7 @@ public class MessageListFragment extends Fragment implements ListHolder<Label> {
     public void onResume() {
         super.onResume();
         MainActivity activity = (MainActivity) getActivity();
+        initFab(activity);
         messageRepo = Singleton.getMessageRepository(activity);
 
         if (backStack.isEmpty()) {
@@ -239,43 +240,39 @@ public class MessageListFragment extends Fragment implements ListHolder<Label> {
         return rootView;
     }
 
-    @Override
-    public void onAttach(Context context) {
-        if (context instanceof MainActivity) {
-            FabSpeedDialMenu menu = new FabSpeedDialMenu(context);
-            menu.add(R.string.broadcast).setIcon(R.drawable.ic_action_broadcast);
-            menu.add(R.string.personal_message).setIcon(R.drawable.ic_action_personal);
-            FabUtils.initFab((MainActivity) context, R.drawable.ic_action_compose_message, menu)
-                .addOnMenuItemClickListener(new FabSpeedDial.OnMenuItemClickListener() {
-                    @Override
-                    public void onMenuItemClick(FloatingActionButton floatingActionButton, @Nullable TextView textView, int itemId) {
-                        BitmessageAddress identity = Singleton.getIdentity(getActivity());
-                        if (identity == null) {
-                            Toast.makeText(getActivity(), R.string.no_identity_warning,
-                                Toast.LENGTH_LONG).show();
-                        } else {
-                            switch (itemId) {
-                                case 1: {
-                                    Intent intent = new Intent(getActivity(), ComposeMessageActivity.class);
-                                    intent.putExtra(EXTRA_IDENTITY, identity);
-                                    startActivity(intent);
-                                    break;
-                                }
-                                case 2: {
-                                    Intent intent = new Intent(getActivity(), ComposeMessageActivity.class);
-                                    intent.putExtra(EXTRA_IDENTITY, identity);
-                                    intent.putExtra(EXTRA_BROADCAST, true);
-                                    startActivity(intent);
-                                    break;
-                                }
-                                default:
-                                    break;
+    private void initFab(MainActivity context){
+        FabSpeedDialMenu menu = new FabSpeedDialMenu(context);
+        menu.add(R.string.broadcast).setIcon(R.drawable.ic_action_broadcast);
+        menu.add(R.string.personal_message).setIcon(R.drawable.ic_action_personal);
+        FabUtils.initFab(context, R.drawable.ic_action_compose_message, menu)
+            .addOnMenuItemClickListener(new FabSpeedDial.OnMenuItemClickListener() {
+                @Override
+                public void onMenuItemClick(FloatingActionButton floatingActionButton, @Nullable TextView textView, int itemId) {
+                    BitmessageAddress identity = Singleton.getIdentity(getActivity());
+                    if (identity == null) {
+                        Toast.makeText(getActivity(), R.string.no_identity_warning,
+                            Toast.LENGTH_LONG).show();
+                    } else {
+                        switch (itemId) {
+                            case 1: {
+                                Intent intent = new Intent(getActivity(), ComposeMessageActivity.class);
+                                intent.putExtra(EXTRA_IDENTITY, identity);
+                                intent.putExtra(EXTRA_BROADCAST, true);
+                                startActivity(intent);
+                                break;
                             }
+                            case 2: {
+                                Intent intent = new Intent(getActivity(), ComposeMessageActivity.class);
+                                intent.putExtra(EXTRA_IDENTITY, identity);
+                                startActivity(intent);
+                                break;
+                            }
+                            default:
+                                break;
                         }
                     }
-                });
-        }
-        super.onAttach(context);
+                }
+            });
     }
 
     @Override

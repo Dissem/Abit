@@ -60,13 +60,10 @@
 
     <io.github.kobakei.materialfabspeeddial.FabSpeedDial
         android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:elevation="8dp"
-        app:fab_useTouchGuard="true"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:fab_useTouchGuard="true"
+        app:fab_miniFabTextBackground="@color/colorAccent"
+        app:fab_miniFabTextColor="@color/colorPrimaryDarkText" />
 
 </android.support.constraint.ConstraintLayout>
