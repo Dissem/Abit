@@ -121,4 +121,6 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="error_msg_recipient_missing">Bitte Empfänger angeben</string>
     <string name="export_data">Export</string>
     <string name="export_data_summary">Alle Nachrichten und Kontakte exportieren (aber keine Identitäten)</string>
+    <string name="request_acknowledgements">Bestätigungen verlangen</string>
+    <string name="request_acknowledgements_summary">Bestätigungen stellen sicher dass eine Nachricht empfangen wurde, benötigen aber zusätzliche Zeit zum versenden</string>
 </resources>
