@@ -73,7 +73,7 @@ class ProofOfWorkNotification(ctx: Context) : AbstractNotification(ctx) {
 
     fun start(item: ProofOfWorkService.PowItem) {
         val expectedPowTimeInMilliseconds = PowStats.getExpectedPowTimeInMilliseconds(ctx, item.targetValue)
-        val delta = (expectedPowTimeInMilliseconds / 2).toInt()
+        val delta = (expectedPowTimeInMilliseconds / 3).toInt()
         startTime = System.currentTimeMillis()
         progress = 0
         progressMax = delta
@@ -81,7 +81,7 @@ class ProofOfWorkNotification(ctx: Context) : AbstractNotification(ctx) {
         notification = builder.build()
         show()
 
-        timer = fixedRateTimer(initialDelay = 5000, period = 5000){
+        timer = fixedRateTimer(initialDelay = 2000, period = 2000){
             val elapsedTime = System.currentTimeMillis() - startTime
             progress = elapsedTime.toInt()
             progressMax = progress + delta
