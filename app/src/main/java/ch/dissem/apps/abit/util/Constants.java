@@ -27,6 +27,7 @@ public class Constants {
     public static final String PREFERENCE_SYNC_TIMEOUT = "sync_timeout";
     public static final String PREFERENCE_SERVER_POW = "server_pow";
     public static final String PREFERENCE_FULL_NODE = "full_node";
+    public static final String PREFERENCE_REQUEST_ACK = "request_acknowledgments";
     public static final String PREFERENCE_POW_AVERAGE = "average_pow_time_ms";
     public static final String PREFERENCE_POW_COUNT = "pow_count";
 

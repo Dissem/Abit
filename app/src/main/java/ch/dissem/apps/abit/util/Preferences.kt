@@ -123,6 +123,18 @@ object Preferences {
     }
 
     @JvmStatic
+    fun requestAcknowledgements(ctx: Context): Boolean {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
+        return preferences.getBoolean(PREFERENCE_REQUEST_ACK, true)
+    }
+
+    @JvmStatic
+    fun setRequestAcknowledgements(ctx: Context, status: Boolean) {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
+        preferences.edit().putBoolean(PREFERENCE_REQUEST_ACK, status).apply()
+    }
+
+    @JvmStatic
     fun cleanupExportDirectory(ctx: Context) {
         val exportDirectory = getExportDirectory(ctx)
         if (exportDirectory.exists()) {

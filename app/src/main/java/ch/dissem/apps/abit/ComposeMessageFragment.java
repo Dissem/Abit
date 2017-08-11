@@ -36,6 +36,7 @@ import java.util.List;
 import ch.dissem.apps.abit.adapter.ContactAdapter;
 import ch.dissem.apps.abit.dialog.SelectEncodingDialogFragment;
 import ch.dissem.apps.abit.service.Singleton;
+import ch.dissem.apps.abit.util.Preferences;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
 import ch.dissem.bitmessage.entity.Plaintext;
@@ -226,6 +227,9 @@ public class ComposeMessageFragment extends Fragment {
             builder = new Plaintext.Builder(MSG)
                 .from(identity)
                 .to(recipient);
+        }
+        if (!Preferences.requestAcknowledgements(getContext())){
+            builder.preventAck();
         }
         switch (encoding) {
             case SIMPLE:

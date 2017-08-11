@@ -5,6 +5,11 @@
         android:key="wifi_only"
         android:summary="@string/wifi_only_summary"
         android:title="@string/wifi_only"/>
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="request_acknowledgements"
+        android:summary="@string/request_acknowledgements_summary"
+        android:title="@string/request_acknowledgements"/>
     <EditTextPreference
         android:inputType="textUri"
         android:key="trusted_node"
