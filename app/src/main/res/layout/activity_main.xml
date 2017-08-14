@@ -29,7 +29,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:fab_useTouchGuard="true"
-        app:fab_miniFabTextBackground="@color/colorAccent"
-        app:fab_miniFabTextColor="@color/colorPrimaryDarkText" />
+        android:elevation="4dp"
+        app:fab_miniFabTextBackground="@drawable/mini_fab_text_background"
+        app:fab_miniFabTextColor="@color/colorPrimaryDarkText"
+        tools:ignore="UnusedAttribute" />
 
 </RelativeLayout>

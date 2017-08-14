@@ -123,4 +123,5 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="export_data_summary">Alle Nachrichten und Kontakte exportieren (aber keine Identitäten)</string>
     <string name="request_acknowledgements">Bestätigungen verlangen</string>
     <string name="request_acknowledgements_summary">Bestätigungen stellen sicher dass eine Nachricht empfangen wurde, benötigen aber zusätzliche Zeit zum versenden</string>
+    <string name="got_it">Alles klar</string>
 </resources>
