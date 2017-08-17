@@ -52,6 +52,11 @@
         android:summary="@string/export_data_summary"
         />
     <Preference
+        android:key="import"
+        android:title="@string/import_data"
+        android:summary="@string/import_data_summary"
+        />
+    <Preference
         android:key="status"
         android:summary="@string/status_summary"
         android:title="@string/status"

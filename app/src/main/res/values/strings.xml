@@ -120,6 +120,8 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="error_msg_recipient_missing">Please set a recipient</string>
     <string name="export_data">Export</string>
     <string name="export_data_summary">Export all messages and contacts (but not identities)</string>
+    <string name="import_data">Import</string>
+    <string name="import_data_summary">Import messages and contacts (but not identities)</string>
     <string name="request_acknowledgements">Request acknowledgements</string>
     <string name="request_acknowledgements_summary">Acknowledges allow making sure a message was received, but require additional time to send</string>
     <string name="got_it">Got it</string>

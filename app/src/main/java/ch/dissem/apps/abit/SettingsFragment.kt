@@ -16,9 +16,11 @@
 
 package ch.dissem.apps.abit
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.v4.content.FileProvider.getUriForFile
@@ -30,20 +32,22 @@ import ch.dissem.apps.abit.synchronization.SyncAdapter
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_SERVER_POW
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE
 import ch.dissem.apps.abit.util.Preferences
+import ch.dissem.bitmessage.entity.valueobject.Label
 import ch.dissem.bitmessage.exports.ContactExport
 import ch.dissem.bitmessage.exports.MessageExport
 import ch.dissem.bitmessage.utils.UnixTime
+import com.beust.klaxon.JsonArray
+import com.beust.klaxon.Parser
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.LibsBuilder
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.support.v4.indeterminateProgressDialog
 import org.jetbrains.anko.uiThread
-import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
-
 
 /**
  * @author Christian Basler
@@ -128,11 +132,20 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                 intent.type = "application/zip"
                 intent.putExtra(Intent.EXTRA_SUBJECT, "abit-export.zip")
                 intent.putExtra(Intent.EXTRA_STREAM, contentUri)
-                startActivityForResult(Intent.createChooser(intent, ""), 0)
+                startActivityForResult(Intent.createChooser(intent, ""), WRITE_EXPORT_REQUEST_CODE)
                 uiThread {
                     dialog.dismiss()
                 }
             }
+            return@OnPreferenceClickListener true
+        }
+
+        findPreference("import")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent.type = "application/zip"
+
+            startActivityForResult(intent, READ_IMPORT_REQUEST_CODE)
             return@OnPreferenceClickListener true
         }
 
@@ -147,8 +160,57 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         }
     }
 
+    private fun processEntry(zipFile: Uri, entry: String, processor: (JsonArray<*>) -> Unit) {
+        ZipInputStream(context.contentResolver.openInputStream(zipFile)).use { zip ->
+            var nextEntry = zip.nextEntry
+            while (nextEntry != null) {
+                if (nextEntry.name == entry) {
+                    processor(Parser().parse(zip) as JsonArray<*>)
+                }
+                nextEntry = zip.nextEntry
+            }
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Preferences.cleanupExportDirectory(context)
+        when (requestCode) {
+            WRITE_EXPORT_REQUEST_CODE -> Preferences.cleanupExportDirectory(context)
+            READ_IMPORT_REQUEST_CODE -> {
+                if (resultCode == Activity.RESULT_OK && data?.data != null) {
+                    val dialog = indeterminateProgressDialog(R.string.import_data_summary, R.string.import_data)
+                    doAsync {
+                        val ctx = Singleton.getBitmessageContext(context)
+                        val labels = mutableMapOf<String, Label>()
+                        val zipFile = data.data
+
+                        processEntry(zipFile, "contacts.json") { json ->
+                            ContactExport.importContacts(json).forEach { contact ->
+                                ctx.addresses.save(contact)
+                            }
+                        }
+                        ctx.messages.getLabels().forEach { label ->
+                            labels[label.toString()] = label
+                        }
+                        processEntry(zipFile, "labels.json") { json ->
+                            MessageExport.importLabels(json).forEach { label ->
+                                if (!labels.contains(label.toString())) {
+                                    ctx.messages.save(label)
+                                    labels[label.toString()] = label
+                                }
+                            }
+                        }
+                        processEntry(zipFile, "messages.json") { json ->
+                            MessageExport.importMessages(json, labels).forEach { message ->
+                                ctx.messages.save(message)
+                            }
+                        }
+                        uiThread {
+                            dialog.dismiss()
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun onAttach(ctx: Context?) {
@@ -181,5 +243,10 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                 }
             }
         }
+    }
+
+    companion object {
+        const val WRITE_EXPORT_REQUEST_CODE = 1
+        const val READ_IMPORT_REQUEST_CODE = 2
     }
 }
