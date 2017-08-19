@@ -17,10 +17,12 @@
 package ch.dissem.apps.abit.dialog;
 
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
 import ch.dissem.apps.abit.R;
+import ch.dissem.apps.abit.util.NetworkUtils;
 import ch.dissem.apps.abit.util.Preferences;
 
 /**
@@ -36,12 +38,16 @@ public class FullNodeDialogActivity extends Activity {
             @Override
             public void onClick(View view) {
                 Preferences.setWifiOnly(FullNodeDialogActivity.this, false);
+                NetworkUtils.enableNode(getApplicationContext());
                 finish();
             }
         });
         findViewById(R.id.dismiss).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    NetworkUtils.scheduleNodeStart(getApplicationContext());
+                }
                 finish();
             }
         });

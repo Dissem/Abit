@@ -174,11 +174,20 @@
             android:exported="false"/>
 
         <!-- Receive Wi-Fi connection state changes -->
-        <receiver android:name=".listener.WifiReceiver">
+        <receiver android:name=".listener.WifiReceiver" android:enabled="@bool/is_pre_api_21">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
             </intent-filter>
         </receiver>
+        <receiver android:name=".service.StartServiceReceiver" android:enabled="@bool/is_post_api_21">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name=".service.StartupNodeOnWifiService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true"/>
 
         <activity
             android:name=".StatusActivity"

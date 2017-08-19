@@ -91,7 +91,7 @@ class ProofOfWorkNotification(ctx: Context) : AbstractNotification(ctx) {
         }
     }
 
-    fun finished(item: ProofOfWorkService.PowItem) {
+    fun finished() {
         timer?.cancel()
         progress = 0
         progressMax = 0

@@ -53,7 +53,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.dissem.apps.abit.dialog.FullNodeDialogActivity;
 import ch.dissem.apps.abit.drawer.ProfileImageListener;
 import ch.dissem.apps.abit.drawer.ProfileSelectionListener;
 import ch.dissem.apps.abit.listener.ListSelectionListener;
@@ -61,6 +60,7 @@ import ch.dissem.apps.abit.service.BitmessageService;
 import ch.dissem.apps.abit.service.Singleton;
 import ch.dissem.apps.abit.synchronization.SyncAdapter;
 import ch.dissem.apps.abit.util.Labels;
+import ch.dissem.apps.abit.util.NetworkUtils;
 import ch.dissem.apps.abit.util.Preferences;
 import ch.dissem.bitmessage.BitmessageContext;
 import ch.dissem.bitmessage.entity.BitmessageAddress;
@@ -271,11 +271,10 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onCheckedChanged(IDrawerItem drawerItem, CompoundButton buttonView,
                                              boolean isChecked) {
-                    Preferences.setFullNodeActive(MainActivity.this, isChecked);
                     if (isChecked) {
-                        checkAndStartNode();
+                        NetworkUtils.enableNode(MainActivity.this);
                     } else {
-                        stopService(new Intent(MainActivity.this, BitmessageService.class));
+                        NetworkUtils.disableNode(MainActivity.this);
                     }
                 }
             });
@@ -417,7 +416,7 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         updateUnread();
         if (Preferences.isFullNodeActive(this) && Preferences.isConnectionAllowed(MainActivity.this)) {
-            startService(new Intent(this, BitmessageService.class));
+            NetworkUtils.enableNode(this, false);
         }
         updateNodeSwitch();
         Singleton.getMessageListener(this).resetNotification();
@@ -480,14 +479,6 @@ public class MainActivity extends AppCompatActivity
                     return;
                 }
             }
-        }
-    }
-
-    private void checkAndStartNode() {
-        if (Preferences.isConnectionAllowed(MainActivity.this)) {
-            startService(new Intent(this, BitmessageService.class));
-        } else {
-            startActivity(new Intent(this, FullNodeDialogActivity.class));
         }
     }
 
