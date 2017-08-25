@@ -159,7 +159,6 @@ class AndroidNodeRegistry(private val sql: SqlHelper) : NodeRegistry {
     }
 
     companion object {
-        @JvmStatic
         private val LOG = LoggerFactory.getLogger(AndroidInventory::class.java)
 
         private const val TABLE_NAME = "Node"

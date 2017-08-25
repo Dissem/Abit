@@ -18,14 +18,9 @@ package ch.dissem.apps.abit.service
 
 import android.app.IntentService
 import android.content.Intent
-
-import ch.dissem.apps.abit.dialog.FullNodeDialogActivity
 import ch.dissem.apps.abit.util.NetworkUtils
-import ch.dissem.apps.abit.util.Preferences
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.entity.Plaintext
-
-import ch.dissem.apps.abit.MainActivity.updateNodeSwitch
 
 /**
  * @author Christian Basler

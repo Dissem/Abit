@@ -10,7 +10,7 @@
         android:paddingTop="4dp">
 
         <AutoCompleteTextView
-            android:id="@+id/recipient"
+            android:id="@+id/recipient_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/to"
@@ -24,7 +24,7 @@
         android:layout_height="wrap_content">
 
         <EditText
-            android:id="@+id/subject"
+            android:id="@+id/subject_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/subject"
@@ -34,7 +34,7 @@
     </android.support.design.widget.TextInputLayout>
 
     <EditText
-        android:id="@+id/body"
+        android:id="@+id/body_input"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"

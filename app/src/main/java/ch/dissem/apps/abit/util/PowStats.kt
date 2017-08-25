@@ -15,7 +15,6 @@ object PowStats {
     var averagePowUnitTime = 0L
     var powCount = 0L
 
-    @JvmStatic
     fun getExpectedPowTimeInMilliseconds(ctx: Context, target: ByteArray): Long {
         if (averagePowUnitTime == 0L) {
             val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
@@ -27,7 +26,6 @@ object PowStats {
         return (BigInteger.valueOf(averagePowUnitTime) * BigInteger(target) / TWO_POW_64).toLong()
     }
 
-    @JvmStatic
     fun addPow(ctx: Context, time: Long, target: ByteArray) {
         val targetBigInt = BigInteger(target)
         val powCountBefore = BigInteger.valueOf(powCount)

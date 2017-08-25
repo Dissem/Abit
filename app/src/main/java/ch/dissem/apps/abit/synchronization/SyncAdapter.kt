@@ -43,11 +43,11 @@ class SyncAdapter(context: Context, autoInitialize: Boolean) : AbstractThreadedS
     private val bmc = Singleton.getBitmessageContext(context)
 
     override fun onPerformSync(
-        account: Account,
-        extras: Bundle,
-        authority: String,
-        provider: ContentProviderClient,
-        syncResult: SyncResult
+            account: Account,
+            extras: Bundle,
+            authority: String,
+            provider: ContentProviderClient,
+            syncResult: SyncResult
     ) {
         try {
             if (account == ACCOUNT_SYNC) {
@@ -81,10 +81,10 @@ class SyncAdapter(context: Context, autoInitialize: Boolean) : AbstractThreadedS
         }
         LOG.info("Synchronization started")
         bmc.synchronize(
-            trustedNode,
-            Preferences.getTrustedNodePort(context),
-            Preferences.getTimeoutInSeconds(context),
-            true
+                trustedNode,
+                Preferences.getTrustedNodePort(context),
+                Preferences.getTimeoutInSeconds(context),
+                true
         )
         LOG.info("Synchronization finished")
     }
@@ -113,12 +113,12 @@ class SyncAdapter(context: Context, autoInitialize: Boolean) : AbstractThreadedS
             val (objectMessage, nonceTrialsPerByte, extraBytes) = powRepo.getItem(initialHash)
             val target = cryptography().getProofOfWorkTarget(objectMessage, nonceTrialsPerByte, extraBytes)
             val cryptoMsg = CryptoCustomMessage(
-                ProofOfWorkRequest(identity, initialHash, CALCULATE, target))
+                    ProofOfWorkRequest(identity, initialHash, CALCULATE, target))
             cryptoMsg.signAndEncrypt(identity, signingKey)
             val response = bmc.send(
-                trustedNode,
-                Preferences.getTrustedNodePort(context),
-                cryptoMsg
+                    trustedNode,
+                    Preferences.getTrustedNodePort(context),
+                    cryptoMsg
             )
             if (response.isError) {
                 LOG.error("Server responded with error: ${String(response.getData())}")
@@ -140,7 +140,6 @@ class SyncAdapter(context: Context, autoInitialize: Boolean) : AbstractThreadedS
 
         private const val SYNC_FREQUENCY = 15 * 60L // seconds
 
-        @JvmStatic
         fun startSync(ctx: Context) {
             // Create account, if it's missing. (Either first run, or user has deleted account.)
             val account = addAccount(ctx, ACCOUNT_SYNC)
@@ -150,7 +149,6 @@ class SyncAdapter(context: Context, autoInitialize: Boolean) : AbstractThreadedS
             ContentResolver.addPeriodicSync(account, AUTHORITY, Bundle(), SYNC_FREQUENCY)
         }
 
-        @JvmStatic
         fun stopSync(ctx: Context) {
             // Create account, if it's missing. (Either first run, or user has deleted account.)
             val account = addAccount(ctx, ACCOUNT_SYNC)
@@ -158,7 +156,6 @@ class SyncAdapter(context: Context, autoInitialize: Boolean) : AbstractThreadedS
             ContentResolver.removePeriodicSync(account, AUTHORITY, Bundle())
         }
 
-        @JvmStatic
         fun startPowSync(ctx: Context) {
             // Create account, if it's missing. (Either first run, or user has deleted account.)
             val account = addAccount(ctx, ACCOUNT_POW)
@@ -168,7 +165,6 @@ class SyncAdapter(context: Context, autoInitialize: Boolean) : AbstractThreadedS
             ContentResolver.addPeriodicSync(account, AUTHORITY, Bundle(), SYNC_FREQUENCY)
         }
 
-        @JvmStatic
         fun stopPowSync(ctx: Context) {
             // Create account, if it's missing. (Either first run, or user has deleted account.)
             val account = addAccount(ctx, ACCOUNT_POW)

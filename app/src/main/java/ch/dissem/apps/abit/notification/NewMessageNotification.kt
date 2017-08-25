@@ -35,8 +35,8 @@ import ch.dissem.apps.abit.service.BitmessageIntentService
 import ch.dissem.bitmessage.entity.Plaintext
 
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
-import ch.dissem.apps.abit.MainActivity.EXTRA_REPLY_TO_MESSAGE
-import ch.dissem.apps.abit.MainActivity.EXTRA_SHOW_MESSAGE
+import ch.dissem.apps.abit.MainActivity.Companion.EXTRA_REPLY_TO_MESSAGE
+import ch.dissem.apps.abit.MainActivity.Companion.EXTRA_SHOW_MESSAGE
 import ch.dissem.apps.abit.service.BitmessageIntentService.Companion.EXTRA_DELETE_MESSAGE
 import ch.dissem.apps.abit.util.Drawables.toBitmap
 

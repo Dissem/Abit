@@ -17,7 +17,6 @@
 package ch.dissem.apps.abit.service
 
 import android.content.Context
-import android.os.AsyncTask
 import android.widget.Toast
 import ch.dissem.apps.abit.MainActivity
 import ch.dissem.apps.abit.R
@@ -35,6 +34,8 @@ import ch.dissem.bitmessage.ports.ProofOfWorkRepository
 import ch.dissem.bitmessage.utils.ConversationService
 import ch.dissem.bitmessage.utils.TTL
 import ch.dissem.bitmessage.utils.UnixTime.DAY
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 
 /**
  * Provides singleton objects across the application.
@@ -48,121 +49,101 @@ object Singleton {
     private var powRepo: AndroidProofOfWorkRepository? = null
     private var creatingIdentity: Boolean = false
 
-    @JvmStatic
     fun getBitmessageContext(context: Context): BitmessageContext {
-        if (bitmessageContext == null) {
-            synchronized(Singleton::class.java) {
-                if (bitmessageContext == null) {
-                    val ctx = context.applicationContext
-                    val sqlHelper = SqlHelper(ctx)
-                    powRepo = AndroidProofOfWorkRepository(sqlHelper)
-                    TTL.pubkey = 2 * DAY
-                    bitmessageContext = BitmessageContext.Builder()
-                        .proofOfWorkEngine(SwitchingProofOfWorkEngine(
+        return init({ bitmessageContext }, { bitmessageContext = it }) {
+            val ctx = context.applicationContext
+            val sqlHelper = SqlHelper(ctx)
+            powRepo = AndroidProofOfWorkRepository(sqlHelper)
+            TTL.pubkey = 2 * DAY
+            BitmessageContext.Builder()
+                    .proofOfWorkEngine(SwitchingProofOfWorkEngine(
                             ctx, Constants.PREFERENCE_SERVER_POW,
                             ServerPowEngine(ctx),
                             ServicePowEngine(ctx)
-                        ))
-                        .cryptography(AndroidCryptography())
-                        .nodeRegistry(AndroidNodeRegistry(sqlHelper))
-                        .inventory(AndroidInventory(sqlHelper))
-                        .addressRepo(AndroidAddressRepository(sqlHelper))
-                        .messageRepo(AndroidMessageRepository(sqlHelper, ctx))
-                        .powRepo(powRepo!!)
-                        .networkHandler(NioNetworkHandler())
-                        .listener(getMessageListener(ctx))
-                        .doNotSendPubkeyOnIdentityCreation()
-                        .build()
-                }
-            }
+                    ))
+                    .cryptography(AndroidCryptography())
+                    .nodeRegistry(AndroidNodeRegistry(sqlHelper))
+                    .inventory(AndroidInventory(sqlHelper))
+                    .addressRepo(AndroidAddressRepository(sqlHelper))
+                    .messageRepo(AndroidMessageRepository(sqlHelper, ctx))
+                    .powRepo(powRepo!!)
+                    .networkHandler(NioNetworkHandler())
+                    .listener(getMessageListener(ctx))
+                    .doNotSendPubkeyOnIdentityCreation()
+                    .build()
         }
-        return bitmessageContext!!
     }
 
-    @JvmStatic
-    fun getMessageListener(ctx: Context): MessageListener {
-        if (messageListener == null) {
-            synchronized(Singleton::class.java) {
-                if (messageListener == null) {
-                    messageListener = MessageListener(ctx)
-                }
-            }
-        }
-        return messageListener!!
-    }
+    fun getMessageListener(ctx: Context) = init({ messageListener }, { messageListener = it }) { MessageListener(ctx) }
 
-    @JvmStatic
-    fun getMessageRepository(ctx: Context): AndroidMessageRepository {
-        return getBitmessageContext(ctx).messages as AndroidMessageRepository
-    }
+    fun getMessageRepository(ctx: Context) = getBitmessageContext(ctx).messages as AndroidMessageRepository
 
-    @JvmStatic
-    fun getAddressRepository(ctx: Context): AndroidAddressRepository {
-        return getBitmessageContext(ctx).addresses as AndroidAddressRepository
-    }
+    fun getAddressRepository(ctx: Context) = getBitmessageContext(ctx).addresses as AndroidAddressRepository
 
-    @JvmStatic
     fun getProofOfWorkRepository(ctx: Context): ProofOfWorkRepository {
         if (powRepo == null) getBitmessageContext(ctx)
         return powRepo!!
     }
 
-    @JvmStatic
     fun getIdentity(ctx: Context): BitmessageAddress? {
-        if (identity == null) {
-            val bmc = getBitmessageContext(ctx)
-            synchronized(Singleton::class) {
-                if (identity == null) {
-                    val identities = bmc.addresses.getIdentities()
-                    if (identities.isNotEmpty()) {
-                        identity = identities[0]
-                    } else {
-                        if (!creatingIdentity) {
-                            creatingIdentity = true
-                            object : AsyncTask<Void, Void, BitmessageAddress>() {
-                                override fun doInBackground(vararg args: Void): BitmessageAddress {
-                                    val identity = bmc.createIdentity(false,
-                                        Pubkey.Feature.DOES_ACK)
-                                    identity.alias = ctx.getString(R.string.alias_default_identity)
-                                    bmc.addresses.save(identity)
-                                    return identity
-                                }
+        return init<BitmessageAddress?>(ctx, { identity }, { identity = it }) { bmc ->
+            val identities = bmc.addresses.getIdentities()
+            if (identities.isNotEmpty()) {
+                identities[0]
+            } else {
+                if (!creatingIdentity) {
+                    creatingIdentity = true
+                    doAsync {
+                        val identity = bmc.createIdentity(false,
+                                Pubkey.Feature.DOES_ACK)
+                        identity.alias = ctx.getString(R.string.alias_default_identity)
+                        bmc.addresses.save(identity)
 
-                                override fun onPostExecute(identity: BitmessageAddress) {
-                                    Singleton.identity = identity
-                                    Toast.makeText(ctx,
-                                        R.string.toast_identity_created,
-                                        Toast.LENGTH_SHORT).show()
-                                    val mainActivity = MainActivity.getInstance()
-                                    mainActivity?.addIdentityEntry(identity)
-                                }
-                            }.execute()
+                        uiThread {
+                            Singleton.identity = identity
+                            Toast.makeText(ctx,
+                                    R.string.toast_identity_created,
+                                    Toast.LENGTH_SHORT).show()
+                            val mainActivity = MainActivity.getInstance()
+                            mainActivity?.addIdentityEntry(identity)
                         }
-                        return null
                     }
                 }
+                null
             }
         }
-        return identity
     }
 
-    @JvmStatic
     fun setIdentity(identity: BitmessageAddress) {
         if (identity.privateKey == null)
             throw IllegalArgumentException("Identity expected, but no private key available")
         Singleton.identity = identity
     }
 
-    @JvmStatic
-    fun getConversationService(ctx: Context): ConversationService {
-        if (conversationService == null) {
-            val bmc = getBitmessageContext(ctx)
-            synchronized(Singleton::class.java) {
-                if (conversationService == null) {
-                    conversationService = ConversationService(bmc.messages)
-                }
+    fun getConversationService(ctx: Context) = init(ctx, { conversationService }, { conversationService = it }) { ConversationService(it.messages) }
+
+    private inline fun <T> init(crossinline getter: () -> T?, crossinline setter: (T) -> Unit, crossinline creator: () -> T): T {
+        return getter() ?: {
+            synchronized(Singleton) {
+                getter() ?: {
+                    val v = creator()
+                    setter(v)
+                    v
+                }.invoke()
             }
-        }
-        return conversationService!!
+        }.invoke()
+    }
+
+    private inline fun <T> init(ctx: Context, crossinline getter: () -> T?, crossinline setter: (T) -> Unit, crossinline creator: (BitmessageContext) -> T): T {
+        return getter() ?: {
+            val bmc = getBitmessageContext(ctx)
+            synchronized(Singleton) {
+                getter() ?: {
+                    val v = creator(bmc)
+                    setter(v)
+                    v
+                }.invoke()
+            }
+        }.invoke()
     }
 }

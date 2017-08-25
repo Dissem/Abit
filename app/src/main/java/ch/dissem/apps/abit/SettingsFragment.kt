@@ -42,6 +42,7 @@ import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.LibsBuilder
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.support.v4.indeterminateProgressDialog
+import org.jetbrains.anko.support.v4.startActivity
 import org.jetbrains.anko.uiThread
 import java.io.File
 import java.io.FileOutputStream
@@ -59,13 +60,13 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
         findPreference("about")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
             val libsBuilder = LibsBuilder()
-                .withActivityTitle(activity.getString(R.string.about))
-                .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
-                .withAboutIconShown(true)
-                .withAboutVersionShown(true)
-                .withAboutDescription(getString(R.string.about_app))
+                    .withActivityTitle(activity.getString(R.string.about))
+                    .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
+                    .withAboutIconShown(true)
+                    .withAboutVersionShown(true)
+                    .withAboutDescription(getString(R.string.about_app))
             val activity = activity as MainActivity
-            if (activity.hasDetailPane()) {
+            if (activity.hasDetailPane) {
                 activity.setDetailView(libsBuilder.supportFragment())
             } else {
                 libsBuilder.start(getActivity())
@@ -77,7 +78,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             val ctx = activity.applicationContext
             cleanup.isEnabled = false
             Toast.makeText(ctx, R.string.cleanup_notification_start, Toast
-                .LENGTH_SHORT).show()
+                    .LENGTH_SHORT).show()
 
             doAsync {
                 val bmc = Singleton.getBitmessageContext(ctx)
@@ -87,9 +88,9 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
                 uiThread {
                     Toast.makeText(
-                        ctx,
-                        R.string.cleanup_notification_end,
-                        Toast.LENGTH_LONG
+                            ctx,
+                            R.string.cleanup_notification_end,
+                            Toast.LENGTH_LONG
                     ).show()
                     cleanup.isEnabled = true
                 }
@@ -108,7 +109,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                     val addressRepo = Singleton.getAddressRepository(context)
                     val exportContacts = ContactExport.exportContacts(addressRepo.getContacts())
                     zip.write(
-                        exportContacts.toJsonString(true).toByteArray()
+                            exportContacts.toJsonString(true).toByteArray()
                     )
                     zip.closeEntry()
 
@@ -116,13 +117,13 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                     zip.putNextEntry(ZipEntry("labels.json"))
                     val exportLabels = MessageExport.exportLabels(messageRepo.getLabels())
                     zip.write(
-                        exportLabels.toJsonString(true).toByteArray()
+                            exportLabels.toJsonString(true).toByteArray()
                     )
                     zip.closeEntry()
                     zip.putNextEntry(ZipEntry("messages.json"))
                     val exportMessages = MessageExport.exportMessages(messageRepo.getAllMessages())
                     zip.write(
-                        exportMessages.toJsonString(true).toByteArray()
+                            exportMessages.toJsonString(true).toByteArray()
                     )
                     zip.closeEntry()
                 }
@@ -151,10 +152,10 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
         findPreference("status").onPreferenceClickListener = Preference.OnPreferenceClickListener {
             val activity = activity as MainActivity
-            if (activity.hasDetailPane()) {
+            if (activity.hasDetailPane) {
                 activity.setDetailView(StatusFragment())
             } else {
-                startActivity(Intent(getActivity(), StatusActivity::class.java))
+                startActivity<StatusActivity>()
             }
             return@OnPreferenceClickListener true
         }
@@ -217,7 +218,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         super.onAttach(ctx)
         (ctx as? MainActivity)?.floatingActionButton?.hide()
         PreferenceManager.getDefaultSharedPreferences(ctx)
-            .registerOnSharedPreferenceChangeListener(this)
+                .registerOnSharedPreferenceChangeListener(this)
 
         (ctx as? MainActivity)?.updateTitle(getString(R.string.settings))
     }

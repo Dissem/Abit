@@ -8,19 +8,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.support.annotation.RequiresApi
-import ch.dissem.apps.abit.MainActivity.updateNodeSwitch
+import ch.dissem.apps.abit.MainActivity
 import ch.dissem.apps.abit.dialog.FullNodeDialogActivity
 import ch.dissem.apps.abit.service.BitmessageService
 import ch.dissem.apps.abit.service.StartupNodeOnWifiService
 
 
-/**
- * Created by chrigu on 18.08.17.
- */
 object NetworkUtils {
 
-    @JvmStatic
-    @JvmOverloads
     fun enableNode(ctx: Context, ask: Boolean = true) {
         Preferences.setFullNodeActive(ctx, true)
         if (Preferences.isWifiOnly(ctx)) {
@@ -29,7 +24,7 @@ object NetworkUtils {
                     scheduleNodeStart(ctx)
                 } else {
                     ctx.startService(Intent(ctx, BitmessageService::class.java))
-                    updateNodeSwitch()
+                    MainActivity.updateNodeSwitch()
                 }
             } else if (ask) {
                 val dialogIntent = Intent(ctx, FullNodeDialogActivity::class.java)
@@ -43,23 +38,22 @@ object NetworkUtils {
             }
         } else {
             ctx.startService(Intent(ctx, BitmessageService::class.java))
-            updateNodeSwitch()
+            MainActivity.updateNodeSwitch()
         }
     }
 
-    @JvmStatic
     fun disableNode(ctx: Context) {
         Preferences.setFullNodeActive(ctx, false)
         ctx.stopService(Intent(ctx, BitmessageService::class.java))
     }
 
-    @JvmStatic
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun scheduleNodeStart(ctx: Context) {
         val serviceComponent = ComponentName(ctx, StartupNodeOnWifiService::class.java)
         val builder = JobInfo.Builder(0, serviceComponent)
         builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+        builder.setBackoffCriteria(0L, JobInfo.BACKOFF_POLICY_LINEAR)
         val jobScheduler = ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-        jobScheduler.schedule(builder.build());
+        jobScheduler.schedule(builder.build())
     }
 }
