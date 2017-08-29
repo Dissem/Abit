@@ -90,7 +90,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
     }
 
     override fun updateList(label: Label) {
-        if (currentLabel != null && currentLabel != label) {
+        if (currentLabel != null && currentLabel != label && currentLabel != backStack.peek()) {
             backStack.push(currentLabel)
         }
         if (!isResumed) {
@@ -123,9 +123,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
             messageRepo.findMessageIds(label)
                     .map { messageRepo.getMessage(it) }
                     .forEach { message ->
-                        uiThread {
-                            swipeableMessageAdapter?.add(message)
-                        }
+                        uiThread { swipeableMessageAdapter?.add(message) }
                     }
         }
     }
@@ -274,9 +272,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
                             messageRepo.remove(message)
                         }
 
-                        uiThread {
-                            updateList(currentLabel)
-                        }
+                        uiThread { updateList(currentLabel) }
                     }
                     return true
                 }

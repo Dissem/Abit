@@ -33,7 +33,7 @@ class MessageDetailActivity : DetailActivity() {
         // http://developer.android.com/guide/components/fragments.html
         //
         if (savedInstanceState == null) {
-            label = intent.getSerializableExtra(MainActivity.EXTRA_SHOW_LABEL) as Label
+            label = intent.getSerializableExtra(MainActivity.EXTRA_SHOW_LABEL) as Label?
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             val arguments = Bundle()

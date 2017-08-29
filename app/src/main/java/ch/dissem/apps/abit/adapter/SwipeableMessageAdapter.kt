@@ -26,32 +26,27 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-
+import ch.dissem.apps.abit.Identicon
+import ch.dissem.apps.abit.R
+import ch.dissem.apps.abit.repository.AndroidMessageRepository.Companion.LABEL_ARCHIVE
+import ch.dissem.apps.abit.util.Assets
+import ch.dissem.apps.abit.util.Strings.prepareMessageExtract
+import ch.dissem.bitmessage.entity.Plaintext
+import ch.dissem.bitmessage.entity.valueobject.Label
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemConstants
-import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultAction
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemConstants.*
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultActionMoveToSwipedDirection
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultActionRemoveItem
 import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractSwipeableItemViewHolder
 import com.h6ah4i.android.widget.advrecyclerview.utils.RecyclerViewAdapterUtils
-
-import java.util.LinkedList
-
-import ch.dissem.apps.abit.Identicon
-import ch.dissem.apps.abit.R
-import ch.dissem.apps.abit.util.Assets
-import ch.dissem.bitmessage.entity.Plaintext
-import ch.dissem.bitmessage.entity.valueobject.Label
-
-import ch.dissem.apps.abit.repository.AndroidMessageRepository.Companion.LABEL_ARCHIVE
-import ch.dissem.apps.abit.util.Strings.prepareMessageExtract
+import java.util.*
 
 /**
  * Adapted from the basic swipeable example by Haruki Hasegawa. See
  *
  * @author Christian Basler
- * @see [
- * https://github.com/h6ah4i/android-advancedrecyclerview](https://github.com/h6ah4i/android-advancedrecyclerview)
+ * @see [https://github.com/h6ah4i/android-advancedrecyclerview](https://github.com/h6ah4i/android-advancedrecyclerview)
  */
 class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.ViewHolder>(), SwipeableItemAdapter<SwipeableMessageAdapter.ViewHolder>, SwipeableItemConstants {
 
@@ -108,16 +103,12 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
     }
 
     private fun onItemViewClick(v: View) {
-        if (eventListener != null) {
-            eventListener!!.onItemViewClicked(v)
-        }
+        eventListener?.onItemViewClicked(v)
     }
 
     private fun onSwipeableViewContainerClick(v: View) {
-        if (eventListener != null) {
-            eventListener!!.onItemViewClicked(
-                    RecyclerViewAdapterUtils.getParentViewHolderItemView(v))
-        }
+        eventListener?.onItemViewClicked(
+                RecyclerViewAdapterUtils.getParentViewHolderItemView(v))
     }
 
     fun getItem(position: Int) = data[position]
@@ -133,52 +124,56 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = data[position]
 
-        if (activateOnItemClick) {
-            holder.container.setBackgroundResource(
-                    if (position == selectedPosition)
-                        R.drawable.bg_item_selected_state
-                    else
-                        R.drawable.bg_item_normal_state
-            )
-        }
+        holder.apply {
+            if (activateOnItemClick) {
+                container.setBackgroundResource(
+                        if (position == selectedPosition)
+                            R.drawable.bg_item_selected_state
+                        else
+                            R.drawable.bg_item_normal_state
+                )
+            }
 
-        // set listeners
-        // (if the item is *pinned*, click event comes to the itemView)
-        holder.itemView.setOnClickListener(itemViewOnClickListener)
-        // (if the item is *not pinned*, click event comes to the container)
-        holder.container.setOnClickListener(swipeableViewContainerOnClickListener)
+            // set listeners
+            // (if the item is *pinned*, click event comes to the itemView)
+            itemView.setOnClickListener(itemViewOnClickListener)
+            // (if the item is *not pinned*, click event comes to the container)
+            container.setOnClickListener(swipeableViewContainerOnClickListener)
 
-        // set data
-        holder.avatar.setImageDrawable(Identicon(item.from))
-        holder.status.setImageResource(Assets.getStatusDrawable(item.status))
-        holder.status.contentDescription = holder.status.context.getString(Assets.getStatusString(item.status))
-        holder.sender.text = item.from.toString()
-        holder.subject.text = prepareMessageExtract(item.subject)
-        holder.extract.text = prepareMessageExtract(item.text)
-        if (item.isUnread()) {
-            holder.sender.typeface = Typeface.DEFAULT_BOLD
-            holder.subject.typeface = Typeface.DEFAULT_BOLD
-        } else {
-            holder.sender.typeface = Typeface.DEFAULT
-            holder.subject.typeface = Typeface.DEFAULT
+            // set data
+            avatar.setImageDrawable(Identicon(item.from))
+            status.setImageResource(Assets.getStatusDrawable(item.status))
+            status.contentDescription = holder.status.context.getString(Assets.getStatusString(item.status))
+            sender.text = item.from.toString()
+            subject.text = prepareMessageExtract(item.subject)
+            extract.text = prepareMessageExtract(item.text)
+            if (item.isUnread()) {
+                sender.typeface = Typeface.DEFAULT_BOLD
+                subject.typeface = Typeface.DEFAULT_BOLD
+            } else {
+                sender.typeface = Typeface.DEFAULT
+                subject.typeface = Typeface.DEFAULT
+            }
         }
     }
 
     override fun getItemCount() = data.size
 
     override fun onGetSwipeReactionType(holder: ViewHolder, position: Int, x: Int, y: Int): Int {
-        return if (label === LABEL_ARCHIVE || label!!.type == Label.Type.TRASH) {
-            SwipeableItemConstants.REACTION_CAN_SWIPE_LEFT or SwipeableItemConstants.REACTION_CAN_NOT_SWIPE_RIGHT_WITH_RUBBER_BAND_EFFECT
-        } else SwipeableItemConstants.REACTION_CAN_SWIPE_BOTH_H
+        return if (label === LABEL_ARCHIVE || label?.type == Label.Type.TRASH) {
+            REACTION_CAN_SWIPE_LEFT or REACTION_CAN_NOT_SWIPE_RIGHT_WITH_RUBBER_BAND_EFFECT
+        } else {
+            REACTION_CAN_SWIPE_BOTH_H
+        }
     }
 
     @SuppressLint("SwitchIntDef")
     override fun onSetSwipeBackground(holder: ViewHolder, position: Int, type: Int) {
         var bgRes = 0
         when (type) {
-            SwipeableItemConstants.DRAWABLE_SWIPE_NEUTRAL_BACKGROUND -> bgRes = R.drawable.bg_swipe_item_neutral
-            SwipeableItemConstants.DRAWABLE_SWIPE_LEFT_BACKGROUND -> bgRes = R.drawable.bg_swipe_item_left
-            SwipeableItemConstants.DRAWABLE_SWIPE_RIGHT_BACKGROUND -> if (label === LABEL_ARCHIVE || label!!.type == Label.Type.TRASH) {
+            DRAWABLE_SWIPE_NEUTRAL_BACKGROUND -> bgRes = R.drawable.bg_swipe_item_neutral
+            DRAWABLE_SWIPE_LEFT_BACKGROUND -> bgRes = R.drawable.bg_swipe_item_left
+            DRAWABLE_SWIPE_RIGHT_BACKGROUND -> if (label === LABEL_ARCHIVE || label?.type == Label.Type.TRASH) {
                 bgRes = R.drawable.bg_swipe_item_neutral
             } else {
                 bgRes = R.drawable.bg_swipe_item_right
@@ -188,13 +183,12 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
     }
 
     @SuppressLint("SwitchIntDef")
-    override fun onSwipeItem(holder: ViewHolder, position: Int, result: Int): SwipeResultAction? {
-        when (result) {
-            SwipeableItemConstants.RESULT_SWIPED_RIGHT -> return SwipeRightResultAction(this, position)
-            SwipeableItemConstants.RESULT_SWIPED_LEFT -> return SwipeLeftResultAction(this, position)
-            else -> return null
-        }
-    }
+    override fun onSwipeItem(holder: ViewHolder, position: Int, result: Int) =
+            when (result) {
+                RESULT_SWIPED_RIGHT -> SwipeRightResultAction(this, position)
+                RESULT_SWIPED_LEFT -> SwipeLeftResultAction(this, position)
+                else -> null
+            }
 
     fun setSelectedPosition(selectedPosition: Int) {
         val oldPosition = this.selectedPosition
@@ -210,8 +204,10 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
         override fun onPerformAction() {
             super.onPerformAction()
 
-            adapter?.data?.removeAt(position)
-            adapter?.notifyItemRemoved(position)
+            adapter?.apply {
+                data.removeAt(position)
+                notifyItemRemoved(position)
+            }
         }
 
         override fun onSlideAnimationEnd() {
@@ -233,8 +229,10 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
         override fun onPerformAction() {
             super.onPerformAction()
 
-            adapter?.data?.removeAt(position)
-            adapter?.notifyItemRemoved(position)
+            adapter?.apply {
+                data.removeAt(position)
+                notifyItemRemoved(position)
+            }
         }
 
         override fun onSlideAnimationEnd() {

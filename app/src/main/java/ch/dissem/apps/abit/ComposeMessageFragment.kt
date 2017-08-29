@@ -56,7 +56,7 @@ class ComposeMessageFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (arguments != null) {
+        arguments?.let { arguments ->
             var id = arguments.getSerializable(EXTRA_IDENTITY) as? BitmessageAddress
             if (context != null && (id == null || id.privateKey == null)) {
                 id = Singleton.getIdentity(context)
@@ -81,9 +81,9 @@ class ComposeMessageFragment : Fragment() {
             if (arguments.containsKey(EXTRA_PARENT)) {
                 parent = arguments.getSerializable(EXTRA_PARENT) as Plaintext
             }
-        } else {
+        } ?: {
             throw IllegalStateException("No identity set for ComposeMessageFragment")
-        }
+        }.invoke()
         setHasOptionsMenu(true)
     }
 
@@ -109,20 +109,18 @@ class ComposeMessageFragment : Fragment() {
                     // leave current selection
                 }
             }
-            if (recipient != null) {
-                recipient_input.setText(recipient.toString())
-            }
+            recipient?.let { recipient_input.setText(it.toString()) }
         }
         subject_input.setText(subject)
         body_input.setText(content)
 
-        if (recipient == null) {
-            recipient_input.requestFocus()
-        } else if (subject.isEmpty()) {
-            subject_input.requestFocus()
-        } else {
-            body_input.requestFocus()
-            body_input.setSelection(0)
+        when {
+            recipient == null -> recipient_input.requestFocus()
+            subject.isEmpty() -> subject_input.requestFocus()
+            else -> {
+                body_input.requestFocus()
+                body_input.setSelection(0)
+            }
         }
     }
 

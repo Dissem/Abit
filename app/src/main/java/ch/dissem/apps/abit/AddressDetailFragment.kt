@@ -58,12 +58,11 @@ class AddressDetailFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.address, menu)
 
-        val activity = activity
-        Drawables.addIcon(activity, menu, R.id.write_message, GoogleMaterial.Icon.gmd_mail)
-        Drawables.addIcon(activity, menu, R.id.share, GoogleMaterial.Icon.gmd_share)
-        Drawables.addIcon(activity, menu, R.id.delete, GoogleMaterial.Icon.gmd_delete)
-        Drawables.addIcon(activity, menu, R.id.export,
-                CommunityMaterial.Icon.cmd_export).isVisible = item != null && item!!.privateKey != null
+        val ctx = activity
+        Drawables.addIcon(ctx, menu, R.id.write_message, GoogleMaterial.Icon.gmd_mail)
+        Drawables.addIcon(ctx, menu, R.id.share, GoogleMaterial.Icon.gmd_share)
+        Drawables.addIcon(ctx, menu, R.id.delete, GoogleMaterial.Icon.gmd_delete)
+        Drawables.addIcon(ctx, menu, R.id.export, CommunityMaterial.Icon.cmd_export).isVisible = item?.privateKey != null
 
         super.onCreateOptionsMenu(menu, inflater)
     }
@@ -187,9 +186,8 @@ class AddressDetailFragment : Fragment() {
     override fun onPause() {
         item?.let { item ->
             Singleton.getAddressRepository(context).save(item)
-            val mainActivity = MainActivity.getInstance()
-            if (mainActivity != null && item.privateKey != null) {
-                mainActivity.updateIdentityEntry(item)
+            if (item.privateKey != null) {
+                MainActivity.getInstance()?.updateIdentityEntry(item)
             }
         }
         super.onPause()

@@ -90,7 +90,7 @@ class CreateAddressActivity : AppCompatActivity() {
             if (subscribe.isChecked) {
                 bmc.addSubscribtion(bmAddress)
             }
-            if (pubkeyBytes != null) {
+            pubkeyBytes?.let { pubkeyBytes ->
                 try {
                     val pubkeyStream = ByteArrayInputStream(pubkeyBytes)
                     val stream = bmAddress.stream
