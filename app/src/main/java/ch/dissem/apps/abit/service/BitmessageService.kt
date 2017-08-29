@@ -35,7 +35,7 @@ class BitmessageService : Service() {
     private lateinit var notification: NetworkNotification
 
     private val cleanupHandler = Handler()
-    private val cleanupTask = object : Runnable {
+    private val cleanupTask: Runnable = object : Runnable {
         override fun run() {
             bmc.cleanup()
             if (isRunning) {
@@ -79,11 +79,9 @@ class BitmessageService : Service() {
     companion object {
         @Volatile private var running = false
 
-        @JvmStatic
         val isRunning: Boolean
             get() = running && Singleton.bitmessageContext?.isRunning() ?: false
 
-        @JvmStatic
         val status: Property
             get() = Singleton.bitmessageContext?.status() ?: Property("bitmessage context")
     }

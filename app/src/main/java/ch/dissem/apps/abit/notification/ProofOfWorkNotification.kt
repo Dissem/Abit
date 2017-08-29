@@ -68,7 +68,7 @@ class ProofOfWorkNotification(ctx: Context) : AbstractNotification(ctx) {
     }
 
     companion object {
-        @JvmField val ONGOING_NOTIFICATION_ID = 3
+        const val ONGOING_NOTIFICATION_ID = 3
     }
 
     fun start(item: ProofOfWorkService.PowItem) {

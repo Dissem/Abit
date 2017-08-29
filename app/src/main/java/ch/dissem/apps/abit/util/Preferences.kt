@@ -21,7 +21,11 @@ import android.preference.PreferenceManager
 import ch.dissem.apps.abit.R
 import ch.dissem.apps.abit.listener.WifiReceiver
 import ch.dissem.apps.abit.notification.ErrorNotification
-import ch.dissem.apps.abit.util.Constants.*
+import ch.dissem.apps.abit.util.Constants.PREFERENCE_FULL_NODE
+import ch.dissem.apps.abit.util.Constants.PREFERENCE_REQUEST_ACK
+import ch.dissem.apps.abit.util.Constants.PREFERENCE_SYNC_TIMEOUT
+import ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE
+import ch.dissem.apps.abit.util.Constants.PREFERENCE_WIFI_ONLY
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
@@ -33,7 +37,6 @@ import java.net.InetAddress
 object Preferences {
     private val LOG = LoggerFactory.getLogger(Preferences::class.java)
 
-    @JvmStatic
     fun useTrustedNode(ctx: Context): Boolean {
         val trustedNode = getPreference(ctx, PREFERENCE_TRUSTED_NODE) ?: return false
         return trustedNode.trim { it <= ' ' }.isNotEmpty()
@@ -43,7 +46,6 @@ object Preferences {
      * Warning, this method might do a network call and therefore can't be called from
      * the UI thread.
      */
-    @JvmStatic
     @Throws(IOException::class)
     fun getTrustedNode(ctx: Context): InetAddress? {
         var trustedNode: String = getPreference(ctx, PREFERENCE_TRUSTED_NODE) ?: return null
@@ -57,7 +59,6 @@ object Preferences {
         return InetAddress.getByName(trustedNode)
     }
 
-    @JvmStatic
     fun getTrustedNodePort(ctx: Context): Int {
         var trustedNode: String = getPreference(ctx, PREFERENCE_TRUSTED_NODE) ?: return 8444
         trustedNode = trustedNode.trim { it <= ' ' }
@@ -69,14 +70,13 @@ object Preferences {
                 return Integer.parseInt(portString)
             } catch (e: NumberFormatException) {
                 ErrorNotification(ctx)
-                    .setError(R.string.error_invalid_sync_port, portString)
-                    .show()
+                        .setError(R.string.error_invalid_sync_port, portString)
+                        .show()
             }
         }
         return 8444
     }
 
-    @JvmStatic
     fun getTimeoutInSeconds(ctx: Context): Long {
         val preference = getPreference(ctx, PREFERENCE_SYNC_TIMEOUT) ?: return 120
         return preference.toLong()
@@ -88,53 +88,40 @@ object Preferences {
         return preferences.getString(name, null)
     }
 
-    @JvmStatic
-    fun isConnectionAllowed(ctx: Context): Boolean {
-        return !isWifiOnly(ctx) || !WifiReceiver.isConnectedToMeteredNetwork(ctx)
-    }
+    fun isConnectionAllowed(ctx: Context) = !isWifiOnly(ctx) || !WifiReceiver.isConnectedToMeteredNetwork(ctx)
 
-    @JvmStatic
     fun isWifiOnly(ctx: Context): Boolean {
         val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
         return preferences.getBoolean(PREFERENCE_WIFI_ONLY, true)
     }
 
-    @JvmStatic
     fun setWifiOnly(ctx: Context, status: Boolean) {
         val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
         preferences.edit().putBoolean(PREFERENCE_WIFI_ONLY, status).apply()
     }
 
-    @JvmStatic
     fun isFullNodeActive(ctx: Context): Boolean {
         val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
         return preferences.getBoolean(PREFERENCE_FULL_NODE, false)
     }
 
-    @JvmStatic
     fun setFullNodeActive(ctx: Context, status: Boolean) {
         val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
         preferences.edit().putBoolean(PREFERENCE_FULL_NODE, status).apply()
     }
 
-    @JvmStatic
-    fun getExportDirectory(ctx: Context): File {
-        return File(ctx.filesDir, "exports")
-    }
+    fun getExportDirectory(ctx: Context) = File(ctx.filesDir, "exports")
 
-    @JvmStatic
     fun requestAcknowledgements(ctx: Context): Boolean {
         val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
         return preferences.getBoolean(PREFERENCE_REQUEST_ACK, true)
     }
 
-    @JvmStatic
     fun setRequestAcknowledgements(ctx: Context, status: Boolean) {
         val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
         preferences.edit().putBoolean(PREFERENCE_REQUEST_ACK, status).apply()
     }
 
-    @JvmStatic
     fun cleanupExportDirectory(ctx: Context) {
         val exportDirectory = getExportDirectory(ctx)
         if (exportDirectory.exists()) {

@@ -29,51 +29,34 @@ import android.os.Bundle
  */
 class Authenticator(context: Context) : AbstractAccountAuthenticator(context) {
 
-    // Editing properties is not supported
-    override fun editProperties(r: AccountAuthenticatorResponse, s: String) = throw UnsupportedOperationException()
+    override fun editProperties(r: AccountAuthenticatorResponse, s: String) =
+            throw UnsupportedOperationException("Editing properties is not supported")
 
     // Don't add additional accounts
     @Throws(NetworkErrorException::class)
-    override fun addAccount(
-        r: AccountAuthenticatorResponse,
-        s: String,
-        s2: String,
-        strings: Array<String>,
-        bundle: Bundle) = null
+    override fun addAccount(r: AccountAuthenticatorResponse, s: String, s2: String, strings: Array<String>, bundle: Bundle) = null
 
     // Ignore attempts to confirm credentials
     @Throws(NetworkErrorException::class)
-    override fun confirmCredentials(
-        r: AccountAuthenticatorResponse,
-        account: Account,
-        bundle: Bundle) = null
+    override fun confirmCredentials(r: AccountAuthenticatorResponse, account: Account, bundle: Bundle) = null
 
-    // Getting an authentication token is not supported
     @Throws(NetworkErrorException::class)
-    override fun getAuthToken(
-        r: AccountAuthenticatorResponse,
-        account: Account,
-        s: String,
-        bundle: Bundle) = throw UnsupportedOperationException()
+    override fun getAuthToken(r: AccountAuthenticatorResponse, account: Account, s: String, bundle: Bundle) =
+            throw UnsupportedOperationException("Getting an authentication token is not supported")
 
-    // Getting a label for the auth token is not supported
-    override fun getAuthTokenLabel(s: String) = throw UnsupportedOperationException()
+    override fun getAuthTokenLabel(s: String) =
+            throw UnsupportedOperationException("Getting a label for the auth token is not supported")
 
-    // Updating user credentials is not supported
     @Throws(NetworkErrorException::class)
-    override fun updateCredentials(
-        r: AccountAuthenticatorResponse,
-        account: Account,
-        s: String, bundle: Bundle) = throw UnsupportedOperationException()
+    override fun updateCredentials(r: AccountAuthenticatorResponse, account: Account, s: String, bundle: Bundle) =
+            throw UnsupportedOperationException("Updating user credentials is not supported")
 
-    // Checking features for the account is not supported
     @Throws(NetworkErrorException::class)
-    override fun hasFeatures(
-        r: AccountAuthenticatorResponse,
-        account: Account, strings: Array<String>) = throw UnsupportedOperationException()
+    override fun hasFeatures(r: AccountAuthenticatorResponse, account: Account, strings: Array<String>) =
+            throw UnsupportedOperationException("Checking features for the account is not supported")
 
     companion object {
-        @JvmField val ACCOUNT_SYNC = Account("Bitmessage", "ch.dissem.bitmessage")
-        @JvmField val ACCOUNT_POW = Account("Proof of Work ", "ch.dissem.bitmessage")
+        val ACCOUNT_SYNC = Account("Bitmessage", "ch.dissem.bitmessage")
+        val ACCOUNT_POW = Account("Proof of Work ", "ch.dissem.bitmessage")
     }
 }

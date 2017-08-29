@@ -8,7 +8,11 @@ import android.support.annotation.RequiresApi
 import ch.dissem.apps.abit.util.Preferences
 
 /**
- * Created by chrigu on 18.08.17.
+ * Starts the full node if
+ * * it is active
+ * * it is not already running
+ *
+ * And stops it when the preconditions for the job (unmetered network) aren't met anymore.
  */
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class StartupNodeOnWifiService : JobService() {
