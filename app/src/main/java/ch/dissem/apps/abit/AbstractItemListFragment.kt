@@ -94,9 +94,9 @@ abstract class AbstractItemListFragment<L, T> : ListFragment(), ListHolder<L> {
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        if (activatedPosition != ListView.INVALID_POSITION) {
+        if (outState != null && activatedPosition != ListView.INVALID_POSITION) {
             // Serialize and persist the activated item position.
-            outState!!.putInt(STATE_ACTIVATED_POSITION, activatedPosition)
+            outState.putInt(STATE_ACTIVATED_POSITION, activatedPosition)
         }
     }
 

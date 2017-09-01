@@ -90,7 +90,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
     }
 
     override fun updateList(label: Label) {
-        if (currentLabel != null && currentLabel != label && currentLabel != backStack.peek()) {
+        if (currentLabel != null && currentLabel != label && (backStack.isEmpty() || currentLabel != backStack.peek())) {
             backStack.push(currentLabel)
         }
         if (!isResumed) {

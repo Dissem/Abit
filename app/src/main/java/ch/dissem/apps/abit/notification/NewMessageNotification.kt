@@ -45,8 +45,9 @@ class NewMessageNotification(ctx: Context) : AbstractNotification(ctx) {
     fun singleNotification(plaintext: Plaintext): NewMessageNotification {
         val builder = NotificationCompat.Builder(ctx)
         val bigText = SpannableString(plaintext.subject + "\n" + plaintext.text)
-        bigText.setSpan(SPAN_EMPHASIS, 0, plaintext.subject!!.length, Spanned
-                .SPAN_INCLUSIVE_EXCLUSIVE)
+        plaintext.subject?.let { subject ->
+            bigText.setSpan(SPAN_EMPHASIS, 0, subject.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        }
         builder.setSmallIcon(R.drawable.ic_notification_new_message)
                 .setLargeIcon(toBitmap(Identicon(plaintext.from), 192))
                 .setContentTitle(plaintext.from.toString())

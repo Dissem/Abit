@@ -83,31 +83,28 @@ class ContactAdapter(ctx: Context) : BaseAdapter(), Filterable {
 
                 val newValues = ArrayList<BitmessageAddress>()
 
-                for (i in originalData.indices) {
-                    val value = originalData[i]
-
-                    // First match against the whole, non-splitted value
-                    if (value.alias != null) {
-                        val alias = value.alias!!.toLowerCase()
-                        if (alias.startsWith(prefixString)) {
-                            newValues.add(value)
-                        } else {
-                            val words = alias.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-
-                            for (word in words) {
-                                if (word.startsWith(prefixString)) {
+                originalData
+                        .forEach { value ->
+                            value.alias?.toLowerCase()?.let { alias ->
+                                if (alias.startsWith(prefixString)) {
                                     newValues.add(value)
-                                    break
+                                } else {
+                                    val words = alias.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+
+                                    for (word in words) {
+                                        if (word.startsWith(prefixString)) {
+                                            newValues.add(value)
+                                            break
+                                        }
+                                    }
                                 }
-                            }
+                            } ?: {
+                                val address = value.address.toLowerCase()
+                                if (address.contains(prefixString)) {
+                                    newValues.add(value)
+                                }
+                            }.invoke()
                         }
-                    } else {
-                        val address = value.address.toLowerCase()
-                        if (address.contains(prefixString)) {
-                            newValues.add(value)
-                        }
-                    }
-                }
 
                 results.values = newValues
                 results.count = newValues.size

@@ -104,7 +104,7 @@ class SyncAdapter(context: Context, autoInitialize: Boolean) : AbstractThreadedS
         // If the Bitmessage context acts as a full node, synchronization isn't necessary
         LOG.info("Looking for completed POW")
 
-        val privateKey = identity.privateKey!!.privateEncryptionKey
+        val privateKey = identity.privateKey?.privateEncryptionKey ?: throw IllegalStateException("Identity without private key")
         val signingKey = cryptography().createPublicKey(identity.publicDecryptionKey)
         val reader = ProofOfWorkRequest.Reader(identity)
         val powRepo = Singleton.getProofOfWorkRepository(context)

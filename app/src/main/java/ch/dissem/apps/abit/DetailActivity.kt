@@ -19,7 +19,9 @@ abstract class DetailActivity : AppCompatActivity() {
 
         setSupportActionBar(toolbar)
         // Show the Up button in the action bar.
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+        }
 
         MaterializeBuilder()
                 .withActivity(this)

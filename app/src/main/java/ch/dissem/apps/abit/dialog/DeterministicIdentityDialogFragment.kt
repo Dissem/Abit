@@ -32,7 +32,6 @@ import ch.dissem.bitmessage.entity.payload.Pubkey
 import kotlinx.android.synthetic.main.dialog_add_deterministic_identity.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
-import kotlinx.android.synthetic.main.dialog_add_deterministic_identity.*
 
 /**
  * @author Christian Basler
@@ -50,19 +49,17 @@ class DeterministicIdentityDialogFragment : AppCompatDialogFragment() {
         return inflater.inflate(R.layout.dialog_add_deterministic_identity, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onViewCreated(dialogView: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(dialogView, savedInstanceState)
         ok.setOnClickListener {
             dismiss()
             val context = activity.baseContext
-            val dialogView = getView()!!
-            val passphrase = dialogView.findViewById(R.id.passphrase) as TextView
+            val passphraseText = passphrase.text.toString()
 
-            Toast.makeText(context, R.string.toast_long_running_operation,
-                    Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.toast_long_running_operation, Toast.LENGTH_SHORT).show()
             doAsync {
                 val identities = bmc.createDeterministicAddresses(
-                        passphrase.text.toString(),
+                        passphraseText,
                         number_of_identities.text.toString().toInt(),
                         Pubkey.LATEST_VERSION,
                         1L,

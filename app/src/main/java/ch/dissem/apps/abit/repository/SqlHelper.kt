@@ -97,7 +97,7 @@ class SqlHelper(private val ctx: Context) : SQLiteOpenHelper(ctx, DATABASE_NAME,
     companion object {
         // If you change the database schema, you must increment the database version.
         private val DATABASE_VERSION = 7
-        private val DATABASE_NAME = "jabit.db"
+        val DATABASE_NAME = "jabit.db"
 
         internal fun join(vararg types: Enum<*>): String = types.joinToString(separator = "', '", prefix = "'", postfix = "'", transform = {it.name})
     }

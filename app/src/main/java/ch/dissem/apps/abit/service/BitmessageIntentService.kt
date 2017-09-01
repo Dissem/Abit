@@ -36,17 +36,19 @@ class BitmessageIntentService : IntentService("BitmessageIntentService") {
     }
 
     override fun onHandleIntent(intent: Intent?) {
-        if (intent!!.hasExtra(EXTRA_DELETE_MESSAGE)) {
-            val item = intent.getSerializableExtra(EXTRA_DELETE_MESSAGE) as Plaintext
-            bmc.labeler.delete(item)
-            bmc.messages.save(item)
-            Singleton.getMessageListener(this).resetNotification()
-        }
-        if (intent.hasExtra(EXTRA_STARTUP_NODE)) {
-            NetworkUtils.enableNode(this)
-        }
-        if (intent.hasExtra(EXTRA_SHUTDOWN_NODE)) {
-            NetworkUtils.disableNode(this)
+        intent?.let {
+            if (it.hasExtra(EXTRA_DELETE_MESSAGE)) {
+                val item = it.getSerializableExtra(EXTRA_DELETE_MESSAGE) as Plaintext
+                bmc.labeler.delete(item)
+                bmc.messages.save(item)
+                Singleton.getMessageListener(this).resetNotification()
+            }
+            if (it.hasExtra(EXTRA_STARTUP_NODE)) {
+                NetworkUtils.enableNode(this)
+            }
+            if (it.hasExtra(EXTRA_SHUTDOWN_NODE)) {
+                NetworkUtils.disableNode(this)
+            }
         }
     }
 

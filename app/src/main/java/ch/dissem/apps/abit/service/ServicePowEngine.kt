@@ -42,7 +42,7 @@ class ServicePowEngine(private val ctx: Context) : ProofOfWorkEngine {
             synchronized(lock) {
                 this@ServicePowEngine.service = service as PowBinder
                 while (!queue.isEmpty()) {
-                    this@ServicePowEngine.service!!.process(queue.poll())
+                    service.process(queue.poll())
                 }
             }
         }
@@ -57,8 +57,7 @@ class ServicePowEngine(private val ctx: Context) : ProofOfWorkEngine {
         synchronized(lock) {
             service?.process(item) ?: {
                 queue.add(item)
-                ctx.bindService(Intent(ctx, ProofOfWorkService::class.java), connection,
-                        BIND_AUTO_CREATE)
+                ctx.bindService(Intent(ctx, ProofOfWorkService::class.java), connection, BIND_AUTO_CREATE)
             }.invoke()
         }
     }

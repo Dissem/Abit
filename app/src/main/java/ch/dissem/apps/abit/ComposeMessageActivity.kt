@@ -37,14 +37,17 @@ class ComposeMessageActivity : AppCompatActivity() {
         setContentView(R.layout.toolbar_layout)
 
         setSupportActionBar(toolbar)
-        supportActionBar!!.setHomeAsUpIndicator(R.drawable.ic_action_close)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        supportActionBar!!.setHomeButtonEnabled(false)
+        supportActionBar?.apply {
+            setHomeAsUpIndicator(R.drawable.ic_action_close)
+            setDisplayHomeAsUpEnabled(true)
+            setHomeButtonEnabled(false)
+        }
 
         // Display the fragment as the main content.
         val fragment = ComposeMessageFragment()
         fragment.arguments = intent.extras
-        supportFragmentManager.beginTransaction()
+        supportFragmentManager
+                .beginTransaction()
                 .replace(R.id.content, fragment)
                 .commit()
     }
@@ -69,7 +72,7 @@ class ComposeMessageActivity : AppCompatActivity() {
         private fun getReplyIntent(ctx: Context, item: Plaintext): Intent {
             val replyIntent = Intent(ctx, ComposeMessageActivity::class.java)
             val receivingIdentity = item.to
-            if (receivingIdentity!!.isChan) {
+            if (receivingIdentity?.isChan ?: false) {
                 // reply to chan, not to the sender of the message
                 replyIntent.putExtra(EXTRA_RECIPIENT, receivingIdentity)
                 // I hate when people send as chan, so it won't be the default behaviour.
@@ -84,14 +87,14 @@ class ComposeMessageActivity : AppCompatActivity() {
                 replyIntent.putExtra(EXTRA_ENCODING, EXTENDED)
             }
             replyIntent.putExtra(EXTRA_PARENT, item)
-            val prefix: String
-            if (item.subject!!.length >= 3 && item.subject!!.substring(0, 3)
-                    .equals("RE:", ignoreCase = true)) {
-                prefix = ""
-            } else {
-                prefix = "RE: "
+            item.subject?.let { subject ->
+                val prefix: String = if (subject.length >= 3 && subject.substring(0, 3).equals("RE:", ignoreCase = true)) {
+                    ""
+                } else {
+                    "RE: "
+                }
+                replyIntent.putExtra(EXTRA_SUBJECT, prefix + subject)
             }
-            replyIntent.putExtra(EXTRA_SUBJECT, prefix + item.subject!!)
             replyIntent.putExtra(EXTRA_CONTENT,
                     "\n\n------------------------------------------------------\n" + item.text!!)
             return replyIntent

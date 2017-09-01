@@ -145,8 +145,8 @@ class MessageDetailFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(activity)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater?) {
-        inflater!!.inflate(R.menu.message, menu)
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.message, menu)
 
         Drawables.addIcon(activity, menu, R.id.reply, GoogleMaterial.Icon.gmd_reply)
         Drawables.addIcon(activity, menu, R.id.delete, GoogleMaterial.Icon.gmd_delete)

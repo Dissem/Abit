@@ -30,7 +30,6 @@ import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.payload.Pubkey
 import ch.dissem.bitmessage.networking.nio.NioNetworkHandler
-import ch.dissem.bitmessage.ports.ProofOfWorkRepository
 import ch.dissem.bitmessage.utils.ConversationService
 import ch.dissem.bitmessage.utils.TTL
 import ch.dissem.bitmessage.utils.UnixTime.DAY
@@ -53,7 +52,8 @@ object Singleton {
         return init({ bitmessageContext }, { bitmessageContext = it }) {
             val ctx = context.applicationContext
             val sqlHelper = SqlHelper(ctx)
-            powRepo = AndroidProofOfWorkRepository(sqlHelper)
+            val powRepo = AndroidProofOfWorkRepository(sqlHelper)
+            this.powRepo = powRepo
             TTL.pubkey = 2 * DAY
             BitmessageContext.Builder()
                     .proofOfWorkEngine(SwitchingProofOfWorkEngine(
@@ -66,7 +66,7 @@ object Singleton {
                     .inventory(AndroidInventory(sqlHelper))
                     .addressRepo(AndroidAddressRepository(sqlHelper))
                     .messageRepo(AndroidMessageRepository(sqlHelper, ctx))
-                    .powRepo(powRepo!!)
+                    .powRepo(powRepo)
                     .networkHandler(NioNetworkHandler())
                     .listener(getMessageListener(ctx))
                     .doNotSendPubkeyOnIdentityCreation()
@@ -80,10 +80,7 @@ object Singleton {
 
     fun getAddressRepository(ctx: Context) = getBitmessageContext(ctx).addresses as AndroidAddressRepository
 
-    fun getProofOfWorkRepository(ctx: Context): ProofOfWorkRepository {
-        if (powRepo == null) getBitmessageContext(ctx)
-        return powRepo!!
-    }
+    fun getProofOfWorkRepository(ctx: Context) = powRepo ?: getBitmessageContext(ctx).internals.proofOfWorkRepository
 
     fun getIdentity(ctx: Context): BitmessageAddress? {
         return init<BitmessageAddress?>(ctx, { identity }, { identity = it }) { bmc ->

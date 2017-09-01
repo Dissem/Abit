@@ -70,11 +70,12 @@ object Drawables {
         if (address.alias != null) {
             link.append("?label=").append(address.alias)
         }
-        if (address.pubkey != null) {
+        address.pubkey?.apply {
             link.append(if (address.alias == null) '?' else '&')
             val pubkey = ByteArrayOutputStream()
-            address.pubkey!!.writeUnencrypted(pubkey)
+            writeUnencrypted(pubkey)
             link.append("pubkey=").append(Base64.encodeToString(pubkey.toByteArray(), URL_SAFE or NO_WRAP))
+
         }
         val result: BitMatrix
         try {

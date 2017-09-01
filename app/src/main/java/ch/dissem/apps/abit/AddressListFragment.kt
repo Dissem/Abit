@@ -68,11 +68,12 @@ class AddressListFragment : AbstractItemListFragment<Void, BitmessageAddress>() 
                     v = convertView.tag as ViewHolder
                     result = convertView
                 }
-                val item = getItem(position)!!
-                v.avatar.setImageDrawable(Identicon(item))
-                v.name.text = item.toString()
-                v.streamNumber.text = v.ctx.getString(R.string.stream_number, item.stream)
-                v.subscribed.visibility = if (item.isSubscribed) View.VISIBLE else View.INVISIBLE
+                getItem(position)?.let { item ->
+                    v.avatar.setImageDrawable(Identicon(item))
+                    v.name.text = item.toString()
+                    v.streamNumber.text = v.ctx.getString(R.string.stream_number, item.stream)
+                    v.subscribed.visibility = if (item.isSubscribed) View.VISIBLE else View.INVISIBLE
+                }
                 return result
             }
         }

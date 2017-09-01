@@ -41,11 +41,11 @@ class NetworkNotification(ctx: Context) : AbstractNotification(ctx) {
         val showAppIntent = Intent(ctx, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(ctx, 1, showAppIntent, 0)
         builder
-            .setSmallIcon(R.drawable.ic_notification_full_node)
-            .setContentTitle(ctx.getString(R.string.bitmessage_full_node))
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setShowWhen(false)
-            .setContentIntent(pendingIntent)
+                .setSmallIcon(R.drawable.ic_notification_full_node)
+                .setContentTitle(ctx.getString(R.string.bitmessage_full_node))
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setShowWhen(false)
+                .setContentIntent(pendingIntent)
     }
 
     @SuppressLint("StringFormatMatches")
@@ -55,7 +55,7 @@ class NetworkNotification(ctx: Context) : AbstractNotification(ctx) {
         val connections = BitmessageService.status.getProperty("network", "connections")
         if (!running) {
             builder.setContentText(ctx.getString(R.string.connection_info_disconnected))
-        } else if (connections!!.properties.isEmpty()) {
+        } else if (connections == null || connections.properties.isEmpty()) {
             builder.setContentText(ctx.getString(R.string.connection_info_pending))
         } else {
             val info = StringBuilder()
@@ -64,10 +64,10 @@ class NetworkNotification(ctx: Context) : AbstractNotification(ctx) {
                 val nodeCount = stream.getProperty("nodes")!!.value as Int?
                 if (nodeCount == 1) {
                     info.append(ctx.getString(R.string.connection_info_1,
-                        streamNumber))
+                            streamNumber))
                 } else {
                     info.append(ctx.getString(R.string.connection_info_n,
-                        streamNumber, nodeCount))
+                            streamNumber, nodeCount))
                 }
                 info.append('\n')
             }
@@ -78,13 +78,13 @@ class NetworkNotification(ctx: Context) : AbstractNotification(ctx) {
         if (running) {
             intent.putExtra(BitmessageIntentService.EXTRA_SHUTDOWN_NODE, true)
             builder.addAction(R.drawable.ic_notification_node_stop,
-                ctx.getString(R.string.full_node_stop),
-                PendingIntent.getService(ctx, 0, intent, FLAG_UPDATE_CURRENT))
+                    ctx.getString(R.string.full_node_stop),
+                    PendingIntent.getService(ctx, 0, intent, FLAG_UPDATE_CURRENT))
         } else {
             intent.putExtra(BitmessageIntentService.EXTRA_STARTUP_NODE, true)
             builder.addAction(R.drawable.ic_notification_node_start,
-                ctx.getString(R.string.full_node_restart),
-                PendingIntent.getService(ctx, 1, intent, FLAG_UPDATE_CURRENT))
+                    ctx.getString(R.string.full_node_restart),
+                    PendingIntent.getService(ctx, 1, intent, FLAG_UPDATE_CURRENT))
         }
         notification = builder.build()
         return running
@@ -117,8 +117,8 @@ class NetworkNotification(ctx: Context) : AbstractNotification(ctx) {
         intent.putExtra(BitmessageIntentService.EXTRA_SHUTDOWN_NODE, true)
         builder.mActions.clear()
         builder.addAction(R.drawable.ic_notification_node_stop,
-            ctx.getString(R.string.full_node_stop),
-            PendingIntent.getService(ctx, 0, intent, FLAG_UPDATE_CURRENT))
+                ctx.getString(R.string.full_node_stop),
+                PendingIntent.getService(ctx, 0, intent, FLAG_UPDATE_CURRENT))
         notification = builder.build()
     }
 

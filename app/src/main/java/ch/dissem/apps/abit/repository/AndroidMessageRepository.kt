@@ -161,11 +161,12 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
 
 
     private fun updateParents(db: SQLiteDatabase, message: Plaintext) {
-        if (message.inventoryVector == null || message.parents.isEmpty()) {
+        val inventoryVector = message.inventoryVector
+        if (inventoryVector == null || message.parents.isEmpty()) {
             // There are no parents to save yet (they are saved in the extended data, that's enough for now)
             return
         }
-        val childIV = message.inventoryVector!!.hash
+        val childIV = inventoryVector.hash
         db.delete(PARENTS_TABLE_NAME, "child=?", arrayOf(hex(childIV)))
 
         // save new parents
@@ -347,7 +348,7 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
 
     override fun remove(message: Plaintext) {
         val db = sql.writableDatabase
-        db.delete(TABLE_NAME, "id = " + message.id!!, null)
+        db.delete(TABLE_NAME, "id = ?", arrayOf(message.id.toString()))
     }
 
     companion object {

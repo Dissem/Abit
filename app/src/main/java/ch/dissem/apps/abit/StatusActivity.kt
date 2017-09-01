@@ -30,8 +30,10 @@ class StatusActivity : AppCompatActivity() {
         setContentView(R.layout.activity_status)
 
         setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        supportActionBar!!.setHomeButtonEnabled(false)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setHomeButtonEnabled(false)
+        }
 
         MaterializeBuilder()
                 .withActivity(this)

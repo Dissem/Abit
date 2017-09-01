@@ -10,7 +10,7 @@ import java.math.BigInteger
  * POW statistics that might help estimate the POW time, depending on
  */
 object PowStats {
-    private val TWO_POW_64 = BigInteger.valueOf(2).pow(64)!!
+    private val TWO_POW_64: BigInteger = BigInteger.valueOf(2).pow(64)
 
     var averagePowUnitTime = 0L
     var powCount = 0L
