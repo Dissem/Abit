@@ -99,6 +99,6 @@ class SqlHelper(private val ctx: Context) : SQLiteOpenHelper(ctx, DATABASE_NAME,
         private val DATABASE_VERSION = 7
         val DATABASE_NAME = "jabit.db"
 
-        internal fun join(vararg types: Enum<*>): String = types.joinToString(separator = "', '", prefix = "'", postfix = "'", transform = {it.name})
+        internal fun join(vararg types: Enum<*>): String = types.joinToString(separator = "', '", prefix = "'", postfix = "'", transform = { it.name })
     }
 }

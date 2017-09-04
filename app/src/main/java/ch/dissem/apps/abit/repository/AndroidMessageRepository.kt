@@ -148,8 +148,9 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
         }
         val result = LinkedList<UUID>()
         sql.readableDatabase.query(
-                TABLE_NAME, projection,
-                where, null, null, null, null
+                true,
+                TABLE_NAME, projection, where,
+                null, null, null, null, null
         ).use { c ->
             while (c.moveToNext()) {
                 val uuidBytes = c.getBlob(c.getColumnIndex(COLUMN_CONVERSATION))
@@ -172,8 +173,7 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
         // save new parents
         var order = 0
         for (parentIV in message.parents) {
-            val parent = getMessage(parentIV)
-            if (parent != null) {
+            getMessage(parentIV)?.let { parent ->
                 mergeConversations(db, parent.conversationId, message.conversationId)
                 order++
                 val values = ContentValues()
@@ -198,9 +198,9 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
     private fun mergeConversations(db: SQLiteDatabase, source: UUID, target: UUID) {
         val values = ContentValues()
         values.put("conversation", UuidUtils.asBytes(target))
-        val whereArgs = arrayOf(hex(UuidUtils.asBytes(source)))
-        db.update(TABLE_NAME, values, "conversation=?", whereArgs)
-        db.update(PARENTS_TABLE_NAME, values, "conversation=?", whereArgs)
+        val where = "conversation=X'${hex(UuidUtils.asBytes(source))}'"
+        db.update(TABLE_NAME, values, where, null)
+        db.update(PARENTS_TABLE_NAME, values, where, null)
     }
 
     private fun findIds(where: String): List<Long> {

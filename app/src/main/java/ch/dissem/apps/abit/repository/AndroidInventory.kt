@@ -113,7 +113,7 @@ class AndroidInventory(private val sql: SqlHelper) : Inventory {
             where.append(" AND version = ").append(version)
         }
         if (types.isNotEmpty()) {
-            where.append(" AND type IN (").append(join(*types)).append(")")
+            where.append(" AND type IN (").append(types.joinToString(separator = "', '", prefix = "'", postfix = "'", transform = { it.number.toString() })).append(")")
         }
 
         val db = sql.readableDatabase
