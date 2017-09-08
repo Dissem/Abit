@@ -49,7 +49,7 @@ class BitmessageService : Service() {
         running = false
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (!isRunning) {
             running = true
             notification.connecting()
