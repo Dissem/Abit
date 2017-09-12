@@ -17,11 +17,14 @@
 package ch.dissem.apps.abit
 
 import android.content.Intent
+
+
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.RecyclerView.OnScrollListener
 import android.view.*
 import android.widget.Toast
 import ch.dissem.apps.abit.ComposeMessageActivity.Companion.EXTRA_BROADCAST
@@ -29,6 +32,7 @@ import ch.dissem.apps.abit.ComposeMessageActivity.Companion.EXTRA_IDENTITY
 import ch.dissem.apps.abit.adapter.SwipeableMessageAdapter
 import ch.dissem.apps.abit.listener.ListSelectionListener
 import ch.dissem.apps.abit.repository.AndroidMessageRepository
+import ch.dissem.apps.abit.repository.AndroidMessageRepository.Companion.LABEL_ARCHIVE
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.util.FabUtils
 import ch.dissem.bitmessage.entity.Plaintext
@@ -41,8 +45,11 @@ import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils
 import io.github.kobakei.materialfabspeeddial.FabSpeedDialMenu
 import kotlinx.android.synthetic.main.fragment_message_list.*
 import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.support.v4.onUiThread
 import org.jetbrains.anko.uiThread
 import java.util.*
+
+private const val PAGE_SIZE = 15
 
 /**
  * A list fragment representing a list of Messages. This fragment
@@ -56,11 +63,32 @@ import java.util.*
  */
 class MessageListFragment : Fragment(), ListHolder<Label> {
 
-    private var layoutManager: RecyclerView.LayoutManager? = null
+    private var isLoading = false
+    private var isLastPage = false
+
+    private var layoutManager: LinearLayoutManager? = null
     private var swipeableMessageAdapter: SwipeableMessageAdapter? = null
     private var wrappedAdapter: RecyclerView.Adapter<*>? = null
     private var recyclerViewSwipeManager: RecyclerViewSwipeManager? = null
     private var recyclerViewTouchActionGuardManager: RecyclerViewTouchActionGuardManager? = null
+
+    private val recyclerViewOnScrollListener = object : OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+            layoutManager?.let { layoutManager ->
+                val visibleItemCount = layoutManager.childCount
+                val totalItemCount = layoutManager.itemCount
+                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+                if (!isLoading && !isLastPage) {
+                    if (visibleItemCount + firstVisibleItemPosition >= totalItemCount - 5
+                            && firstVisibleItemPosition >= 0
+                            && totalItemCount >= PAGE_SIZE) {
+                        loadMoreItems()
+                    }
+                }
+            }
+        }
+    }
 
     override var currentLabel: Label? = null
 
@@ -69,6 +97,20 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
     private var activateOnItemClick: Boolean = false
 
     private val backStack = Stack<Label>()
+
+    fun loadMoreItems() {
+        isLoading = true
+        swipeableMessageAdapter?.let { messageAdapter ->
+            doAsync {
+                val messages = messageRepo.findMessages(currentLabel, messageAdapter.itemCount, PAGE_SIZE)
+                onUiThread {
+                    messageAdapter.addAll(messages)
+                    isLoading = false
+                    isLastPage = messages.size < PAGE_SIZE
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,10 +124,8 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         initFab(activity)
         messageRepo = Singleton.getMessageRepository(activity)
 
-        if (backStack.isEmpty()) {
+        if (backStack.isEmpty() && currentLabel == null) {
             doUpdateList(activity.selectedLabel)
-        } else {
-            doUpdateList(backStack.peek())
         }
     }
 
@@ -119,13 +159,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
             }
         }
 
-        doAsync {
-            messageRepo.findMessageIds(label)
-                    .map { messageRepo.getMessage(it) }
-                    .forEach { message ->
-                        uiThread { swipeableMessageAdapter?.add(message) }
-                    }
-        }
+        loadMoreItems()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
@@ -189,6 +223,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         recycler_view.layoutManager = layoutManager
         recycler_view.adapter = wrappedAdapter  // requires *wrapped* swipeableMessageAdapter
         recycler_view.itemAnimator = animator
+        recycler_view.addOnScrollListener(recyclerViewOnScrollListener)
 
         recycler_view.addItemDecoration(SimpleListDividerDecorator(
                 ContextCompat.getDrawable(context, R.drawable.list_divider_h), true))
@@ -204,6 +239,17 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         recyclerViewTouchActionGuardManager = touchActionGuardManager
         recyclerViewSwipeManager = swipeManager
         this.swipeableMessageAdapter = adapter
+
+        Singleton.labeler.listener = { message, added, removed ->
+            if (added.contains(currentLabel)) {
+                // TODO: add to current list, at correct position
+            } else if (removed.contains(currentLabel)) {
+                swipeableMessageAdapter?.remove(message)
+            } else if (removed.any { it.type == Label.Type.UNREAD } || added.any { it.type == Label.Type.UNREAD }) {
+                // TODO: update if in current list, maybe update unread badges
+                swipeableMessageAdapter?.update(message)
+            }
+        }
     }
 
     private fun initFab(context: MainActivity) {
@@ -293,6 +339,12 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         } else {
             doUpdateList(backStack.pop())
             true
+        }
+    }
+
+    fun addMessage(message: Plaintext) {
+        if (message.labels.contains(currentLabel) || (currentLabel == LABEL_ARCHIVE && message.labels.isEmpty())) {
+            swipeableMessageAdapter?.addFirst(message)
         }
     }
 }

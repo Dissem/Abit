@@ -96,6 +96,35 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
         notifyDataSetChanged()
     }
 
+    fun addFirst(item: Plaintext) {
+        val index = data.size
+        data.addFirst(item)
+        notifyItemInserted(index)
+    }
+
+    fun addAll(items: Collection<Plaintext>) {
+        val index = data.size
+        data.addAll(items)
+        notifyItemRangeInserted(index, items.size)
+    }
+
+    fun remove(item: Plaintext) {
+        val index = data.indexOf(item)
+        data.removeIf { it.id == item.id }
+        notifyItemRemoved(index)
+    }
+
+    fun update(item: Plaintext) {
+        data.replaceAll {
+            if (it.id == item.id) {
+                item
+            } else {
+                it
+            }
+        }
+        notifyItemChanged(data.indexOf(item))
+    }
+
     fun clear(newLabel: Label?) {
         label = newLabel
         data.clear()

@@ -166,18 +166,17 @@ class MessageDetailFragment : Fragment() {
                     return true
                 }
                 R.id.delete -> {
+                    Singleton.labeler.delete(item)
                     if (isInTrash(item)) {
                         messageRepo.remove(item)
                     } else {
-                        item.labels.clear()
-                        item.addLabels(messageRepo.getLabels(Label.Type.TRASH))
                         messageRepo.save(item)
                     }
                     activity.onBackPressed()
                     return true
                 }
                 R.id.mark_unread -> {
-                    item.addLabels(messageRepo.getLabels(Label.Type.UNREAD))
+                    Singleton.labeler.markAsUnread(item)
                     messageRepo.save(item)
                     if (activity is MainActivity) {
                         (activity as MainActivity).updateUnread()
@@ -188,7 +187,7 @@ class MessageDetailFragment : Fragment() {
                     if (item.isUnread() && activity is MainActivity) {
                         (activity as MainActivity).updateUnread()
                     }
-                    item.labels.clear()
+                    Singleton.labeler.archive(item)
                     messageRepo.save(item)
                     return true
                 }
