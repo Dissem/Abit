@@ -241,12 +241,16 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         this.swipeableMessageAdapter = adapter
 
         Singleton.labeler.listener = { message, added, removed ->
-            if (added.contains(currentLabel)) {
-                // TODO: add to current list, at correct position
+            if (currentLabel?.type == Label.Type.TRASH && added.all { it.type == Label.Type.TRASH } && removed.isEmpty()) {
+                // work-around for messages that are deleted from trash
+                swipeableMessageAdapter?.remove(message)
+            } else if (added.contains(currentLabel)) {
+                // in most cases, top should be the correct position, but time will show if
+                // the message should be properly sorted in
+                swipeableMessageAdapter?.addFirst(message)
             } else if (removed.contains(currentLabel)) {
                 swipeableMessageAdapter?.remove(message)
             } else if (removed.any { it.type == Label.Type.UNREAD } || added.any { it.type == Label.Type.UNREAD }) {
-                // TODO: update if in current list, maybe update unread badges
                 swipeableMessageAdapter?.update(message)
             }
         }

@@ -166,10 +166,11 @@ class MessageDetailFragment : Fragment() {
                     return true
                 }
                 R.id.delete -> {
-                    Singleton.labeler.delete(item)
                     if (isInTrash(item)) {
+                        Singleton.labeler.delete(item)
                         messageRepo.remove(item)
                     } else {
+                        Singleton.labeler.delete(item)
                         messageRepo.save(item)
                     }
                     activity.onBackPressed()
