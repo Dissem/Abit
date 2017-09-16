@@ -26,7 +26,8 @@ class StartupNodeOnWifiService : JobService() {
 
     override fun onStopJob(params: JobParameters?): Boolean {
         if (Preferences.isWifiOnly(this)) {
-            Singleton.getBitmessageContext(this).shutdown()
+            // Don't actually stop the service, otherwise it will be stopped after 1 or 10 minutes
+            // depending on Android version.
             return Preferences.isFullNodeActive(this)
         } else {
             return false

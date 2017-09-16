@@ -17,12 +17,17 @@
 package ch.dissem.apps.abit.service
 
 import android.app.Service
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import android.os.Handler
 import ch.dissem.apps.abit.notification.NetworkNotification
 import ch.dissem.apps.abit.notification.NetworkNotification.Companion.NETWORK_NOTIFICATION_ID
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.utils.Property
+import org.jetbrains.anko.connectivityManager
 
 /**
  * Define a Service that returns an IBinder for the
@@ -33,6 +38,14 @@ class BitmessageService : Service() {
 
     private val bmc: BitmessageContext by lazy { Singleton.getBitmessageContext(this) }
     private lateinit var notification: NetworkNotification
+
+    private val connectivityReceiver: BroadcastReceiver = object: BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (bmc.isRunning() && connectivityManager.isActiveNetworkMetered){
+                bmc.shutdown()
+            }
+        }
+    }
 
     private val cleanupHandler = Handler()
     private val cleanupTask: Runnable = object : Runnable {
@@ -45,6 +58,7 @@ class BitmessageService : Service() {
     }
 
     override fun onCreate() {
+        registerReceiver(connectivityReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
         notification = NetworkNotification(this)
         running = false
     }
