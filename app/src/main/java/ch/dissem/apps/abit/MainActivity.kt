@@ -241,7 +241,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
                 .withIdentifier(ID_NODE_SWITCH)
                 .withName(R.string.full_node)
                 .withIcon(CommunityMaterial.Icon.cmd_cloud_outline)
-                .withChecked(isRunning)
+                .withChecked(Preferences.isFullNodeActive(this))
                 .withOnCheckedChangeListener { _, _, isChecked ->
                     if (isChecked) {
                         NetworkUtils.enableNode(this@MainActivity)
@@ -373,7 +373,6 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
         if (Preferences.isFullNodeActive(this) && Preferences.isConnectionAllowed(this@MainActivity)) {
             NetworkUtils.enableNode(this, false)
         }
-        updateNodeSwitch()
         Singleton.getMessageListener(this).resetNotification()
         active = true
         super.onResume()

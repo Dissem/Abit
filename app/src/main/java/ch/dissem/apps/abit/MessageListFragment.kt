@@ -81,8 +81,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
 
                 if (!isLoading && !isLastPage) {
                     if (visibleItemCount + firstVisibleItemPosition >= totalItemCount - 5
-                            && firstVisibleItemPosition >= 0
-                            && totalItemCount >= PAGE_SIZE) {
+                            && firstVisibleItemPosition >= 0) {
                         loadMoreItems()
                     }
                 }
@@ -193,11 +192,13 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
                     item.addLabels(messageRepo.getLabels(Label.Type.TRASH))
                     messageRepo.save(item)
                 }
+                recyclerViewOnScrollListener.onScrolled(null, 0, 0)
             }
 
             override fun onItemArchived(item: Plaintext) {
                 item.labels.clear()
                 messageRepo.save(item)
+                recyclerViewOnScrollListener.onScrolled(null, 0, 0)
             }
 
             override fun onItemViewClicked(v: View?) {
@@ -244,12 +245,14 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
             if (currentLabel?.type == Label.Type.TRASH && added.all { it.type == Label.Type.TRASH } && removed.isEmpty()) {
                 // work-around for messages that are deleted from trash
                 swipeableMessageAdapter?.remove(message)
+                recyclerViewOnScrollListener.onScrolled(null, 0, 0)
             } else if (added.contains(currentLabel)) {
                 // in most cases, top should be the correct position, but time will show if
                 // the message should be properly sorted in
                 swipeableMessageAdapter?.addFirst(message)
             } else if (removed.contains(currentLabel)) {
                 swipeableMessageAdapter?.remove(message)
+                recyclerViewOnScrollListener.onScrolled(null, 0, 0)
             } else if (removed.any { it.type == Label.Type.UNREAD } || added.any { it.type == Label.Type.UNREAD }) {
                 swipeableMessageAdapter?.update(message)
             }
