@@ -31,7 +31,6 @@
         android:paddingEnd="8dp"
         android:paddingStart="16dp"
         android:paddingTop="8dp"
-        android:text="CheckBox"
         android:textAppearance="?android:attr/textAppearanceMedium"
         tools:text="Name"/>
 

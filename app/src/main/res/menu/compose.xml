@@ -10,6 +10,6 @@
         android:id="@+id/select_encoding"
         app:showAsAction="never"
         android:icon="@drawable/ic_action_encoding"
-        android:title="Select encoding"
+        android:title="@string/select_encoding"
         />
 </menu>

@@ -11,7 +11,7 @@ import io.github.kobakei.materialfabspeeddial.FabSpeedDialMenu
  */
 object FabUtils {
     fun initFab(activity: MainActivity, @DrawableRes drawableRes: Int, menu: FabSpeedDialMenu): FabSpeedDial {
-        val fab = activity.floatingActionButton
+        val fab = activity.floatingActionButton ?: throw IllegalStateException("Fab must not be null")
         fab.removeAllOnMenuItemClickListeners()
         fab.show()
         fab.closeMenu()

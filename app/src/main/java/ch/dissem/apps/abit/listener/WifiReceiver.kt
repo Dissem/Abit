@@ -19,42 +19,18 @@ package ch.dissem.apps.abit.listener
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
-import android.net.NetworkInfo
 import ch.dissem.apps.abit.service.BitmessageService
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.util.Preferences
+import org.jetbrains.anko.connectivityManager
 
 class WifiReceiver : BroadcastReceiver() {
     override fun onReceive(ctx: Context, intent: Intent) {
         if ("android.net.conn.CONNECTIVITY_CHANGE" == intent.action) {
             val bmc = Singleton.getBitmessageContext(ctx)
-            if (Preferences.isWifiOnly(ctx) && isConnectedToMeteredNetwork(ctx) && bmc.isRunning()) {
-                bmc.shutdown()
-            }
-            if (Preferences.isFullNodeActive(ctx) && !bmc.isRunning() && !(Preferences.isWifiOnly(ctx) && isConnectedToMeteredNetwork(ctx))) {
+            if (Preferences.isFullNodeActive(ctx) && !bmc.isRunning() && !(Preferences.isWifiOnly(ctx) && ctx.connectivityManager.isActiveNetworkMetered)) {
                 ctx.startService(Intent(ctx, BitmessageService::class.java))
             }
-        }
-    }
-
-    companion object {
-
-        fun isConnectedToMeteredNetwork(ctx: Context): Boolean {
-            val netInfo = getNetworkInfo(ctx)
-            if (netInfo == null || !netInfo.isConnectedOrConnecting) {
-                return false
-            }
-            when (netInfo.type) {
-                ConnectivityManager.TYPE_ETHERNET, ConnectivityManager.TYPE_WIFI -> return false
-                else -> return true
-            }
-        }
-
-        private fun getNetworkInfo(ctx: Context): NetworkInfo? {
-            val conMan = ctx.getSystemService(Context
-                    .CONNECTIVITY_SERVICE) as ConnectivityManager
-            return conMan.activeNetworkInfo
         }
     }
 }

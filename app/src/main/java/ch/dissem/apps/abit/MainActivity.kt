@@ -29,7 +29,6 @@ import ch.dissem.apps.abit.drawer.ProfileImageListener
 import ch.dissem.apps.abit.drawer.ProfileSelectionListener
 import ch.dissem.apps.abit.listener.ListSelectionListener
 import ch.dissem.apps.abit.repository.AndroidMessageRepository.Companion.LABEL_ARCHIVE
-import ch.dissem.apps.abit.service.BitmessageService.Companion.isRunning
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.synchronization.SyncAdapter
 import ch.dissem.apps.abit.util.Labels
@@ -99,8 +98,8 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
     private lateinit var drawer: Drawer
     private lateinit var nodeSwitch: SwitchDrawerItem
 
-    val floatingActionButton: FabSpeedDial
-        get() = fab
+    val floatingActionButton: FabSpeedDial?
+        get() = findViewById(R.id.fab) as FabSpeedDial?
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -359,11 +358,12 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        selectedLabel = savedInstanceState.getSerializable("selectedLabel") as Label
+        selectedLabel = savedInstanceState.getSerializable("selectedLabel") as Label?
 
-        val selectedItem = drawer.getDrawerItem(selectedLabel)
-        if (selectedItem != null) {
-            drawer.setSelection(selectedItem)
+        selectedLabel?.let { selectedLabel ->
+            drawer.getDrawerItem(selectedLabel)?.let { selectedItem ->
+                drawer.setSelection(selectedItem)
+            }
         }
         super.onRestoreInstanceState(savedInstanceState)
     }

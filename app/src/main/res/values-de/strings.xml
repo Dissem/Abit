@@ -124,4 +124,7 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="request_acknowledgements">Bestätigungen verlangen</string>
     <string name="request_acknowledgements_summary">Bestätigungen stellen sicher dass eine Nachricht empfangen wurde, benötigen aber zusätzliche Zeit zum versenden</string>
     <string name="got_it">Alles klar</string>
+    <string name="import_data">Import</string>
+    <string name="import_data_summary">Nachrichten und Kontakte importieren (aber keine Identitäten)</string>
+    <string name="select_encoding">Kodierung auswählen</string>
 </resources>

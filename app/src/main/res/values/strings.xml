@@ -125,4 +125,5 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="request_acknowledgements">Request acknowledgements</string>
     <string name="request_acknowledgements_summary">Acknowledges allow making sure a message was received, but require additional time to send</string>
     <string name="got_it">Got it</string>
+    <string name="select_encoding">Select encoding</string>
 </resources>
