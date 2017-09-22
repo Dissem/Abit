@@ -30,6 +30,7 @@ import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.payload.Pubkey
 import ch.dissem.bitmessage.networking.nio.NioNetworkHandler
+import ch.dissem.bitmessage.ports.DefaultLabeler
 import ch.dissem.bitmessage.utils.ConversationService
 import ch.dissem.bitmessage.utils.TTL
 import ch.dissem.bitmessage.utils.UnixTime.DAY
@@ -40,6 +41,7 @@ import org.jetbrains.anko.uiThread
  * Provides singleton objects across the application.
  */
 object Singleton {
+    val labeler = DefaultLabeler()
     var bitmessageContext: BitmessageContext? = null
         private set
     private var conversationService: ConversationService? = null
@@ -69,6 +71,7 @@ object Singleton {
                     .powRepo(powRepo)
                     .networkHandler(NioNetworkHandler())
                     .listener(getMessageListener(ctx))
+                    .labeler(labeler)
                     .doNotSendPubkeyOnIdentityCreation()
                     .build()
         }

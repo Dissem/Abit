@@ -111,14 +111,7 @@ class MessageDetailFragment : Fragment() {
             text.linksClickable = true
             text.setTextIsSelectable(true)
 
-            var removed = false
-            val labels = item.labels.iterator()
-            while (labels.hasNext()) {
-                if (labels.next().type == Label.Type.UNREAD) {
-                    labels.remove()
-                    removed = true
-                }
-            }
+            val removed = item.labels.removeAll { it.type==Label.Type.UNREAD }
             val messageRepo = Singleton.getMessageRepository(context)
             if (removed) {
                 if (activity is MainActivity) {
@@ -167,29 +160,29 @@ class MessageDetailFragment : Fragment() {
                 }
                 R.id.delete -> {
                     if (isInTrash(item)) {
+                        Singleton.labeler.delete(item)
                         messageRepo.remove(item)
                     } else {
-                        item.labels.clear()
-                        item.addLabels(messageRepo.getLabels(Label.Type.TRASH))
+                        Singleton.labeler.delete(item)
                         messageRepo.save(item)
                     }
+                    (activity as? MainActivity)?.updateUnread()
                     activity.onBackPressed()
                     return true
                 }
                 R.id.mark_unread -> {
-                    item.addLabels(messageRepo.getLabels(Label.Type.UNREAD))
+                    Singleton.labeler.markAsUnread(item)
                     messageRepo.save(item)
-                    if (activity is MainActivity) {
-                        (activity as MainActivity).updateUnread()
-                    }
+                    (activity as? MainActivity)?.updateUnread()
                     return true
                 }
                 R.id.archive -> {
                     if (item.isUnread() && activity is MainActivity) {
                         (activity as MainActivity).updateUnread()
                     }
-                    item.labels.clear()
+                    Singleton.labeler.archive(item)
                     messageRepo.save(item)
+                    (activity as? MainActivity)?.updateUnread()
                     return true
                 }
                 else -> return false

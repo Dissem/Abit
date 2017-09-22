@@ -17,16 +17,12 @@
 package ch.dissem.apps.abit.listener
 
 import android.content.Context
-
-import java.util.Deque
-import java.util.LinkedList
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-
 import ch.dissem.apps.abit.MainActivity
 import ch.dissem.apps.abit.notification.NewMessageNotification
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.entity.Plaintext
+import java.util.*
+import java.util.concurrent.Executors
 
 /**
  * Listens for decrypted Bitmessage messages. Does show a notification.

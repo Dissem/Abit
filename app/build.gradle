@@ -20,8 +20,8 @@ android {
         applicationId "ch.dissem.apps." + appName.toLowerCase()
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 16
-        versionName "1.0-beta16"
+        versionCode 17
+        versionName "1.0-beta17"
         multiDexEnabled true
     }
     compileOptions {
@@ -39,7 +39,7 @@ android {
 }
 
 //ext.jabitVersion = '2.0.4'
-ext.jabitVersion = 'feature-exports-SNAPSHOT'
+ext.jabitVersion = 'development-SNAPSHOT'
 ext.supportVersion = '25.3.1'
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])

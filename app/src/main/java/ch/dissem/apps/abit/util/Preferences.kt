@@ -26,6 +26,8 @@ import ch.dissem.apps.abit.util.Constants.PREFERENCE_REQUEST_ACK
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_SYNC_TIMEOUT
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_WIFI_ONLY
+import org.jetbrains.anko.connectivityManager
+import org.jetbrains.anko.networkStatsManager
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
@@ -88,7 +90,7 @@ object Preferences {
         return preferences.getString(name, null)
     }
 
-    fun isConnectionAllowed(ctx: Context) = !isWifiOnly(ctx) || !WifiReceiver.isConnectedToMeteredNetwork(ctx)
+    fun isConnectionAllowed(ctx: Context) = !isWifiOnly(ctx) || ctx.connectivityManager.isActiveNetworkMetered
 
     fun isWifiOnly(ctx: Context): Boolean {
         val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)

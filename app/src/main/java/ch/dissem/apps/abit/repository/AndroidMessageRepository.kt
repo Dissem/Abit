@@ -42,10 +42,10 @@ import java.util.*
  */
 class AndroidMessageRepository(private val sql: SqlHelper, private val context: Context) : AbstractMessageRepository() {
 
-    override fun findMessages(label: Label?) = if (label === LABEL_ARCHIVE) {
-        super.findMessages(null as Label?)
+    override fun findMessages(label: Label?, offset: Int, limit: Int) = if (label === LABEL_ARCHIVE) {
+        super.findMessages(null as Label?, offset, limit)
     } else {
-        super.findMessages(label)
+        super.findMessages(label, offset, limit)
     }
 
     fun findMessageIds(label: Label) = if (label === LABEL_ARCHIVE) {
@@ -224,7 +224,7 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
         return result
     }
 
-    override fun find(where: String): List<Plaintext> {
+    override fun find(where: String, offset: Int, limit: Int): List<Plaintext> {
         val result = LinkedList<Plaintext>()
 
         // Define a projection that specifies which columns from the database
@@ -235,7 +235,8 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
         db.query(
                 TABLE_NAME, projection,
                 where, null, null, null,
-                "$COLUMN_RECEIVED DESC, $COLUMN_SENT DESC"
+                "$COLUMN_RECEIVED DESC, $COLUMN_SENT DESC",
+                if (limit == 0) null else "$offset, $limit"
         ).use { c ->
             while (c.moveToNext()) {
                 val iv = c.getBlob(c.getColumnIndex(COLUMN_IV))

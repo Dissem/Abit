@@ -18,7 +18,6 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="18dp"
@@ -71,7 +70,7 @@
         android:text="@string/ok"
         android:textColor="@color/colorAccent"
         app:layout_constraintHorizontal_bias="1.0"
-        android:layout_alignRight="@+id/radioGroup"
+        android:layout_alignEnd="@+id/radioGroup"
         android:layout_below="@+id/radioGroup"/>
 
     <Button
@@ -81,7 +80,7 @@
         android:layout_height="wrap_content"
         android:text="@string/cancel"
         android:textColor="@color/colorAccent"
-        android:layout_toLeftOf="@+id/ok"
+        android:layout_toStartOf="@+id/ok"
         android:layout_below="@+id/radioGroup"/>
 
 </RelativeLayout>
