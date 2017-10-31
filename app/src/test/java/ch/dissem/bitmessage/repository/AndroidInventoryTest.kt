@@ -40,7 +40,7 @@ import org.robolectric.annotation.Config
 import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
-@Config(constants = BuildConfig::class, sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP), packageName = "ch.dissem.apps.abit")
+@Config(sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP), packageName = "ch.dissem.apps.abit")
 class AndroidInventoryTest : TestBase() {
     private lateinit var inventory: Inventory
 
@@ -134,14 +134,12 @@ class AndroidInventoryTest : TestBase() {
         assertNull(inventory.getObject(inventoryVectorIgnore))
     }
 
-    private fun getObjectMessage(stream: Long, TTL: Long, payload: ObjectPayload): ObjectMessage {
-        return ObjectMessage(
-                nonce = ByteArray(8),
-                expiresTime = now + TTL,
-                stream = stream,
-                payload = payload
-        )
-    }
+    private fun getObjectMessage(stream: Long, TTL: Long, payload: ObjectPayload) = ObjectMessage(
+            nonce = ByteArray(8),
+            expiresTime = now + TTL,
+            stream = stream,
+            payload = payload
+    )
 
     private val getPubkey: GetPubkey = GetPubkey(BitmessageAddress("BM-2cW7cD5cDQJDNkE7ibmyTxfvGAmnPqa9Vt"))
 }

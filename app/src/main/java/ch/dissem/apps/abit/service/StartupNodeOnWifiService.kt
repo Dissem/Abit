@@ -24,13 +24,11 @@ class StartupNodeOnWifiService : JobService() {
         return true
     }
 
-    override fun onStopJob(params: JobParameters?): Boolean {
-        if (Preferences.isWifiOnly(this)) {
-            // Don't actually stop the service, otherwise it will be stopped after 1 or 10 minutes
-            // depending on Android version.
-            return Preferences.isFullNodeActive(this)
-        } else {
-            return false
-        }
+    override fun onStopJob(params: JobParameters?) = if (Preferences.isWifiOnly(this)) {
+        // Don't actually stop the service, otherwise it will be stopped after 1 or 10 minutes
+        // depending on Android version.
+        Preferences.isFullNodeActive(this)
+    } else {
+        false
     }
 }

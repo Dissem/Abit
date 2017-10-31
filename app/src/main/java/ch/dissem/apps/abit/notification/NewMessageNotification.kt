@@ -20,7 +20,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
-import android.support.v7.app.NotificationCompat
+import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationCompat.BigTextStyle
 import android.support.v4.app.NotificationCompat.InboxStyle
 import android.text.Spannable
@@ -43,7 +43,7 @@ import ch.dissem.apps.abit.util.Drawables.toBitmap
 class NewMessageNotification(ctx: Context) : AbstractNotification(ctx) {
 
     fun singleNotification(plaintext: Plaintext): NewMessageNotification {
-        val builder = NotificationCompat.Builder(ctx)
+        val builder = NotificationCompat.Builder(ctx, CHANNEL_ID)
         val bigText = SpannableString(plaintext.subject + "\n" + plaintext.text)
         plaintext.subject?.let { subject ->
             bigText.setSpan(SPAN_EMPHASIS, 0, subject.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
@@ -83,7 +83,7 @@ class NewMessageNotification(ctx: Context) : AbstractNotification(ctx) {
      * *                       {}` block
      */
     fun multiNotification(unacknowledged: Collection<Plaintext>, numberOfUnacknowledgedMessages: Int): NewMessageNotification {
-        val builder = NotificationCompat.Builder(ctx)
+        val builder = NotificationCompat.Builder(ctx, CHANNEL_ID)
         builder.setSmallIcon(R.drawable.ic_notification_new_message)
                 .setContentTitle(ctx.getString(R.string.n_new_messages, numberOfUnacknowledgedMessages))
                 .setContentText(ctx.getString(R.string.app_name))
@@ -113,5 +113,6 @@ class NewMessageNotification(ctx: Context) : AbstractNotification(ctx) {
     companion object {
         private val NEW_MESSAGE_NOTIFICATION_ID = 1
         private val SPAN_EMPHASIS = StyleSpan(Typeface.BOLD)
+        private val CHANNEL_ID = "abit.message"
     }
 }

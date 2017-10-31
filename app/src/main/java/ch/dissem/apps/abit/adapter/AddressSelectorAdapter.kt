@@ -51,8 +51,8 @@ class AddressSelectorAdapter(identities: List<BitmessageAddress>) : RecyclerView
 
     class ViewHolder internal constructor(v: View) : RecyclerView.ViewHolder(v) {
         var data: Selectable<BitmessageAddress>? = null
-        val checkbox = v.findViewById(R.id.checkbox) as CheckBox
-        val address = v.findViewById(R.id.address) as TextView
+        val checkbox = v.findViewById<CheckBox>(R.id.checkbox)!!
+        val address = v.findViewById<TextView>(R.id.address)!!
 
         init {
             checkbox.setOnCheckedChangeListener { _, isChecked ->
@@ -63,12 +63,8 @@ class AddressSelectorAdapter(identities: List<BitmessageAddress>) : RecyclerView
 
     val selected: List<BitmessageAddress>
         get() {
-            val result = LinkedList<BitmessageAddress>()
-            for (selectable in data) {
-                if (selectable.selected) {
-                    result.add(selectable.data)
-                }
-            }
-            return result
+            return data
+                .filter { it.selected }
+                .mapTo(LinkedList()) { it.data }
         }
 }

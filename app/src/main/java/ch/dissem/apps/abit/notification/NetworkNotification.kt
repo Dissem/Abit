@@ -21,7 +21,7 @@ import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
-import android.support.v7.app.NotificationCompat
+import android.support.v4.app.NotificationCompat
 import ch.dissem.apps.abit.MainActivity
 import ch.dissem.apps.abit.R
 import ch.dissem.apps.abit.service.BitmessageIntentService
@@ -34,7 +34,7 @@ import kotlin.concurrent.fixedRateTimer
  */
 class NetworkNotification(ctx: Context) : AbstractNotification(ctx) {
 
-    private val builder = NotificationCompat.Builder(ctx)
+    private val builder = NotificationCompat.Builder(ctx, "abit.network")
     private var timer: Timer? = null
 
     init {

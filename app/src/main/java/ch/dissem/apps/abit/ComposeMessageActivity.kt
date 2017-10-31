@@ -47,9 +47,9 @@ class ComposeMessageActivity : AppCompatActivity() {
         val fragment = ComposeMessageFragment()
         fragment.arguments = intent.extras
         supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.content, fragment)
-                .commit()
+            .beginTransaction()
+            .replace(R.id.content, fragment)
+            .commit()
     }
 
     companion object {
@@ -61,18 +61,19 @@ class ComposeMessageActivity : AppCompatActivity() {
         const val EXTRA_ENCODING = "ch.dissem.abit.Message.ENCODING"
         const val EXTRA_PARENT = "ch.dissem.abit.Message.PARENT"
 
-        fun launchReplyTo(fragment: Fragment, item: Plaintext) {
-            fragment.startActivity(getReplyIntent(fragment.activity, item))
-        }
+        fun launchReplyTo(fragment: Fragment, item: Plaintext) =
+            fragment.startActivity(getReplyIntent(
+                ctx = fragment.activity ?: throw IllegalStateException("Fragment not attached to an activity"),
+                item = item
+            ))
 
-        fun launchReplyTo(activity: Activity, item: Plaintext) {
+        fun launchReplyTo(activity: Activity, item: Plaintext) =
             activity.startActivity(getReplyIntent(activity, item))
-        }
 
         private fun getReplyIntent(ctx: Context, item: Plaintext): Intent {
             val replyIntent = Intent(ctx, ComposeMessageActivity::class.java)
             val receivingIdentity = item.to
-            if (receivingIdentity?.isChan ?: false) {
+            if (receivingIdentity?.isChan == true) {
                 // reply to chan, not to the sender of the message
                 replyIntent.putExtra(EXTRA_RECIPIENT, receivingIdentity)
                 // I hate when people send as chan, so it won't be the default behaviour.
@@ -96,7 +97,7 @@ class ComposeMessageActivity : AppCompatActivity() {
                 replyIntent.putExtra(EXTRA_SUBJECT, prefix + subject)
             }
             replyIntent.putExtra(EXTRA_CONTENT,
-                    "\n\n------------------------------------------------------\n" + item.text!!)
+                "\n\n------------------------------------------------------\n" + item.text!!)
             return replyIntent
         }
     }

@@ -17,7 +17,6 @@
 package ch.dissem.bitmessage.repository
 
 import android.os.Build.VERSION_CODES.LOLLIPOP
-import ch.dissem.apps.abit.BuildConfig
 import ch.dissem.apps.abit.repository.AndroidAddressRepository
 import ch.dissem.apps.abit.repository.AndroidMessageRepository
 import ch.dissem.apps.abit.repository.AndroidProofOfWorkRepository
@@ -50,14 +49,14 @@ import kotlin.properties.Delegates
  * @author Christian Basler
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(constants = BuildConfig::class, sdk = intArrayOf(LOLLIPOP), packageName = "ch.dissem.apps.abit")
+@Config(sdk = intArrayOf(LOLLIPOP), packageName = "ch.dissem.apps.abit")
 class AndroidProofOfWorkRepositoryTest : TestBase() {
     private lateinit var repo: ProofOfWorkRepository
     private lateinit var addressRepo: AddressRepository
     private lateinit var messageRepo: MessageRepository
 
-    private var initialHash1: ByteArray by Delegates.notNull<ByteArray>()
-    private var initialHash2: ByteArray by Delegates.notNull<ByteArray>()
+    private var initialHash1: ByteArray by Delegates.notNull()
+    private var initialHash2: ByteArray by Delegates.notNull()
 
     @Before
     fun setUp() {
@@ -68,15 +67,19 @@ class AndroidProofOfWorkRepositoryTest : TestBase() {
         messageRepo = AndroidMessageRepository(sqlHelper, RuntimeEnvironment.application)
         repo = AndroidProofOfWorkRepository(sqlHelper)
         mockedInternalContext(
-                addressRepository = addressRepo,
-                messageRepository = messageRepo,
-                proofOfWorkRepository = repo,
-                cryptography = cryptography()
+            addressRepository = addressRepo,
+            messageRepository = messageRepo,
+            proofOfWorkRepository = repo,
+            cryptography = cryptography()
         )
 
-        repo.putObject(ObjectMessage.Builder()
-                .payload(GetPubkey(BitmessageAddress("BM-2DAjcCFrqFrp88FUxExhJ9kPqHdunQmiyn"))).build(),
-                1000, 1000)
+        repo.putObject(
+            objectMessage = ObjectMessage.Builder()
+                .payload(GetPubkey(BitmessageAddress("BM-2DAjcCFrqFrp88FUxExhJ9kPqHdunQmiyn")))
+                .build(),
+            nonceTrialsPerByte = 1000,
+            extraBytes = 1000
+        )
         initialHash1 = repo.getItems()[0]
 
         val sender = loadIdentity("BM-2cSqjfJ8xK6UUn5Rw3RpdGQ9RsDkBhWnS8")
@@ -84,28 +87,34 @@ class AndroidProofOfWorkRepositoryTest : TestBase() {
         addressRepo.save(sender)
         addressRepo.save(recipient)
         val plaintext = Plaintext.Builder(Plaintext.Type.MSG)
-                .ackData(cryptography().randomBytes(32))
-                .from(sender)
-                .to(recipient)
-                .message("Subject", "Message")
-                .status(Plaintext.Status.DOING_PROOF_OF_WORK)
-                .build()
+            .ackData(cryptography().randomBytes(32))
+            .from(sender)
+            .to(recipient)
+            .message("Subject", "Message")
+            .status(Plaintext.Status.DOING_PROOF_OF_WORK)
+            .build()
         messageRepo.save(plaintext)
-        initialHash2 = cryptography().getInitialHash(plaintext.ackMessage!!)
-        repo.putObject(ProofOfWorkRepository.Item(
-                plaintext.ackMessage!!,
-                1000, 1000,
-                UnixTime.now + 10 * UnixTime.MINUTE,
-                plaintext
-        ))
+        plaintext.ackMessage!!.let { ackMessage ->
+            initialHash2 = cryptography().getInitialHash(ackMessage)
+            repo.putObject(ProofOfWorkRepository.Item(
+                objectMessage = ackMessage,
+                nonceTrialsPerByte = 1000, extraBytes = 1000,
+                expirationTime = UnixTime.now + 10 * UnixTime.MINUTE,
+                message = plaintext
+            ))
+        }
     }
 
     @Test
     fun `ensure object is stored`() {
         val sizeBefore = repo.getItems().size
-        repo.putObject(ObjectMessage.Builder()
-                .payload(GetPubkey(BitmessageAddress("BM-2D9U2hv3YBMHM1zERP32anKfVKohyPN9x2"))).build(),
-                1000, 1000)
+        repo.putObject(
+            objectMessage = ObjectMessage.Builder()
+                .payload(GetPubkey(BitmessageAddress("BM-2D9U2hv3YBMHM1zERP32anKfVKohyPN9x2")))
+                .build(),
+            nonceTrialsPerByte = 1000,
+            extraBytes = 1000
+        )
         assertThat(repo.getItems().size, `is`(sizeBefore + 1))
     }
 
@@ -117,19 +126,22 @@ class AndroidProofOfWorkRepositoryTest : TestBase() {
         addressRepo.save(sender)
         addressRepo.save(recipient)
         val plaintext = Plaintext.Builder(Plaintext.Type.MSG)
-                .ackData(cryptography().randomBytes(32))
-                .from(sender)
-                .to(recipient)
-                .message("Subject", "Message")
-                .status(Plaintext.Status.DOING_PROOF_OF_WORK)
-                .build()
+            .ackData(cryptography().randomBytes(32))
+            .from(sender)
+            .to(recipient)
+            .message("Subject", "Message")
+            .status(Plaintext.Status.DOING_PROOF_OF_WORK)
+            .build()
         messageRepo.save(plaintext)
-        repo.putObject(ProofOfWorkRepository.Item(
-                plaintext.ackMessage!!,
-                1000, 1000,
-                UnixTime.now + 10 * UnixTime.MINUTE,
-                plaintext
-        ))
+        plaintext.ackMessage!!.let { ackMessage ->
+            repo.putObject(ProofOfWorkRepository.Item(
+                objectMessage = ackMessage,
+                nonceTrialsPerByte = 1000,
+                extraBytes = 1000,
+                expirationTime = UnixTime.now + 10 * UnixTime.MINUTE,
+                message = plaintext
+            ))
+        }
         assertThat(repo.getItems().size, `is`(sizeBefore + 1))
     }
 
@@ -156,7 +168,7 @@ class AndroidProofOfWorkRepositoryTest : TestBase() {
     }
 
     @Test(expected = RuntimeException::class)
-    fun `ensure retrieving nonexisting item causes exception`() {
+    fun `ensure retrieving non-existing item causes exception`() {
         repo.getItem(ByteArray(0))
     }
 
@@ -168,7 +180,7 @@ class AndroidProofOfWorkRepositoryTest : TestBase() {
     }
 
     @Test
-    fun `ensure deletion of nonexisting item is handled silently`() {
+    fun `ensure deletion of non-existing item is handled silently`() {
         repo.removeObject(ByteArray(0))
     }
 }

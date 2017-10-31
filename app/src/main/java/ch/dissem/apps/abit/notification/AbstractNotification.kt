@@ -19,13 +19,14 @@ package ch.dissem.apps.abit.notification
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
+import org.jetbrains.anko.notificationManager
 
 /**
  * Some base class to create and handle notifications.
  */
 abstract class AbstractNotification(ctx: Context) {
-    protected val ctx = ctx.applicationContext
-    protected val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    protected val ctx = ctx.applicationContext!!
+    private val manager = ctx.notificationManager
     var notification: Notification? = null
         protected set
     protected var showing = false

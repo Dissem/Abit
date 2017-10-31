@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
     private lateinit var nodeSwitch: SwitchDrawerItem
 
     val floatingActionButton: FabSpeedDial?
-        get() = findViewById(R.id.fab) as FabSpeedDial?
+        get() = findViewById(R.id.fab)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
         setContentView(R.layout.activity_main)
         fab.hide()
 
-        val toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
         val listFragment = MessageListFragment()
@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
                 .replace(R.id.item_list, listFragment)
                 .commit()
 
-        if (findViewById(R.id.message_detail_container) != null) {
+        if (findViewById<View>(R.id.message_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-large and
             // res/values-sw600dp). If this view is present, then the
@@ -358,7 +358,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        selectedLabel = savedInstanceState.getSerializable("selectedLabel") as Label?
+        selectedLabel = savedInstanceState.getSerializable("selectedLabel") as? Label
 
         selectedLabel?.let { selectedLabel ->
             drawer.getDrawerItem(selectedLabel)?.let { selectedItem ->

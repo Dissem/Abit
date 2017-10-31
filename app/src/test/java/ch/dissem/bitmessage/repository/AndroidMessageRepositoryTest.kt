@@ -48,7 +48,7 @@ import org.robolectric.annotation.Config
 import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
-@Config(constants = BuildConfig::class, sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP), packageName = "ch.dissem.apps.abit")
+@Config(sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP), packageName = "ch.dissem.apps.abit")
 class AndroidMessageRepositoryTest : TestBase() {
     private lateinit var contactA: BitmessageAddress
     private lateinit var contactB: BitmessageAddress
@@ -320,26 +320,24 @@ class AndroidMessageRepositoryTest : TestBase() {
         return repo.getMessage(root.id!!)
     }
 
-    private fun hasMessage(subject: String?, body: String?): Matcher<Plaintext> {
-        return object : BaseMatcher<Plaintext>() {
-            override fun describeTo(description: Description) {
-                description.appendText("Subject: ").appendText(subject)
-                description.appendText(", ")
-                description.appendText("Body: ").appendText(body)
-            }
+    private fun hasMessage(subject: String?, body: String?) = object : BaseMatcher<Plaintext>() {
+        override fun describeTo(description: Description) {
+            description.appendText("Subject: ").appendText(subject)
+            description.appendText(", ")
+            description.appendText("Body: ").appendText(body)
+        }
 
-            override fun matches(item: Any): Boolean {
-                if (item is Plaintext) {
-                    if (subject != null && subject != item.subject) {
-                        return false
-                    }
-                    if (body != null && body != item.text) {
-                        return false
-                    }
-                    return true
-                } else {
+        override fun matches(item: Any): Boolean {
+            if (item is Plaintext) {
+                if (subject != null && subject != item.subject) {
                     return false
                 }
+                if (body != null && body != item.text) {
+                    return false
+                }
+                return true
+            } else {
+                return false
             }
         }
     }

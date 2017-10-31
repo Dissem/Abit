@@ -59,26 +59,26 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         addPreferencesFromResource(R.xml.preferences)
 
         findPreference("about")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            val libsBuilder = LibsBuilder()
+            (activity as? MainActivity)?.let { activity ->
+                val libsBuilder = LibsBuilder()
                     .withActivityTitle(activity.getString(R.string.about))
                     .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
                     .withAboutIconShown(true)
                     .withAboutVersionShown(true)
                     .withAboutDescription(getString(R.string.about_app))
-            val activity = activity as MainActivity
-            if (activity.hasDetailPane) {
-                activity.setDetailView(libsBuilder.supportFragment())
-            } else {
-                libsBuilder.start(getActivity())
+                if (activity.hasDetailPane) {
+                    activity.setDetailView(libsBuilder.supportFragment())
+                } else {
+                    libsBuilder.start(activity)
+                }
             }
             return@OnPreferenceClickListener true
         }
         val cleanup = findPreference("cleanup")
         cleanup?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            val ctx = activity.applicationContext
+            val ctx = activity?.applicationContext ?: throw IllegalStateException("Context not available")
             cleanup.isEnabled = false
-            Toast.makeText(ctx, R.string.cleanup_notification_start, Toast
-                    .LENGTH_SHORT).show()
+            Toast.makeText(ctx, R.string.cleanup_notification_start, Toast.LENGTH_SHORT).show()
 
             doAsync {
                 val bmc = Singleton.getBitmessageContext(ctx)
@@ -88,9 +88,9 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
                 uiThread {
                     Toast.makeText(
-                            ctx,
-                            R.string.cleanup_notification_end,
-                            Toast.LENGTH_LONG
+                        ctx,
+                        R.string.cleanup_notification_end,
+                        Toast.LENGTH_LONG
                     ).show()
                     cleanup.isEnabled = true
                 }
@@ -99,36 +99,38 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         }
 
         findPreference("export")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+            val ctx = context ?: throw IllegalStateException("No context available")
+
             val dialog = indeterminateProgressDialog(R.string.export_data_summary, R.string.export_data)
             doAsync {
-                val exportDirectory = Preferences.getExportDirectory(context)
+                val exportDirectory = Preferences.getExportDirectory(ctx)
                 exportDirectory.mkdirs()
                 val temp = File(exportDirectory, "export-${UnixTime.now}.zip")
                 ZipOutputStream(FileOutputStream(temp)).use { zip ->
                     zip.putNextEntry(ZipEntry("contacts.json"))
-                    val addressRepo = Singleton.getAddressRepository(context)
+                    val addressRepo = Singleton.getAddressRepository(ctx)
                     val exportContacts = ContactExport.exportContacts(addressRepo.getContacts())
                     zip.write(
-                            exportContacts.toJsonString(true).toByteArray()
+                        exportContacts.toJsonString(true).toByteArray()
                     )
                     zip.closeEntry()
 
-                    val messageRepo = Singleton.getMessageRepository(context)
+                    val messageRepo = Singleton.getMessageRepository(ctx)
                     zip.putNextEntry(ZipEntry("labels.json"))
                     val exportLabels = MessageExport.exportLabels(messageRepo.getLabels())
                     zip.write(
-                            exportLabels.toJsonString(true).toByteArray()
+                        exportLabels.toJsonString(true).toByteArray()
                     )
                     zip.closeEntry()
                     zip.putNextEntry(ZipEntry("messages.json"))
                     val exportMessages = MessageExport.exportMessages(messageRepo.getAllMessages())
                     zip.write(
-                            exportMessages.toJsonString(true).toByteArray()
+                        exportMessages.toJsonString(true).toByteArray()
                     )
                     zip.closeEntry()
                 }
 
-                val contentUri = getUriForFile(context, "ch.dissem.apps.abit.fileprovider", temp)
+                val contentUri = getUriForFile(ctx, "ch.dissem.apps.abit.fileprovider", temp)
                 val intent = Intent(android.content.Intent.ACTION_SEND)
                 intent.type = "application/zip"
                 intent.putExtra(Intent.EXTRA_SUBJECT, "abit-export.zip")
@@ -161,8 +163,8 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         }
     }
 
-    private fun processEntry(zipFile: Uri, entry: String, processor: (JsonArray<*>) -> Unit) {
-        ZipInputStream(context.contentResolver.openInputStream(zipFile)).use { zip ->
+    private fun processEntry(ctx: Context, zipFile: Uri, entry: String, processor: (JsonArray<*>) -> Unit) =
+        ZipInputStream(ctx.contentResolver.openInputStream(zipFile)).use { zip ->
             var nextEntry = zip.nextEntry
             while (nextEntry != null) {
                 if (nextEntry.name == entry) {
@@ -171,38 +173,38 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                 nextEntry = zip.nextEntry
             }
         }
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val ctx = context ?: throw IllegalStateException("No context available")
         when (requestCode) {
-            WRITE_EXPORT_REQUEST_CODE -> Preferences.cleanupExportDirectory(context)
+            WRITE_EXPORT_REQUEST_CODE -> Preferences.cleanupExportDirectory(ctx)
             READ_IMPORT_REQUEST_CODE -> {
                 if (resultCode == Activity.RESULT_OK && data?.data != null) {
                     val dialog = indeterminateProgressDialog(R.string.import_data_summary, R.string.import_data)
                     doAsync {
-                        val ctx = Singleton.getBitmessageContext(context)
+                        val bmc = Singleton.getBitmessageContext(ctx)
                         val labels = mutableMapOf<String, Label>()
                         val zipFile = data.data
 
-                        processEntry(zipFile, "contacts.json") { json ->
+                        processEntry(ctx, zipFile, "contacts.json") { json ->
                             ContactExport.importContacts(json).forEach { contact ->
-                                ctx.addresses.save(contact)
+                                bmc.addresses.save(contact)
                             }
                         }
-                        ctx.messages.getLabels().forEach { label ->
+                        bmc.messages.getLabels().forEach { label ->
                             labels[label.toString()] = label
                         }
-                        processEntry(zipFile, "labels.json") { json ->
+                        processEntry(ctx, zipFile, "labels.json") { json ->
                             MessageExport.importLabels(json).forEach { label ->
                                 if (!labels.contains(label.toString())) {
-                                    ctx.messages.save(label)
+                                    bmc.messages.save(label)
                                     labels[label.toString()] = label
                                 }
                             }
                         }
-                        processEntry(zipFile, "messages.json") { json ->
+                        processEntry(ctx, zipFile, "messages.json") { json ->
                             MessageExport.importMessages(json, labels).forEach { message ->
-                                ctx.messages.save(message)
+                                bmc.messages.save(message)
                             }
                         }
                         uiThread {
@@ -218,7 +220,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         super.onAttach(ctx)
         (ctx as? MainActivity)?.floatingActionButton?.hide()
         PreferenceManager.getDefaultSharedPreferences(ctx)
-                .registerOnSharedPreferenceChangeListener(this)
+            .registerOnSharedPreferenceChangeListener(this)
 
         (ctx as? MainActivity)?.updateTitle(getString(R.string.settings))
     }
@@ -227,19 +229,21 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         when (key) {
             PREFERENCE_TRUSTED_NODE -> {
                 val node = sharedPreferences.getString(PREFERENCE_TRUSTED_NODE, null)
+                val ctx = context ?: throw IllegalStateException("No context available")
                 if (node != null) {
-                    SyncAdapter.startSync(activity)
+                    SyncAdapter.startSync(ctx)
                 } else {
-                    SyncAdapter.stopSync(activity)
+                    SyncAdapter.stopSync(ctx)
                 }
             }
             PREFERENCE_SERVER_POW -> {
                 val node = sharedPreferences.getString(PREFERENCE_TRUSTED_NODE, null)
                 if (node != null) {
+                    val ctx = context ?: throw IllegalStateException("No context available")
                     if (sharedPreferences.getBoolean(PREFERENCE_SERVER_POW, false)) {
-                        SyncAdapter.startPowSync(activity)
+                        SyncAdapter.startPowSync(ctx)
                     } else {
-                        SyncAdapter.stopPowSync(activity)
+                        SyncAdapter.stopPowSync(ctx)
                     }
                 }
             }

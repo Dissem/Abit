@@ -47,28 +47,24 @@ object Assets {
     }
 
     @DrawableRes
-    fun getStatusDrawable(status: Plaintext.Status): Int {
-        when (status) {
-            Plaintext.Status.RECEIVED -> return 0
-            Plaintext.Status.DRAFT -> return R.drawable.draft
-            Plaintext.Status.PUBKEY_REQUESTED -> return R.drawable.public_key
-            Plaintext.Status.DOING_PROOF_OF_WORK -> return R.drawable.ic_notification_proof_of_work
-            Plaintext.Status.SENT -> return R.drawable.sent
-            Plaintext.Status.SENT_ACKNOWLEDGED -> return R.drawable.sent_acknowledged
-            else -> return 0
-        }
+    fun getStatusDrawable(status: Plaintext.Status) = when (status) {
+        Plaintext.Status.RECEIVED -> 0
+        Plaintext.Status.DRAFT -> R.drawable.draft
+        Plaintext.Status.PUBKEY_REQUESTED -> R.drawable.public_key
+        Plaintext.Status.DOING_PROOF_OF_WORK -> R.drawable.ic_notification_proof_of_work
+        Plaintext.Status.SENT -> R.drawable.sent
+        Plaintext.Status.SENT_ACKNOWLEDGED -> R.drawable.sent_acknowledged
+        else -> 0
     }
 
     @StringRes
-    fun getStatusString(status: Plaintext.Status): Int {
-        when (status) {
-            Plaintext.Status.RECEIVED -> return R.string.status_received
-            Plaintext.Status.DRAFT -> return R.string.status_draft
-            Plaintext.Status.PUBKEY_REQUESTED -> return R.string.status_public_key
-            Plaintext.Status.DOING_PROOF_OF_WORK -> return R.string.proof_of_work_title
-            Plaintext.Status.SENT -> return R.string.status_sent
-            Plaintext.Status.SENT_ACKNOWLEDGED -> return R.string.status_sent_acknowledged
-            else -> return 0
-        }
+    fun getStatusString(status: Plaintext.Status) = when (status) {
+        Plaintext.Status.RECEIVED -> R.string.status_received
+        Plaintext.Status.DRAFT -> R.string.status_draft
+        Plaintext.Status.PUBKEY_REQUESTED -> R.string.status_public_key
+        Plaintext.Status.DOING_PROOF_OF_WORK -> R.string.proof_of_work_title
+        Plaintext.Status.SENT -> R.string.status_sent
+        Plaintext.Status.SENT_ACKNOWLEDGED -> R.string.status_sent_acknowledged
+        else -> 0
     }
 }

@@ -19,7 +19,7 @@ package ch.dissem.apps.abit.notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.support.v7.app.NotificationCompat
+import android.support.v4.app.NotificationCompat
 
 import ch.dissem.apps.abit.MainActivity
 import ch.dissem.apps.abit.R
@@ -33,7 +33,7 @@ import kotlin.concurrent.fixedRateTimer
  */
 class ProofOfWorkNotification(ctx: Context) : AbstractNotification(ctx) {
 
-    private val builder = NotificationCompat.Builder(ctx)
+    private val builder = NotificationCompat.Builder(ctx, "abit.pow")
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         .setUsesChronometer(true)
         .setOngoing(true)

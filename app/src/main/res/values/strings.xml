@@ -20,7 +20,7 @@
     <string name="add_deterministic_address">Deterministic identity</string>
     <string name="add_deterministic_address_description">Create or recreate a deterministic identity</string>
     <string name="add_chan">Add Chan</string>
-    <string name="add_chan_description">Create or join a isChan</string>
+    <string name="add_chan_description">Create or join a Chan</string>
     <string name="title_activity_open_bitmessage_link">Import Contact</string>
 
     <string name="connection_info_1">Stream #%1$d: one connection</string>

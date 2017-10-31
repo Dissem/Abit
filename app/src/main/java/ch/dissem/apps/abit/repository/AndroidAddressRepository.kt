@@ -21,7 +21,6 @@ import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.payload.V3Pubkey
 import ch.dissem.bitmessage.entity.payload.V4Pubkey
 import ch.dissem.bitmessage.entity.valueobject.PrivateKey
-import ch.dissem.bitmessage.exception.ApplicationException
 import ch.dissem.bitmessage.factory.Factory
 import ch.dissem.bitmessage.ports.AddressRepository
 import ch.dissem.bitmessage.utils.Encode
@@ -149,12 +148,10 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
         return result
     }
 
-    override fun save(address: BitmessageAddress) {
-        if (exists(address)) {
-            update(address)
-        } else {
-            insert(address)
-        }
+    override fun save(address: BitmessageAddress) = if (exists(address)) {
+        update(address)
+    } else {
+        insert(address)
     }
 
     private fun exists(address: BitmessageAddress): Boolean {
@@ -217,15 +214,6 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
     override fun remove(address: BitmessageAddress) {
         val db = sql.writableDatabase
         db.delete(TABLE_NAME, "address = ?", arrayOf(address.address))
-    }
-
-    fun getById(id: String): BitmessageAddress {
-        val result = find("address = '$id'")
-        return if (result.isNotEmpty()) {
-            result[0]
-        } else {
-            throw ApplicationException("Address with id $id not found.")
-        }
     }
 
     override fun getAddress(address: String) = find("address = '$address'").firstOrNull()

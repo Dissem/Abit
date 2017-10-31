@@ -38,12 +38,10 @@ class ServicePowEngine(private val ctx: Context) : ProofOfWorkEngine {
     private var service: PowBinder? = null
 
     private val connection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            synchronized(lock) {
-                this@ServicePowEngine.service = service as PowBinder
-                while (!queue.isEmpty()) {
-                    service.process(queue.poll())
-                }
+        override fun onServiceConnected(name: ComponentName, service: IBinder) = synchronized(lock) {
+            this@ServicePowEngine.service = service as PowBinder
+            while (!queue.isEmpty()) {
+                service.process(queue.poll())
             }
         }
 

@@ -3,19 +3,16 @@ package ch.dissem.apps.abit.drawer
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Point
-import android.view.Display
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.RelativeLayout
-
-import com.mikepenz.materialdrawer.AccountHeader
-import com.mikepenz.materialdrawer.model.interfaces.IProfile
-
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.util.Drawables
+import com.mikepenz.materialdrawer.AccountHeader
+import com.mikepenz.materialdrawer.model.interfaces.IProfile
 
 class ProfileImageListener(private val ctx: Context) : AccountHeader.OnAccountHeaderProfileImageListener {
 

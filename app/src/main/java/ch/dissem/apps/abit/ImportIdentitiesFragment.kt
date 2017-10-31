@@ -24,6 +24,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 
 import com.h6ah4i.android.widget.advrecyclerview.decoration.SimpleListDividerDecorator
 
@@ -38,7 +39,7 @@ class ImportIdentitiesFragment : Fragment() {
     private lateinit var adapter: AddressSelectorAdapter
     private lateinit var importer: WifImporter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle): View =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
             inflater.inflate(R.layout.fragment_import_select_identities, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,14 +53,14 @@ class ImportIdentitiesFragment : Fragment() {
         val layoutManager = LinearLayoutManager(activity,
                 LinearLayoutManager.VERTICAL,
                 false)
-        val recyclerView = view.findViewById(R.id.recycler_view) as RecyclerView
+        val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
         recyclerView.addItemDecoration(SimpleListDividerDecorator(
                 ContextCompat.getDrawable(activity, R.drawable.list_divider_h), true))
 
-        view.findViewById(R.id.finish).setOnClickListener {
+        view.findViewById<Button>(R.id.finish).setOnClickListener {
             importer.importAll(adapter.selected)
             val mainActivity = MainActivity.getInstance()
             if (mainActivity != null) {

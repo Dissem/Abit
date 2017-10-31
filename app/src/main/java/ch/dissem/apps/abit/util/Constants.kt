@@ -33,5 +33,5 @@ object Constants {
 
     const val BITMESSAGE_URL_SCHEMA = "bitmessage:"
 
-    val BITMESSAGE_ADDRESS_PATTERN = Pattern.compile("\\bBM-[a-zA-Z0-9]+\\b")
+    val BITMESSAGE_ADDRESS_PATTERN = Pattern.compile("\\bBM-[a-zA-Z0-9]+\\b")!!
 }

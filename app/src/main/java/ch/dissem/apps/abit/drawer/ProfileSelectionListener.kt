@@ -49,7 +49,5 @@ class ProfileSelectionListener(
         return false
     }
 
-    private fun addIdentityDialog() {
-        AddIdentityDialogFragment().show(fragmentManager, "dialog")
-    }
+    private fun addIdentityDialog() = AddIdentityDialogFragment().show(fragmentManager, "dialog")
 }

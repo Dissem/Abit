@@ -59,7 +59,7 @@ class ComposeMessageFragment : Fragment() {
         arguments?.let { arguments ->
             var id = arguments.getSerializable(EXTRA_IDENTITY) as? BitmessageAddress
             if (context != null && (id == null || id.privateKey == null)) {
-                id = Singleton.getIdentity(context)
+                id = Singleton.getIdentity(context!!)
             }
             if (id?.privateKey != null) {
                 identity = id
@@ -97,7 +97,7 @@ class ComposeMessageFragment : Fragment() {
         if (broadcast) {
             recipient_input.visibility = View.GONE
         } else {
-            val adapter = ContactAdapter(context)
+            val adapter = ContactAdapter(context!!)
             recipient_input.setAdapter(adapter)
             recipient_input.onItemClickListener = AdapterView.OnItemClickListener { _, _, pos, _ -> adapter.getItem(pos) }
             recipient_input.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -105,9 +105,7 @@ class ComposeMessageFragment : Fragment() {
                     recipient = adapter.getItem(position)
                 }
 
-                override fun onNothingSelected(parent: AdapterView<*>) {
-                    // leave current selection
-                }
+                override fun onNothingSelected(parent: AdapterView<*>) = Unit // leave current selection
             }
             recipient?.let { recipient_input.setText(it.toString()) }
         }
@@ -148,17 +146,16 @@ class ComposeMessageFragment : Fragment() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == 0 && data != null && resultCode == RESULT_OK) {
-            encoding = data.getSerializableExtra(EXTRA_ENCODING) as Plaintext.Encoding
-        } else {
-            super.onActivityResult(requestCode, resultCode, data)
-        }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) = if (requestCode == 0 && data != null && resultCode == RESULT_OK) {
+        encoding = data.getSerializableExtra(EXTRA_ENCODING) as Plaintext.Encoding
+    } else {
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun send() {
         val builder: Plaintext.Builder
-        val bmc = Singleton.getBitmessageContext(context)
+        val ctx = activity ?: throw IllegalStateException("Fragment is not attached to an activity")
+        val bmc = Singleton.getBitmessageContext(ctx)
         if (broadcast) {
             builder = Plaintext.Builder(BROADCAST).from(identity)
         } else {
@@ -167,7 +164,7 @@ class ComposeMessageFragment : Fragment() {
                 try {
                     recipient = BitmessageAddress(inputString)
                 } catch (e: Exception) {
-                    val contacts = Singleton.getAddressRepository(context).getContacts()
+                    val contacts = Singleton.getAddressRepository(ctx).getContacts()
                     for (contact in contacts) {
                         if (inputString.equals(contact.alias, ignoreCase = true)) {
                             recipient = contact
@@ -186,7 +183,7 @@ class ComposeMessageFragment : Fragment() {
                     .from(identity)
                     .to(recipient)
         }
-        if (!Preferences.requestAcknowledgements(context)) {
+        if (!Preferences.requestAcknowledgements(ctx)) {
             builder.preventAck()
         }
         when (encoding) {
@@ -203,8 +200,8 @@ class ComposeMessageFragment : Fragment() {
             )
             else -> {
                 Toast.makeText(
-                        context,
-                        context.getString(R.string.error_unsupported_encoding, encoding),
+                        ctx,
+                        ctx.getString(R.string.error_unsupported_encoding, encoding),
                         Toast.LENGTH_LONG
                 ).show()
                 builder.message(
@@ -214,7 +211,7 @@ class ComposeMessageFragment : Fragment() {
             }
         }
         bmc.send(builder.build())
-        activity.finish()
+        ctx.finish()
     }
 }
 

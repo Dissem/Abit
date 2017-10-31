@@ -30,14 +30,9 @@ class SyncService : Service() {
     /**
      * Instantiate the sync adapter object.
      */
-    override fun onCreate() {
-        // Create the sync adapter as a singleton.
-        // Set the sync adapter as syncable
-        // Disallow parallel syncs
-        synchronized(syncAdapterLock) {
-            if (syncAdapter == null) {
-                syncAdapter = SyncAdapter(this, true)
-            }
+    override fun onCreate() = synchronized(syncAdapterLock) {
+        if (syncAdapter == null) {
+            syncAdapter = SyncAdapter(this, true)
         }
     }
 
@@ -45,13 +40,7 @@ class SyncService : Service() {
      * Return an object that allows the system to invoke
      * the sync adapter.
      */
-    override fun onBind(intent: Intent): IBinder? {
-        // Get the object that allows external processes
-        // to call onPerformSync(). The object is created
-        // in the base class code when the SyncAdapter
-        // constructors call super()
-        return syncAdapter?.syncAdapterBinder
-    }
+    override fun onBind(intent: Intent) = syncAdapter?.syncAdapterBinder
 
     companion object {
         // Storage for an instance of the sync adapter

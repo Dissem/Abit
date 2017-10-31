@@ -39,12 +39,12 @@ class SelectEncodingDialogFragment : AppCompatDialogFragment() {
     private lateinit var encoding: Plaintext.Encoding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        encoding = (arguments.getSerializable(EXTRA_ENCODING) as? Plaintext.Encoding) ?: SIMPLE
+        encoding = (arguments?.getSerializable(EXTRA_ENCODING) as? Plaintext.Encoding) ?: SIMPLE
         dialog.setTitle(R.string.select_encoding_title)
         return inflater.inflate(R.layout.dialog_select_message_encoding, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         when (encoding) {
             SIMPLE -> radioGroup.check(R.id.simple)
@@ -62,7 +62,7 @@ class SelectEncodingDialogFragment : AppCompatDialogFragment() {
             }
             val result = Intent()
             result.putExtra(EXTRA_ENCODING, encoding)
-            targetFragment.onActivityResult(targetRequestCode, RESULT_OK, result)
+            targetFragment?.onActivityResult(targetRequestCode, RESULT_OK, result)
             dismiss()
         })
         dismiss.setOnClickListener { dismiss() }

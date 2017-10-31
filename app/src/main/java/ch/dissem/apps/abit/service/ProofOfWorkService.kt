@@ -38,35 +38,45 @@ class ProofOfWorkService : Service() {
         notification = ProofOfWorkNotification(this)
     }
 
-    override fun onBind(intent: Intent): IBinder? {
-        return PowBinder(this)
-    }
+    override fun onBind(intent: Intent) = PowBinder(this)
 
     class PowBinder internal constructor(private val service: ProofOfWorkService) : Binder() {
-        private val notification: ProofOfWorkNotification
+        private val notification = service.notification
 
-        init {
-            this.notification = service.notification
-        }
-
-        fun process(item: PowItem) {
-            synchronized(queue) {
-                service.startService(Intent(service, ProofOfWorkService::class.java))
-                service.startForeground(ONGOING_NOTIFICATION_ID,
-                    notification.notification)
-                if (!calculating) {
-                    calculating = true
-                    service.calculateNonce(item)
-                } else {
-                    queue.add(item)
-                    notification.update(queue.size).show()
-                }
+        fun process(item: PowItem) = synchronized(queue) {
+            service.startService(Intent(service, ProofOfWorkService::class.java))
+            service.startForeground(ONGOING_NOTIFICATION_ID,
+                notification.notification)
+            if (!calculating) {
+                calculating = true
+                service.calculateNonce(item)
+            } else {
+                queue.add(item)
+                notification.update(queue.size).show()
             }
         }
     }
 
 
-    data class PowItem(val initialHash: ByteArray, val targetValue: ByteArray, val callback: ProofOfWorkEngine.Callback)
+    data class PowItem(val initialHash: ByteArray, val targetValue: ByteArray, val callback: ProofOfWorkEngine.Callback) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as PowItem
+
+            if (!Arrays.equals(initialHash, other.initialHash)) return false
+            if (!Arrays.equals(targetValue, other.targetValue)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = Arrays.hashCode(initialHash)
+            result = 31 * result + Arrays.hashCode(targetValue)
+            return result
+        }
+    }
 
     private fun calculateNonce(item: PowItem) {
         notification.start(item)

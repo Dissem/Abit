@@ -28,19 +28,21 @@ import ch.dissem.apps.abit.service.Singleton
 class StatusFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-            inflater.inflate(R.layout.fragment_status, container, false)
+        inflater.inflate(R.layout.fragment_status, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val bmc = Singleton.getBitmessageContext(context)
+        val bmc = Singleton.getBitmessageContext(
+            context ?: throw IllegalStateException("No context available")
+        )
         val status = StringBuilder()
         for (address in bmc.addresses.getIdentities()) {
             status.append(address.address).append('\n')
         }
         status.append('\n')
         status.append(bmc.status())
-        (view.findViewById(R.id.content) as TextView).text = status
+        view.findViewById<TextView>(R.id.content).text = status
     }
 
 }

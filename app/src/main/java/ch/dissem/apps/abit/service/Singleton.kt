@@ -50,8 +50,8 @@ object Singleton {
     private var powRepo: AndroidProofOfWorkRepository? = null
     private var creatingIdentity: Boolean = false
 
-    fun getBitmessageContext(context: Context): BitmessageContext {
-        return init({ bitmessageContext }, { bitmessageContext = it }) {
+    fun getBitmessageContext(context: Context): BitmessageContext =
+        init({ bitmessageContext }, { bitmessageContext = it }) {
             val ctx = context.applicationContext
             val sqlHelper = SqlHelper(ctx)
             val powRepo = AndroidProofOfWorkRepository(sqlHelper)
@@ -75,7 +75,6 @@ object Singleton {
                     .doNotSendPubkeyOnIdentityCreation()
                     .build()
         }
-    }
 
     fun getMessageListener(ctx: Context) = init({ messageListener }, { messageListener = it }) { MessageListener(ctx) }
 
@@ -85,8 +84,8 @@ object Singleton {
 
     fun getProofOfWorkRepository(ctx: Context) = powRepo ?: getBitmessageContext(ctx).internals.proofOfWorkRepository
 
-    fun getIdentity(ctx: Context): BitmessageAddress? {
-        return init<BitmessageAddress?>(ctx, { identity }, { identity = it }) { bmc ->
+    fun getIdentity(ctx: Context): BitmessageAddress? =
+        init<BitmessageAddress?>(ctx, { identity }, { identity = it }) { bmc ->
             val identities = bmc.addresses.getIdentities()
             if (identities.isNotEmpty()) {
                 identities[0]
@@ -112,7 +111,6 @@ object Singleton {
                 null
             }
         }
-    }
 
     fun setIdentity(identity: BitmessageAddress) {
         if (identity.privateKey == null)
@@ -122,8 +120,8 @@ object Singleton {
 
     fun getConversationService(ctx: Context) = init(ctx, { conversationService }, { conversationService = it }) { ConversationService(it.messages) }
 
-    private inline fun <T> init(crossinline getter: () -> T?, crossinline setter: (T) -> Unit, crossinline creator: () -> T): T {
-        return getter() ?: {
+    private inline fun <T> init(crossinline getter: () -> T?, crossinline setter: (T) -> Unit, crossinline creator: () -> T): T =
+        getter() ?: {
             synchronized(Singleton) {
                 getter() ?: {
                     val v = creator()
@@ -132,10 +130,9 @@ object Singleton {
                 }.invoke()
             }
         }.invoke()
-    }
 
-    private inline fun <T> init(ctx: Context, crossinline getter: () -> T?, crossinline setter: (T) -> Unit, crossinline creator: (BitmessageContext) -> T): T {
-        return getter() ?: {
+    private inline fun <T> init(ctx: Context, crossinline getter: () -> T?, crossinline setter: (T) -> Unit, crossinline creator: (BitmessageContext) -> T): T =
+        getter() ?: {
             val bmc = getBitmessageContext(ctx)
             synchronized(Singleton) {
                 getter() ?: {
@@ -145,5 +142,4 @@ object Singleton {
                 }.invoke()
             }
         }.invoke()
-    }
 }

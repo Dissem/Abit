@@ -18,7 +18,6 @@ package ch.dissem.apps.abit.synchronization
 
 import android.app.Service
 import android.content.Intent
-import android.os.IBinder
 
 /**
  * A bound Service that instantiates the authenticator

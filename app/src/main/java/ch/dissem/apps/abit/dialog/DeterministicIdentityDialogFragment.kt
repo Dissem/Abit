@@ -22,7 +22,6 @@ import android.support.v7.app.AppCompatDialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import ch.dissem.apps.abit.MainActivity
 import ch.dissem.apps.abit.R
@@ -53,7 +52,7 @@ class DeterministicIdentityDialogFragment : AppCompatDialogFragment() {
         super.onViewCreated(dialogView, savedInstanceState)
         ok.setOnClickListener {
             dismiss()
-            val context = activity.baseContext
+            val context = activity?.baseContext ?: throw IllegalStateException("No context available")
             val passphraseText = passphrase.text.toString()
 
             Toast.makeText(context, R.string.toast_long_running_operation, Toast.LENGTH_SHORT).show()

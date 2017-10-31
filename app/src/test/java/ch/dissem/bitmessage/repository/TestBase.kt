@@ -60,25 +60,23 @@ open class TestBase {
                 port: Int = 0,
                 connectionTTL: Long = 0,
                 connectionLimit: Int = 0
-        ): InternalContext {
-            return spy(InternalContext(
-                    cryptography,
-                    inventory,
-                    nodeRegistry,
-                    networkHandler,
-                    addressRepository,
-                    messageRepository,
-                    proofOfWorkRepository,
-                    proofOfWorkEngine,
-                    customCommandHandler,
-                    listener,
-                    labeler,
-                    "/Jabit:TEST/",
-                    port,
-                    connectionTTL,
-                    connectionLimit
-            ))
-        }
+        ) = spy(InternalContext(
+                cryptography,
+                inventory,
+                nodeRegistry,
+                networkHandler,
+                addressRepository,
+                messageRepository,
+                proofOfWorkRepository,
+                proofOfWorkEngine,
+                customCommandHandler,
+                listener,
+                labeler,
+                "/Jabit:TEST/",
+                port,
+                connectionTTL,
+                connectionLimit
+        ))
 
         fun randomInventoryVector(): InventoryVector {
             val bytes = ByteArray(32)
@@ -86,16 +84,16 @@ open class TestBase {
             return InventoryVector(bytes)
         }
 
-        fun getResource(resourceName: String) =
+        private fun getResource(resourceName: String) =
                 TestBase::class.java.classLoader.getResourceAsStream(resourceName)
 
-        fun loadObjectMessage(version: Int, resourceName: String): ObjectMessage {
+        private fun loadObjectMessage(version: Int, resourceName: String): ObjectMessage {
             val data = getBytes(resourceName)
             val `in` = ByteArrayInputStream(data)
             return Factory.getObjectMessage(version, `in`, data.size) ?: throw NoSuchElementException("error loading object message")
         }
 
-        fun getBytes(resourceName: String): ByteArray {
+        private fun getBytes(resourceName: String): ByteArray {
             val `in` = getResource(resourceName)
             val out = ByteArrayOutputStream()
             val buffer = ByteArray(1024)

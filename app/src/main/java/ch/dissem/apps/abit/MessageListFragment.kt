@@ -165,6 +165,8 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val context = context ?: throw IllegalStateException("No context available")
+
         layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
         // touch guard manager  (this class is required to suppress scrolling while swipe-dismiss
@@ -190,12 +192,10 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
                     Singleton.labeler.delete(item)
                     messageRepo.save(item)
                 }
-                recyclerViewOnScrollListener.onScrolled(null, 0, 0)
             }
 
             override fun onItemArchived(item: Plaintext) {
                 Singleton.labeler.archive(item)
-                recyclerViewOnScrollListener.onScrolled(null, 0, 0)
             }
 
             override fun onItemViewClicked(v: View?) {
@@ -239,28 +239,27 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         this.swipeableMessageAdapter = adapter
 
         Singleton.labeler.listener = { message, added, removed ->
-            when {
-                currentLabel?.type == Label.Type.TRASH && added.all { it.type == Label.Type.TRASH } && removed.any { it.type == Label.Type.TRASH } -> {
-                    // work-around for messages that are deleted from trash
-                    swipeableMessageAdapter?.remove(message)
-                    recyclerViewOnScrollListener.onScrolled(null, 0, 0)
-                }
-                currentLabel?.type == Label.Type.UNREAD && added.all { it.type == Label.Type.TRASH } -> {
-                    // work-around for messages that are deleted from unread, which already have the unread label removed
-                    swipeableMessageAdapter?.remove(message)
-                    recyclerViewOnScrollListener.onScrolled(null, 0, 0)
-                }
-                added.contains(currentLabel) -> {
-                    // in most cases, top should be the correct position, but time will show if
-                    // the message should be properly sorted in
-                    swipeableMessageAdapter?.addFirst(message)
-                }
-                removed.contains(currentLabel) -> {
-                    swipeableMessageAdapter?.remove(message)
-                    recyclerViewOnScrollListener.onScrolled(null, 0, 0)
-                }
-                removed.any { it.type == Label.Type.UNREAD } || added.any { it.type == Label.Type.UNREAD } -> {
-                    swipeableMessageAdapter?.update(message)
+            swipeableMessageAdapter?.let { swipeableMessageAdapter ->
+                when {
+                    currentLabel?.type == Label.Type.TRASH && added.all { it.type == Label.Type.TRASH } && removed.any { it.type == Label.Type.TRASH } -> {
+                        // work-around for messages that are deleted from trash
+                        swipeableMessageAdapter.remove(message)
+                    }
+                    currentLabel?.type == Label.Type.UNREAD && added.all { it.type == Label.Type.TRASH } -> {
+                        // work-around for messages that are deleted from unread, which already have the unread label removed
+                        swipeableMessageAdapter.remove(message)
+                    }
+                    added.contains(currentLabel) -> {
+                        // in most cases, top should be the correct position, but time will show if
+                        // the message should be properly sorted in
+                        swipeableMessageAdapter.addFirst(message)
+                    }
+                    removed.contains(currentLabel) -> {
+                        swipeableMessageAdapter.remove(message)
+                    }
+                    removed.any { it.type == Label.Type.UNREAD } || added.any { it.type == Label.Type.UNREAD } -> {
+                        swipeableMessageAdapter.update(message)
+                    }
                 }
             }
         }
@@ -272,7 +271,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         menu.add(R.string.personal_message).setIcon(R.drawable.ic_action_personal)
         FabUtils.initFab(context, R.drawable.ic_action_compose_message, menu)
                 .addOnMenuItemClickListener { _, _, itemId ->
-                    val identity = Singleton.getIdentity(activity)
+                    val identity = Singleton.getIdentity(context)
                     if (identity == null) {
                         Toast.makeText(activity, R.string.no_identity_warning,
                                 Toast.LENGTH_LONG).show()
@@ -347,12 +346,10 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         this.activateOnItemClick = activateOnItemClick
     }
 
-    override fun showPreviousList(): Boolean {
-        return if (backStack.isEmpty()) {
-            false
-        } else {
-            doUpdateList(backStack.pop())
-            true
-        }
+    override fun showPreviousList() = if (backStack.isEmpty()) {
+        false
+    } else {
+        doUpdateList(backStack.pop())
+        true
     }
 }

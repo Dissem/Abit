@@ -46,9 +46,9 @@ class CreateAddressActivity : AppCompatActivity() {
         else
             setContentView(R.layout.activity_create_bitmessage_address)
 
-        val address = findViewById(R.id.address) as TextView
-        val label = findViewById(R.id.label) as EditText
-        val subscribe = findViewById(R.id.subscribe) as Switch
+        val address = findViewById<TextView>(R.id.address)
+        val label = findViewById<EditText>(R.id.label)
+        val subscribe = findViewById<Switch>(R.id.subscribe)
 
         if (uri != null) {
             val addressText = getAddress(uri)
@@ -70,12 +70,12 @@ class CreateAddressActivity : AppCompatActivity() {
             address.text = addressText
         }
 
-        val cancel = findViewById(R.id.cancel) as Button
+        val cancel = findViewById<Button>(R.id.cancel)
         cancel.setOnClickListener {
             setResult(Activity.RESULT_CANCELED)
             finish()
         }
-        findViewById(R.id.do_import).setOnClickListener { onOK(address, label, subscribe) }
+        findViewById<Button>(R.id.do_import).setOnClickListener { onOK(address, label, subscribe) }
     }
 
 

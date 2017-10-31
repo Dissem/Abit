@@ -24,17 +24,15 @@ import java.util.regex.Pattern
 object Strings {
     private val WHITESPACES = Pattern.compile("\\s+")
 
-    private fun trim(string: CharSequence?, length: Int) = if (string == null) {
-        ""
-    } else if (string.length <= length) {
-        string
-    } else {
-        string.subSequence(0, length)
+    private fun trim(string: CharSequence?, length: Int) = when {
+        string == null -> ""
+        string.length <= length -> string
+        else -> string.subSequence(0, length)
     }
 
     /**
      * Trim the string to 200 characters and normalizes all whitespaces by replacing any sequence
      * of whitespace characters with a single space character.
      */
-    fun prepareMessageExtract(string: CharSequence?) = WHITESPACES.matcher(trim(string, 200)).replaceAll(" ")
+    fun prepareMessageExtract(string: CharSequence?): String = WHITESPACES.matcher(trim(string, 200)).replaceAll(" ")
 }

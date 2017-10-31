@@ -37,15 +37,9 @@ import ch.dissem.bitmessage.entity.BitmessageAddress
  * An adapter for contacts. Can be filtered by alias or address.
  */
 class ContactAdapter(ctx: Context) : BaseAdapter(), Filterable {
-    private val inflater: LayoutInflater
-    private val originalData: List<BitmessageAddress>
-    private var data: List<BitmessageAddress> = emptyList()
-
-    init {
-        inflater = LayoutInflater.from(ctx)
-        originalData = Singleton.getAddressRepository(ctx).getContacts()
-        data = originalData
-    }
+    private val inflater = LayoutInflater.from(ctx)
+    private val originalData = Singleton.getAddressRepository(ctx).getContacts()
+    private var data: List<BitmessageAddress> = originalData
 
     override fun getCount() = data.size
 
@@ -69,10 +63,15 @@ class ContactAdapter(ctx: Context) : BaseAdapter(), Filterable {
     override fun getFilter(): Filter = ContactFilter()
 
     private inner class ViewHolder(val view: View) {
-        val avatar = view.findViewById(R.id.avatar) as ImageView
-        val name = view.findViewById(R.id.name) as TextView
-        val address = view.findViewById(R.id.address) as TextView
+        val avatar = view.findViewById<ImageView>(R.id.avatar)!!
+        val name = view.findViewById<TextView>(R.id.name)!!
+        val address = view.findViewById<TextView>(R.id.address)!!
+
+        init {
+            view.tag = this
+        }
     }
+
 
     private inner class ContactFilter : Filter() {
         override fun performFiltering(prefix: CharSequence?): Filter.FilterResults {
@@ -116,7 +115,7 @@ class ContactAdapter(ctx: Context) : BaseAdapter(), Filterable {
             return results
         }
 
-        override fun publishResults(constraint: CharSequence, results: Filter.FilterResults) {
+        override fun publishResults(constraint: CharSequence?, results: Filter.FilterResults) {
             @Suppress("UNCHECKED_CAST")
             data = results.values as List<BitmessageAddress>
             if (results.count > 0) {

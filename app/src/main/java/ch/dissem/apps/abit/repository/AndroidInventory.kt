@@ -18,7 +18,6 @@ package ch.dissem.apps.abit.repository
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteConstraintException
-import ch.dissem.apps.abit.repository.SqlHelper.Companion.join
 import ch.dissem.bitmessage.entity.ObjectMessage
 import ch.dissem.bitmessage.entity.payload.ObjectType
 import ch.dissem.bitmessage.entity.valueobject.InventoryVector

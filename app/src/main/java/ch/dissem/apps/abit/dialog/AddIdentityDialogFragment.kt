@@ -42,6 +42,7 @@ import org.jetbrains.anko.uiThread
 
 class AddIdentityDialogFragment : AppCompatDialogFragment() {
     private lateinit var bmc: BitmessageContext
+    private var parent: ViewGroup? = null
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -50,13 +51,15 @@ class AddIdentityDialogFragment : AppCompatDialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         dialog.setTitle(R.string.add_identity)
+        parent = container
         return inflater.inflate(R.layout.dialog_add_identity, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ok.setOnClickListener(View.OnClickListener {
-            val ctx = activity.baseContext
+            val ctx = activity?.baseContext ?: throw IllegalStateException("No context available")
+
             when (radioGroup.checkedRadioButtonId) {
                 R.id.create_identity -> {
                     Toast.makeText(ctx,
@@ -84,14 +87,14 @@ class AddIdentityDialogFragment : AppCompatDialogFragment() {
     }
 
     private fun addChanDialog() {
-        val activity = activity
-        val ctx = activity.baseContext
-        val dialogView = activity.layoutInflater.inflate(R.layout.dialog_input_passphrase, null)
+        val activity = activity ?: throw IllegalStateException("No activity available")
+        val ctx = activity.baseContext ?: throw IllegalStateException("No context available")
+        val dialogView = activity.layoutInflater.inflate(R.layout.dialog_input_passphrase, parent)
         AlertDialog.Builder(activity)
                 .setTitle(R.string.add_chan)
                 .setView(dialogView)
                 .setPositiveButton(R.string.ok) { _, _ ->
-                    val passphrase = dialogView.findViewById(R.id.passphrase) as TextView
+                    val passphrase = dialogView.findViewById<TextView>(R.id.passphrase)
                     Toast.makeText(ctx, R.string.toast_long_running_operation,
                             Toast.LENGTH_SHORT).show()
                     val pass = passphrase.text.toString()

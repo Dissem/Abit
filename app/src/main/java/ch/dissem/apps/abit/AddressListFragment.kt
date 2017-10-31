@@ -45,10 +45,10 @@ class AddressListFragment : AbstractItemListFragment<Void, BitmessageAddress>() 
         super.onCreate(savedInstanceState)
 
         adapter = object : ArrayAdapter<BitmessageAddress>(
-                activity,
-                R.layout.subscription_row,
-                R.id.name,
-                LinkedList()) {
+            activity,
+            R.layout.subscription_row,
+            R.id.name,
+            LinkedList()) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val result: View
                 val v: ViewHolder
@@ -56,11 +56,11 @@ class AddressListFragment : AbstractItemListFragment<Void, BitmessageAddress>() 
                     val inflater = LayoutInflater.from(context)
                     val view = inflater.inflate(R.layout.subscription_row, parent, false)
                     v = ViewHolder(
-                            ctx = context,
-                            avatar = view.findViewById(R.id.avatar) as ImageView,
-                            name = view.findViewById(R.id.name) as TextView,
-                            streamNumber = view.findViewById(R.id.stream_number) as TextView,
-                            subscribed = view.findViewById(R.id.subscribed)
+                        ctx = context,
+                        avatar = view.findViewById(R.id.avatar),
+                        name = view.findViewById(R.id.name),
+                        streamNumber = view.findViewById(R.id.stream_number),
+                        subscribed = view.findViewById(R.id.subscribed)
                     )
                     view.tag = v
                     result = view
@@ -89,12 +89,14 @@ class AddressListFragment : AbstractItemListFragment<Void, BitmessageAddress>() 
 
     fun updateList() {
         adapter.clear()
-        val addressRepo = Singleton.getAddressRepository(context)
-        doAsync {
-            addressRepo.getContactIds()
+        context?.let { context ->
+            val addressRepo = Singleton.getAddressRepository(context)
+            doAsync {
+                addressRepo.getContactIds()
                     .map { addressRepo.getAddress(it) }
                     .forEach { address -> uiThread { adapter.add(address) } }
 
+            }
         }
     }
 
@@ -104,23 +106,23 @@ class AddressListFragment : AbstractItemListFragment<Void, BitmessageAddress>() 
         menu.add(R.string.scan_qr_code).setIcon(R.drawable.ic_action_qr_code)
         menu.add(R.string.create_contact).setIcon(R.drawable.ic_action_create_contact)
         FabUtils.initFab(activity, R.drawable.ic_action_add_contact, menu)
-                .addOnMenuItemClickListener { _, _, itemId ->
-                    when (itemId) {
-                        1 -> IntentIntegrator.forSupportFragment(this@AddressListFragment)
-                                .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES)
-                                .initiateScan()
-                        2 -> {
-                            val intent = Intent(getActivity(), CreateAddressActivity::class.java)
-                            startActivity(intent)
-                        }
-                        else -> {
-                        }
+            .addOnMenuItemClickListener { _, _, itemId ->
+                when (itemId) {
+                    1 -> IntentIntegrator.forSupportFragment(this@AddressListFragment)
+                        .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES)
+                        .initiateScan()
+                    2 -> {
+                        val intent = Intent(getActivity(), CreateAddressActivity::class.java)
+                        startActivity(intent)
+                    }
+                    else -> {
                     }
                 }
+            }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-            inflater.inflate(R.layout.fragment_address_list, container, false)
+        inflater.inflate(R.layout.fragment_address_list, container, false)
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (data != null && data.hasExtra("SCAN_RESULT")) {
@@ -131,15 +133,13 @@ class AddressListFragment : AbstractItemListFragment<Void, BitmessageAddress>() 
         }
     }
 
-    override fun updateList(label: Void) {
-        updateList()
-    }
+    override fun updateList(label: Void) = updateList()
 
     private data class ViewHolder(
-            val ctx: Context,
-            val avatar: ImageView,
-            val name: TextView,
-            val streamNumber: TextView,
-            val subscribed: View
+        val ctx: Context,
+        val avatar: ImageView,
+        val name: TextView,
+        val streamNumber: TextView,
+        val subscribed: View
     )
 }

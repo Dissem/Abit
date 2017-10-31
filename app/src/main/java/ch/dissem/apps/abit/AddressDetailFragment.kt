@@ -49,8 +49,10 @@ class AddressDetailFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (arguments.containsKey(ARG_ITEM)) {
-            item = arguments.getSerializable(ARG_ITEM) as BitmessageAddress
+        arguments?.let { arguments ->
+            if (arguments.containsKey(ARG_ITEM)) {
+                item = arguments.getSerializable(ARG_ITEM) as BitmessageAddress
+            }
         }
         setHasOptionsMenu(true)
     }
@@ -58,7 +60,7 @@ class AddressDetailFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.address, menu)
 
-        val ctx = activity
+        val ctx = activity!!
         Drawables.addIcon(ctx, menu, R.id.write_message, GoogleMaterial.Icon.gmd_mail)
         Drawables.addIcon(ctx, menu, R.id.share, GoogleMaterial.Icon.gmd_share)
         Drawables.addIcon(ctx, menu, R.id.delete, GoogleMaterial.Icon.gmd_delete)
@@ -69,7 +71,7 @@ class AddressDetailFragment : Fragment() {
 
     override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
         val item = item ?: return false
-        val ctx = activity
+        val ctx = activity ?: return false
         when (menuItem.itemId) {
             R.id.write_message -> {
                 val identity = Singleton.getIdentity(ctx)
@@ -89,35 +91,35 @@ class AddressDetailFragment : Fragment() {
                 else
                     R.string.delete_contact_warning
                 AlertDialog.Builder(ctx)
-                        .setMessage(warning)
-                        .setPositiveButton(android.R.string.yes) { _, _ ->
-                            Singleton.getAddressRepository(ctx).remove(item)
-                            val mainActivity = MainActivity.getInstance()
-                            if (item.privateKey != null && mainActivity != null) {
-                                mainActivity.removeIdentityEntry(item)
-                            }
-                            this.item = null
-                            ctx.onBackPressed()
+                    .setMessage(warning)
+                    .setPositiveButton(android.R.string.yes) { _, _ ->
+                        Singleton.getAddressRepository(ctx).remove(item)
+                        val mainActivity = MainActivity.getInstance()
+                        if (item.privateKey != null && mainActivity != null) {
+                            mainActivity.removeIdentityEntry(item)
                         }
-                        .setNegativeButton(android.R.string.no, null)
-                        .show()
+                        this.item = null
+                        ctx.onBackPressed()
+                    }
+                    .setNegativeButton(android.R.string.no, null)
+                    .show()
                 return true
             }
             R.id.export -> {
                 AlertDialog.Builder(ctx)
-                        .setMessage(R.string.confirm_export)
-                        .setPositiveButton(android.R.string.yes) { _, _ ->
-                            val shareIntent = Intent(Intent.ACTION_SEND)
-                            shareIntent.type = "text/plain"
-                            shareIntent.putExtra(Intent.EXTRA_TITLE, item.toString() + EXPORT_POSTFIX)
-                            val exporter = WifExporter(Singleton
-                                    .getBitmessageContext(ctx))
-                            exporter.addIdentity(item)
-                            shareIntent.putExtra(Intent.EXTRA_TEXT, exporter.toString())
-                            startActivity(Intent.createChooser(shareIntent, null))
-                        }
-                        .setNegativeButton(android.R.string.no, null)
-                        .show()
+                    .setMessage(R.string.confirm_export)
+                    .setPositiveButton(android.R.string.yes) { _, _ ->
+                        val shareIntent = Intent(Intent.ACTION_SEND)
+                        shareIntent.type = "text/plain"
+                        shareIntent.putExtra(Intent.EXTRA_TITLE, item.toString() + EXPORT_POSTFIX)
+                        val exporter = WifExporter(Singleton
+                            .getBitmessageContext(ctx))
+                        exporter.addIdentity(item)
+                        shareIntent.putExtra(Intent.EXTRA_TEXT, exporter.toString())
+                        startActivity(Intent.createChooser(shareIntent, null))
+                    }
+                    .setNegativeButton(android.R.string.no, null)
+                    .show()
                 return true
             }
             R.id.share -> {
@@ -132,30 +134,27 @@ class AddressDetailFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View
-            = inflater.inflate(R.layout.fragment_address_detail, container, false)
+        = inflater.inflate(R.layout.fragment_address_detail, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // Show the dummy content as text in a TextView.
         item?.let { item ->
-            val activity = activity
-            when {
-                item.isChan -> activity.setTitle(R.string.title_chan_detail)
-                item.privateKey != null -> activity.setTitle(R.string.title_identity_detail)
-                item.isSubscribed -> activity.setTitle(R.string.title_subscription_detail)
-                else -> activity.setTitle(R.string.title_contact_detail)
+            activity?.let { activity ->
+                when {
+                    item.isChan -> activity.setTitle(R.string.title_chan_detail)
+                    item.privateKey != null -> activity.setTitle(R.string.title_identity_detail)
+                    item.isSubscribed -> activity.setTitle(R.string.title_subscription_detail)
+                    else -> activity.setTitle(R.string.title_contact_detail)
+                }
             }
 
             avatar.setImageDrawable(Identicon(item))
             name.setText(item.toString())
             name.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-                    // Nothing to do
-                }
+                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit // Nothing to do
 
-                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                    // Nothing to do
-                }
+                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit // Nothing to do
 
                 override fun afterTextChanged(s: Editable) {
                     item.alias = s.toString()
@@ -185,7 +184,7 @@ class AddressDetailFragment : Fragment() {
 
     override fun onPause() {
         item?.let { item ->
-            Singleton.getAddressRepository(context).save(item)
+            Singleton.getAddressRepository(context!!).save(item)
             if (item.privateKey != null) {
                 MainActivity.getInstance()?.updateIdentityEntry(item)
             }

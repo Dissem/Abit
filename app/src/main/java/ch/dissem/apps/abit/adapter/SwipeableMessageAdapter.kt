@@ -72,12 +72,12 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
     }
 
     class ViewHolder(v: View) : AbstractSwipeableItemViewHolder(v) {
-        val container = v.findViewById(R.id.container) as FrameLayout
-        val avatar = v.findViewById(R.id.avatar) as ImageView
-        val status = v.findViewById(R.id.status) as ImageView
-        val sender = v.findViewById(R.id.sender) as TextView
-        val subject = v.findViewById(R.id.subject) as TextView
-        val extract = v.findViewById(R.id.text) as TextView
+        val container = v.findViewById<FrameLayout>(R.id.container)!!
+        val avatar = v.findViewById<ImageView>(R.id.avatar)!!
+        val status = v.findViewById<ImageView>(R.id.status)!!
+        val sender = v.findViewById<TextView>(R.id.sender)!!
+        val subject = v.findViewById<TextView>(R.id.subject)!!
+        val extract = v.findViewById<TextView>(R.id.text)!!
 
         override fun getSwipeableContainerView() = container
     }
@@ -110,19 +110,16 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
 
     fun remove(item: Plaintext) {
         val index = data.indexOf(item)
-        data.removeIf { it.id == item.id }
+        data.removeAll { it.id == item.id }
         notifyItemRemoved(index)
     }
 
     fun update(item: Plaintext) {
-        data.replaceAll {
-            if (it.id == item.id) {
-                item
-            } else {
-                it
-            }
+        val index = data.indexOfFirst { it.id == item.id }
+        if (index >= 0) {
+            data[index] = item
+            notifyItemChanged(index)
         }
-        notifyItemChanged(data.indexOf(item))
     }
 
     fun clear(newLabel: Label?) {
@@ -137,7 +134,7 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
 
     private fun onSwipeableViewContainerClick(v: View) {
         eventListener?.onItemViewClicked(
-                RecyclerViewAdapterUtils.getParentViewHolderItemView(v))
+            RecyclerViewAdapterUtils.getParentViewHolderItemView(v))
     }
 
     fun getItem(position: Int) = data[position]
@@ -156,10 +153,10 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
         holder.apply {
             if (activateOnItemClick) {
                 container.setBackgroundResource(
-                        if (position == selectedPosition)
-                            R.drawable.bg_item_selected_state
-                        else
-                            R.drawable.bg_item_normal_state
+                    if (position == selectedPosition)
+                        R.drawable.bg_item_selected_state
+                    else
+                        R.drawable.bg_item_normal_state
                 )
             }
 
@@ -188,36 +185,35 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
 
     override fun getItemCount() = data.size
 
-    override fun onGetSwipeReactionType(holder: ViewHolder, position: Int, x: Int, y: Int): Int {
-        return if (label === LABEL_ARCHIVE || label?.type == Label.Type.TRASH) {
+    override fun onGetSwipeReactionType(holder: ViewHolder, position: Int, x: Int, y: Int): Int =
+        if (label === LABEL_ARCHIVE || label?.type == Label.Type.TRASH) {
             REACTION_CAN_SWIPE_LEFT or REACTION_CAN_NOT_SWIPE_RIGHT_WITH_RUBBER_BAND_EFFECT
         } else {
             REACTION_CAN_SWIPE_BOTH_H
         }
-    }
 
     @SuppressLint("SwitchIntDef")
-    override fun onSetSwipeBackground(holder: ViewHolder, position: Int, type: Int) {
-        var bgRes = 0
-        when (type) {
-            DRAWABLE_SWIPE_NEUTRAL_BACKGROUND -> bgRes = R.drawable.bg_swipe_item_neutral
-            DRAWABLE_SWIPE_LEFT_BACKGROUND -> bgRes = R.drawable.bg_swipe_item_left
+    override fun onSetSwipeBackground(holder: ViewHolder, position: Int, type: Int) =
+        holder.itemView.setBackgroundResource(when (type) {
+            DRAWABLE_SWIPE_NEUTRAL_BACKGROUND -> R.drawable.bg_swipe_item_neutral
+            DRAWABLE_SWIPE_LEFT_BACKGROUND -> R.drawable.bg_swipe_item_left
             DRAWABLE_SWIPE_RIGHT_BACKGROUND -> if (label === LABEL_ARCHIVE || label?.type == Label.Type.TRASH) {
-                bgRes = R.drawable.bg_swipe_item_neutral
+                R.drawable.bg_swipe_item_neutral
             } else {
-                bgRes = R.drawable.bg_swipe_item_right
+                R.drawable.bg_swipe_item_right
             }
-        }
-        holder.itemView.setBackgroundResource(bgRes)
-    }
+            else -> R.drawable.bg_swipe_item_neutral
+        })
 
     @SuppressLint("SwitchIntDef")
     override fun onSwipeItem(holder: ViewHolder, position: Int, result: Int) =
-            when (result) {
-                RESULT_SWIPED_RIGHT -> SwipeRightResultAction(this, position)
-                RESULT_SWIPED_LEFT -> SwipeLeftResultAction(this, position)
-                else -> null
-            }
+        when (result) {
+            RESULT_SWIPED_RIGHT -> SwipeRightResultAction(this, position)
+            RESULT_SWIPED_LEFT -> SwipeLeftResultAction(this, position)
+            else -> null
+        }
+
+    override fun onSwipeItemStarted(holder: ViewHolder?, position: Int) = Unit
 
     fun setSelectedPosition(selectedPosition: Int) {
         val oldPosition = this.selectedPosition

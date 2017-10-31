@@ -17,11 +17,7 @@
 package ch.dissem.apps.abit.adapter
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.preference.PreferenceManager
-
-import java.util.Arrays
-
 import ch.dissem.bitmessage.InternalContext
 import ch.dissem.bitmessage.ports.ProofOfWorkEngine
 
@@ -46,9 +42,7 @@ class SwitchingProofOfWorkEngine(
         }
     }
 
-    override fun setContext(context: InternalContext) {
-        listOf(option, fallback)
-                .filterIsInstance<InternalContext.ContextHolder>()
-                .forEach { it.setContext(context) }
-    }
+    override fun setContext(context: InternalContext) = listOf(option, fallback)
+            .filterIsInstance<InternalContext.ContextHolder>()
+            .forEach { it.setContext(context) }
 }

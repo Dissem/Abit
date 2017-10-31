@@ -18,7 +18,7 @@ package ch.dissem.apps.abit.notification
 
 import android.content.Context
 import android.support.annotation.StringRes
-import android.support.v7.app.NotificationCompat
+import android.support.v4.app.NotificationCompat
 
 import ch.dissem.apps.abit.R
 
@@ -30,7 +30,7 @@ import ch.dissem.apps.abit.R
  */
 class ErrorNotification(ctx: Context) : AbstractNotification(ctx) {
 
-    private val builder = NotificationCompat.Builder(ctx)
+    private val builder = NotificationCompat.Builder(ctx, "abit.error")
         .setContentTitle(ctx.getString(R.string.app_name))
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 

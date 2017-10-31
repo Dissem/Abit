@@ -39,7 +39,7 @@ class InputWifFragment : Fragment() {
         setHasOptionsMenu(true)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle): View =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
             inflater.inflate(R.layout.fragment_import_input, container, false)
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
@@ -58,9 +58,8 @@ class InputWifFragment : Fragment() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) =
         inflater.inflate(R.menu.import_input_data, menu)
-    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val properties = DialogProperties()

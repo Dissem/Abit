@@ -94,7 +94,7 @@ class BitmessageService : Service() {
         @Volatile private var running = false
 
         val isRunning: Boolean
-            get() = running && Singleton.bitmessageContext?.isRunning() ?: false
+            get() = running && Singleton.bitmessageContext?.isRunning() == true
 
         val status: Property
             get() = Singleton.bitmessageContext?.status() ?: Property("bitmessage context")

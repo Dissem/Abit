@@ -19,7 +19,6 @@ package ch.dissem.apps.abit.util
 import android.content.Context
 import android.preference.PreferenceManager
 import ch.dissem.apps.abit.R
-import ch.dissem.apps.abit.listener.WifiReceiver
 import ch.dissem.apps.abit.notification.ErrorNotification
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_FULL_NODE
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_REQUEST_ACK
@@ -27,7 +26,6 @@ import ch.dissem.apps.abit.util.Constants.PREFERENCE_SYNC_TIMEOUT
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_WIFI_ONLY
 import org.jetbrains.anko.connectivityManager
-import org.jetbrains.anko.networkStatsManager
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException

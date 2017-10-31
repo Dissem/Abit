@@ -117,9 +117,8 @@ class AndroidProofOfWorkRepository(private val sql: SqlHelper) : ProofOfWorkRepo
 
     }
 
-    override fun putObject(objectMessage: ObjectMessage, nonceTrialsPerByte: Long, extraBytes: Long) {
+    override fun putObject(objectMessage: ObjectMessage, nonceTrialsPerByte: Long, extraBytes: Long) =
         putObject(ProofOfWorkRepository.Item(objectMessage, nonceTrialsPerByte, extraBytes))
-    }
 
     override fun removeObject(initialHash: ByteArray) {
         val db = sql.writableDatabase

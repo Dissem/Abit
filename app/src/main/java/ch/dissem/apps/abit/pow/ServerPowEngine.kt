@@ -17,26 +17,18 @@
 package ch.dissem.apps.abit.pow
 
 import android.content.Context
-import android.widget.Toast
-
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
-
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.synchronization.SyncAdapter
 import ch.dissem.apps.abit.util.Preferences
 import ch.dissem.bitmessage.InternalContext
-import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.extensions.CryptoCustomMessage
 import ch.dissem.bitmessage.extensions.pow.ProofOfWorkRequest
-import ch.dissem.bitmessage.ports.ProofOfWorkEngine
-
 import ch.dissem.bitmessage.extensions.pow.ProofOfWorkRequest.Request.CALCULATE
+import ch.dissem.bitmessage.ports.ProofOfWorkEngine
 import ch.dissem.bitmessage.utils.Singleton.cryptography
+import org.slf4j.LoggerFactory
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * @author Christian Basler
@@ -54,7 +46,7 @@ class ServerPowEngine(private val ctx: Context) : ProofOfWorkEngine, InternalCon
         }
     }
 
-    override fun calculateNonce(initialHash: ByteArray, target: ByteArray, callback: ProofOfWorkEngine.Callback) {
+    override fun calculateNonce(initialHash: ByteArray, target: ByteArray, callback: ProofOfWorkEngine.Callback) =
         pool.execute {
             val identity = Singleton.getIdentity(ctx) ?: throw RuntimeException("No Identity for calculating POW")
 
@@ -80,7 +72,6 @@ class ServerPowEngine(private val ctx: Context) : ProofOfWorkEngine, InternalCon
                 LOG.error(e.message, e)
             }
         }
-    }
 
     override fun setContext(context: InternalContext) {
         this.context = context

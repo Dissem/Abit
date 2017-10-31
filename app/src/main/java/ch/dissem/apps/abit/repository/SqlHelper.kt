@@ -29,57 +29,50 @@ import java.util.*
  */
 class SqlHelper(private val ctx: Context) : SQLiteOpenHelper(ctx, DATABASE_NAME, null, DATABASE_VERSION) {
 
-    override fun onCreate(db: SQLiteDatabase) {
-        onUpgrade(db, 0, DATABASE_VERSION)
-    }
+    override fun onCreate(db: SQLiteDatabase) = onUpgrade(db, 0, DATABASE_VERSION)
 
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        mapOf(
-                0 to {
-                    executeMigration(db, "V1.0__Create_table_inventory")
-                    executeMigration(db, "V1.1__Create_table_address")
-                    executeMigration(db, "V1.2__Create_table_message")
-                },
-                1 to {
-                    // executeMigration(db, "V2.0__Update_table_message");
-                    executeMigration(db, "V2.1__Create_table_POW")
-                },
-                2 to {
-                    executeMigration(db, "V3.0__Update_table_address")
-                },
-                3 to {
-                    executeMigration(db, "V3.1__Update_table_POW")
-                    executeMigration(db, "V3.2__Update_table_message")
-                },
-                4 to {
-                    executeMigration(db, "V3.3__Create_table_node")
-                },
-                5 to {
-                    executeMigration(db, "V3.4__Add_label_outbox")
-                },
-                6 to {
-                    executeMigration(db, "V4.0__Create_table_message_parent")
-                },
-                7 to {
-                    setMissingConversationIds(db)
-                }
-        ).filterKeys { it in oldVersion..(newVersion - 1) }.forEach { (_, v) -> v.invoke() }
-    }
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) = mapOf(
+            0 to {
+                executeMigration(db, "V1.0__Create_table_inventory")
+                executeMigration(db, "V1.1__Create_table_address")
+                executeMigration(db, "V1.2__Create_table_message")
+            },
+            1 to {
+                // executeMigration(db, "V2.0__Update_table_message");
+                executeMigration(db, "V2.1__Create_table_POW")
+            },
+            2 to {
+                executeMigration(db, "V3.0__Update_table_address")
+            },
+            3 to {
+                executeMigration(db, "V3.1__Update_table_POW")
+                executeMigration(db, "V3.2__Update_table_message")
+            },
+            4 to {
+                executeMigration(db, "V3.3__Create_table_node")
+            },
+            5 to {
+                executeMigration(db, "V3.4__Add_label_outbox")
+            },
+            6 to {
+                executeMigration(db, "V4.0__Create_table_message_parent")
+            },
+            7 to {
+                setMissingConversationIds(db)
+            }
+    ).filterKeys { it in oldVersion until newVersion }.forEach { (_, v) -> v.invoke() }
 
     /**
      * Set UUIDs for all messages that have no conversation ID
      */
-    private fun setMissingConversationIds(db: SQLiteDatabase) {
-        db.query(
-                "Message", arrayOf("id"),
-                "conversation IS NULL", null, null, null, null
-        ).use { c ->
-            while (c.moveToNext()) {
-                val id = c.getLong(0)
-                setMissingConversationId(id, db)
-            }
+    private fun setMissingConversationIds(db: SQLiteDatabase) = db.query(
+            "Message", arrayOf("id"),
+            "conversation IS NULL", null, null, null, null
+    ).use { c ->
+        while (c.moveToNext()) {
+            val id = c.getLong(0)
+            setMissingConversationId(id, db)
         }
-
     }
 
     private fun setMissingConversationId(id: Long, db: SQLiteDatabase) {
@@ -98,7 +91,5 @@ class SqlHelper(private val ctx: Context) : SQLiteOpenHelper(ctx, DATABASE_NAME,
         // If you change the database schema, you must increment the database version.
         private val DATABASE_VERSION = 7
         val DATABASE_NAME = "jabit.db"
-
-        internal fun join(vararg types: Enum<*>): String = types.joinToString(separator = "', '", prefix = "'", postfix = "'", transform = { it.name })
     }
 }

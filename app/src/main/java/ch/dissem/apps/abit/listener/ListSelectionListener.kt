@@ -21,7 +21,7 @@ package ch.dissem.apps.abit.listener
  * implement. This mechanism allows activities to be notified of item
  * selections.
  */
-interface ListSelectionListener<T> {
+interface ListSelectionListener<in T> {
     /**
      * Callback for when an item has been selected.
      */

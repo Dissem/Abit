@@ -39,9 +39,7 @@ object Labels {
     }
 
     @ColorInt
-    fun getColor(label: Label): Int {
-        return if (label.type == null) {
-            label.color
-        } else 0xFF000000.toInt()
-    }
+    fun getColor(label: Label) = if (label.type == null) {
+        label.color
+    } else 0xFF000000.toInt()
 }

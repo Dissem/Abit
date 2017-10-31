@@ -25,32 +25,23 @@ import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.util.Linkify
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.text.util.Linkify.WEB_URLS
+import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
-
-import com.mikepenz.google_material_typeface_library.GoogleMaterial
-import com.mikepenz.iconics.view.IconicsImageView
-
-import java.util.ArrayList
-
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.util.Assets
-import ch.dissem.apps.abit.util.Drawables
-import ch.dissem.apps.abit.util.Labels
-import ch.dissem.bitmessage.entity.Plaintext
-import ch.dissem.bitmessage.entity.valueobject.Label
-
-import android.text.util.Linkify.WEB_URLS
 import ch.dissem.apps.abit.util.Constants.BITMESSAGE_ADDRESS_PATTERN
 import ch.dissem.apps.abit.util.Constants.BITMESSAGE_URL_SCHEMA
+import ch.dissem.apps.abit.util.Drawables
+import ch.dissem.apps.abit.util.Labels
 import ch.dissem.apps.abit.util.Strings.prepareMessageExtract
+import ch.dissem.bitmessage.entity.Plaintext
+import ch.dissem.bitmessage.entity.valueobject.Label
+import com.mikepenz.google_material_typeface_library.GoogleMaterial
+import com.mikepenz.iconics.view.IconicsImageView
 import kotlinx.android.synthetic.main.fragment_message_detail.*
+import java.util.*
 
 /**
  * A fragment representing a single Message detail screen.
@@ -68,20 +59,24 @@ class MessageDetailFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (arguments.containsKey(ARG_ITEM)) {
-            // Load the dummy content specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load content from a content provider.
-            item = arguments.getSerializable(ARG_ITEM) as Plaintext
+        arguments?.let { arguments ->
+            if (arguments.containsKey(ARG_ITEM)) {
+                // Load the dummy content specified by the fragment
+                // arguments. In a real-world scenario, use a Loader
+                // to load content from a content provider.
+                item = arguments.getSerializable(ARG_ITEM) as Plaintext
+            }
         }
         setHasOptionsMenu(true)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-            inflater.inflate(R.layout.fragment_message_detail, container, false)
+        inflater.inflate(R.layout.fragment_message_detail, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val ctx = activity ?: throw IllegalStateException("Fragment is not attached to an activity")
 
         // Show the dummy content as text in a TextView.
         item?.let { item ->
@@ -97,7 +92,7 @@ class MessageDetailFragment : Fragment() {
                     recipient.setText(R.string.broadcast)
                 }
             }.invoke()
-            val labelAdapter = LabelAdapter(activity, item.labels)
+            val labelAdapter = LabelAdapter(ctx, item.labels)
             labels.adapter = labelAdapter
             labels.layoutManager = GridLayoutManager(activity, 2)
 
@@ -105,18 +100,16 @@ class MessageDetailFragment : Fragment() {
 
             Linkify.addLinks(text, WEB_URLS)
             Linkify.addLinks(text, BITMESSAGE_ADDRESS_PATTERN, BITMESSAGE_URL_SCHEMA, null,
-                    Linkify.TransformFilter { match, _ -> match.group() }
+                Linkify.TransformFilter { match, _ -> match.group() }
             )
 
             text.linksClickable = true
             text.setTextIsSelectable(true)
 
-            val removed = item.labels.removeAll { it.type==Label.Type.UNREAD }
-            val messageRepo = Singleton.getMessageRepository(context)
+            val removed = item.labels.removeAll { it.type == Label.Type.UNREAD }
+            val messageRepo = Singleton.getMessageRepository(ctx)
             if (removed) {
-                if (activity is MainActivity) {
-                    (activity as MainActivity).updateUnread()
-                }
+                (activity as? MainActivity)?.updateUnread()
                 messageRepo.save(item)
             }
             val parents = ArrayList<Plaintext>(item.parents.size)
@@ -126,32 +119,35 @@ class MessageDetailFragment : Fragment() {
                     parents.add(parent)
                 }
             }
-            showRelatedMessages(view, R.id.parents, parents)
-            showRelatedMessages(view, R.id.responses, messageRepo.findResponses(item))
+            showRelatedMessages(ctx, view, R.id.parents, parents)
+            showRelatedMessages(ctx, view, R.id.responses, messageRepo.findResponses(item))
         }
     }
 
-    private fun showRelatedMessages(rootView: View, @IdRes id: Int, messages: List<Plaintext>) {
-        val recyclerView = rootView.findViewById(id) as RecyclerView
-        val adapter = RelatedMessageAdapter(activity, messages)
+    private fun showRelatedMessages(ctx: Context, rootView: View, @IdRes id: Int, messages: List<Plaintext>) {
+        val recyclerView = rootView.findViewById<RecyclerView>(id)
+        val adapter = RelatedMessageAdapter(ctx, messages)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(activity)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.message, menu)
-
-        Drawables.addIcon(activity, menu, R.id.reply, GoogleMaterial.Icon.gmd_reply)
-        Drawables.addIcon(activity, menu, R.id.delete, GoogleMaterial.Icon.gmd_delete)
-        Drawables.addIcon(activity, menu, R.id.mark_unread, GoogleMaterial.Icon
+        activity?.let { activity ->
+            Drawables.addIcon(activity, menu, R.id.reply, GoogleMaterial.Icon.gmd_reply)
+            Drawables.addIcon(activity, menu, R.id.delete, GoogleMaterial.Icon.gmd_delete)
+            Drawables.addIcon(activity, menu, R.id.mark_unread, GoogleMaterial.Icon
                 .gmd_markunread)
-        Drawables.addIcon(activity, menu, R.id.archive, GoogleMaterial.Icon.gmd_archive)
+            Drawables.addIcon(activity, menu, R.id.archive, GoogleMaterial.Icon.gmd_archive)
+        }
 
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
-        val messageRepo = Singleton.getMessageRepository(context)
+        val messageRepo = Singleton.getMessageRepository(
+            context ?: throw IllegalStateException("No context available")
+        )
         item?.let { item ->
             when (menuItem.itemId) {
                 R.id.reply -> {
@@ -167,7 +163,7 @@ class MessageDetailFragment : Fragment() {
                         messageRepo.save(item)
                     }
                     (activity as? MainActivity)?.updateUnread()
-                    activity.onBackPressed()
+                    activity?.onBackPressed()
                     return true
                 }
                 R.id.mark_unread -> {
@@ -220,10 +216,10 @@ class MessageDetailFragment : Fragment() {
         override fun getItemCount() = messages.size
 
         internal inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            internal val avatar = itemView.findViewById(R.id.avatar) as ImageView
-            internal val status = itemView.findViewById(R.id.status) as ImageView
-            internal val sender = itemView.findViewById(R.id.sender) as TextView
-            internal val extract = itemView.findViewById(R.id.text) as TextView
+            internal val avatar = itemView.findViewById<ImageView>(R.id.avatar)
+            internal val status = itemView.findViewById<ImageView>(R.id.status)
+            internal val sender = itemView.findViewById<TextView>(R.id.sender)
+            internal val extract = itemView.findViewById<TextView>(R.id.text)
             internal var item: Plaintext? = null
 
             init {
@@ -260,16 +256,16 @@ class MessageDetailFragment : Fragment() {
             // Get the data model based on position
             val label = labels[position]
 
-            viewHolder.icon.setColor(Labels.getColor(label))
-            viewHolder.icon.setIcon(Labels.getIcon(label))
+            viewHolder.icon.icon?.color(Labels.getColor(label))
+            viewHolder.icon.icon?.icon(Labels.getIcon(label))
             viewHolder.label.text = Labels.getText(label, ctx)
         }
 
         override fun getItemCount() = labels.size
 
         internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            var icon = itemView.findViewById(R.id.icon) as IconicsImageView
-            var label = itemView.findViewById(R.id.label) as TextView
+            var icon = itemView.findViewById<IconicsImageView>(R.id.icon)!!
+            var label = itemView.findViewById<TextView>(R.id.label)!!
         }
     }
 
@@ -280,6 +276,6 @@ class MessageDetailFragment : Fragment() {
          */
         val ARG_ITEM = "item"
 
-        fun isInTrash(item: Plaintext?) = item?.labels?.any { it.type == Label.Type.TRASH } ?: false
+        fun isInTrash(item: Plaintext?) = item?.labels?.any { it.type == Label.Type.TRASH } == true
     }
 }

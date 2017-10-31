@@ -19,6 +19,6 @@ package ch.dissem.apps.abit.adapter
 /**
  * @author Christian Basler
  */
-class Selectable<T>(val data: T) {
+class Selectable<out T>(val data: T) {
     var selected = false
 }

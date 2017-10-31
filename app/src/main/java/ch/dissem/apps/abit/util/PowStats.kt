@@ -12,8 +12,8 @@ import java.math.BigInteger
 object PowStats {
     private val TWO_POW_64: BigInteger = BigInteger.valueOf(2).pow(64)
 
-    var averagePowUnitTime = 0L
-    var powCount = 0L
+    private var averagePowUnitTime = 0L
+    private var powCount = 0L
 
     fun getExpectedPowTimeInMilliseconds(ctx: Context, target: ByteArray): Long {
         if (averagePowUnitTime == 0L) {

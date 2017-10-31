@@ -48,12 +48,6 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
         super.findMessages(label, offset, limit)
     }
 
-    fun findMessageIds(label: Label) = if (label === LABEL_ARCHIVE) {
-        findIds("id NOT IN (SELECT message_id FROM Message_Label)")
-    } else {
-        findIds("id IN (SELECT message_id FROM Message_Label WHERE label_id=${label.id})")
-    }
-
     public override fun findLabels(where: String): List<Label> {
         val result = LinkedList<Label>()
 
@@ -201,27 +195,6 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
         val where = "conversation=X'${hex(UuidUtils.asBytes(source))}'"
         db.update(TABLE_NAME, values, where, null)
         db.update(PARENTS_TABLE_NAME, values, where, null)
-    }
-
-    private fun findIds(where: String): List<Long> {
-        val result = LinkedList<Long>()
-
-        // Define a projection that specifies which columns from the database
-        // you will actually use after this query.
-        val projection = arrayOf(COLUMN_ID)
-
-        val db = sql.readableDatabase
-        db.query(
-                TABLE_NAME, projection,
-                where, null, null, null,
-                "$COLUMN_RECEIVED DESC, $COLUMN_SENT DESC"
-        ).use { c ->
-            while (c.moveToNext()) {
-                val id = c.getLong(0)
-                result.add(id)
-            }
-        }
-        return result
     }
 
     override fun find(where: String, offset: Int, limit: Int): List<Plaintext> {

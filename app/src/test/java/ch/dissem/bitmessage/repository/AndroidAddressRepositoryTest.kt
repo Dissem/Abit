@@ -32,14 +32,14 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(constants = BuildConfig::class, sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP), packageName = "ch.dissem.apps.abit")
+@Config(sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP), packageName = "ch.dissem.apps.abit")
 class AndroidAddressRepositoryTest : TestBase() {
-    private val CONTACT_A = "BM-2cW7cD5cDQJDNkE7ibmyTxfvGAmnPqa9Vt"
-    private val CONTACT_B = "BM-2cTtkBnb4BUYDndTKun6D9PjtueP2h1bQj"
-    private val CONTACT_C = "BM-2cV5f9EpzaYARxtoruSpa6pDoucSf9ZNke"
+    private val contactA = "BM-2cW7cD5cDQJDNkE7ibmyTxfvGAmnPqa9Vt"
+    private val contactB = "BM-2cTtkBnb4BUYDndTKun6D9PjtueP2h1bQj"
+    private val contactC = "BM-2cV5f9EpzaYARxtoruSpa6pDoucSf9ZNke"
 
-    private lateinit var IDENTITY_A: String
-    private lateinit var IDENTITY_B: String
+    private lateinit var identityA: String
+    private lateinit var identityB: String
 
     private lateinit var repo: AndroidAddressRepository
 
@@ -50,21 +50,23 @@ class AndroidAddressRepositoryTest : TestBase() {
 
         repo = AndroidAddressRepository(sqlHelper)
 
-        repo.save(BitmessageAddress(CONTACT_A))
-        repo.save(BitmessageAddress(CONTACT_B))
-        repo.save(BitmessageAddress(CONTACT_C))
+        repo.save(BitmessageAddress(contactA))
+        repo.save(BitmessageAddress(contactB))
+        repo.save(BitmessageAddress(contactC))
 
-        val identityA = BitmessageAddress(PrivateKey(false, 1, 1000, 1000, DOES_ACK))
-        repo.save(identityA)
-        IDENTITY_A = identityA.address
-        val identityB = BitmessageAddress(PrivateKey(false, 1, 1000, 1000))
-        repo.save(identityB)
-        IDENTITY_B = identityB.address
+        BitmessageAddress(PrivateKey(false, 1, 1000, 1000, DOES_ACK)).let {
+            repo.save(it)
+            identityA = it.address
+        }
+        BitmessageAddress(PrivateKey(false, 1, 1000, 1000)).let {
+            repo.save(it)
+            identityB = it.address
+        }
     }
 
     @Test
     fun `ensure contact can be found`() {
-        val address = BitmessageAddress(CONTACT_A)
+        val address = BitmessageAddress(contactA)
         assertEquals(4, address.version)
         assertEquals(address, repo.findContact(address.tag!!))
         assertNull(repo.findIdentity(address.tag!!))
@@ -72,7 +74,7 @@ class AndroidAddressRepositoryTest : TestBase() {
 
     @Test
     fun `ensure identity can be found`() {
-        val identity = BitmessageAddress(IDENTITY_A)
+        val identity = BitmessageAddress(identityA)
         assertEquals(4, identity.version)
         assertNull(repo.findContact(identity.tag!!))
 
@@ -131,7 +133,7 @@ class AndroidAddressRepositoryTest : TestBase() {
 
     @Test
     fun `ensure existing address is updated`() {
-        var address = repo.getAddress(CONTACT_A)
+        var address = repo.getAddress(contactA)
         address!!.alias = "Test-Alias"
         repo.save(address)
         address = repo.getAddress(address.address)
@@ -140,10 +142,10 @@ class AndroidAddressRepositoryTest : TestBase() {
 
     @Test
     fun `ensure existing keys are not deleted`() {
-        val address = BitmessageAddress(IDENTITY_A)
+        val address = BitmessageAddress(identityA)
         address.alias = "Test"
         repo.save(address)
-        val identityA = repo.getAddress(IDENTITY_A)
+        val identityA = repo.getAddress(identityA)
         assertNotNull(identityA!!.pubkey)
         assertNotNull(identityA.privateKey)
         assertEquals("Test", identityA.alias)
@@ -169,14 +171,14 @@ class AndroidAddressRepositoryTest : TestBase() {
 
     @Test
     fun `ensure address is removed`() {
-        val address = repo.getAddress(IDENTITY_A)
+        val address = repo.getAddress(identityA)
         repo.remove(address!!)
-        assertNull(repo.getAddress(IDENTITY_A))
+        assertNull(repo.getAddress(identityA))
     }
 
     @Test
     fun `ensure address can be retrieved`() {
-        val address = repo.getAddress(IDENTITY_A)
+        val address = repo.getAddress(identityA)
         assertNotNull(address)
         assertNotNull(address!!.privateKey)
     }

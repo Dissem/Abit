@@ -54,10 +54,10 @@ class AndroidNodeRegistry(private val sql: SqlHelper) : NodeRegistry {
         statement.bindLong(1, node.stream)
         statement.bindBlob(2, node.IPv6)
         statement.bindLong(3, node.port.toLong())
-        try {
-            return statement.simpleQueryForLong()
+        return try {
+            statement.simpleQueryForLong()
         } catch (e: SQLiteDoneException) {
-            return null
+            null
         }
     }
 

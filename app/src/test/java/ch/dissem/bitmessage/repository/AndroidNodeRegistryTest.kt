@@ -39,7 +39,7 @@ import java.util.*
  * as the initial nodes' IP addresses are determined by DNS lookup.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(constants = BuildConfig::class, sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP), packageName = "ch.dissem.apps.abit")
+@Config(sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP), packageName = "ch.dissem.apps.abit")
 class AndroidNodeRegistryTest : TestBase() {
     private lateinit var registry: NodeRegistry
 
@@ -51,17 +51,16 @@ class AndroidNodeRegistryTest : TestBase() {
         registry = AndroidNodeRegistry(sqlHelper)
 
         registry.offerAddresses(Arrays.asList(
-                createAddress(1, 8444, 1, now),
-                createAddress(2, 8444, 1, now),
-                createAddress(3, 8444, 1, now),
-                createAddress(4, 8444, 2, now)
+            createAddress(lastByte = 1),
+            createAddress(lastByte = 2),
+            createAddress(lastByte = 3),
+            createAddress(lastByte = 4, stream = 2)
         ))
     }
 
     @Test
-    fun `ensure getKnownNodes() without streams yields empty`() {
+    fun `ensure getKnownNodes() without streams yields empty`() =
         assertThat(registry.getKnownAddresses(10), empty<NetworkAddress>())
-    }
 
     @Test
     fun `ensure predefined node is returned when database is empty`() {
@@ -86,26 +85,25 @@ class AndroidNodeRegistryTest : TestBase() {
     @Test
     fun `ensure offered addresses are added`() {
         registry.offerAddresses(Arrays.asList(
-                createAddress(1, 8444, 1, now),
-                createAddress(10, 8444, 1, now),
-                createAddress(11, 8444, 1, now)
+            createAddress(lastByte = 1),
+            createAddress(lastByte = 10),
+            createAddress(lastByte = 11)
         ))
 
         var knownAddresses = registry.getKnownAddresses(1000, 1)
         assertEquals(5, knownAddresses.size.toLong())
 
-        registry.offerAddresses(listOf(createAddress(1, 8445, 1, now)))
+        registry.offerAddresses(listOf(createAddress(lastByte = 1, port = 8445)))
 
         knownAddresses = registry.getKnownAddresses(1000, 1)
         assertEquals(6, knownAddresses.size.toLong())
     }
 
-    private fun createAddress(lastByte: Int, port: Int, stream: Long, time: Long): NetworkAddress {
-        return NetworkAddress.Builder()
-                .ipv6(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, lastByte)
-                .port(port)
-                .stream(stream)
-                .time(time)
-                .build()
-    }
+    private fun createAddress(lastByte: Int, port: Int = 8444, stream: Long = 1, time: Long = now) =
+        NetworkAddress.Builder()
+            .ipv6(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, lastByte)
+            .port(port)
+            .stream(stream)
+            .time(time)
+            .build()
 }

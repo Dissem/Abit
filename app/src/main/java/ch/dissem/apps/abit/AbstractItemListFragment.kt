@@ -40,7 +40,7 @@ abstract class AbstractItemListFragment<L, T> : ListFragment(), ListHolder<L> {
     private var activatedPosition = ListView.INVALID_POSITION
     private var activateOnItemClick: Boolean = false
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         // Restore the previously serialized activated item position.
@@ -92,9 +92,9 @@ abstract class AbstractItemListFragment<L, T> : ListFragment(), ListHolder<L> {
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        if (outState != null && activatedPosition != ListView.INVALID_POSITION) {
+        if (activatedPosition != ListView.INVALID_POSITION) {
             // Serialize and persist the activated item position.
             outState.putInt(STATE_ACTIVATED_POSITION, activatedPosition)
         }
@@ -136,9 +136,7 @@ abstract class AbstractItemListFragment<L, T> : ListFragment(), ListHolder<L> {
      * nothing. Used only when this fragment is not attached to an activity.
      */
     internal object DummyCallback : ListSelectionListener<Any> {
-        override fun onItemSelected(item: Any) {
-            // NO OP
-        }
+        override fun onItemSelected(item: Any) = Unit // NO OP
     }
 
     companion object {
