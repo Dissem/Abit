@@ -82,8 +82,8 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
             doAsync {
                 val bmc = Singleton.getBitmessageContext(ctx)
-                bmc.cleanup()
                 bmc.internals.nodeRegistry.clear()
+                bmc.cleanup()
                 Preferences.cleanupExportDirectory(ctx)
 
                 uiThread {

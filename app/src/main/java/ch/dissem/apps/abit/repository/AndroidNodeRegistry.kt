@@ -11,9 +11,11 @@ import ch.dissem.bitmessage.ports.NodeRegistryHelper.loadStableNodes
 import ch.dissem.bitmessage.utils.Collections
 import ch.dissem.bitmessage.utils.SqlStrings
 import ch.dissem.bitmessage.utils.Strings.hex
+import ch.dissem.bitmessage.utils.UnixTime
 import ch.dissem.bitmessage.utils.UnixTime.DAY
 import ch.dissem.bitmessage.utils.UnixTime.MINUTE
 import ch.dissem.bitmessage.utils.UnixTime.now
+import ch.dissem.bitmessage.utils.max
 import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.concurrent.getOrSet
@@ -132,7 +134,14 @@ class AndroidNodeRegistry(private val sql: SqlHelper) : NodeRegistry {
             values.put(COLUMN_ADDRESS, node.IPv6)
             values.put(COLUMN_PORT, node.port)
             values.put(COLUMN_SERVICES, node.services)
-            values.put(COLUMN_TIME, node.time)
+            values.put(COLUMN_TIME,
+                if (node.time > UnixTime.now) {
+                    // This might be an attack, let's not use those nodes with priority
+                    UnixTime.now - 7 * UnixTime.DAY
+                } else {
+                    node.time
+                }
+            )
 
             sql.writableDatabase.insertOrThrow(TABLE_NAME, null, values)
         } catch (e: SQLiteConstraintException) {
@@ -140,17 +149,48 @@ class AndroidNodeRegistry(private val sql: SqlHelper) : NodeRegistry {
         }
     }
 
-    private fun update(node: NetworkAddress) {
+    override fun update(node: NetworkAddress) {
         try {
+            val time = if (node.time > UnixTime.now) {
+                // This might be an attack, let's not use those nodes with priority
+                UnixTime.now - 7 * UnixTime.DAY
+            } else {
+                node.time
+            }
+
             // Create a new map of values, where column names are the keys
             val values = ContentValues()
             values.put(COLUMN_SERVICES, node.services)
-            values.put(COLUMN_TIME, node.time)
+            values.put(COLUMN_TIME, max(node.time, time))
 
             sql.writableDatabase.update(
                 TABLE_NAME,
                 values,
                 "stream=${node.stream} AND address=X'${hex(node.IPv6)}' AND port=${node.port}",
+                null
+            )
+        } catch (e: SQLiteConstraintException) {
+            LOG.trace(e.message, e)
+        }
+    }
+
+    override fun remove(node: NetworkAddress) {
+        try {
+            sql.writableDatabase.delete(
+                TABLE_NAME,
+                "stream=${node.stream} AND address=X'${hex(node.IPv6)}' AND port=${node.port}",
+                null
+            )
+        } catch (e: SQLiteConstraintException) {
+            LOG.trace(e.message, e)
+        }
+    }
+
+    override fun cleanup() {
+        try {
+            sql.writableDatabase.delete(
+                TABLE_NAME,
+                "time<${UnixTime.now - 8 * DAY}",
                 null
             )
         } catch (e: SQLiteConstraintException) {
