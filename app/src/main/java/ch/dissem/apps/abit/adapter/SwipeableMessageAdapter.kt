@@ -222,52 +222,28 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
         notifyItemChanged(selectedPosition)
     }
 
-    private class SwipeLeftResultAction internal constructor(adapter: SwipeableMessageAdapter, private val position: Int) : SwipeResultActionMoveToSwipedDirection() {
+    private class SwipeLeftResultAction internal constructor(adapter: SwipeableMessageAdapter, position: Int) : SwipeResultActionMoveToSwipedDirection() {
         private var adapter: SwipeableMessageAdapter? = adapter
         private val item = adapter.data[position]
 
         override fun onPerformAction() {
-            super.onPerformAction()
-
-            adapter?.apply {
-                data.removeAt(position)
-                notifyItemRemoved(position)
-            }
-        }
-
-        override fun onSlideAnimationEnd() {
-            super.onSlideAnimationEnd()
             adapter?.eventListener?.onItemDeleted(item)
         }
 
         override fun onCleanUp() {
-            super.onCleanUp()
-            // clear the references
             adapter = null
         }
     }
 
-    private class SwipeRightResultAction internal constructor(adapter: SwipeableMessageAdapter, private val position: Int) : SwipeResultActionRemoveItem() {
+    private class SwipeRightResultAction internal constructor(adapter: SwipeableMessageAdapter, position: Int) : SwipeResultActionRemoveItem() {
         private var adapter: SwipeableMessageAdapter? = adapter
         private val item = adapter.data[position]
 
         override fun onPerformAction() {
-            super.onPerformAction()
-
-            adapter?.apply {
-                data.removeAt(position)
-                notifyItemRemoved(position)
-            }
-        }
-
-        override fun onSlideAnimationEnd() {
-            super.onSlideAnimationEnd()
             adapter?.eventListener?.onItemArchived(item)
         }
 
         override fun onCleanUp() {
-            super.onCleanUp()
-            // clear the references
             adapter = null
         }
     }
