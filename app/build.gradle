@@ -48,7 +48,7 @@ android {
 
 //ext.jabitVersion = '2.0.4'
 ext.jabitVersion = 'development-SNAPSHOT'
-ext.supportVersion = '27.0.0'
+ext.supportVersion = '27.0.1'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
@@ -88,8 +88,7 @@ dependencies {
 
     implementation 'com.github.kobakei:MaterialFabSpeedDial:1.1.7'
     implementation 'com.github.amlcurran.showcaseview:library:5.4.3'
-    // FIXME: switch back to com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.10.+ a.s.a.p.
-    implementation('com.github.h6ah4i:android-advancedrecyclerview:develop-SNAPSHOT@aar') {
+    implementation('com.github.h6ah4i:android-advancedrecyclerview:0.11.0@aar') {
         transitive = true
     }
     implementation 'com.github.angads25:filepicker:1.1.1'
