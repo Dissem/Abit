@@ -106,9 +106,9 @@ class MessageDetailFragment : Fragment() {
             text.linksClickable = true
             text.setTextIsSelectable(true)
 
-            val removed = item.labels.removeAll { it.type == Label.Type.UNREAD }
             val messageRepo = Singleton.getMessageRepository(ctx)
-            if (removed) {
+            if (item.isUnread()) {
+                Singleton.labeler.markAsRead(item)
                 (activity as? MainActivity)?.updateUnread()
                 messageRepo.save(item)
             }
