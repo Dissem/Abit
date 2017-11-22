@@ -17,6 +17,7 @@
 package ch.dissem.apps.abit.repository
 
 import android.content.ContentValues
+import android.database.Cursor
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.payload.V3Pubkey
 import ch.dissem.bitmessage.entity.payload.V4Pubkey
@@ -81,8 +82,8 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
      * @return the ordered list of ids (address strings)
      */
     fun getContactIds(): List<String> = findIds(
-            "private_key IS NULL OR chan = '1'",
-            "$COLUMN_SUBSCRIBED DESC, $COLUMN_ALIAS IS NULL, $COLUMN_ALIAS, $COLUMN_ADDRESS"
+        "private_key IS NULL OR chan = '1'",
+        "$COLUMN_SUBSCRIBED DESC, $COLUMN_ALIAS IS NULL, $COLUMN_ALIAS, $COLUMN_ADDRESS"
     )
 
     private fun findIds(where: String, orderBy: String): List<String> {
@@ -94,9 +95,9 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
 
         val db = sql.readableDatabase
         db.query(
-                TABLE_NAME, projection,
-                where, null, null, null,
-                orderBy
+            TABLE_NAME, projection,
+            where, null, null, null,
+            orderBy
         ).use { c ->
             while (c.moveToNext()) {
                 result.add(c.getString(c.getColumnIndex(COLUMN_ADDRESS)))
@@ -114,38 +115,40 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
 
         val db = sql.readableDatabase
         db.query(
-                TABLE_NAME, projection,
-                where, null, null, null, null
+            TABLE_NAME, projection,
+            where, null, null, null, null
         ).use { c ->
             while (c.moveToNext()) {
-                val address: BitmessageAddress
-
-                val privateKeyBytes = c.getBlob(c.getColumnIndex(COLUMN_PRIVATE_KEY))
-                if (privateKeyBytes != null) {
-                    val privateKey = PrivateKey.read(ByteArrayInputStream(privateKeyBytes))
-                    address = BitmessageAddress(privateKey)
-                } else {
-                    address = BitmessageAddress(c.getString(c.getColumnIndex(COLUMN_ADDRESS)))
-                    val publicKeyBytes = c.getBlob(c.getColumnIndex(COLUMN_PUBLIC_KEY))
-                    if (publicKeyBytes != null) {
-                        var pubkey = Factory.readPubkey(address.version, address
-                                .stream,
-                                ByteArrayInputStream(publicKeyBytes), publicKeyBytes.size,
-                                false)
-                        if (address.version == 4L && pubkey is V3Pubkey) {
-                            pubkey = V4Pubkey(pubkey)
-                        }
-                        address.pubkey = pubkey
-                    }
-                }
-                address.alias = c.getString(c.getColumnIndex(COLUMN_ALIAS))
-                address.isChan = c.getInt(c.getColumnIndex(COLUMN_CHAN)) == 1
-                address.isSubscribed = c.getInt(c.getColumnIndex(COLUMN_SUBSCRIBED)) == 1
-
-                result.add(address)
+                result.add(getAddress(c))
             }
         }
         return result
+    }
+
+    private fun getAddress(c: Cursor): BitmessageAddress {
+        val address: BitmessageAddress
+
+        val privateKeyBytes = c.getBlob(c.getColumnIndex(COLUMN_PRIVATE_KEY))
+        if (privateKeyBytes != null) {
+            address = BitmessageAddress(PrivateKey.read(ByteArrayInputStream(privateKeyBytes)))
+        } else {
+            address = BitmessageAddress(c.getString(c.getColumnIndex(COLUMN_ADDRESS)))
+            c.getBlob(c.getColumnIndex(COLUMN_PUBLIC_KEY))?.let { publicKeyBytes ->
+                val pubkey = Factory.readPubkey(address.version, address.stream,
+                    ByteArrayInputStream(publicKeyBytes), publicKeyBytes.size,
+                    false)
+                address.pubkey = if (address.version == 4L && pubkey is V3Pubkey) {
+                    V4Pubkey(pubkey)
+                } else {
+                    pubkey
+                }
+            }
+        }
+        address.alias = c.getString(c.getColumnIndex(COLUMN_ALIAS))
+        address.isChan = c.getInt(c.getColumnIndex(COLUMN_CHAN)) == 1
+        address.isSubscribed = c.getInt(c.getColumnIndex(COLUMN_SUBSCRIBED)) == 1
+
+        return address
     }
 
     override fun save(address: BitmessageAddress) = if (exists(address)) {
@@ -157,8 +160,8 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
     private fun exists(address: BitmessageAddress): Boolean {
         val db = sql.readableDatabase
         db.rawQuery(
-                "SELECT COUNT(*) FROM Address WHERE address=?",
-                arrayOf(address.address)
+            "SELECT COUNT(*) FROM Address WHERE address=?",
+            arrayOf(address.address)
         ).use { cursor ->
             cursor.moveToFirst()
             return cursor.getInt(0) > 0
