@@ -73,7 +73,7 @@ object Drawables {
         address.pubkey?.apply {
             link.append(if (address.alias == null) '?' else '&')
             val pubkey = ByteArrayOutputStream()
-            writeUnencrypted(pubkey)
+            writer().writeUnencrypted(pubkey)
             link.append("pubkey=").append(Base64.encodeToString(pubkey.toByteArray(), URL_SAFE or NO_WRAP))
 
         }

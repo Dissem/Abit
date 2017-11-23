@@ -47,86 +47,93 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.preferences)
 
-        findPreference("about")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            (activity as? MainActivity)?.let { activity ->
-                val libsBuilder = LibsBuilder()
-                    .withActivityTitle(activity.getString(R.string.about))
-                    .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
-                    .withAboutIconShown(true)
-                    .withAboutVersionShown(true)
-                    .withAboutDescription(getString(R.string.about_app))
-                if (activity.hasDetailPane) {
-                    activity.setDetailView(libsBuilder.supportFragment())
-                } else {
-                    libsBuilder.start(activity)
-                }
-            }
-            return@OnPreferenceClickListener true
-        }
+        findPreference("about")?.onPreferenceClickListener = aboutClickListener()
         val cleanup = findPreference("cleanup")
-        cleanup?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            val ctx = activity?.applicationContext ?: throw IllegalStateException("Context not available")
-            cleanup.isEnabled = false
-            Toast.makeText(ctx, R.string.cleanup_notification_start, Toast.LENGTH_SHORT).show()
+        cleanup?.onPreferenceClickListener = cleanupClickListener(cleanup)
+        findPreference("export")?.onPreferenceClickListener = exportClickListener()
+        findPreference("import")?.onPreferenceClickListener = importClickListener()
+        findPreference("status").onPreferenceClickListener = statusClickListener()
+    }
 
-            doAsync {
-                val bmc = Singleton.getBitmessageContext(ctx)
-                bmc.internals.nodeRegistry.clear()
-                bmc.cleanup()
-                Preferences.cleanupExportDirectory(ctx)
-
-                uiThread {
-                    Toast.makeText(
-                        ctx,
-                        R.string.cleanup_notification_end,
-                        Toast.LENGTH_LONG
-                    ).show()
-                    cleanup.isEnabled = true
-                }
-            }
-            return@OnPreferenceClickListener true
-        }
-
-        findPreference("export")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            val ctx = context ?: throw IllegalStateException("No context available")
-
-            indeterminateProgressDialog(R.string.export_data_summary, R.string.export_data).apply {
-                doAsync {
-                    val exportDirectory = Preferences.getExportDirectory(ctx)
-                    exportDirectory.mkdirs()
-                    val file = Exports.exportData(exportDirectory, ctx)
-                    val contentUri = getUriForFile(ctx, "ch.dissem.apps.abit.fileprovider", file)
-                    val intent = Intent(android.content.Intent.ACTION_SEND)
-                    intent.type = "application/zip"
-                    intent.putExtra(Intent.EXTRA_SUBJECT, "abit-export.zip")
-                    intent.putExtra(Intent.EXTRA_STREAM, contentUri)
-                    startActivityForResult(Intent.createChooser(intent, ""), WRITE_EXPORT_REQUEST_CODE)
-                    uiThread {
-                        dismiss()
-                    }
-                }
-            }
-            return@OnPreferenceClickListener true
-        }
-
-        findPreference("import")?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-            intent.addCategory(Intent.CATEGORY_OPENABLE)
-            intent.type = "application/zip"
-
-            startActivityForResult(intent, READ_IMPORT_REQUEST_CODE)
-            return@OnPreferenceClickListener true
-        }
-
-        findPreference("status").onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            val activity = activity as MainActivity
+    private fun aboutClickListener() = Preference.OnPreferenceClickListener {
+        (activity as? MainActivity)?.let { activity ->
+            val libsBuilder = LibsBuilder()
+                .withActivityTitle(activity.getString(R.string.about))
+                .withActivityStyle(Libs.ActivityStyle.LIGHT_DARK_TOOLBAR)
+                .withAboutIconShown(true)
+                .withAboutVersionShown(true)
+                .withAboutDescription(getString(R.string.about_app))
             if (activity.hasDetailPane) {
-                activity.setDetailView(StatusFragment())
+                activity.setDetailView(libsBuilder.supportFragment())
             } else {
-                startActivity<StatusActivity>()
+                libsBuilder.start(activity)
             }
-            return@OnPreferenceClickListener true
         }
+        return@OnPreferenceClickListener true
+    }
+
+    private fun cleanupClickListener(cleanup: Preference) = Preference.OnPreferenceClickListener {
+        val ctx = activity?.applicationContext ?: throw IllegalStateException("Context not available")
+        cleanup.isEnabled = false
+        Toast.makeText(ctx, R.string.cleanup_notification_start, Toast.LENGTH_SHORT).show()
+
+        doAsync {
+            val bmc = Singleton.getBitmessageContext(ctx)
+            bmc.internals.nodeRegistry.clear()
+            bmc.cleanup()
+            Preferences.cleanupExportDirectory(ctx)
+
+            uiThread {
+                Toast.makeText(
+                    ctx,
+                    R.string.cleanup_notification_end,
+                    Toast.LENGTH_LONG
+                ).show()
+                cleanup.isEnabled = true
+            }
+        }
+        return@OnPreferenceClickListener true
+    }
+
+    private fun exportClickListener() = Preference.OnPreferenceClickListener {
+        val ctx = context ?: throw IllegalStateException("No context available")
+
+        indeterminateProgressDialog(R.string.export_data_summary, R.string.export_data).apply {
+            doAsync {
+                val exportDirectory = Preferences.getExportDirectory(ctx)
+                exportDirectory.mkdirs()
+                val file = Exports.exportData(exportDirectory, ctx)
+                val contentUri = getUriForFile(ctx, "ch.dissem.apps.abit.fileprovider", file)
+                val intent = Intent(android.content.Intent.ACTION_SEND)
+                intent.type = "application/zip"
+                intent.putExtra(Intent.EXTRA_SUBJECT, "abit-export.zip")
+                intent.putExtra(Intent.EXTRA_STREAM, contentUri)
+                startActivityForResult(Intent.createChooser(intent, ""), WRITE_EXPORT_REQUEST_CODE)
+                uiThread {
+                    dismiss()
+                }
+            }
+        }
+        return@OnPreferenceClickListener true
+    }
+
+    private fun importClickListener() = Preference.OnPreferenceClickListener {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.type = "application/zip"
+
+        startActivityForResult(intent, READ_IMPORT_REQUEST_CODE)
+        return@OnPreferenceClickListener true
+    }
+
+    private fun statusClickListener() = Preference.OnPreferenceClickListener {
+        val activity = activity as MainActivity
+        if (activity.hasDetailPane) {
+            activity.setDetailView(StatusFragment())
+        } else {
+            startActivity<StatusActivity>()
+        }
+        return@OnPreferenceClickListener true
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

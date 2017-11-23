@@ -50,7 +50,7 @@ android {
 }
 
 //ext.jabitVersion = '2.0.4'
-ext.jabitVersion = 'development-SNAPSHOT'
+ext.jabitVersion = 'feature-refactoring-SNAPSHOT'
 ext.supportVersion = '27.0.1'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

@@ -35,19 +35,12 @@ import java.util.*
  */
 class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
 
-    override fun findContact(ripeOrTag: ByteArray): BitmessageAddress? {
-        for (address in find("public_key is null")) {
-            if (address.version > 3) {
-                if (Arrays.equals(ripeOrTag, address.tag)) return address
-            } else {
-                if (Arrays.equals(ripeOrTag, address.ripe)) return address
-            }
-        }
-        return null
-    }
+    override fun findContact(ripeOrTag: ByteArray): BitmessageAddress? = findByRipeOrTag("public_key is null", ripeOrTag)
 
-    override fun findIdentity(ripeOrTag: ByteArray): BitmessageAddress? {
-        for (address in find("private_key is not null")) {
+    override fun findIdentity(ripeOrTag: ByteArray): BitmessageAddress? = findByRipeOrTag("private_key is not null", ripeOrTag)
+
+    private fun findByRipeOrTag(where: String, ripeOrTag: ByteArray): BitmessageAddress? {
+        for (address in find(where)) {
             if (address.version > 3) {
                 if (Arrays.equals(ripeOrTag, address.tag)) return address
             } else {
@@ -126,24 +119,27 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
     }
 
     private fun getAddress(c: Cursor): BitmessageAddress {
-        val address: BitmessageAddress
 
         val privateKeyBytes = c.getBlob(c.getColumnIndex(COLUMN_PRIVATE_KEY))
-        if (privateKeyBytes != null) {
-            address = BitmessageAddress(PrivateKey.read(ByteArrayInputStream(privateKeyBytes)))
-        } else {
-            address = BitmessageAddress(c.getString(c.getColumnIndex(COLUMN_ADDRESS)))
-            c.getBlob(c.getColumnIndex(COLUMN_PUBLIC_KEY))?.let { publicKeyBytes ->
-                val pubkey = Factory.readPubkey(address.version, address.stream,
-                    ByteArrayInputStream(publicKeyBytes), publicKeyBytes.size,
-                    false)
-                address.pubkey = if (address.version == 4L && pubkey is V3Pubkey) {
-                    V4Pubkey(pubkey)
-                } else {
-                    pubkey
+        val address = privateKeyBytes?.let {
+            BitmessageAddress(PrivateKey.read(ByteArrayInputStream(privateKeyBytes)))
+        } ?:
+            BitmessageAddress(c.getString(c.getColumnIndex(COLUMN_ADDRESS))).also { address ->
+                c.getBlob(c.getColumnIndex(COLUMN_PUBLIC_KEY))?.let { publicKeyBytes ->
+                    Factory.readPubkey(
+                        version = address.version, stream = address.stream,
+                        input = ByteArrayInputStream(publicKeyBytes), length = publicKeyBytes.size,
+                        encrypted = false
+                    ).let {
+                        address.pubkey = if (address.version == 4L && it is V3Pubkey) {
+                            V4Pubkey(it)
+                        } else {
+                            it
+                        }
+                    }
                 }
             }
-        }
+
         address.alias = c.getString(c.getColumnIndex(COLUMN_ALIAS))
         address.isChan = c.getInt(c.getColumnIndex(COLUMN_CHAN)) == 1
         address.isSubscribed = c.getInt(c.getColumnIndex(COLUMN_SUBSCRIBED)) == 1
@@ -171,18 +167,7 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
     private fun update(address: BitmessageAddress) {
         val db = sql.writableDatabase
         // Create a new map of values, where column names are the keys
-        val values = ContentValues()
-        address.alias?.let { values.put(COLUMN_ALIAS, it) }
-        address.pubkey?.let { pubkey ->
-            val out = ByteArrayOutputStream()
-            pubkey.writeUnencrypted(out)
-            values.put(COLUMN_PUBLIC_KEY, out.toByteArray())
-        }
-        address.privateKey?.let { values.put(COLUMN_PRIVATE_KEY, Encode.bytes(it)) }
-        if (address.isChan) {
-            values.put(COLUMN_CHAN, true)
-        }
-        values.put(COLUMN_SUBSCRIBED, address.isSubscribed)
+        val values = getContentValues(address)
 
         val update = db.update(TABLE_NAME, values, "address=?", arrayOf(address.address))
         if (update < 0) {
@@ -193,25 +178,31 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
     private fun insert(address: BitmessageAddress) {
         val db = sql.writableDatabase
         // Create a new map of values, where column names are the keys
-        val values = ContentValues()
+        val values = getContentValues(address)
         values.put(COLUMN_ADDRESS, address.address)
         values.put(COLUMN_VERSION, address.version)
-        values.put(COLUMN_ALIAS, address.alias)
-        address.pubkey?.let { pubkey ->
-            val out = ByteArrayOutputStream()
-            pubkey.writeUnencrypted(out)
-            values.put(COLUMN_PUBLIC_KEY, out.toByteArray())
-        } ?: {
-            values.put(COLUMN_PUBLIC_KEY, null as ByteArray?)
-        }.invoke()
-        address.privateKey?.let { values.put(COLUMN_PRIVATE_KEY, Encode.bytes(it)) }
         values.put(COLUMN_CHAN, address.isChan)
-        values.put(COLUMN_SUBSCRIBED, address.isSubscribed)
 
         val insert = db.insert(TABLE_NAME, null, values)
         if (insert < 0) {
             LOG.error("Could not insert address {}", address)
         }
+    }
+
+    private fun getContentValues(address: BitmessageAddress): ContentValues {
+        val values = ContentValues()
+        address.alias?.let { values.put(COLUMN_ALIAS, it) }
+        address.pubkey?.let { pubkey ->
+            val out = ByteArrayOutputStream()
+            pubkey.writer().writeUnencrypted(out)
+            values.put(COLUMN_PUBLIC_KEY, out.toByteArray())
+        }
+        address.privateKey?.let { values.put(COLUMN_PRIVATE_KEY, Encode.bytes(it)) }
+        if (address.isChan) {
+            values.put(COLUMN_CHAN, true)
+        }
+        values.put(COLUMN_SUBSCRIBED, address.isSubscribed)
+        return values
     }
 
     override fun remove(address: BitmessageAddress) {
