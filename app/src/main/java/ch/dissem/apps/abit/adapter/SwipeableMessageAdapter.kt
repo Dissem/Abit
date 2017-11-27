@@ -28,7 +28,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import ch.dissem.apps.abit.Identicon
 import ch.dissem.apps.abit.R
-import ch.dissem.apps.abit.repository.AndroidMessageRepository.Companion.LABEL_ARCHIVE
+import ch.dissem.apps.abit.repository.AndroidLabelRepository.Companion.LABEL_ARCHIVE
 import ch.dissem.apps.abit.util.Assets
 import ch.dissem.apps.abit.util.Strings.prepareMessageExtract
 import ch.dissem.bitmessage.entity.Plaintext

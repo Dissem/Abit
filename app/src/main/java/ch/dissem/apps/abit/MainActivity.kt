@@ -28,7 +28,7 @@ import android.widget.RelativeLayout
 import ch.dissem.apps.abit.drawer.ProfileImageListener
 import ch.dissem.apps.abit.drawer.ProfileSelectionListener
 import ch.dissem.apps.abit.listener.ListSelectionListener
-import ch.dissem.apps.abit.repository.AndroidMessageRepository.Companion.LABEL_ARCHIVE
+import ch.dissem.apps.abit.repository.AndroidLabelRepository.Companion.LABEL_ARCHIVE
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.synchronization.SyncAdapter
 import ch.dissem.apps.abit.util.Labels
@@ -278,7 +278,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
         }
 
         doAsync {
-            val labels = bmc.messages.getLabels()
+            val labels = bmc.labels.getLabels()
 
             uiThread {
                 if (intent.hasExtra(EXTRA_SHOW_LABEL)) {

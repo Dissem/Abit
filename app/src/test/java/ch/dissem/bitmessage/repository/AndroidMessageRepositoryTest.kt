@@ -17,8 +17,8 @@
 package ch.dissem.bitmessage.repository
 
 import android.os.Build
-import ch.dissem.apps.abit.BuildConfig
 import ch.dissem.apps.abit.repository.AndroidAddressRepository
+import ch.dissem.apps.abit.repository.AndroidLabelRepository
 import ch.dissem.apps.abit.repository.AndroidMessageRepository
 import ch.dissem.apps.abit.repository.SqlHelper
 import ch.dissem.bitmessage.cryptography.sc.SpongyCryptography
@@ -31,12 +31,12 @@ import ch.dissem.bitmessage.entity.valueobject.ExtendedEncoding
 import ch.dissem.bitmessage.entity.valueobject.Label
 import ch.dissem.bitmessage.entity.valueobject.PrivateKey
 import ch.dissem.bitmessage.entity.valueobject.extended.Message
+import ch.dissem.bitmessage.ports.LabelRepository
 import ch.dissem.bitmessage.ports.MessageRepository
 import ch.dissem.bitmessage.utils.UnixTime
 import org.hamcrest.BaseMatcher
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.Description
-import org.hamcrest.Matcher
 import org.hamcrest.Matchers.*
 import org.junit.Assert.*
 import org.junit.Before
@@ -67,14 +67,16 @@ class AndroidMessageRepositoryTest : TestBase() {
         val sqlHelper = SqlHelper(RuntimeEnvironment.application)
 
         val addressRepo = AndroidAddressRepository(sqlHelper)
-        repo = AndroidMessageRepository(sqlHelper, RuntimeEnvironment.application)
+        val labelRepo = AndroidLabelRepository(sqlHelper, RuntimeEnvironment.application)
+        repo = AndroidMessageRepository(sqlHelper)
         mockedInternalContext(
-                cryptography = SpongyCryptography(),
-                addressRepository = addressRepo,
-                messageRepository = repo,
-                port = 12345,
-                connectionTTL = 10,
-                connectionLimit = 10
+            cryptography = SpongyCryptography(),
+            addressRepository = addressRepo,
+            labelRepository = labelRepo,
+            messageRepository = repo,
+            port = 12345,
+            connectionTTL = 10,
+            connectionLimit = 10
         )
         val tmp = BitmessageAddress(PrivateKey(false, 1, 1000, 1000, DOES_ACK))
         contactA = BitmessageAddress(tmp.address)
@@ -86,27 +88,14 @@ class AndroidMessageRepositoryTest : TestBase() {
         identity = BitmessageAddress(PrivateKey(false, 1, 1000, 1000, DOES_ACK))
         addressRepo.save(identity)
 
-        inbox = repo.getLabels(Label.Type.INBOX)[0]
-        sent = repo.getLabels(Label.Type.SENT)[0]
-        drafts = repo.getLabels(Label.Type.DRAFT)[0]
-        unread = repo.getLabels(Label.Type.UNREAD)[0]
+        inbox = labelRepo.getLabels(Label.Type.INBOX)[0]
+        sent = labelRepo.getLabels(Label.Type.SENT)[0]
+        drafts = labelRepo.getLabels(Label.Type.DRAFT)[0]
+        unread = labelRepo.getLabels(Label.Type.UNREAD)[0]
 
         addMessage(contactA, identity, Plaintext.Status.RECEIVED, inbox, unread)
         addMessage(identity, contactA, Plaintext.Status.DRAFT, drafts)
         addMessage(identity, contactB, Plaintext.Status.DRAFT, unread)
-    }
-
-    @Test
-    fun `ensure labels are retrieved`() {
-        val labels = repo.getLabels()
-        assertEquals(7, labels.size.toLong())
-    }
-
-    @Test
-    fun `ensure labels can be retrieved by type`() {
-        val labels = repo.getLabels(Label.Type.INBOX)
-        assertEquals(1, labels.size.toLong())
-        assertEquals("Inbox", labels[0].toString())
     }
 
     @Test
@@ -176,12 +165,12 @@ class AndroidMessageRepositoryTest : TestBase() {
     @Test
     fun `ensure message can be saved`() {
         val message = Plaintext.Builder(MSG)
-                .IV(randomInventoryVector())
-                .from(identity)
-                .to(contactA)
-                .message("Subject", "Message")
-                .status(Plaintext.Status.DOING_PROOF_OF_WORK)
-                .build()
+            .IV(randomInventoryVector())
+            .from(identity)
+            .to(contactA)
+            .message("Subject", "Message")
+            .status(Plaintext.Status.DOING_PROOF_OF_WORK)
+            .build()
         repo.save(message)
 
         assertNotNull(message.id)
@@ -220,14 +209,14 @@ class AndroidMessageRepositoryTest : TestBase() {
     @Test
     fun `ensure unacknowledged messages are found for resend`() {
         val message = Plaintext.Builder(MSG)
-                .IV(randomInventoryVector())
-                .from(identity)
-                .to(contactA)
-                .message("Subject", "Message")
-                .sent(UnixTime.now)
-                .status(Plaintext.Status.SENT)
-                .ttl(2)
-                .build()
+            .IV(randomInventoryVector())
+            .from(identity)
+            .to(contactA)
+            .message("Subject", "Message")
+            .sent(UnixTime.now)
+            .status(Plaintext.Status.SENT)
+            .ttl(2)
+            .build()
         message.updateNextTry()
         assertThat(message.retries, `is`(1))
         assertThat<Long>(message.nextTry, greaterThan(UnixTime.now))
@@ -265,57 +254,57 @@ class AndroidMessageRepositoryTest : TestBase() {
 
     private fun addMessage(from: BitmessageAddress, to: BitmessageAddress, status: Plaintext.Status, vararg labels: Label): Plaintext {
         val content = Message.Builder()
-                .subject("Subject")
-                .body("Message")
-                .build()
+            .subject("Subject")
+            .body("Message")
+            .build()
         return addMessage(from, to, content, status, *labels)
     }
 
     private fun addMessage(from: BitmessageAddress, to: BitmessageAddress,
                            content: ExtendedEncoding, status: Plaintext.Status, vararg labels: Label): Plaintext {
         val message = Plaintext.Builder(MSG)
-                .IV(randomInventoryVector())
-                .from(from)
-                .to(to)
-                .message(content)
-                .status(status)
-                .labels(Arrays.asList(*labels))
-                .build()
+            .IV(randomInventoryVector())
+            .from(from)
+            .to(to)
+            .message(content)
+            .status(status)
+            .labels(Arrays.asList(*labels))
+            .build()
         repo.save(message)
         return message
     }
 
     private fun storeConversation(): Plaintext {
         val older = addMessage(identity, contactA,
-                Message.Builder()
-                        .subject("hey there")
-                        .body("does it work?")
-                        .build(),
-                Plaintext.Status.SENT, sent)
+            Message.Builder()
+                .subject("hey there")
+                .body("does it work?")
+                .build(),
+            Plaintext.Status.SENT, sent)
 
         val root = addMessage(identity, contactA,
-                Message.Builder()
-                        .subject("new test")
-                        .body("There's a new test in town!")
-                        .build(),
-                Plaintext.Status.SENT, sent)
+            Message.Builder()
+                .subject("new test")
+                .body("There's a new test in town!")
+                .build(),
+            Plaintext.Status.SENT, sent)
 
         addMessage(contactA, identity,
-                Message.Builder()
-                        .subject("Re: new test")
-                        .body("Nice!")
-                        .addParent(root)
-                        .build(),
-                Plaintext.Status.RECEIVED, inbox)
+            Message.Builder()
+                .subject("Re: new test")
+                .body("Nice!")
+                .addParent(root)
+                .build(),
+            Plaintext.Status.RECEIVED, inbox)
 
         addMessage(contactA, identity,
-                Message.Builder()
-                        .subject("Re: new test")
-                        .body("PS: it did work!")
-                        .addParent(root)
-                        .addParent(older)
-                        .build(),
-                Plaintext.Status.RECEIVED, inbox)
+            Message.Builder()
+                .subject("Re: new test")
+                .body("PS: it did work!")
+                .addParent(root)
+                .addParent(older)
+                .build(),
+            Plaintext.Status.RECEIVED, inbox)
 
         return repo.getMessage(root.id!!)
     }

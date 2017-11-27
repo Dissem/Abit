@@ -18,6 +18,7 @@ package ch.dissem.bitmessage.repository
 
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.InternalContext
+import ch.dissem.bitmessage.Preferences
 import ch.dissem.bitmessage.cryptography.sc.SpongyCryptography
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.ObjectMessage
@@ -40,42 +41,45 @@ open class TestBase {
         @JvmStatic
         fun init() {
             mockedInternalContext(
-                    cryptography = SpongyCryptography(),
-                    proofOfWorkEngine = MultiThreadedPOWEngine()
+                cryptography = SpongyCryptography(),
+                proofOfWorkEngine = MultiThreadedPOWEngine()
             )
         }
 
         fun mockedInternalContext(
-                cryptography: Cryptography = mock {},
-                inventory: Inventory = mock {},
-                nodeRegistry: NodeRegistry = mock {},
-                networkHandler: NetworkHandler = mock {},
-                addressRepository: AddressRepository = mock {},
-                messageRepository: MessageRepository = mock {},
-                proofOfWorkRepository: ProofOfWorkRepository = mock {},
-                proofOfWorkEngine: ProofOfWorkEngine = mock {},
-                customCommandHandler: CustomCommandHandler = mock {},
-                listener: BitmessageContext.Listener = mock {},
-                labeler: Labeler = mock {},
-                port: Int = 0,
-                connectionTTL: Long = 0,
-                connectionLimit: Int = 0
+            cryptography: Cryptography = mock {},
+            inventory: Inventory = mock {},
+            nodeRegistry: NodeRegistry = mock {},
+            networkHandler: NetworkHandler = mock {},
+            addressRepository: AddressRepository = mock {},
+            labelRepository: LabelRepository = mock {},
+            messageRepository: MessageRepository = mock {},
+            proofOfWorkRepository: ProofOfWorkRepository = mock {},
+            proofOfWorkEngine: ProofOfWorkEngine = mock {},
+            customCommandHandler: CustomCommandHandler = mock {},
+            listener: BitmessageContext.Listener = mock {},
+            labeler: Labeler = mock {},
+            port: Int = 0,
+            connectionTTL: Long = 0,
+            connectionLimit: Int = 0
         ) = spy(InternalContext(
-                cryptography,
-                inventory,
-                nodeRegistry,
-                networkHandler,
-                addressRepository,
-                messageRepository,
-                proofOfWorkRepository,
-                proofOfWorkEngine,
-                customCommandHandler,
-                listener,
-                labeler,
-                "/Jabit:TEST/",
-                port,
-                connectionTTL,
-                connectionLimit
+            cryptography,
+            inventory,
+            nodeRegistry,
+            networkHandler,
+            addressRepository,
+            labelRepository,
+            messageRepository,
+            proofOfWorkRepository,
+            proofOfWorkEngine,
+            customCommandHandler,
+            listener,
+            labeler,
+            Preferences().apply {
+                this.port = port
+                this.connectionTTL = connectionTTL
+                this.connectionLimit = connectionLimit
+            }
         ))
 
         fun randomInventoryVector(): InventoryVector {
@@ -85,7 +89,7 @@ open class TestBase {
         }
 
         private fun getResource(resourceName: String) =
-                TestBase::class.java.classLoader.getResourceAsStream(resourceName)
+            TestBase::class.java.classLoader.getResourceAsStream(resourceName)
 
         private fun loadObjectMessage(version: Int, resourceName: String): ObjectMessage {
             val data = getBytes(resourceName)

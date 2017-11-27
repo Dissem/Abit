@@ -35,14 +35,15 @@ object Exports {
             )
             zip.closeEntry()
 
-            val messageRepo = Singleton.getMessageRepository(ctx)
+            val labelRepo = Singleton.getLabelRepository(ctx)
             zip.putNextEntry(ZipEntry("labels.json"))
-            val exportLabels = MessageExport.exportLabels(messageRepo.getLabels())
+            val exportLabels = MessageExport.exportLabels(labelRepo.getLabels())
             zip.write(
                 exportLabels.toJsonString(true).toByteArray()
             )
             zip.closeEntry()
             zip.putNextEntry(ZipEntry("messages.json"))
+            val messageRepo = Singleton.getMessageRepository(ctx)
             val exportMessages = MessageExport.exportMessages(messageRepo.getAllMessages())
             zip.write(
                 exportMessages.toJsonString(true).toByteArray()
@@ -62,13 +63,13 @@ object Exports {
                 bmc.addresses.save(contact)
             }
         }
-        bmc.messages.getLabels().forEach { label ->
+        bmc.labels.getLabels().forEach { label ->
             labels[label.toString()] = label
         }
         processEntry(ctx, zipFile, "labels.json") { json ->
             MessageExport.importLabels(json).forEach { label ->
                 if (!labels.contains(label.toString())) {
-                    bmc.messages.save(label)
+                    bmc.labels.save(label)
                     labels[label.toString()] = label
                 }
             }

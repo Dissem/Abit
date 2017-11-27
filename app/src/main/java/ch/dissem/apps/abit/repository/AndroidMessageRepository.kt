@@ -17,12 +17,11 @@
 package ch.dissem.apps.abit.repository
 
 import android.content.ContentValues
-import android.content.Context
 import android.database.Cursor
 import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteConstraintException
 import android.database.sqlite.SQLiteDatabase
-import ch.dissem.apps.abit.util.Labels
+import ch.dissem.apps.abit.repository.AndroidLabelRepository.Companion.LABEL_ARCHIVE
 import ch.dissem.apps.abit.util.UuidUtils
 import ch.dissem.apps.abit.util.UuidUtils.asUuid
 import ch.dissem.bitmessage.entity.BitmessageAddress
@@ -40,7 +39,7 @@ import java.util.*
 /**
  * [MessageRepository] implementation using the Android SQL API.
  */
-class AndroidMessageRepository(private val sql: SqlHelper, private val context: Context) : AbstractMessageRepository() {
+class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepository() {
 
     override fun findMessages(label: Label?, offset: Int, limit: Int) = if (label === LABEL_ARCHIVE) {
         super.findMessages(null as Label?, offset, limit)
@@ -48,87 +47,20 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
         super.findMessages(label, offset, limit)
     }
 
-    public override fun findLabels(where: String): List<Label> {
-        val result = LinkedList<Label>()
-
-        // Define a projection that specifies which columns from the database
-        // you will actually use after this query.
-        val projection = arrayOf(LBL_COLUMN_ID, LBL_COLUMN_LABEL, LBL_COLUMN_TYPE, LBL_COLUMN_COLOR)
-
-        sql.readableDatabase.query(
-                LBL_TABLE_NAME, projection,
-                where, null, null, null,
-                LBL_COLUMN_ORDER
-        ).use { c ->
-            while (c.moveToNext()) {
-                result.add(getLabel(c))
-            }
-        }
-        return result
-    }
-
-    private fun getLabel(c: Cursor): Label {
-        val typeName = c.getString(c.getColumnIndex(LBL_COLUMN_TYPE))
-        val type = if (typeName == null) null else Label.Type.valueOf(typeName)
-        val text: String? = Labels.getText(type, null, context)
-        val label = Label(
-                text ?: c.getString(c.getColumnIndex(LBL_COLUMN_LABEL)),
-                type,
-                c.getInt(c.getColumnIndex(LBL_COLUMN_COLOR)))
-        label.id = c.getLong(c.getColumnIndex(LBL_COLUMN_ID))
-        return label
-    }
-
-    override fun save(label: Label) {
-        val db = sql.writableDatabase
-        if (label.id != null) {
-            val values = ContentValues()
-            values.put(LBL_COLUMN_LABEL, label.toString())
-            values.put(LBL_COLUMN_TYPE, label.type?.name)
-            values.put(LBL_COLUMN_COLOR, label.color)
-            values.put(LBL_COLUMN_ORDER, label.ord)
-            db.update(LBL_TABLE_NAME, values, "id=?", arrayOf(label.id.toString()))
-        } else {
-            try {
-                db.beginTransaction()
-
-                val exists = DatabaseUtils.queryNumEntries(db, LBL_TABLE_NAME, "label=?", arrayOf(label.toString())) > 0
-
-                if (exists) {
-                    val values = ContentValues()
-                    values.put(LBL_COLUMN_TYPE, label.type?.name)
-                    values.put(LBL_COLUMN_COLOR, label.color)
-                    values.put(LBL_COLUMN_ORDER, label.ord)
-                    db.update(LBL_TABLE_NAME, values, "label=?", arrayOf(label.toString()))
-                } else {
-                    val values = ContentValues()
-                    values.put(LBL_COLUMN_LABEL, label.toString())
-                    values.put(LBL_COLUMN_TYPE, label.type?.name)
-                    values.put(LBL_COLUMN_COLOR, label.color)
-                    values.put(LBL_COLUMN_ORDER, label.ord)
-                    db.insertOrThrow(LBL_TABLE_NAME, null, values)
-                }
-                db.setTransactionSuccessful()
-            } finally {
-                db.endTransaction()
-            }
-        }
-    }
-
     override fun countUnread(label: Label?) = when {
         label === LABEL_ARCHIVE -> 0
         label == null -> DatabaseUtils.queryNumEntries(
-                sql.readableDatabase,
-                TABLE_NAME,
-                "id IN (SELECT message_id FROM Message_Label WHERE label_id IN (SELECT id FROM Label WHERE type=?))",
-                arrayOf(Label.Type.UNREAD.name)
+            sql.readableDatabase,
+            TABLE_NAME,
+            "id IN (SELECT message_id FROM Message_Label WHERE label_id IN (SELECT id FROM Label WHERE type=?))",
+            arrayOf(Label.Type.UNREAD.name)
         ).toInt()
         else -> DatabaseUtils.queryNumEntries(
-                sql.readableDatabase,
-                TABLE_NAME,
-                "        id IN (SELECT message_id FROM Message_Label WHERE label_id=?) " +
-                        "AND id IN (SELECT message_id FROM Message_Label WHERE label_id IN (SELECT id FROM Label WHERE type=?))",
-                arrayOf(label.id.toString(), Label.Type.UNREAD.name)
+            sql.readableDatabase,
+            TABLE_NAME,
+            "        id IN (SELECT message_id FROM Message_Label WHERE label_id=?) " +
+                "AND id IN (SELECT message_id FROM Message_Label WHERE label_id IN (SELECT id FROM Label WHERE type=?))",
+            arrayOf(label.id.toString(), Label.Type.UNREAD.name)
         ).toInt()
     }
 
@@ -142,9 +74,9 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
         }
         val result = LinkedList<UUID>()
         sql.readableDatabase.query(
-                true,
-                TABLE_NAME, projection, where,
-                null, null, null, null, null
+            true,
+            TABLE_NAME, projection, where,
+            null, null, null, null, null
         ).use { c ->
             while (c.moveToNext()) {
                 val uuidBytes = c.getBlob(c.getColumnIndex(COLUMN_CONVERSATION))
@@ -166,11 +98,11 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
 
         // save new parents
         var order = 0
+        val values = ContentValues()
         for (parentIV in message.parents) {
             getMessage(parentIV)?.let { parent ->
                 mergeConversations(db, parent.conversationId, message.conversationId)
                 order++
-                val values = ContentValues()
                 values.put("parent", parentIV.hash)
                 values.put("child", childIV)
                 values.put("pos", order)
@@ -206,57 +138,45 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
 
         val db = sql.readableDatabase
         db.query(
-                TABLE_NAME, projection,
-                where, null, null, null,
-                "$COLUMN_RECEIVED DESC, $COLUMN_SENT DESC",
-                if (limit == 0) null else "$offset, $limit"
+            TABLE_NAME, projection,
+            where, null, null, null,
+            "$COLUMN_RECEIVED DESC, $COLUMN_SENT DESC",
+            if (limit == 0) null else "$offset, $limit"
         ).use { c ->
             while (c.moveToNext()) {
-                val iv = c.getBlob(c.getColumnIndex(COLUMN_IV))
-                val data = c.getBlob(c.getColumnIndex(COLUMN_DATA))
-                val type = Plaintext.Type.valueOf(c.getString(c.getColumnIndex(COLUMN_TYPE)))
-                val builder = Plaintext.readWithoutSignature(type,
-                        ByteArrayInputStream(data))
-                val id = c.getLong(c.getColumnIndex(COLUMN_ID))
-                builder.id(id)
-                builder.IV(InventoryVector.fromHash(iv))
-                val sender = c.getString(c.getColumnIndex(COLUMN_SENDER))
-                if (sender != null) {
-                    val address = ctx.addressRepository.getAddress(sender)
-                    if (address != null) {
-                        builder.from(address)
-                    } else {
-                        builder.from(BitmessageAddress(sender))
-                    }
-                }
-                val recipient = c.getString(c.getColumnIndex(COLUMN_RECIPIENT))
-                if (recipient != null) {
-                    val address = ctx.addressRepository.getAddress(recipient)
-                    if (address != null) {
-                        builder.to(address)
-                    } else {
-                        builder.to(BitmessageAddress(sender))
-                    }
-                }
-                builder.ackData(c.getBlob(c.getColumnIndex(COLUMN_ACK_DATA)))
-                builder.sent(c.getLong(c.getColumnIndex(COLUMN_SENT)))
-                builder.received(c.getLong(c.getColumnIndex(COLUMN_RECEIVED)))
-                builder.status(Plaintext.Status.valueOf(c.getString(c.getColumnIndex(COLUMN_STATUS))))
-                builder.ttl(c.getLong(c.getColumnIndex(COLUMN_TTL)))
-                builder.retries(c.getInt(c.getColumnIndex(COLUMN_RETRIES)))
-                val nextTryColumn = c.getColumnIndex(COLUMN_NEXT_TRY)
-                if (!c.isNull(nextTryColumn)) {
-                    builder.nextTry(c.getLong(nextTryColumn))
-                }
-                builder.conversation(asUuid(c.getBlob(c.getColumnIndex(COLUMN_CONVERSATION))))
-                builder.labels(findLabels(id))
-                result.add(builder.build())
+                result.add(getMessage(c))
             }
         }
         return result
     }
 
-    private fun findLabels(id: Long) = findLabels("id IN (SELECT label_id FROM Message_Label WHERE message_id=$id)")
+    private fun getMessage(c: Cursor): Plaintext = Plaintext.readWithoutSignature(
+        Plaintext.Type.valueOf(c.getString(c.getColumnIndex(COLUMN_TYPE))),
+        ByteArrayInputStream(c.getBlob(c.getColumnIndex(COLUMN_DATA)))
+    ).build {
+        id = c.getLong(c.getColumnIndex(COLUMN_ID))
+        inventoryVector = InventoryVector.fromHash(c.getBlob(c.getColumnIndex(COLUMN_IV)))
+        c.getString(c.getColumnIndex(COLUMN_SENDER))?.let {
+            from = ctx.addressRepository.getAddress(it) ?: BitmessageAddress(it)
+        }
+        c.getString(c.getColumnIndex(COLUMN_RECIPIENT))?.let {
+            to = ctx.addressRepository.getAddress(it) ?: BitmessageAddress(it)
+        }
+        ackData = c.getBlob(c.getColumnIndex(COLUMN_ACK_DATA))
+        sent = c.getLong(c.getColumnIndex(COLUMN_SENT))
+        received = c.getLong(c.getColumnIndex(COLUMN_RECEIVED))
+        status = Plaintext.Status.valueOf(c.getString(c.getColumnIndex(COLUMN_STATUS)))
+        ttl = c.getLong(c.getColumnIndex(COLUMN_TTL))
+        retries = c.getInt(c.getColumnIndex(COLUMN_RETRIES))
+        val nextTryColumn = c.getColumnIndex(COLUMN_NEXT_TRY)
+        if (!c.isNull(nextTryColumn)) {
+            nextTry = c.getLong(nextTryColumn)
+        }
+        conversation = asUuid(c.getBlob(c.getColumnIndex(COLUMN_CONVERSATION)))
+        labels = findLabels(id!!)
+    }
+
+    private fun findLabels(msgId: Any) = (ctx.labelRepository as AndroidLabelRepository).findLabels(msgId)
 
     override fun save(message: Plaintext) {
         saveContactIfNecessary(message.from)
@@ -326,8 +246,6 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
     }
 
     companion object {
-        val LABEL_ARCHIVE = Label("archive", null, 0)
-
         private const val TABLE_NAME = "Message"
         private const val COLUMN_ID = "id"
         private const val COLUMN_IV = "iv"
@@ -350,12 +268,5 @@ class AndroidMessageRepository(private val sql: SqlHelper, private val context: 
         private const val JOIN_TABLE_NAME = "Message_Label"
         private const val JT_COLUMN_MESSAGE = "message_id"
         private const val JT_COLUMN_LABEL = "label_id"
-
-        private const val LBL_TABLE_NAME = "Label"
-        private const val LBL_COLUMN_ID = "id"
-        private const val LBL_COLUMN_LABEL = "label"
-        private const val LBL_COLUMN_TYPE = "type"
-        private const val LBL_COLUMN_COLOR = "color"
-        private const val LBL_COLUMN_ORDER = "ord"
     }
 }

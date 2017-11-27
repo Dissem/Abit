@@ -17,10 +17,7 @@
 package ch.dissem.bitmessage.repository
 
 import android.os.Build.VERSION_CODES.LOLLIPOP
-import ch.dissem.apps.abit.repository.AndroidAddressRepository
-import ch.dissem.apps.abit.repository.AndroidMessageRepository
-import ch.dissem.apps.abit.repository.AndroidProofOfWorkRepository
-import ch.dissem.apps.abit.repository.SqlHelper
+import ch.dissem.apps.abit.repository.*
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.ObjectMessage
 import ch.dissem.bitmessage.entity.Plaintext
@@ -64,10 +61,11 @@ class AndroidProofOfWorkRepositoryTest : TestBase() {
         val sqlHelper = SqlHelper(RuntimeEnvironment.application)
 
         addressRepo = AndroidAddressRepository(sqlHelper)
-        messageRepo = AndroidMessageRepository(sqlHelper, RuntimeEnvironment.application)
+        messageRepo = AndroidMessageRepository(sqlHelper)
         repo = AndroidProofOfWorkRepository(sqlHelper)
         mockedInternalContext(
             addressRepository = addressRepo,
+            labelRepository = AndroidLabelRepository(sqlHelper, RuntimeEnvironment.application),
             messageRepository = messageRepo,
             proofOfWorkRepository = repo,
             cryptography = cryptography()

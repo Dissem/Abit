@@ -52,31 +52,32 @@ object Singleton {
 
     fun getBitmessageContext(context: Context): BitmessageContext =
         init({ bitmessageContext }, { bitmessageContext = it }) {
-            val ctx = context.applicationContext
-            val sqlHelper = SqlHelper(ctx)
-            val powRepo = AndroidProofOfWorkRepository(sqlHelper)
-            this.powRepo = powRepo
-            TTL.pubkey = 2 * DAY
-            BitmessageContext.Builder()
-                    .proofOfWorkEngine(SwitchingProofOfWorkEngine(
-                            ctx, Constants.PREFERENCE_SERVER_POW,
-                            ServerPowEngine(ctx),
-                            ServicePowEngine(ctx)
-                    ))
-                    .cryptography(AndroidCryptography())
-                    .nodeRegistry(AndroidNodeRegistry(sqlHelper))
-                    .inventory(AndroidInventory(sqlHelper))
-                    .addressRepo(AndroidAddressRepository(sqlHelper))
-                    .messageRepo(AndroidMessageRepository(sqlHelper, ctx))
-                    .powRepo(powRepo)
-                    .networkHandler(NioNetworkHandler())
-                    .listener(getMessageListener(ctx))
-                    .labeler(labeler)
-                    .doNotSendPubkeyOnIdentityCreation()
-                    .build()
+            BitmessageContext.build {
+                TTL.pubkey = 2 * DAY
+                val ctx = context.applicationContext
+                val sqlHelper = SqlHelper(ctx)
+                proofOfWorkEngine = SwitchingProofOfWorkEngine(
+                    ctx, Constants.PREFERENCE_SERVER_POW,
+                    ServerPowEngine(ctx),
+                    ServicePowEngine(ctx)
+                )
+                cryptography = AndroidCryptography()
+                nodeRegistry = AndroidNodeRegistry(sqlHelper)
+                inventory = AndroidInventory(sqlHelper)
+                addressRepo = AndroidAddressRepository(sqlHelper)
+                labelRepo = AndroidLabelRepository(sqlHelper, ctx)
+                messageRepo = AndroidMessageRepository(sqlHelper)
+                proofOfWorkRepo = AndroidProofOfWorkRepository(sqlHelper).also { powRepo = it }
+                networkHandler = NioNetworkHandler()
+                listener = getMessageListener(ctx)
+                labeler = Singleton.labeler
+                preferences.sendPubkeyOnIdentityCreation = false
+            }
         }
 
     fun getMessageListener(ctx: Context) = init({ messageListener }, { messageListener = it }) { MessageListener(ctx) }
+
+    fun getLabelRepository(ctx: Context) = getBitmessageContext(ctx).labels as AndroidLabelRepository
 
     fun getMessageRepository(ctx: Context) = getBitmessageContext(ctx).messages as AndroidMessageRepository
 
@@ -94,15 +95,15 @@ object Singleton {
                     creatingIdentity = true
                     doAsync {
                         val identity = bmc.createIdentity(false,
-                                Pubkey.Feature.DOES_ACK)
+                            Pubkey.Feature.DOES_ACK)
                         identity.alias = ctx.getString(R.string.alias_default_identity)
                         bmc.addresses.save(identity)
 
                         uiThread {
                             Singleton.identity = identity
                             Toast.makeText(ctx,
-                                    R.string.toast_identity_created,
-                                    Toast.LENGTH_SHORT).show()
+                                R.string.toast_identity_created,
+                                Toast.LENGTH_SHORT).show()
                             val mainActivity = MainActivity.getInstance()
                             mainActivity?.addIdentityEntry(identity)
                         }
