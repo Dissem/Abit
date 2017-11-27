@@ -16,6 +16,7 @@ import ch.dissem.bitmessage.utils.UnixTime.DAY
 import ch.dissem.bitmessage.utils.UnixTime.MINUTE
 import ch.dissem.bitmessage.utils.UnixTime.now
 import ch.dissem.bitmessage.utils.max
+import org.jetbrains.anko.db.transaction
 import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.concurrent.getOrSet
@@ -64,30 +65,25 @@ class AndroidNodeRegistry(private val sql: SqlHelper) : NodeRegistry {
     }
 
     override fun getKnownAddresses(limit: Int, vararg streams: Long): List<NetworkAddress> {
-        val projection = arrayOf(COLUMN_STREAM, COLUMN_ADDRESS, COLUMN_PORT, COLUMN_SERVICES, COLUMN_TIME)
-
         val result = LinkedList<NetworkAddress>()
-        try {
-            sql.readableDatabase.query(
-                TABLE_NAME, projection,
-                "stream IN (?)",
-                arrayOf(SqlStrings.join(*streams)), null, null,
-                "time DESC",
-                limit.toString()
-            ).use { c ->
-                while (c.moveToNext()) {
-                    result.add(NetworkAddress(
-                        time = c.getLong(c.getColumnIndex(COLUMN_TIME)),
-                        stream = c.getLong(c.getColumnIndex(COLUMN_STREAM)),
-                        services = c.getLong(c.getColumnIndex(COLUMN_SERVICES)),
-                        IPv6 = c.getBlob(c.getColumnIndex(COLUMN_ADDRESS)),
-                        port = c.getInt(c.getColumnIndex(COLUMN_PORT))
-                    ))
-                }
+
+        sql.readableDatabase.query(
+            TABLE_NAME,
+            arrayOf(COLUMN_STREAM, COLUMN_ADDRESS, COLUMN_PORT, COLUMN_SERVICES, COLUMN_TIME),
+            "stream IN (?)",
+            arrayOf(SqlStrings.join(*streams)), null, null,
+            "time DESC",
+            limit.toString()
+        ).use { c ->
+            while (c.moveToNext()) {
+                result.add(NetworkAddress(
+                    time = c.getLong(c.getColumnIndex(COLUMN_TIME)),
+                    stream = c.getLong(c.getColumnIndex(COLUMN_STREAM)),
+                    services = c.getLong(c.getColumnIndex(COLUMN_SERVICES)),
+                    IPv6 = c.getBlob(c.getColumnIndex(COLUMN_ADDRESS)),
+                    port = c.getInt(c.getColumnIndex(COLUMN_PORT))
+                ))
             }
-        } catch (e: Exception) {
-            LOG.error(e.message, e)
-            throw ApplicationException(e)
         }
 
         if (result.isEmpty()) {
@@ -101,9 +97,7 @@ class AndroidNodeRegistry(private val sql: SqlHelper) : NodeRegistry {
     }
 
     override fun offerAddresses(nodes: List<NetworkAddress>) {
-        val db = sql.writableDatabase
-        db.beginTransaction()
-        try {
+        sql.writableDatabase.transaction {
             cleanUp()
             nodes
                 .filter {
@@ -120,9 +114,6 @@ class AndroidNodeRegistry(private val sql: SqlHelper) : NodeRegistry {
                         }
                     }
                 }
-            db.setTransactionSuccessful()
-        } finally {
-            db.endTransaction()
         }
     }
 

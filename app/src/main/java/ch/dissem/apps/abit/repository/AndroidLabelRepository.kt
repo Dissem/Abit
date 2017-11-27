@@ -24,6 +24,7 @@ import ch.dissem.apps.abit.util.Labels
 import ch.dissem.bitmessage.entity.valueobject.Label
 import ch.dissem.bitmessage.ports.AbstractLabelRepository
 import ch.dissem.bitmessage.ports.MessageRepository
+import org.jetbrains.anko.db.transaction
 import java.util.*
 
 /**
@@ -40,7 +41,7 @@ class AndroidLabelRepository(private val sql: SqlHelper, private val context: Co
 
         sql.readableDatabase.query(
             TABLE_NAME, projection,
-                where, null, null, null,
+            where, null, null, null,
             COLUMN_ORDER
         ).use { c ->
             while (c.moveToNext()) {
@@ -60,9 +61,7 @@ class AndroidLabelRepository(private val sql: SqlHelper, private val context: Co
             values.put(COLUMN_ORDER, label.ord)
             db.update(TABLE_NAME, values, "id=?", arrayOf(label.id.toString()))
         } else {
-            try {
-                db.beginTransaction()
-
+            db.transaction {
                 val exists = DatabaseUtils.queryNumEntries(db, TABLE_NAME, "label=?", arrayOf(label.toString())) > 0
 
                 if (exists) {
@@ -79,9 +78,6 @@ class AndroidLabelRepository(private val sql: SqlHelper, private val context: Co
                     values.put(COLUMN_ORDER, label.ord)
                     db.insertOrThrow(TABLE_NAME, null, values)
                 }
-                db.setTransactionSuccessful()
-            } finally {
-                db.endTransaction()
             }
         }
     }

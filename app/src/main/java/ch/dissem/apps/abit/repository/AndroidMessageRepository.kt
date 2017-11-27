@@ -33,6 +33,7 @@ import ch.dissem.bitmessage.ports.AlreadyStoredException
 import ch.dissem.bitmessage.ports.MessageRepository
 import ch.dissem.bitmessage.utils.Encode
 import ch.dissem.bitmessage.utils.Strings.hex
+import org.jetbrains.anko.db.transaction
 import java.io.ByteArrayInputStream
 import java.util.*
 
@@ -182,9 +183,7 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
         saveContactIfNecessary(message.from)
         saveContactIfNecessary(message.to)
         val db = sql.writableDatabase
-        try {
-            db.beginTransaction()
-
+        db.transaction {
             // save message
             if (message.id == null) {
                 insert(db, message)
@@ -204,11 +203,6 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
                 values.put(JT_COLUMN_MESSAGE, message.id as Long?)
                 db.insertOrThrow(JOIN_TABLE_NAME, null, values)
             }
-            db.setTransactionSuccessful()
-        } catch (e: SQLiteConstraintException) {
-            throw AlreadyStoredException(cause = e)
-        } finally {
-            db.endTransaction()
         }
     }
 
