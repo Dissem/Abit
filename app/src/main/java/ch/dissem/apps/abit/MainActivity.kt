@@ -114,9 +114,9 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
 
         val listFragment = MessageListFragment()
         supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.item_list, listFragment)
-                .commit()
+            .beginTransaction()
+            .replace(R.id.item_list, listFragment)
+            .commit()
 
         if (findViewById<View>(R.id.message_detail_container) != null) {
             // The detail container view will be present only in the
@@ -149,40 +149,38 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
         }
         if (drawer.isDrawerOpen) {
             val lps = RelativeLayout.LayoutParams(ViewGroup
-                    .LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
             lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT)
             val margin = ((resources.displayMetrics.density * 12) as Number).toInt()
             lps.setMargins(margin, margin, margin, margin)
 
             ShowcaseView.Builder(this)
-                    .withMaterialShowcase()
-                    .setStyle(R.style.CustomShowcaseTheme)
-                    .setContentTitle(R.string.full_node)
-                    .setContentText(R.string.full_node_description)
-                    .setTarget {
-                        val view = drawer.stickyFooter
-                        val location = IntArray(2)
-                        view.getLocationInWindow(location)
-                        val x = location[0] + 7 * view.width / 8
-                        val y = location[1] + view.height / 2
-                        Point(x, y)
-                    }
-                    .replaceEndButton(R.layout.showcase_button)
-                    .hideOnTouchOutside()
-                    .build()
-                    .setButtonPosition(lps)
+                .withMaterialShowcase()
+                .setStyle(R.style.CustomShowcaseTheme)
+                .setContentTitle(R.string.full_node)
+                .setContentText(R.string.full_node_description)
+                .setTarget {
+                    val view = drawer.stickyFooter
+                    val location = IntArray(2)
+                    view.getLocationInWindow(location)
+                    val x = location[0] + 7 * view.width / 8
+                    val y = location[1] + view.height / 2
+                    Point(x, y)
+                }
+                .replaceEndButton(R.layout.showcase_button)
+                .hideOnTouchOutside()
+                .build()
+                .setButtonPosition(lps)
         }
     }
 
     private fun <F> changeList(listFragment: F) where F : Fragment, F : ListHolder<*> {
         if (active) {
-            val transaction = supportFragmentManager
-                    .beginTransaction()
+            val transaction = supportFragmentManager.beginTransaction()
             transaction.replace(R.id.item_list, listFragment)
-            val detailFragment = supportFragmentManager.findFragmentById(R.id.message_detail_container)
-            if (detailFragment != null) {
-                transaction.remove(detailFragment)
+            supportFragmentManager.findFragmentById(R.id.message_detail_container)?.let {
+                transaction.remove(it)
             }
             transaction.addToBackStack(null).commit()
 
@@ -197,67 +195,67 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
     private fun createDrawer(toolbar: Toolbar) {
         val profiles = ArrayList<IProfile<*>>()
         profiles.add(ProfileSettingDrawerItem()
-                .withName(getString(R.string.add_identity))
-                .withDescription(getString(R.string.add_identity_summary))
-                .withIcon(IconicsDrawable(this, GoogleMaterial.Icon.gmd_add)
-                        .actionBar()
-                        .paddingDp(5)
-                        .colorRes(R.color.icons))
-                .withIdentifier(ADD_IDENTITY.toLong())
+            .withName(getString(R.string.add_identity))
+            .withDescription(getString(R.string.add_identity_summary))
+            .withIcon(IconicsDrawable(this, GoogleMaterial.Icon.gmd_add)
+                .actionBar()
+                .paddingDp(5)
+                .colorRes(R.color.icons))
+            .withIdentifier(ADD_IDENTITY.toLong())
         )
         profiles.add(ProfileSettingDrawerItem()
-                .withName(getString(R.string.manage_identity))
-                .withIcon(GoogleMaterial.Icon.gmd_settings)
-                .withIdentifier(MANAGE_IDENTITY.toLong())
+            .withName(getString(R.string.manage_identity))
+            .withIcon(GoogleMaterial.Icon.gmd_settings)
+            .withIdentifier(MANAGE_IDENTITY.toLong())
         )
         // Create the AccountHeader
         accountHeader = AccountHeaderBuilder()
-                .withActivity(this)
-                .withHeaderBackground(R.drawable.header)
-                .withProfiles(profiles)
-                .withOnAccountHeaderProfileImageListener(ProfileImageListener(this))
-                .withOnAccountHeaderListener(ProfileSelectionListener(this@MainActivity, supportFragmentManager))
-                .build()
+            .withActivity(this)
+            .withHeaderBackground(R.drawable.header)
+            .withProfiles(profiles)
+            .withOnAccountHeaderProfileImageListener(ProfileImageListener(this))
+            .withOnAccountHeaderListener(ProfileSelectionListener(this@MainActivity, supportFragmentManager))
+            .build()
         if (profiles.size > 2) { // There's always the add and manage identity items
             accountHeader.setActiveProfile(profiles[0], true)
         }
 
         val drawerItems = ArrayList<IDrawerItem<*, *>>()
         drawerItems.add(PrimaryDrawerItem()
-                .withName(R.string.archive)
-                .withTag(LABEL_ARCHIVE)
-                .withIcon(CommunityMaterial.Icon.cmd_archive)
+            .withName(R.string.archive)
+            .withTag(LABEL_ARCHIVE)
+            .withIcon(CommunityMaterial.Icon.cmd_archive)
         )
         drawerItems.add(DividerDrawerItem())
         drawerItems.add(PrimaryDrawerItem()
-                .withName(R.string.contacts_and_subscriptions)
-                .withIcon(GoogleMaterial.Icon.gmd_contacts))
+            .withName(R.string.contacts_and_subscriptions)
+            .withIcon(GoogleMaterial.Icon.gmd_contacts))
         drawerItems.add(PrimaryDrawerItem()
-                .withName(R.string.settings)
-                .withIcon(GoogleMaterial.Icon.gmd_settings))
+            .withName(R.string.settings)
+            .withIcon(GoogleMaterial.Icon.gmd_settings))
 
         nodeSwitch = SwitchDrawerItem()
-                .withIdentifier(ID_NODE_SWITCH)
-                .withName(R.string.full_node)
-                .withIcon(CommunityMaterial.Icon.cmd_cloud_outline)
-                .withChecked(Preferences.isFullNodeActive(this))
-                .withOnCheckedChangeListener { _, _, isChecked ->
-                    if (isChecked) {
-                        NetworkUtils.enableNode(this@MainActivity)
-                    } else {
-                        NetworkUtils.disableNode(this@MainActivity)
-                    }
+            .withIdentifier(ID_NODE_SWITCH)
+            .withName(R.string.full_node)
+            .withIcon(CommunityMaterial.Icon.cmd_cloud_outline)
+            .withChecked(Preferences.isFullNodeActive(this))
+            .withOnCheckedChangeListener { _, _, isChecked ->
+                if (isChecked) {
+                    NetworkUtils.enableNode(this@MainActivity)
+                } else {
+                    NetworkUtils.disableNode(this@MainActivity)
                 }
+            }
 
         drawer = DrawerBuilder()
-                .withActivity(this)
-                .withToolbar(toolbar)
-                .withAccountHeader(accountHeader)
-                .withDrawerItems(drawerItems)
-                .addStickyDrawerItems(nodeSwitch)
-                .withOnDrawerItemClickListener(DrawerItemClickListener())
-                .withShowDrawerOnFirstLaunch(true)
-                .build()
+            .withActivity(this)
+            .withToolbar(toolbar)
+            .withAccountHeader(accountHeader)
+            .withDrawerItems(drawerItems)
+            .addStickyDrawerItems(nodeSwitch)
+            .withOnDrawerItemClickListener(DrawerItemClickListener())
+            .withShowDrawerOnFirstLaunch(true)
+            .build()
 
         loadDrawerItemsAsynchronously()
     }
@@ -289,10 +287,8 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
                 for (label in labels) {
                     addLabelEntry(label)
                 }
-                val selectedDrawerItem = drawer.getDrawerItem(selectedLabel)
-                if (selectedDrawerItem != null) {
-                    drawer.setSelection(selectedDrawerItem)
-                }
+                drawer.setSelection(selectedLabel?.id as Long)
+                updateUnread()
             }
         }
     }
@@ -338,10 +334,10 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
                     }
                     R.string.settings -> {
                         supportFragmentManager
-                                .beginTransaction()
-                                .replace(R.id.item_list, SettingsFragment())
-                                .addToBackStack(null)
-                                .commit()
+                            .beginTransaction()
+                            .replace(R.id.item_list, SettingsFragment())
+                            .addToBackStack(null)
+                            .commit()
                         return false
                     }
                     R.string.full_node -> return true
@@ -385,16 +381,16 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
 
     fun addIdentityEntry(identity: BitmessageAddress) {
         val newProfile = ProfileDrawerItem()
-                .withIcon(Identicon(identity))
-                .withName(identity.toString())
-                .withNameShown(true)
-                .withEmail(identity.address)
-                .withTag(identity)
+            .withIcon(Identicon(identity))
+            .withName(identity.toString())
+            .withNameShown(true)
+            .withEmail(identity.address)
+            .withTag(identity)
         if (accountHeader.profiles != null) {
             // we know that there are 2 setting elements.
             // Set the new profile above them ;)
             accountHeader.addProfile(
-                    newProfile, accountHeader.profiles.size - 2)
+                newProfile, accountHeader.profiles.size - 2)
         } else {
             accountHeader.addProfiles(newProfile)
         }
@@ -402,10 +398,11 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
 
     private fun addLabelEntry(label: Label) {
         val item = PrimaryDrawerItem()
-                .withName(label.toString())
-                .withTag(label)
-                .withIcon(Labels.getIcon(label))
-                .withIconColor(Labels.getColor(label))
+            .withIdentifier(label.id as Long)
+            .withName(label.toString())
+            .withTag(label)
+            .withIcon(Labels.getIcon(label))
+            .withIconColor(Labels.getColor(label))
         drawer.addItemAtPosition(item, drawer.drawerItems.size - 3)
     }
 
@@ -414,8 +411,8 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             if (profile is ProfileDrawerItem) {
                 if (identity == profile.tag) {
                     profile
-                            .withName(identity.toString())
-                            .withTag(identity)
+                        .withName(identity.toString())
+                        .withTag(identity)
                     return
                 }
             }
@@ -468,8 +465,8 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             }
             fragment.arguments = arguments
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.message_detail_container, fragment)
-                    .commit()
+                .replace(R.id.message_detail_container, fragment)
+                .commit()
         } else {
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
@@ -490,8 +487,8 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
     fun setDetailView(fragment: Fragment) {
         if (hasDetailPane) {
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.message_detail_container, fragment)
-                    .commit()
+                .replace(R.id.message_detail_container, fragment)
+                .commit()
         }
     }
 
@@ -513,10 +510,9 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
         private var instance: WeakReference<MainActivity>? = null
 
         fun updateNodeSwitch() {
-            val i = getInstance()
-            i?.apply {
+            getInstance()?.apply {
                 runOnUiThread {
-                    nodeSwitch.withChecked(Preferences.isFullNodeActive(i))
+                    nodeSwitch.withChecked(Preferences.isFullNodeActive(this))
                     drawer.updateStickyFooterItem(nodeSwitch)
                 }
             }

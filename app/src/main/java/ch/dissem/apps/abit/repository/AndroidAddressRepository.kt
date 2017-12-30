@@ -120,31 +120,31 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
 
     private fun getAddress(c: Cursor): BitmessageAddress {
 
-        val privateKeyBytes = c.getBlob(c.getColumnIndex(COLUMN_PRIVATE_KEY))
-        val address = privateKeyBytes?.let {
-            BitmessageAddress(PrivateKey.read(ByteArrayInputStream(privateKeyBytes)))
-        } ?:
-            BitmessageAddress(c.getString(c.getColumnIndex(COLUMN_ADDRESS))).also { address ->
-                c.getBlob(c.getColumnIndex(COLUMN_PUBLIC_KEY))?.let { publicKeyBytes ->
-                    Factory.readPubkey(
-                        version = address.version, stream = address.stream,
-                        input = ByteArrayInputStream(publicKeyBytes), length = publicKeyBytes.size,
-                        encrypted = false
-                    ).let {
-                        address.pubkey = if (address.version == 4L && it is V3Pubkey) {
-                            V4Pubkey(it)
-                        } else {
-                            it
-                        }
+        fun getIdentity(c: Cursor) = c.getBlob(c.getColumnIndex(COLUMN_PRIVATE_KEY))?.let {
+            BitmessageAddress(PrivateKey.read(ByteArrayInputStream(it)))
+        }
+
+        fun getContact(c: Cursor) = BitmessageAddress(c.getString(c.getColumnIndex(COLUMN_ADDRESS))).also { address ->
+            c.getBlob(c.getColumnIndex(COLUMN_PUBLIC_KEY))?.let { publicKeyBytes ->
+                Factory.readPubkey(
+                    version = address.version, stream = address.stream,
+                    input = ByteArrayInputStream(publicKeyBytes), length = publicKeyBytes.size,
+                    encrypted = false
+                ).let {
+                    address.pubkey = if (address.version == 4L && it is V3Pubkey) {
+                        V4Pubkey(it)
+                    } else {
+                        it
                     }
                 }
             }
+        }
 
-        address.alias = c.getString(c.getColumnIndex(COLUMN_ALIAS))
-        address.isChan = c.getInt(c.getColumnIndex(COLUMN_CHAN)) == 1
-        address.isSubscribed = c.getInt(c.getColumnIndex(COLUMN_SUBSCRIBED)) == 1
-
-        return address
+        return (getIdentity(c) ?: getContact(c)).apply {
+            alias = c.getString(c.getColumnIndex(COLUMN_ALIAS))
+            isChan = c.getInt(c.getColumnIndex(COLUMN_CHAN)) == 1
+            isSubscribed = c.getInt(c.getColumnIndex(COLUMN_SUBSCRIBED)) == 1
+        }
     }
 
     override fun save(address: BitmessageAddress) = if (exists(address)) {

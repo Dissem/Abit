@@ -88,7 +88,7 @@ object Preferences {
         return preferences.getString(name, null)
     }
 
-    fun isConnectionAllowed(ctx: Context) = !isWifiOnly(ctx) || ctx.connectivityManager.isActiveNetworkMetered
+    fun isConnectionAllowed(ctx: Context) = !isWifiOnly(ctx) || !ctx.connectivityManager.isActiveNetworkMetered
 
     fun isWifiOnly(ctx: Context): Boolean {
         val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
