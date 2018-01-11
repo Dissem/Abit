@@ -62,10 +62,9 @@ class ImportIdentitiesFragment : Fragment() {
 
         view.findViewById<Button>(R.id.finish).setOnClickListener {
             importer.importAll(adapter.selected)
-            val mainActivity = MainActivity.getInstance()
-            if (mainActivity != null) {
+            MainActivity.apply {
                 for (selected in adapter.selected) {
-                    mainActivity.addIdentityEntry(selected)
+                    addIdentityEntry(selected)
                 }
             }
             activity.finish()

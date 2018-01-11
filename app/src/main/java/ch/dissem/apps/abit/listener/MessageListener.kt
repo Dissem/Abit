@@ -54,7 +54,7 @@ class MessageListener(ctx: Context) : BitmessageContext.Listener {
             notification.show()
 
             // If MainActivity is shown, update the sidebar badges
-            MainActivity.getInstance()?.updateUnread()
+            MainActivity.apply { updateUnread() }
         }
     }
 

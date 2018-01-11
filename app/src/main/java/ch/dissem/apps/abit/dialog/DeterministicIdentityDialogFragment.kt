@@ -81,9 +81,9 @@ class DeterministicIdentityDialogFragment : AppCompatDialogFragment() {
                     Toast.makeText(context,
                             messageRes,
                             Toast.LENGTH_SHORT).show()
-                    MainActivity.getInstance()?.let { mainActivity ->
+                    MainActivity.apply {
                         identities.forEach { identity ->
-                            mainActivity.addIdentityEntry(identity)
+                            addIdentityEntry(identity)
                         }
                     }
                 }

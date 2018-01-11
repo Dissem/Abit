@@ -298,9 +298,8 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
         if (listFragment is ListHolder<*>) {
             val listHolder = listFragment as ListHolder<*>
             if (listHolder.showPreviousList()) {
-                val drawerItem = drawer.getDrawerItem(listHolder.currentLabel)
-                if (drawerItem != null) {
-                    drawer.setSelection(drawerItem)
+                drawer.getDrawerItem(listHolder.currentLabel)?.let {
+                    drawer.setSelection(it)
                 }
                 return
             }
@@ -510,7 +509,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
         private var instance: WeakReference<MainActivity>? = null
 
         fun updateNodeSwitch() {
-            getInstance()?.apply {
+            apply {
                 runOnUiThread {
                     nodeSwitch.withChecked(Preferences.isFullNodeActive(this))
                     drawer.updateStickyFooterItem(nodeSwitch)
@@ -518,6 +517,12 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             }
         }
 
-        fun getInstance() = instance?.get()
+        /**
+         * Runs the given code in the main activity context, if it currently exists. Otherwise,
+         * it's ignored.
+         */
+        fun apply(run: MainActivity.() -> Unit){
+            instance?.get()?.let { run.invoke(it) }
+        }
     }
 }

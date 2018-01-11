@@ -104,8 +104,7 @@ object Singleton {
                             Toast.makeText(ctx,
                                 R.string.toast_identity_created,
                                 Toast.LENGTH_SHORT).show()
-                            val mainActivity = MainActivity.getInstance()
-                            mainActivity?.addIdentityEntry(identity)
+                            MainActivity.apply { addIdentityEntry(identity) }
                         }
                     }
                 }

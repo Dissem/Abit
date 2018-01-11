@@ -71,8 +71,9 @@ class AddIdentityDialogFragment : AppCompatDialogFragment() {
                             Toast.makeText(ctx,
                                     R.string.toast_identity_created,
                                     Toast.LENGTH_SHORT).show()
-                            val mainActivity = MainActivity.getInstance()
-                            mainActivity?.addIdentityEntry(identity)
+                            MainActivity.apply {
+                                addIdentityEntry(identity)
+                            }
                         }
                     }
                 }
@@ -106,7 +107,7 @@ class AddIdentityDialogFragment : AppCompatDialogFragment() {
                             Toast.makeText(ctx,
                                     R.string.toast_chan_created,
                                     Toast.LENGTH_SHORT).show()
-                            MainActivity.getInstance()?.addIdentityEntry(chan)
+                            MainActivity.apply { addIdentityEntry(chan) }
                         }
                     }
                 }

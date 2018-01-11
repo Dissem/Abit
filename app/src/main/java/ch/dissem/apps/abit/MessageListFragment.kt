@@ -79,7 +79,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
 
                 if (!isLoading && !isLastPage) {
                     if (visibleItemCount + firstVisibleItemPosition >= totalItemCount - 5
-                            && firstVisibleItemPosition >= 0) {
+                        && firstVisibleItemPosition >= 0) {
                         loadMoreItems()
                     }
                 }
@@ -160,7 +160,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-            inflater.inflate(R.layout.fragment_message_list, container, false)
+        inflater.inflate(R.layout.fragment_message_list, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -224,7 +224,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         recycler_view.addOnScrollListener(recyclerViewOnScrollListener)
 
         recycler_view.addItemDecoration(SimpleListDividerDecorator(
-                ContextCompat.getDrawable(context, R.drawable.list_divider_h), true))
+            ContextCompat.getDrawable(context, R.drawable.list_divider_h), true))
 
         // NOTE:
         // The initialization order is very important! This order determines the priority of
@@ -262,6 +262,11 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
                     }
                 }
             }
+            if (removed.any { it.type == Label.Type.UNREAD } || added.any { it.type == Label.Type.UNREAD }) {
+                MainActivity.apply {
+                    updateUnread()
+                }
+            }
         }
     }
 
@@ -270,29 +275,29 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         menu.add(R.string.broadcast).setIcon(R.drawable.ic_action_broadcast)
         menu.add(R.string.personal_message).setIcon(R.drawable.ic_action_personal)
         FabUtils.initFab(context, R.drawable.ic_action_compose_message, menu)
-                .addOnMenuItemClickListener { _, _, itemId ->
-                    val identity = Singleton.getIdentity(context)
-                    if (identity == null) {
-                        Toast.makeText(activity, R.string.no_identity_warning,
-                                Toast.LENGTH_LONG).show()
-                    } else {
-                        when (itemId) {
-                            1 -> {
-                                val intent = Intent(activity, ComposeMessageActivity::class.java)
-                                intent.putExtra(EXTRA_IDENTITY, identity)
-                                intent.putExtra(EXTRA_BROADCAST, true)
-                                startActivity(intent)
-                            }
-                            2 -> {
-                                val intent = Intent(activity, ComposeMessageActivity::class.java)
-                                intent.putExtra(EXTRA_IDENTITY, identity)
-                                startActivity(intent)
-                            }
-                            else -> {
-                            }
+            .addOnMenuItemClickListener { _, _, itemId ->
+                val identity = Singleton.getIdentity(context)
+                if (identity == null) {
+                    Toast.makeText(activity, R.string.no_identity_warning,
+                        Toast.LENGTH_LONG).show()
+                } else {
+                    when (itemId) {
+                        1 -> {
+                            val intent = Intent(activity, ComposeMessageActivity::class.java)
+                            intent.putExtra(EXTRA_IDENTITY, identity)
+                            intent.putExtra(EXTRA_BROADCAST, true)
+                            startActivity(intent)
+                        }
+                        2 -> {
+                            val intent = Intent(activity, ComposeMessageActivity::class.java)
+                            intent.putExtra(EXTRA_IDENTITY, identity)
+                            startActivity(intent)
+                        }
+                        else -> {
                         }
                     }
                 }
+            }
     }
 
     override fun onDestroyView() {

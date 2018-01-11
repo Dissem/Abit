@@ -94,9 +94,10 @@ class AddressDetailFragment : Fragment() {
                     .setMessage(warning)
                     .setPositiveButton(android.R.string.yes) { _, _ ->
                         Singleton.getAddressRepository(ctx).remove(item)
-                        val mainActivity = MainActivity.getInstance()
-                        if (item.privateKey != null && mainActivity != null) {
-                            mainActivity.removeIdentityEntry(item)
+                        MainActivity.apply {
+                            if (item.privateKey != null) {
+                                removeIdentityEntry(item)
+                            }
                         }
                         this.item = null
                         ctx.onBackPressed()
@@ -109,13 +110,19 @@ class AddressDetailFragment : Fragment() {
                 AlertDialog.Builder(ctx)
                     .setMessage(R.string.confirm_export)
                     .setPositiveButton(android.R.string.yes) { _, _ ->
-                        val shareIntent = Intent(Intent.ACTION_SEND)
-                        shareIntent.type = "text/plain"
-                        shareIntent.putExtra(Intent.EXTRA_TITLE, item.toString() + EXPORT_POSTFIX)
-                        val exporter = WifExporter(Singleton
-                            .getBitmessageContext(ctx))
-                        exporter.addIdentity(item)
-                        shareIntent.putExtra(Intent.EXTRA_TEXT, exporter.toString())
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(
+                                Intent.EXTRA_TITLE,
+                                "$item$EXPORT_POSTFIX"
+                            )
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                WifExporter(Singleton.getBitmessageContext(ctx)).apply {
+                                    addIdentity(item)
+                                }.toString()
+                            )
+                        }
                         startActivity(Intent.createChooser(shareIntent, null))
                     }
                     .setNegativeButton(android.R.string.no, null)
@@ -186,7 +193,7 @@ class AddressDetailFragment : Fragment() {
         item?.let { item ->
             Singleton.getAddressRepository(context!!).save(item)
             if (item.privateKey != null) {
-                MainActivity.getInstance()?.updateIdentityEntry(item)
+                MainActivity.apply { updateIdentityEntry(item) }
             }
         }
         super.onPause()
