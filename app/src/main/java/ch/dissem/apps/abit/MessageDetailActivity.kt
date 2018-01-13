@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.support.v4.app.NavUtils
 import android.view.MenuItem
 
-import ch.dissem.bitmessage.entity.valueobject.Label
-
 
 /**
  * An activity representing a single Message detail screen. This
@@ -18,7 +16,6 @@ import ch.dissem.bitmessage.entity.valueobject.Label
  * more than a [MessageDetailFragment].
  */
 class MessageDetailActivity : DetailActivity() {
-    private var label: Label? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +30,6 @@ class MessageDetailActivity : DetailActivity() {
         // http://developer.android.com/guide/components/fragments.html
         //
         if (savedInstanceState == null) {
-            label = intent.getSerializableExtra(MainActivity.EXTRA_SHOW_LABEL) as Label?
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             val arguments = Bundle()
@@ -49,9 +45,7 @@ class MessageDetailActivity : DetailActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         android.R.id.home -> {
-            val parentIntent = Intent(this, MainActivity::class.java)
-            parentIntent.putExtra(MainActivity.EXTRA_SHOW_LABEL, label)
-            NavUtils.navigateUpTo(this, parentIntent)
+            NavUtils.navigateUpTo(this, Intent(this, MainActivity::class.java))
             true
         }
         else -> super.onOptionsItemSelected(item)

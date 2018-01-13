@@ -24,7 +24,5 @@ interface ListHolder<L> {
 
     fun setActivateOnItemClick(activateOnItemClick: Boolean)
 
-    var currentLabel: L?
-
     fun showPreviousList(): Boolean
 }

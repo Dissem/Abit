@@ -30,6 +30,7 @@ import ch.dissem.apps.abit.drawer.ProfileSelectionListener
 import ch.dissem.apps.abit.listener.ListSelectionListener
 import ch.dissem.apps.abit.repository.AndroidLabelRepository.Companion.LABEL_ARCHIVE
 import ch.dissem.apps.abit.service.Singleton
+import ch.dissem.apps.abit.service.Singleton.currentLabel
 import ch.dissem.apps.abit.synchronization.SyncAdapter
 import ch.dissem.apps.abit.util.Labels
 import ch.dissem.apps.abit.util.NetworkUtils
@@ -87,9 +88,6 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
      * device.
      */
     var hasDetailPane: Boolean = false
-        private set
-
-    var selectedLabel: Label? = null
         private set
 
     private lateinit var bmc: BitmessageContext
@@ -280,14 +278,16 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
 
             uiThread {
                 if (intent.hasExtra(EXTRA_SHOW_LABEL)) {
-                    selectedLabel = intent.getSerializableExtra(EXTRA_SHOW_LABEL) as Label
-                } else if (selectedLabel == null) {
-                    selectedLabel = labels[0]
+                    currentLabel.value = intent.getSerializableExtra(EXTRA_SHOW_LABEL) as Label
+                } else if (currentLabel.value == null) {
+                    currentLabel.value = labels[0]
                 }
                 for (label in labels) {
                     addLabelEntry(label)
                 }
-                drawer.setSelection(selectedLabel?.id as Long)
+                currentLabel.value?.let {
+                    drawer.setSelection(it.id as Long)
+                }
                 updateUnread()
             }
         }
@@ -295,16 +295,9 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
 
     override fun onBackPressed() {
         val listFragment = supportFragmentManager.findFragmentById(R.id.item_list)
-        if (listFragment is ListHolder<*>) {
-            val listHolder = listFragment as ListHolder<*>
-            if (listHolder.showPreviousList()) {
-                drawer.getDrawerItem(listHolder.currentLabel)?.let {
-                    drawer.setSelection(it)
-                }
-                return
-            }
+        if (listFragment !is ListHolder<*> || !listFragment.showPreviousList()) {
+            super.onBackPressed()
         }
-        super.onBackPressed()
     }
 
     private inner class DrawerItemClickListener : Drawer.OnDrawerItemClickListener {
@@ -312,13 +305,9 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             val itemList = supportFragmentManager.findFragmentById(R.id.item_list)
             val tag = item.tag
             if (tag is Label) {
-                selectedLabel = tag
-                if (itemList is MessageListFragment) {
-                    itemList.updateList(tag)
-                } else {
-                    val listFragment = MessageListFragment()
-                    changeList(listFragment)
-                    listFragment.updateList(tag)
+                currentLabel.value = tag
+                if (itemList !is MessageListFragment) {
+                    changeList(MessageListFragment())
                 }
                 return false
             } else if (item is Nameable<*>) {
@@ -347,33 +336,23 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
         }
     }
 
-    override fun onSaveInstanceState(savedInstanceState: Bundle) {
-        super.onSaveInstanceState(savedInstanceState)
-        savedInstanceState.putSerializable("selectedLabel", selectedLabel)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        selectedLabel = savedInstanceState.getSerializable("selectedLabel") as? Label
-
-        selectedLabel?.let { selectedLabel ->
-            drawer.getDrawerItem(selectedLabel)?.let { selectedItem ->
-                drawer.setSelection(selectedItem)
-            }
-        }
-        super.onRestoreInstanceState(savedInstanceState)
-    }
-
     override fun onResume() {
         updateUnread()
         if (Preferences.isFullNodeActive(this) && Preferences.isConnectionAllowed(this@MainActivity)) {
             NetworkUtils.enableNode(this, false)
         }
         Singleton.getMessageListener(this).resetNotification()
+        currentLabel.addObserver(this) { label ->
+            if (label != null) {
+                drawer.setSelection(label.id as Long)
+            }
+        }
         active = true
         super.onResume()
     }
 
     override fun onPause() {
+        currentLabel.removeObserver(this)
         super.onPause()
         active = false
     }
@@ -471,9 +450,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             // for the selected item ID.
             val detailIntent = when (item) {
                 is Plaintext -> {
-                    Intent(this, MessageDetailActivity::class.java).apply {
-                        putExtra(EXTRA_SHOW_LABEL, selectedLabel)
-                    }
+                    Intent(this, MessageDetailActivity::class.java)
                 }
                 is BitmessageAddress -> Intent(this, AddressDetailActivity::class.java)
                 else -> throw IllegalArgumentException("Plaintext or BitmessageAddress expected, but was ${item::class.simpleName}")
@@ -521,7 +498,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
          * Runs the given code in the main activity context, if it currently exists. Otherwise,
          * it's ignored.
          */
-        fun apply(run: MainActivity.() -> Unit){
+        fun apply(run: MainActivity.() -> Unit) {
             instance?.get()?.let { run.invoke(it) }
         }
     }

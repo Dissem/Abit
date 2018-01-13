@@ -21,14 +21,17 @@ import android.widget.Toast
 import ch.dissem.apps.abit.MainActivity
 import ch.dissem.apps.abit.R
 import ch.dissem.apps.abit.adapter.AndroidCryptography
+import ch.dissem.apps.abit.adapter.SwipeableMessageAdapter
 import ch.dissem.apps.abit.adapter.SwitchingProofOfWorkEngine
 import ch.dissem.apps.abit.listener.MessageListener
 import ch.dissem.apps.abit.pow.ServerPowEngine
 import ch.dissem.apps.abit.repository.*
 import ch.dissem.apps.abit.util.Constants
+import ch.dissem.apps.abit.util.Observable
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.payload.Pubkey
+import ch.dissem.bitmessage.entity.valueobject.Label
 import ch.dissem.bitmessage.networking.nio.NioNetworkHandler
 import ch.dissem.bitmessage.ports.DefaultLabeler
 import ch.dissem.bitmessage.utils.ConversationService
@@ -36,12 +39,54 @@ import ch.dissem.bitmessage.utils.TTL
 import ch.dissem.bitmessage.utils.UnixTime.DAY
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
+import java.lang.ref.WeakReference
 
 /**
  * Provides singleton objects across the application.
  */
 object Singleton {
-    val labeler = DefaultLabeler()
+    var currentLabel = Observable<Label?>(null).apply {
+        addObserver(this) { _ -> swipeableMessageAdapter = null }
+    }
+
+    private var swipeableMessageAdapter: WeakReference<SwipeableMessageAdapter>? = null
+    val labeler = DefaultLabeler().apply {
+        listener = { message, added, removed ->
+            swipeableMessageAdapter?.get()?.let { swipeableMessageAdapter ->
+                currentLabel.value?.let { label ->
+                    when {
+                        label.type == Label.Type.TRASH
+                            && added.all { it.type == Label.Type.TRASH }
+                            && removed.any { it.type == Label.Type.TRASH } -> {
+                            // work-around for messages that are deleted from trash
+                            swipeableMessageAdapter.remove(message)
+                        }
+                        label.type == Label.Type.UNREAD
+                            && added.all { it.type == Label.Type.TRASH } -> {
+                            // work-around for messages that are deleted from unread, which already have the unread label removed
+                            swipeableMessageAdapter.remove(message)
+                        }
+                        added.contains(label) -> {
+                            // in most cases, top should be the correct position, but time will show if
+                            // the message should be properly sorted in
+                            swipeableMessageAdapter.addFirst(message)
+                        }
+                        removed.contains(label) -> {
+                            swipeableMessageAdapter.remove(message)
+                        }
+                        removed.any { it.type == Label.Type.UNREAD } || added.any { it.type == Label.Type.UNREAD } -> {
+                            swipeableMessageAdapter.update(message)
+                        }
+                    }
+                }
+            }
+            if (removed.any { it.type == Label.Type.UNREAD } || added.any { it.type == Label.Type.UNREAD }) {
+                MainActivity.apply {
+                    updateUnread()
+                }
+            }
+        }
+    }
     var bitmessageContext: BitmessageContext? = null
         private set
     private var conversationService: ConversationService? = null
@@ -74,6 +119,10 @@ object Singleton {
                 preferences.sendPubkeyOnIdentityCreation = false
             }
         }
+
+    fun updateMessageListAdapterInListener(adapter: SwipeableMessageAdapter) {
+        swipeableMessageAdapter = WeakReference(adapter)
+    }
 
     fun getMessageListener(ctx: Context) = init({ messageListener }, { messageListener = it }) { MessageListener(ctx) }
 

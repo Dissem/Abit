@@ -127,8 +127,6 @@ abstract class AbstractItemListFragment<L, T> : ListFragment(), ListHolder<L> {
         activatedPosition = position
     }
 
-    override var currentLabel: L? = null
-
     override fun showPreviousList() = false
 
     /**

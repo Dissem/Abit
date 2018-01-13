@@ -32,6 +32,7 @@ import ch.dissem.apps.abit.adapter.SwipeableMessageAdapter
 import ch.dissem.apps.abit.listener.ListSelectionListener
 import ch.dissem.apps.abit.repository.AndroidMessageRepository
 import ch.dissem.apps.abit.service.Singleton
+import ch.dissem.apps.abit.service.Singleton.currentLabel
 import ch.dissem.apps.abit.util.FabUtils
 import ch.dissem.bitmessage.entity.Plaintext
 import ch.dissem.bitmessage.entity.valueobject.Label
@@ -87,8 +88,6 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         }
     }
 
-    override var currentLabel: Label? = null
-
     private var emptyTrashMenuItem: MenuItem? = null
     private lateinit var messageRepo: AndroidMessageRepository
     private var activateOnItemClick: Boolean = false
@@ -99,7 +98,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         isLoading = true
         swipeableMessageAdapter?.let { messageAdapter ->
             doAsync {
-                val messages = messageRepo.findMessages(currentLabel, messageAdapter.itemCount, PAGE_SIZE)
+                val messages = messageRepo.findMessages(currentLabel.value, messageAdapter.itemCount, PAGE_SIZE)
                 onUiThread {
                     messageAdapter.addAll(messages)
                     isLoading = false
@@ -121,21 +120,13 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         initFab(activity)
         messageRepo = Singleton.getMessageRepository(activity)
 
-        if (backStack.isEmpty() && currentLabel == null) {
-            doUpdateList(activity.selectedLabel)
-        }
+        currentLabel.addObserver(this) { new -> doUpdateList(new) }
+        doUpdateList(currentLabel.value)
     }
 
-    override fun updateList(label: Label) {
-        if (currentLabel != null && currentLabel != label && (backStack.isEmpty() || currentLabel != backStack.peek())) {
-            backStack.push(currentLabel)
-        }
-        if (!isResumed) {
-            currentLabel = label
-            return
-        }
-
-        doUpdateList(label)
+    override fun onPause() {
+        currentLabel.removeObserver(this)
+        super.onPause()
     }
 
     private fun doUpdateList(label: Label?) {
@@ -146,7 +137,6 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
             swipeableMessageAdapter?.notifyDataSetChanged()
             return
         }
-        currentLabel = label
         emptyTrashMenuItem?.isVisible = label.type == Label.Type.TRASH
         mainActivity?.apply {
             if ("archive" == label.toString()) {
@@ -238,36 +228,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         recyclerViewSwipeManager = swipeManager
         this.swipeableMessageAdapter = adapter
 
-        Singleton.labeler.listener = { message, added, removed ->
-            swipeableMessageAdapter?.let { swipeableMessageAdapter ->
-                when {
-                    currentLabel?.type == Label.Type.TRASH && added.all { it.type == Label.Type.TRASH } && removed.any { it.type == Label.Type.TRASH } -> {
-                        // work-around for messages that are deleted from trash
-                        swipeableMessageAdapter.remove(message)
-                    }
-                    currentLabel?.type == Label.Type.UNREAD && added.all { it.type == Label.Type.TRASH } -> {
-                        // work-around for messages that are deleted from unread, which already have the unread label removed
-                        swipeableMessageAdapter.remove(message)
-                    }
-                    added.contains(currentLabel) -> {
-                        // in most cases, top should be the correct position, but time will show if
-                        // the message should be properly sorted in
-                        swipeableMessageAdapter.addFirst(message)
-                    }
-                    removed.contains(currentLabel) -> {
-                        swipeableMessageAdapter.remove(message)
-                    }
-                    removed.any { it.type == Label.Type.UNREAD } || added.any { it.type == Label.Type.UNREAD } -> {
-                        swipeableMessageAdapter.update(message)
-                    }
-                }
-            }
-            if (removed.any { it.type == Label.Type.UNREAD } || added.any { it.type == Label.Type.UNREAD }) {
-                MainActivity.apply {
-                    updateUnread()
-                }
-            }
-        }
+        Singleton.updateMessageListAdapterInListener(adapter)
     }
 
     private fun initFab(context: MainActivity) {
@@ -326,24 +287,27 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        currentLabel?.let { currentLabel ->
-            when (item.itemId) {
-                R.id.empty_trash -> {
-                    if (currentLabel.type != Label.Type.TRASH) return true
+        when (item.itemId) {
+            R.id.empty_trash -> {
+                currentLabel.value?.let { label ->
+                    if (label.type != Label.Type.TRASH) return true
 
                     doAsync {
-                        for (message in messageRepo.findMessages(currentLabel)) {
+                        for (message in messageRepo.findMessages(label)) {
                             messageRepo.remove(message)
                         }
 
-                        uiThread { updateList(currentLabel) }
+                        uiThread { doUpdateList(label) }
                     }
-                    return true
                 }
-                else -> return false
+                return true
             }
+            else -> return false
         }
-        return false
+    }
+
+    override fun updateList(label: Label) {
+        currentLabel.value = label
     }
 
     override fun setActivateOnItemClick(activateOnItemClick: Boolean) {
@@ -354,7 +318,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
     override fun showPreviousList() = if (backStack.isEmpty()) {
         false
     } else {
-        doUpdateList(backStack.pop())
+        currentLabel.value = backStack.pop()
         true
     }
 }
