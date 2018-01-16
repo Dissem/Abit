@@ -45,9 +45,7 @@ import java.lang.ref.WeakReference
  * Provides singleton objects across the application.
  */
 object Singleton {
-    var currentLabel = Observable<Label?>(null).apply {
-        addObserver(this) { _ -> swipeableMessageAdapter = null }
-    }
+    var currentLabel = Observable<Label?>(null)
 
     private var swipeableMessageAdapter: WeakReference<SwipeableMessageAdapter>? = null
     val labeler = DefaultLabeler().apply {
