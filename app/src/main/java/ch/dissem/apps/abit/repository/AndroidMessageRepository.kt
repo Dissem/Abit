@@ -19,7 +19,6 @@ package ch.dissem.apps.abit.repository
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.DatabaseUtils
-import android.database.sqlite.SQLiteConstraintException
 import android.database.sqlite.SQLiteDatabase
 import ch.dissem.apps.abit.repository.AndroidLabelRepository.Companion.LABEL_ARCHIVE
 import ch.dissem.apps.abit.util.UuidUtils
@@ -29,7 +28,6 @@ import ch.dissem.bitmessage.entity.Plaintext
 import ch.dissem.bitmessage.entity.valueobject.InventoryVector
 import ch.dissem.bitmessage.entity.valueobject.Label
 import ch.dissem.bitmessage.ports.AbstractMessageRepository
-import ch.dissem.bitmessage.ports.AlreadyStoredException
 import ch.dissem.bitmessage.ports.MessageRepository
 import ch.dissem.bitmessage.utils.Encode
 import ch.dissem.bitmessage.utils.Strings.hex
@@ -137,8 +135,7 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
         // you will actually use after this query.
         val projection = arrayOf(COLUMN_ID, COLUMN_IV, COLUMN_TYPE, COLUMN_SENDER, COLUMN_RECIPIENT, COLUMN_DATA, COLUMN_ACK_DATA, COLUMN_SENT, COLUMN_RECEIVED, COLUMN_STATUS, COLUMN_TTL, COLUMN_RETRIES, COLUMN_NEXT_TRY, COLUMN_CONVERSATION)
 
-        val db = sql.readableDatabase
-        db.query(
+        sql.readableDatabase.query(
             TABLE_NAME, projection,
             where, null, null, null,
             "$COLUMN_RECEIVED DESC, $COLUMN_SENT DESC",
@@ -206,23 +203,21 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
         }
     }
 
-    private fun getValues(message: Plaintext): ContentValues {
-        val values = ContentValues()
-        values.put(COLUMN_IV, message.inventoryVector?.hash)
-        values.put(COLUMN_TYPE, message.type.name)
-        values.put(COLUMN_SENDER, message.from.address)
-        values.put(COLUMN_RECIPIENT, message.to?.address)
-        values.put(COLUMN_DATA, Encode.bytes(message))
-        values.put(COLUMN_ACK_DATA, message.ackData)
-        values.put(COLUMN_SENT, message.sent)
-        values.put(COLUMN_RECEIVED, message.received)
-        values.put(COLUMN_STATUS, message.status.name)
-        values.put(COLUMN_INITIAL_HASH, message.initialHash)
-        values.put(COLUMN_TTL, message.ttl)
-        values.put(COLUMN_RETRIES, message.retries)
-        values.put(COLUMN_NEXT_TRY, message.nextTry)
-        values.put(COLUMN_CONVERSATION, UuidUtils.asBytes(message.conversationId))
-        return values
+    private fun getValues(message: Plaintext) = ContentValues(14).apply {
+        put(COLUMN_IV, message.inventoryVector?.hash)
+        put(COLUMN_TYPE, message.type.name)
+        put(COLUMN_SENDER, message.from.address)
+        put(COLUMN_RECIPIENT, message.to?.address)
+        put(COLUMN_DATA, Encode.bytes(message))
+        put(COLUMN_ACK_DATA, message.ackData)
+        put(COLUMN_SENT, message.sent)
+        put(COLUMN_RECEIVED, message.received)
+        put(COLUMN_STATUS, message.status.name)
+        put(COLUMN_INITIAL_HASH, message.initialHash)
+        put(COLUMN_TTL, message.ttl)
+        put(COLUMN_RETRIES, message.retries)
+        put(COLUMN_NEXT_TRY, message.nextTry)
+        put(COLUMN_CONVERSATION, UuidUtils.asBytes(message.conversationId))
     }
 
     private fun insert(db: SQLiteDatabase, message: Plaintext) {
@@ -235,8 +230,7 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
     }
 
     override fun remove(message: Plaintext) {
-        val db = sql.writableDatabase
-        db.delete(TABLE_NAME, "id = ?", arrayOf(message.id.toString()))
+        sql.writableDatabase.delete(TABLE_NAME, "id = ?", arrayOf(message.id.toString()))
     }
 
     companion object {

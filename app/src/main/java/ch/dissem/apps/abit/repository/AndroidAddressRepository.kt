@@ -86,8 +86,7 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
         // you will actually use after this query.
         val projection = arrayOf(COLUMN_ADDRESS)
 
-        val db = sql.readableDatabase
-        db.query(
+        sql.readableDatabase.query(
             TABLE_NAME, projection,
             where, null, null, null,
             orderBy
@@ -106,8 +105,7 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
         // you will actually use after this query.
         val projection = arrayOf(COLUMN_ADDRESS, COLUMN_ALIAS, COLUMN_PUBLIC_KEY, COLUMN_PRIVATE_KEY, COLUMN_SUBSCRIBED, COLUMN_CHAN)
 
-        val db = sql.readableDatabase
-        db.query(
+        sql.readableDatabase.query(
             TABLE_NAME, projection,
             where, null, null, null, null
         ).use { c ->
@@ -154,8 +152,7 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
     }
 
     private fun exists(address: BitmessageAddress): Boolean {
-        val db = sql.readableDatabase
-        db.rawQuery(
+        sql.readableDatabase.rawQuery(
             "SELECT COUNT(*) FROM Address WHERE address=?",
             arrayOf(address.address)
         ).use { cursor ->
@@ -165,49 +162,45 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
     }
 
     private fun update(address: BitmessageAddress) {
-        val db = sql.writableDatabase
         // Create a new map of values, where column names are the keys
         val values = getContentValues(address)
 
-        val update = db.update(TABLE_NAME, values, "address=?", arrayOf(address.address))
+        val update = sql.writableDatabase.update(TABLE_NAME, values, "address=?", arrayOf(address.address))
         if (update < 0) {
             LOG.error("Could not update address {}", address)
         }
     }
 
     private fun insert(address: BitmessageAddress) {
-        val db = sql.writableDatabase
         // Create a new map of values, where column names are the keys
-        val values = getContentValues(address)
-        values.put(COLUMN_ADDRESS, address.address)
-        values.put(COLUMN_VERSION, address.version)
-        values.put(COLUMN_CHAN, address.isChan)
+        val values = getContentValues(address).apply {
+            put(COLUMN_ADDRESS, address.address)
+            put(COLUMN_VERSION, address.version)
+            put(COLUMN_CHAN, address.isChan)
+        }
 
-        val insert = db.insert(TABLE_NAME, null, values)
+        val insert = sql.writableDatabase.insert(TABLE_NAME, null, values)
         if (insert < 0) {
             LOG.error("Could not insert address {}", address)
         }
     }
 
-    private fun getContentValues(address: BitmessageAddress): ContentValues {
-        val values = ContentValues()
-        address.alias?.let { values.put(COLUMN_ALIAS, it) }
+    private fun getContentValues(address: BitmessageAddress) = ContentValues().apply {
+        address.alias?.let { put(COLUMN_ALIAS, it) }
         address.pubkey?.let { pubkey ->
             val out = ByteArrayOutputStream()
             pubkey.writer().writeUnencrypted(out)
-            values.put(COLUMN_PUBLIC_KEY, out.toByteArray())
+            put(COLUMN_PUBLIC_KEY, out.toByteArray())
         }
-        address.privateKey?.let { values.put(COLUMN_PRIVATE_KEY, Encode.bytes(it)) }
+        address.privateKey?.let { put(COLUMN_PRIVATE_KEY, Encode.bytes(it)) }
         if (address.isChan) {
-            values.put(COLUMN_CHAN, true)
+            put(COLUMN_CHAN, true)
         }
-        values.put(COLUMN_SUBSCRIBED, address.isSubscribed)
-        return values
+        put(COLUMN_SUBSCRIBED, address.isSubscribed)
     }
 
     override fun remove(address: BitmessageAddress) {
-        val db = sql.writableDatabase
-        db.delete(TABLE_NAME, "address = ?", arrayOf(address.address))
+        sql.writableDatabase.delete(TABLE_NAME, "address = ?", arrayOf(address.address))
     }
 
     override fun getAddress(address: String) = find("address = '$address'").firstOrNull()

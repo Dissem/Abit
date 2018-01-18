@@ -48,28 +48,27 @@ class AndroidProofOfWorkRepository(private val sql: SqlHelper) : ProofOfWorkRepo
         // you will actually use after this query.
         val projection = arrayOf(COLUMN_DATA, COLUMN_VERSION, COLUMN_NONCE_TRIALS_PER_BYTE, COLUMN_EXTRA_BYTES, COLUMN_EXPIRATION_TIME, COLUMN_MESSAGE_ID)
 
-        val db = sql.readableDatabase
-        db.query(
-                TABLE_NAME, projection,
-                "initial_hash=X'${hex(initialHash)}'",
-                null, null, null, null
+        sql.readableDatabase.query(
+            TABLE_NAME, projection,
+            "initial_hash=X'${hex(initialHash)}'",
+            null, null, null, null
         ).use { c ->
             if (c.moveToFirst()) {
                 val version = c.getInt(c.getColumnIndex(COLUMN_VERSION))
                 val blob = c.getBlob(c.getColumnIndex(COLUMN_DATA))
                 return if (c.isNull(c.getColumnIndex(COLUMN_MESSAGE_ID))) {
                     ProofOfWorkRepository.Item(
-                            Factory.getObjectMessage(version, ByteArrayInputStream(blob), blob.size) ?: throw RuntimeException("Invalid object in repository"),
-                            c.getLong(c.getColumnIndex(COLUMN_NONCE_TRIALS_PER_BYTE)),
-                            c.getLong(c.getColumnIndex(COLUMN_EXTRA_BYTES))
+                        Factory.getObjectMessage(version, ByteArrayInputStream(blob), blob.size) ?: throw RuntimeException("Invalid object in repository"),
+                        c.getLong(c.getColumnIndex(COLUMN_NONCE_TRIALS_PER_BYTE)),
+                        c.getLong(c.getColumnIndex(COLUMN_EXTRA_BYTES))
                     )
                 } else {
                     ProofOfWorkRepository.Item(
-                            Factory.getObjectMessage(version, ByteArrayInputStream(blob), blob.size) ?: throw RuntimeException("Invalid object in repository"),
-                            c.getLong(c.getColumnIndex(COLUMN_NONCE_TRIALS_PER_BYTE)),
-                            c.getLong(c.getColumnIndex(COLUMN_EXTRA_BYTES)),
-                            c.getLong(c.getColumnIndex(COLUMN_EXPIRATION_TIME)),
-                            bmc.messageRepository.getMessage(c.getLong(c.getColumnIndex(COLUMN_MESSAGE_ID)))
+                        Factory.getObjectMessage(version, ByteArrayInputStream(blob), blob.size) ?: throw RuntimeException("Invalid object in repository"),
+                        c.getLong(c.getColumnIndex(COLUMN_NONCE_TRIALS_PER_BYTE)),
+                        c.getLong(c.getColumnIndex(COLUMN_EXTRA_BYTES)),
+                        c.getLong(c.getColumnIndex(COLUMN_EXPIRATION_TIME)),
+                        bmc.messageRepository.getMessage(c.getLong(c.getColumnIndex(COLUMN_MESSAGE_ID)))
                     )
                 }
             }
@@ -82,10 +81,9 @@ class AndroidProofOfWorkRepository(private val sql: SqlHelper) : ProofOfWorkRepo
         // you will actually use after this query.
         val projection = arrayOf(COLUMN_INITIAL_HASH)
 
-        val db = sql.readableDatabase
         val result = LinkedList<ByteArray>()
-        db.query(
-                TABLE_NAME, projection, null, null, null, null, null
+        sql.readableDatabase.query(
+            TABLE_NAME, projection, null, null, null, null, null
         ).use { c ->
             while (c.moveToNext()) {
                 val initialHash = c.getBlob(c.getColumnIndex(COLUMN_INITIAL_HASH))
@@ -97,20 +95,20 @@ class AndroidProofOfWorkRepository(private val sql: SqlHelper) : ProofOfWorkRepo
 
     override fun putObject(item: ProofOfWorkRepository.Item) {
         try {
-            val db = sql.writableDatabase
             // Create a new map of values, where column names are the keys
-            val values = ContentValues()
-            values.put(COLUMN_INITIAL_HASH, cryptography().getInitialHash(item.objectMessage))
-            values.put(COLUMN_DATA, Encode.bytes(item.objectMessage))
-            values.put(COLUMN_VERSION, item.objectMessage.version)
-            values.put(COLUMN_NONCE_TRIALS_PER_BYTE, item.nonceTrialsPerByte)
-            values.put(COLUMN_EXTRA_BYTES, item.extraBytes)
-            item.message?.let { message ->
-                values.put(COLUMN_EXPIRATION_TIME, item.expirationTime)
-                values.put(COLUMN_MESSAGE_ID, message.id as Long?)
+            val values = ContentValues().apply {
+                put(COLUMN_INITIAL_HASH, cryptography().getInitialHash(item.objectMessage))
+                put(COLUMN_DATA, Encode.bytes(item.objectMessage))
+                put(COLUMN_VERSION, item.objectMessage.version)
+                put(COLUMN_NONCE_TRIALS_PER_BYTE, item.nonceTrialsPerByte)
+                put(COLUMN_EXTRA_BYTES, item.extraBytes)
+                item.message?.let { message ->
+                    put(COLUMN_EXPIRATION_TIME, item.expirationTime)
+                    put(COLUMN_MESSAGE_ID, message.id as Long?)
+                }
             }
 
-            db.insertOrThrow(TABLE_NAME, null, values)
+            sql.writableDatabase.insertOrThrow(TABLE_NAME, null, values)
         } catch (e: SQLiteConstraintException) {
             LOG.trace(e.message, e)
         }
@@ -121,8 +119,7 @@ class AndroidProofOfWorkRepository(private val sql: SqlHelper) : ProofOfWorkRepo
         putObject(ProofOfWorkRepository.Item(objectMessage, nonceTrialsPerByte, extraBytes))
 
     override fun removeObject(initialHash: ByteArray) {
-        val db = sql.writableDatabase
-        db.delete(TABLE_NAME, "initial_hash=X'${hex(initialHash)}'", null)
+        sql.writableDatabase.delete(TABLE_NAME, "initial_hash=X'${hex(initialHash)}'", null)
     }
 
     companion object {

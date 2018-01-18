@@ -85,7 +85,7 @@ class AndroidLabelRepository(private val sql: SqlHelper, private val context: Co
     internal fun findLabels(msgId: Any) = find("id IN (SELECT label_id FROM Message_Label WHERE message_id=$msgId)")
 
     companion object {
-        val LABEL_ARCHIVE = Label("archive", null, 0)
+        val LABEL_ARCHIVE = Label("archive", null, 0).apply { id = Long.MAX_VALUE }
 
         private const val TABLE_NAME = "Label"
         private const val COLUMN_ID = "id"

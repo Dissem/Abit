@@ -220,6 +220,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
 
         val drawerItems = ArrayList<IDrawerItem<*, *>>()
         drawerItems.add(PrimaryDrawerItem()
+            .withIdentifier(LABEL_ARCHIVE.id as Long)
             .withName(R.string.archive)
             .withTag(LABEL_ARCHIVE)
             .withIcon(CommunityMaterial.Icon.cmd_archive)
@@ -343,7 +344,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
         }
         Singleton.getMessageListener(this).resetNotification()
         currentLabel.addObserver(this) { label ->
-            if (label != null) {
+            if (label != null && label.id is Long) {
                 drawer.setSelection(label.id as Long)
             }
         }

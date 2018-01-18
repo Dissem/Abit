@@ -50,36 +50,38 @@ object Singleton {
     private var swipeableMessageAdapter: WeakReference<SwipeableMessageAdapter>? = null
     val labeler = DefaultLabeler().apply {
         listener = { message, added, removed ->
-            swipeableMessageAdapter?.get()?.let { swipeableMessageAdapter ->
-                currentLabel.value?.let { label ->
-                    when {
-                        label.type == Label.Type.TRASH
-                            && added.all { it.type == Label.Type.TRASH }
-                            && removed.any { it.type == Label.Type.TRASH } -> {
-                            // work-around for messages that are deleted from trash
-                            swipeableMessageAdapter.remove(message)
-                        }
-                        label.type == Label.Type.UNREAD
-                            && added.all { it.type == Label.Type.TRASH } -> {
-                            // work-around for messages that are deleted from unread, which already have the unread label removed
-                            swipeableMessageAdapter.remove(message)
-                        }
-                        added.contains(label) -> {
-                            // in most cases, top should be the correct position, but time will show if
-                            // the message should be properly sorted in
-                            swipeableMessageAdapter.addFirst(message)
-                        }
-                        removed.contains(label) -> {
-                            swipeableMessageAdapter.remove(message)
-                        }
-                        removed.any { it.type == Label.Type.UNREAD } || added.any { it.type == Label.Type.UNREAD } -> {
-                            swipeableMessageAdapter.update(message)
+            MainActivity.apply {
+                runOnUiThread {
+                    swipeableMessageAdapter?.get()?.let { swipeableMessageAdapter ->
+                        currentLabel.value?.let { label ->
+                            when {
+                                label.type == Label.Type.TRASH
+                                    && added.all { it.type == Label.Type.TRASH }
+                                    && removed.any { it.type == Label.Type.TRASH } -> {
+                                    // work-around for messages that are deleted from trash
+                                    swipeableMessageAdapter.remove(message)
+                                }
+                                label.type == Label.Type.UNREAD
+                                    && added.all { it.type == Label.Type.TRASH } -> {
+                                    // work-around for messages that are deleted from unread, which already have the unread label removed
+                                    swipeableMessageAdapter.remove(message)
+                                }
+                                added.contains(label) -> {
+                                    // in most cases, top should be the correct position, but time will show if
+                                    // the message should be properly sorted in
+                                    swipeableMessageAdapter.addFirst(message)
+                                }
+                                removed.contains(label) -> {
+                                    swipeableMessageAdapter.remove(message)
+                                }
+                                removed.any { it.type == Label.Type.UNREAD } || added.any { it.type == Label.Type.UNREAD } -> {
+                                    swipeableMessageAdapter.update(message)
+                                }
+                            }
                         }
                     }
                 }
-            }
-            if (removed.any { it.type == Label.Type.UNREAD } || added.any { it.type == Label.Type.UNREAD }) {
-                MainActivity.apply {
+                if (removed.any { it.type == Label.Type.UNREAD } || added.any { it.type == Label.Type.UNREAD }) {
                     updateUnread()
                 }
             }
