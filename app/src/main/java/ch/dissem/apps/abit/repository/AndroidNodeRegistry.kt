@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteConstraintException
 import android.database.sqlite.SQLiteDoneException
 import android.database.sqlite.SQLiteStatement
 import ch.dissem.bitmessage.entity.valueobject.NetworkAddress
-import ch.dissem.bitmessage.exception.ApplicationException
 import ch.dissem.bitmessage.ports.NodeRegistry
 import ch.dissem.bitmessage.ports.NodeRegistryHelper.loadStableNodes
 import ch.dissem.bitmessage.utils.Collections
@@ -120,19 +119,20 @@ class AndroidNodeRegistry(private val sql: SqlHelper) : NodeRegistry {
     private fun insert(node: NetworkAddress) {
         try {
             // Create a new map of values, where column names are the keys
-            val values = ContentValues()
-            values.put(COLUMN_STREAM, node.stream)
-            values.put(COLUMN_ADDRESS, node.IPv6)
-            values.put(COLUMN_PORT, node.port)
-            values.put(COLUMN_SERVICES, node.services)
-            values.put(COLUMN_TIME,
-                if (node.time > UnixTime.now) {
-                    // This might be an attack, let's not use those nodes with priority
-                    UnixTime.now - 7 * UnixTime.DAY
-                } else {
-                    node.time
-                }
-            )
+            val values = ContentValues().apply {
+                put(COLUMN_STREAM, node.stream)
+                put(COLUMN_ADDRESS, node.IPv6)
+                put(COLUMN_PORT, node.port)
+                put(COLUMN_SERVICES, node.services)
+                put(COLUMN_TIME,
+                    if (node.time > UnixTime.now) {
+                        // This might be an attack, let's not use those nodes with priority
+                        UnixTime.now - 7 * UnixTime.DAY
+                    } else {
+                        node.time
+                    }
+                )
+            }
 
             sql.writableDatabase.insertOrThrow(TABLE_NAME, null, values)
         } catch (e: SQLiteConstraintException) {
@@ -150,9 +150,10 @@ class AndroidNodeRegistry(private val sql: SqlHelper) : NodeRegistry {
             }
 
             // Create a new map of values, where column names are the keys
-            val values = ContentValues()
-            values.put(COLUMN_SERVICES, node.services)
-            values.put(COLUMN_TIME, max(node.time, time))
+            val values = ContentValues().apply {
+                put(COLUMN_SERVICES, node.services)
+                put(COLUMN_TIME, max(node.time, time))
+            }
 
             sql.writableDatabase.update(
                 TABLE_NAME,

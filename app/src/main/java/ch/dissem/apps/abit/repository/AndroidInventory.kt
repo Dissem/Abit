@@ -57,10 +57,10 @@ class AndroidInventory(private val sql: SqlHelper) : Inventory {
             cache.put(stream, result)
 
             val projection = arrayOf(COLUMN_HASH, COLUMN_EXPIRES)
-            val db = sql.readableDatabase
-            db.query(
-                    TABLE_NAME, projection,
-                    "stream = $stream", null, null, null, null
+
+            sql.readableDatabase.query(
+                TABLE_NAME, projection,
+                "stream = $stream", null, null, null, null
             ).use { c ->
                 while (c.moveToNext()) {
                     val blob = c.getBlob(c.getColumnIndex(COLUMN_HASH))
@@ -84,10 +84,9 @@ class AndroidInventory(private val sql: SqlHelper) : Inventory {
         // you will actually use after this query.
         val projection = arrayOf(COLUMN_VERSION, COLUMN_DATA)
 
-        val db = sql.readableDatabase
-        db.query(
-                TABLE_NAME, projection,
-                "hash = X'$vector'", null, null, null, null
+        sql.readableDatabase.query(
+            TABLE_NAME, projection,
+            "hash = X'$vector'", null, null, null, null
         ).use { c ->
             if (!c.moveToFirst()) {
                 LOG.info("Object requested that we don't have. IV: {}", vector)
@@ -115,11 +114,10 @@ class AndroidInventory(private val sql: SqlHelper) : Inventory {
             where.append(" AND type IN (").append(types.joinToString(separator = "', '", prefix = "'", postfix = "'", transform = { it.number.toString() })).append(")")
         }
 
-        val db = sql.readableDatabase
         val result = LinkedList<ObjectMessage>()
-        db.query(
-                TABLE_NAME, projection,
-                where.toString(), null, null, null, null
+        sql.readableDatabase.query(
+            TABLE_NAME, projection,
+            where.toString(), null, null, null, null
         ).use { c ->
             while (c.moveToNext()) {
                 val objectVersion = c.getInt(c.getColumnIndex(COLUMN_VERSION))
@@ -139,31 +137,29 @@ class AndroidInventory(private val sql: SqlHelper) : Inventory {
         LOG.trace("Storing object {}", iv)
 
         try {
-            val db = sql.writableDatabase
             // Create a new map of values, where column names are the keys
-            val values = ContentValues()
-            values.put(COLUMN_HASH, objectMessage.inventoryVector.hash)
-            values.put(COLUMN_STREAM, objectMessage.stream)
-            values.put(COLUMN_EXPIRES, objectMessage.expiresTime)
-            values.put(COLUMN_DATA, Encode.bytes(objectMessage))
-            values.put(COLUMN_TYPE, objectMessage.type)
-            values.put(COLUMN_VERSION, objectMessage.version)
+            val values = ContentValues().apply {
+                put(COLUMN_HASH, objectMessage.inventoryVector.hash)
+                put(COLUMN_STREAM, objectMessage.stream)
+                put(COLUMN_EXPIRES, objectMessage.expiresTime)
+                put(COLUMN_DATA, Encode.bytes(objectMessage))
+                put(COLUMN_TYPE, objectMessage.type)
+                put(COLUMN_VERSION, objectMessage.version)
+            }
 
-            db.insertOrThrow(TABLE_NAME, null, values)
+            sql.writableDatabase.insertOrThrow(TABLE_NAME, null, values)
 
             getCache(objectMessage.stream).put(iv, objectMessage.expiresTime)
         } catch (e: SQLiteConstraintException) {
             LOG.trace(e.message, e)
         }
-
     }
 
     override fun contains(objectMessage: ObjectMessage) = getCache(objectMessage.stream).keys.contains(objectMessage.inventoryVector)
 
     override fun cleanup() {
         val fiveMinutesAgo = now - 5 * MINUTE
-        val db = sql.writableDatabase
-        db.delete(TABLE_NAME, "expires < ?", arrayOf(fiveMinutesAgo.toString()))
+        sql.writableDatabase.delete(TABLE_NAME, "expires < ?", arrayOf(fiveMinutesAgo.toString()))
 
         cache.values.map { it.entries }.forEach { entries -> entries.removeAll { it.value < fiveMinutesAgo } }
     }
