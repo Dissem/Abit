@@ -38,12 +38,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:text="@string/startup_node"
+        android:text="@string/use_mobile_network"
         android:textColor="@color/colorAccent"
-        app:layout_constraintEnd_toEndOf="@+id/description"
+        app:layout_constraintEnd_toEndOf="@id/description"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintTop_toBottomOf="@+id/description"
-        tools:layout_editor_absoluteX="184dp"/>
+        tools:layout_editor_absoluteX="8dp"/>
 
     <Button
         android:id="@+id/dismiss"
@@ -51,10 +51,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:text="@string/cancel"
+        android:text="@string/wait_for_wifi"
         android:textColor="@color/colorAccent"
-        app:layout_constraintEnd_toStartOf="@+id/ok"
-        app:layout_constraintTop_toBottomOf="@+id/description"
-        tools:ignore="RtlSymmetry"
-        tools:layout_editor_absoluteX="87dp"/>
+        app:layout_constraintEnd_toEndOf="@id/description"
+        app:layout_constraintTop_toBottomOf="@+id/ok"
+        tools:layout_editor_absoluteX="8dp"/>
 </android.support.constraint.ConstraintLayout>

@@ -13,8 +13,8 @@
         android:layout_height="16dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        app:iiv_color="@android:color/black"
-        app:iiv_icon="cmd-label" />
+        app:ico_color="@android:color/black"
+        app:ico_icon="cmd-label" />
 
     <TextView
         android:id="@+id/label"

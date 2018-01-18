@@ -3,7 +3,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/material_showcase_button_bg"
-        android:text="Got it"
+        android:text="@string/got_it"
         android:textAllCaps="true"
         android:textColor="@android:color/white"
         android:textSize="13sp"

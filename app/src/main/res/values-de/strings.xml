@@ -98,7 +98,7 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="import_input_description">Du kannst einfach den Inhalt eines Exports oder einer ‘keys.dat’-Datei einfügen</string>
     <string name="full_node_restart">Knoten starten</string>
     <string name="full_node_stop">Knoten beenden</string>
-    <string name="startup_node">Knoten starten</string>
+    <string name="use_mobile_network">Mobilfunknetz benutzen</string>
     <string name="personal_message">Nachricht</string>
     <string name="no_identity_warning">Bitte versuchs nochmals wenn eine Identität verfügbar ist.</string>
     <string name="title_chan_detail">Chan</string>
@@ -117,4 +117,14 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="cleanup_notification_start">Aufräumarbeiten gestartet</string>
     <string name="cleanup_notification_end">Aufräumarbeiten beendet</string>
     <string name="cleanup_summary">Veraltete Inventareinträge werden entfernt</string>
+    <string name="wait_for_wifi">Auf W-LAN warten</string>
+    <string name="error_msg_recipient_missing">Bitte Empfänger angeben</string>
+    <string name="export_data">Export</string>
+    <string name="export_data_summary">Alle Nachrichten und Kontakte exportieren (aber keine Identitäten)</string>
+    <string name="request_acknowledgements">Bestätigungen verlangen</string>
+    <string name="request_acknowledgements_summary">Bestätigungen stellen sicher dass eine Nachricht empfangen wurde, benötigen aber zusätzliche Zeit zum versenden</string>
+    <string name="got_it">Alles klar</string>
+    <string name="import_data">Import</string>
+    <string name="import_data_summary">Nachrichten und Kontakte importieren (aber keine Identitäten)</string>
+    <string name="select_encoding">Kodierung auswählen</string>
 </resources>

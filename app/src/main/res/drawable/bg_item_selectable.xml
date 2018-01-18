@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/bg_item_selected_state"
+        android:state_pressed="true"
+        android:state_selected="true"
+        android:state_activated="true"
+        android:state_active="true"
+        android:state_checked="true"
+        android:state_focused="true"
+        android:state_single="true"/>
+    <item android:drawable="@drawable/bg_item_normal_state" />
+</selector>

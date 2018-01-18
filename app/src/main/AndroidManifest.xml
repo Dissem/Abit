@@ -4,9 +4,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
@@ -19,8 +19,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
-        android:name="android.support.multidex.MultiDexApplication"
-        tools:replace="android:allowBackup">
+        android:name="android.support.multidex.MultiDexApplication">
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
@@ -85,16 +84,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingsActivity"
-            android:label="@string/settings"
-            android:parentActivityName=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MANAGE_NETWORK_USAGE"/>
-
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".CreateAddressActivity"
             android:label="@string/title_activity_open_bitmessage_link"
             android:theme="@style/Theme.AppCompat.Light.Dialog">
@@ -144,6 +133,17 @@
             android:exported="false"
             android:syncable="true"/>
 
+        <!-- Exports -->
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="ch.dissem.apps.abit.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <service
             android:name=".synchronization.AuthenticatorService"
             android:exported="true"
@@ -173,19 +173,28 @@
             android:exported="false"/>
 
         <!-- Receive Wi-Fi connection state changes -->
-        <receiver android:name=".listener.WifiReceiver">
+        <receiver android:name=".listener.WifiReceiver" android:enabled="@bool/is_pre_api_21">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
             </intent-filter>
         </receiver>
+        <receiver android:name=".service.StartServiceReceiver" android:enabled="@bool/is_post_api_21">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name=".service.StartupNodeOnWifiService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true"/>
 
         <activity
             android:name=".StatusActivity"
             android:label="@string/title_activity_status"
-            android:parentActivityName=".SettingsActivity">
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".SettingsActivity"/>
+                android:value=".MainActivity"/>
         </activity>
     </application>
 
