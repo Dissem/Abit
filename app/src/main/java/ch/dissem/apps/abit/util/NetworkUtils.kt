@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.support.annotation.RequiresApi
+import android.support.v4.content.ContextCompat
 import ch.dissem.apps.abit.MainActivity
 import ch.dissem.apps.abit.dialog.FullNodeDialogActivity
 import ch.dissem.apps.abit.service.BitmessageService
@@ -23,7 +24,7 @@ object NetworkUtils {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     scheduleNodeStart(ctx)
                 } else {
-                    ctx.startService(Intent(ctx, BitmessageService::class.java))
+                    doStartBitmessageService(ctx)
                     MainActivity.updateNodeSwitch()
                 }
             } else if (ask) {
@@ -37,9 +38,13 @@ object NetworkUtils {
                 scheduleNodeStart(ctx)
             }
         } else {
-            ctx.startService(Intent(ctx, BitmessageService::class.java))
+            doStartBitmessageService(ctx)
             MainActivity.updateNodeSwitch()
         }
+    }
+
+    fun doStartBitmessageService(ctx: Context) {
+        ContextCompat.startForegroundService(ctx, Intent(ctx, BitmessageService::class.java))
     }
 
     fun disableNode(ctx: Context) {

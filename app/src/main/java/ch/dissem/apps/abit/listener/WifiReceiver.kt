@@ -19,8 +19,8 @@ package ch.dissem.apps.abit.listener
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import ch.dissem.apps.abit.service.BitmessageService
 import ch.dissem.apps.abit.service.Singleton
+import ch.dissem.apps.abit.util.NetworkUtils
 import ch.dissem.apps.abit.util.Preferences
 import org.jetbrains.anko.connectivityManager
 
@@ -29,7 +29,7 @@ class WifiReceiver : BroadcastReceiver() {
         if ("android.net.conn.CONNECTIVITY_CHANGE" == intent.action) {
             val bmc = Singleton.getBitmessageContext(ctx)
             if (Preferences.isFullNodeActive(ctx) && !bmc.isRunning() && !(Preferences.isWifiOnly(ctx) && ctx.connectivityManager.isActiveNetworkMetered)) {
-                ctx.startService(Intent(ctx, BitmessageService::class.java))
+                NetworkUtils.doStartBitmessageService(ctx)
             }
         }
     }

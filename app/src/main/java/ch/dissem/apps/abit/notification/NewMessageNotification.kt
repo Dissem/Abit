@@ -42,36 +42,48 @@ import ch.dissem.apps.abit.util.Drawables.toBitmap
 
 class NewMessageNotification(ctx: Context) : AbstractNotification(ctx) {
 
+    init {
+        initChannel(MESSAGE_CHANNEL_ID, R.color.colorPrimary)
+    }
+
     fun singleNotification(plaintext: Plaintext): NewMessageNotification {
-        val builder = NotificationCompat.Builder(ctx, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(ctx, MESSAGE_CHANNEL_ID)
         val bigText = SpannableString(plaintext.subject + "\n" + plaintext.text)
         plaintext.subject?.let { subject ->
             bigText.setSpan(SPAN_EMPHASIS, 0, subject.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
         }
         builder.setSmallIcon(R.drawable.ic_notification_new_message)
-                .setLargeIcon(toBitmap(Identicon(plaintext.from), 192))
-                .setContentTitle(plaintext.from.toString())
-                .setContentText(plaintext.subject)
-                .setStyle(BigTextStyle().bigText(bigText))
-                .setContentInfo("Info")
+            .setLargeIcon(toBitmap(Identicon(plaintext.from), 192))
+            .setContentTitle(plaintext.from.toString())
+            .setContentText(plaintext.subject)
+            .setStyle(BigTextStyle().bigText(bigText))
+            .setContentInfo("Info")
 
         builder.setContentIntent(
-                createActivityIntent(EXTRA_SHOW_MESSAGE, plaintext))
-        builder.addAction(R.drawable.ic_action_reply, ctx.getString(R.string.reply),
-                createActivityIntent(EXTRA_REPLY_TO_MESSAGE, plaintext))
-        builder.addAction(R.drawable.ic_action_delete, ctx.getString(R.string.delete),
-                createServiceIntent(ctx, EXTRA_DELETE_MESSAGE, plaintext))
+            createActivityIntent(EXTRA_SHOW_MESSAGE, plaintext)
+        )
+        builder.addAction(
+            R.drawable.ic_action_reply, ctx.getString(R.string.reply),
+            createActivityIntent(EXTRA_REPLY_TO_MESSAGE, plaintext)
+        )
+        builder.addAction(
+            R.drawable.ic_action_delete, ctx.getString(R.string.delete),
+            createServiceIntent(ctx, EXTRA_DELETE_MESSAGE, plaintext)
+        )
         notification = builder.build()
         return this
     }
 
     private fun createActivityIntent(action: String, message: Plaintext): PendingIntent {
-        val intent = Intent(ctx, MainActivity::class.java)
-        intent.putExtra(action, message)
+        val intent = Intent(ctx, MainActivity::class.java).putExtra(action, message)
         return PendingIntent.getActivity(ctx, action.hashCode(), intent, FLAG_UPDATE_CURRENT)
     }
 
-    private fun createServiceIntent(ctx: Context, action: String, message: Plaintext): PendingIntent {
+    private fun createServiceIntent(
+        ctx: Context,
+        action: String,
+        message: Plaintext
+    ): PendingIntent {
         val intent = Intent(ctx, BitmessageIntentService::class.java)
         intent.putExtra(action, message)
         return PendingIntent.getService(ctx, action.hashCode(), intent, FLAG_UPDATE_CURRENT)
@@ -82,19 +94,24 @@ class NewMessageNotification(ctx: Context) : AbstractNotification(ctx) {
      * *                       accessed it will be in a `synchronized(unacknowledged)
      * *                       {}` block
      */
-    fun multiNotification(unacknowledged: Collection<Plaintext>, numberOfUnacknowledgedMessages: Int): NewMessageNotification {
-        val builder = NotificationCompat.Builder(ctx, CHANNEL_ID)
+    fun multiNotification(
+        unacknowledged: Collection<Plaintext>,
+        numberOfUnacknowledgedMessages: Int
+    ): NewMessageNotification {
+        val builder = NotificationCompat.Builder(ctx, MESSAGE_CHANNEL_ID)
         builder.setSmallIcon(R.drawable.ic_notification_new_message)
-                .setContentTitle(ctx.getString(R.string.n_new_messages, numberOfUnacknowledgedMessages))
-                .setContentText(ctx.getString(R.string.app_name))
+            .setContentTitle(ctx.getString(R.string.n_new_messages, numberOfUnacknowledgedMessages))
+            .setContentText(ctx.getString(R.string.app_name))
 
         val inboxStyle = InboxStyle()
 
         synchronized(unacknowledged) {
             for (msg in unacknowledged) {
                 val sb = SpannableString(msg.from.toString() + " " + msg.subject)
-                sb.setSpan(SPAN_EMPHASIS, 0, msg.from.toString().length, Spannable
-                        .SPAN_INCLUSIVE_EXCLUSIVE)
+                sb.setSpan(
+                    SPAN_EMPHASIS, 0, msg.from.toString().length, Spannable
+                        .SPAN_INCLUSIVE_EXCLUSIVE
+                )
                 inboxStyle.addLine(sb)
             }
         }
@@ -113,6 +130,5 @@ class NewMessageNotification(ctx: Context) : AbstractNotification(ctx) {
     companion object {
         private val NEW_MESSAGE_NOTIFICATION_ID = 1
         private val SPAN_EMPHASIS = StyleSpan(Typeface.BOLD)
-        private val CHANNEL_ID = "abit.message"
     }
 }

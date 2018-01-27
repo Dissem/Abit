@@ -20,6 +20,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import android.support.v4.content.ContextCompat
 import ch.dissem.apps.abit.notification.ProofOfWorkNotification
 import ch.dissem.apps.abit.notification.ProofOfWorkNotification.Companion.ONGOING_NOTIFICATION_ID
 import ch.dissem.apps.abit.util.PowStats
@@ -44,9 +45,14 @@ class ProofOfWorkService : Service() {
         private val notification = service.notification
 
         fun process(item: PowItem) = synchronized(queue) {
-            service.startService(Intent(service, ProofOfWorkService::class.java))
-            service.startForeground(ONGOING_NOTIFICATION_ID,
-                notification.notification)
+            ContextCompat.startForegroundService(
+                service,
+                Intent(service, ProofOfWorkService::class.java)
+            )
+            service.startForeground(
+                ONGOING_NOTIFICATION_ID,
+                notification.notification
+            )
             if (!calculating) {
                 calculating = true
                 service.calculateNonce(item)
@@ -58,7 +64,11 @@ class ProofOfWorkService : Service() {
     }
 
 
-    data class PowItem(val initialHash: ByteArray, val targetValue: ByteArray, val callback: ProofOfWorkEngine.Callback) {
+    data class PowItem(
+        val initialHash: ByteArray,
+        val targetValue: ByteArray,
+        val callback: ProofOfWorkEngine.Callback
+    ) {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
@@ -81,29 +91,32 @@ class ProofOfWorkService : Service() {
     private fun calculateNonce(item: PowItem) {
         notification.start(item)
         val startTime = System.currentTimeMillis()
-        engine.calculateNonce(item.initialHash, item.targetValue, object : ProofOfWorkEngine.Callback {
-            override fun onNonceCalculated(initialHash: ByteArray, nonce: ByteArray) {
-                notification.finished()
-                val time = System.currentTimeMillis() - startTime
-                PowStats.addPow(this@ProofOfWorkService, time, item.targetValue)
-                try {
-                    item.callback.onNonceCalculated(initialHash, nonce)
-                } finally {
-                    var next: PowItem? = null
-                    synchronized(queue) {
-                        next = queue.poll()
-                        if (next == null) {
-                            calculating = false
-                            stopForeground(true)
-                            stopSelf()
-                        } else {
-                            notification.update(queue.size).show()
+        engine.calculateNonce(
+            item.initialHash,
+            item.targetValue,
+            object : ProofOfWorkEngine.Callback {
+                override fun onNonceCalculated(initialHash: ByteArray, nonce: ByteArray) {
+                    notification.finished()
+                    val time = System.currentTimeMillis() - startTime
+                    PowStats.addPow(this@ProofOfWorkService, time, item.targetValue)
+                    try {
+                        item.callback.onNonceCalculated(initialHash, nonce)
+                    } finally {
+                        var next: PowItem? = null
+                        synchronized(queue) {
+                            next = queue.poll()
+                            if (next == null) {
+                                calculating = false
+                                stopForeground(true)
+                                stopSelf()
+                            } else {
+                                notification.update(queue.size).show()
+                            }
                         }
+                        next?.let { calculateNonce(it) }
                     }
-                    next?.let { calculateNonce(it) }
                 }
-            }
-        })
+            })
     }
 
     companion object {
