@@ -25,6 +25,8 @@ import android.net.ConnectivityManager
 import android.os.Handler
 import ch.dissem.apps.abit.notification.NetworkNotification
 import ch.dissem.apps.abit.notification.NetworkNotification.Companion.NETWORK_NOTIFICATION_ID
+import ch.dissem.apps.abit.util.NetworkUtils
+import ch.dissem.apps.abit.util.Preferences
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.utils.Property
 import org.jetbrains.anko.connectivityManager
@@ -39,9 +41,9 @@ class BitmessageService : Service() {
     private val bmc: BitmessageContext by lazy { Singleton.getBitmessageContext(this) }
     private lateinit var notification: NetworkNotification
 
-    private val connectivityReceiver: BroadcastReceiver = object: BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (bmc.isRunning() && connectivityManager.isActiveNetworkMetered){
+    private val connectivityReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent?) {
+            if (bmc.isRunning() && !Preferences.isConnectionAllowed(this@BitmessageService)) {
                 bmc.shutdown()
             }
         }
@@ -58,7 +60,10 @@ class BitmessageService : Service() {
     }
 
     override fun onCreate() {
-        registerReceiver(connectivityReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        registerReceiver(
+            connectivityReceiver,
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        )
         notification = NetworkNotification(this)
         running = false
     }
@@ -85,13 +90,15 @@ class BitmessageService : Service() {
         notification.showShutdown()
         cleanupHandler.removeCallbacks(cleanupTask)
         bmc.cleanup()
+        unregisterReceiver(connectivityReceiver)
         stopSelf()
     }
 
     override fun onBind(intent: Intent) = null
 
     companion object {
-        @Volatile private var running = false
+        @Volatile
+        private var running = false
 
         val isRunning: Boolean
             get() = running && Singleton.bitmessageContext?.isRunning() == true

@@ -5,6 +5,7 @@ import android.app.job.JobService
 import android.content.Intent
 import android.os.Build
 import android.support.annotation.RequiresApi
+import ch.dissem.apps.abit.util.NetworkUtils
 import ch.dissem.apps.abit.util.Preferences
 
 /**
@@ -19,7 +20,7 @@ class StartupNodeOnWifiService : JobService() {
     override fun onStartJob(params: JobParameters?): Boolean {
         val bmc = Singleton.getBitmessageContext(this)
         if (Preferences.isFullNodeActive(this) && !bmc.isRunning()) {
-            applicationContext.startService(Intent(this, BitmessageService::class.java))
+            NetworkUtils.doStartBitmessageService(applicationContext)
         }
         return true
     }

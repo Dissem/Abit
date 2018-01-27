@@ -33,7 +33,7 @@ import kotlin.concurrent.fixedRateTimer
  */
 class ProofOfWorkNotification(ctx: Context) : AbstractNotification(ctx) {
 
-    private val builder = NotificationCompat.Builder(ctx, "abit.pow")
+    private val builder = NotificationCompat.Builder(ctx, ONGOING_CHANNEL_ID)
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         .setUsesChronometer(true)
         .setOngoing(true)
@@ -46,6 +46,7 @@ class ProofOfWorkNotification(ctx: Context) : AbstractNotification(ctx) {
     private var timer: Timer? = null
 
     init {
+        initChannel(ONGOING_CHANNEL_ID, R.color.colorAccent)
         update(0)
     }
 
@@ -65,10 +66,6 @@ class ProofOfWorkNotification(ctx: Context) : AbstractNotification(ctx) {
 
         notification = builder.build()
         return this
-    }
-
-    companion object {
-        const val ONGOING_NOTIFICATION_ID = 3
     }
 
     fun start(item: ProofOfWorkService.PowItem) {
@@ -100,5 +97,9 @@ class ProofOfWorkNotification(ctx: Context) : AbstractNotification(ctx) {
             notification = builder.build()
             show()
         }
+    }
+
+    companion object {
+        const val ONGOING_NOTIFICATION_ID = 3
     }
 }

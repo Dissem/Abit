@@ -30,9 +30,13 @@ import ch.dissem.apps.abit.R
  */
 class ErrorNotification(ctx: Context) : AbstractNotification(ctx) {
 
-    private val builder = NotificationCompat.Builder(ctx, "abit.error")
+    private val builder = NotificationCompat.Builder(ctx, ERROR_CHANNEL_ID)
         .setContentTitle(ctx.getString(R.string.app_name))
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+
+    init {
+        initChannel(ERROR_CHANNEL_ID, R.color.colorPrimaryDark)
+    }
 
     fun setWarning(@StringRes resId: Int, vararg args: Any): ErrorNotification {
         builder.setSmallIcon(R.drawable.ic_notification_warning)

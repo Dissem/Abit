@@ -34,18 +34,19 @@ import kotlin.concurrent.fixedRateTimer
  */
 class NetworkNotification(ctx: Context) : AbstractNotification(ctx) {
 
-    private val builder = NotificationCompat.Builder(ctx, "abit.network")
+    private val builder = NotificationCompat.Builder(ctx, ONGOING_CHANNEL_ID)
     private var timer: Timer? = null
 
     init {
+        initChannel(ONGOING_CHANNEL_ID, R.color.colorAccent)
         val showAppIntent = Intent(ctx, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(ctx, 1, showAppIntent, 0)
         builder
-                .setSmallIcon(R.drawable.ic_notification_full_node)
-                .setContentTitle(ctx.getString(R.string.bitmessage_full_node))
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setShowWhen(false)
-                .setContentIntent(pendingIntent)
+            .setSmallIcon(R.drawable.ic_notification_full_node)
+            .setContentTitle(ctx.getString(R.string.bitmessage_full_node))
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setShowWhen(false)
+            .setContentIntent(pendingIntent)
     }
 
     @SuppressLint("StringFormatMatches")
@@ -63,11 +64,19 @@ class NetworkNotification(ctx: Context) : AbstractNotification(ctx) {
                 val streamNumber = Integer.parseInt(stream.name.substring("stream ".length))
                 val nodeCount = stream.getProperty("nodes")!!.value as Int?
                 if (nodeCount == 1) {
-                    info.append(ctx.getString(R.string.connection_info_1,
-                            streamNumber))
+                    info.append(
+                        ctx.getString(
+                            R.string.connection_info_1,
+                            streamNumber
+                        )
+                    )
                 } else {
-                    info.append(ctx.getString(R.string.connection_info_n,
-                            streamNumber, nodeCount))
+                    info.append(
+                        ctx.getString(
+                            R.string.connection_info_n,
+                            streamNumber, nodeCount
+                        )
+                    )
                 }
                 info.append('\n')
             }
@@ -77,14 +86,18 @@ class NetworkNotification(ctx: Context) : AbstractNotification(ctx) {
         val intent = Intent(ctx, BitmessageIntentService::class.java)
         if (running) {
             intent.putExtra(BitmessageIntentService.EXTRA_SHUTDOWN_NODE, true)
-            builder.addAction(R.drawable.ic_notification_node_stop,
-                    ctx.getString(R.string.full_node_stop),
-                    PendingIntent.getService(ctx, 0, intent, FLAG_UPDATE_CURRENT))
+            builder.addAction(
+                R.drawable.ic_notification_node_stop,
+                ctx.getString(R.string.full_node_stop),
+                PendingIntent.getService(ctx, 0, intent, FLAG_UPDATE_CURRENT)
+            )
         } else {
             intent.putExtra(BitmessageIntentService.EXTRA_STARTUP_NODE, true)
-            builder.addAction(R.drawable.ic_notification_node_start,
-                    ctx.getString(R.string.full_node_restart),
-                    PendingIntent.getService(ctx, 1, intent, FLAG_UPDATE_CURRENT))
+            builder.addAction(
+                R.drawable.ic_notification_node_start,
+                ctx.getString(R.string.full_node_restart),
+                PendingIntent.getService(ctx, 1, intent, FLAG_UPDATE_CURRENT)
+            )
         }
         notification = builder.build()
         return running
@@ -116,13 +129,15 @@ class NetworkNotification(ctx: Context) : AbstractNotification(ctx) {
         val intent = Intent(ctx, BitmessageIntentService::class.java)
         intent.putExtra(BitmessageIntentService.EXTRA_SHUTDOWN_NODE, true)
         builder.mActions.clear()
-        builder.addAction(R.drawable.ic_notification_node_stop,
-                ctx.getString(R.string.full_node_stop),
-                PendingIntent.getService(ctx, 0, intent, FLAG_UPDATE_CURRENT))
+        builder.addAction(
+            R.drawable.ic_notification_node_stop,
+            ctx.getString(R.string.full_node_stop),
+            PendingIntent.getService(ctx, 0, intent, FLAG_UPDATE_CURRENT)
+        )
         notification = builder.build()
     }
 
     companion object {
-        val NETWORK_NOTIFICATION_ID = 2
+        const val NETWORK_NOTIFICATION_ID = 2
     }
 }

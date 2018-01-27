@@ -17,8 +17,13 @@
 package ch.dissem.apps.abit.notification
 
 import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.os.Build
+import android.support.annotation.ColorRes
+import android.support.v4.content.ContextCompat
+import ch.dissem.apps.abit.R
 import org.jetbrains.anko.notificationManager
 
 /**
@@ -45,5 +50,31 @@ abstract class AbstractNotification(ctx: Context) {
     fun hide() {
         showing = false
         manager.cancel(notificationId)
+    }
+
+    protected fun initChannel(channelId: String, @ColorRes color: Int = R.color.colorPrimary) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ctx.notificationManager.createNotificationChannel(
+                NotificationChannel(
+                    channelId,
+                    ctx.getText(R.string.app_name),
+                    NotificationManager.IMPORTANCE_LOW
+                ).apply {
+                    lightColor = ContextCompat.getColor(ctx, color)
+                    lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+                }
+            )
+        }
+    }
+
+
+    companion object {
+        internal const val ONGOING_CHANNEL_ID = "abit.ongoing"
+        internal const val MESSAGE_CHANNEL_ID = "abit.message"
+        internal const val ERROR_CHANNEL_ID = "abit.error"
+
+        init {
+
+        }
     }
 }
