@@ -1,2 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<?xml version='1.0' encoding='UTF-8'?>
+<resources><string name="app_name">Abit</string>
+    <string name="about_app">Un client Bitmessage pour Android</string>
+    <string name="title_message_detail">Message</string>
+    <string name="title_subscription_detail">Abonnement</string>
+    <string name="title_chan_detail">Chan</string>
+    <string name="title_identity_detail">Identité</string>
+    <string name="title_contact_detail">Contact</string>
+    <string name="bitmessage_full_node">Nœud de bitmessage</string>
+    <string name="settings">Paramètres</string>
+    <string name="wifi_only">Seulement Wi-Fi</string>
+    <string name="wifi_only_summary">Ne vous connectez pas au réseau mobile</string>
+    </resources>
