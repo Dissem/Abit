@@ -1,2 +1,42 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<?xml version='1.0' encoding='UTF-8'?>
+<resources xmlns:tools="http://schemas.android.com/tools"><string name="app_name">Abit</string>
+    <string name="about_app">عميل Bitmessage أندرويد</string>
+    <string name="title_message_detail">رسالة</string>
+    <string name="title_subscription_detail">اشتراك</string>
+    <string name="title_chan_detail">قناة</string>
+    <string name="title_identity_detail">هوية</string>
+    <string name="title_contact_detail">جهة إتصال</string>
+    <string name="bitmessage_full_node">عقدة Bitmessage</string>
+    <string name="settings">إعدادات</string>
+    <string name="wifi_only">Wi-Fi فقط</string>
+    <string name="wifi_only_summary">منع الإتصال من خلال بيانات الهاتف</string>
+    <string name="to">إلى</string>
+    <string name="subject">الموضوع</string>
+    <string name="manage_identity">إدارة الهويات</string>
+    <string name="add_identity">إضافة هوية</string>
+    <string name="add_identity_summary">إنشاء هوية جديدة</string>
+    <string name="create_identity_description">إنشاء هوية جديدة عشوائية</string>
+    <string name="import_identity_description">إستيراد هوية موجودة من PyBitmessage او من تصدير</string>
+    <string name="add_deterministic_address">هوية حتمية</string>
+    <string name="add_deterministic_address_description">إنشاء أو إعادة إنشاء هوية حتمية</string>
+    <string name="add_chan">إضافة قناة</string>
+    <string name="add_chan_description">إنشاء أو الإنضمام إلى قناة</string>
+    <string name="title_activity_open_bitmessage_link">إستيراد جهة اتصال</string>
+
+    <string name="subscribe">إشتراك</string>
+    <string name="do_import">استيراد</string>
+    <string name="cancel">إلغاء</string>
+    <string name="n_new_messages" tools:ignore="PluralsCandidate">رسائل جديدة</string>
+    <string name="reply">رد</string>
+    <string name="delete">حذف</string>
+    <string name="empty_trash">أفرغ المهملات</string>
+    <string name="trusted_node">عقدة موثوقة</string>
+    <string name="trusted_node_summary">استخدام العقدة في التزامن</string>
+    <string name="write_message">كتابة رسالة</string>
+    <string name="full_node">عقدة كاملة</string>
+    <string name="send">أرسل</string>
+    <string name="connection_info_disconnected">غير متصل</string>
+    <string name="connection_info_pending">يتصل…</string>
+    <string name="proof_of_work_title">إثبات العمل</string>
+    <string name="proof_of_work_text_0">جاري إثبات العمل لإرسال الرسالة</string>
+    </resources>
