@@ -146,12 +146,15 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             SyncAdapter.stopSync(this)
         }
         if (drawer.isDrawerOpen) {
-            val lps = RelativeLayout.LayoutParams(ViewGroup
-                .LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-            lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT)
-            val margin = ((resources.displayMetrics.density * 12) as Number).toInt()
-            lps.setMargins(margin, margin, margin, margin)
+            val lps = RelativeLayout.LayoutParams(
+                ViewGroup
+                    .LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+                addRule(RelativeLayout.ALIGN_PARENT_LEFT)
+                val margin = ((resources.displayMetrics.density * 12) as Number).toInt()
+                setMargins(margin, margin, margin, margin)
+            }
 
             ShowcaseView.Builder(this)
                 .withMaterialShowcase()
@@ -192,19 +195,23 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
 
     private fun createDrawer(toolbar: Toolbar) {
         val profiles = ArrayList<IProfile<*>>()
-        profiles.add(ProfileSettingDrawerItem()
-            .withName(getString(R.string.add_identity))
-            .withDescription(getString(R.string.add_identity_summary))
-            .withIcon(IconicsDrawable(this, GoogleMaterial.Icon.gmd_add)
-                .actionBar()
-                .paddingDp(5)
-                .colorRes(R.color.icons))
-            .withIdentifier(ADD_IDENTITY.toLong())
+        profiles.add(
+            ProfileSettingDrawerItem()
+                .withName(getString(R.string.add_identity))
+                .withDescription(getString(R.string.add_identity_summary))
+                .withIcon(
+                    IconicsDrawable(this, GoogleMaterial.Icon.gmd_add)
+                        .actionBar()
+                        .paddingDp(5)
+                        .colorRes(R.color.icons)
+                )
+                .withIdentifier(ADD_IDENTITY.toLong())
         )
-        profiles.add(ProfileSettingDrawerItem()
-            .withName(getString(R.string.manage_identity))
-            .withIcon(GoogleMaterial.Icon.gmd_settings)
-            .withIdentifier(MANAGE_IDENTITY.toLong())
+        profiles.add(
+            ProfileSettingDrawerItem()
+                .withName(getString(R.string.manage_identity))
+                .withIcon(GoogleMaterial.Icon.gmd_settings)
+                .withIdentifier(MANAGE_IDENTITY.toLong())
         )
         // Create the AccountHeader
         accountHeader = AccountHeaderBuilder()
@@ -212,26 +219,36 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             .withHeaderBackground(R.drawable.header)
             .withProfiles(profiles)
             .withOnAccountHeaderProfileImageListener(ProfileImageListener(this))
-            .withOnAccountHeaderListener(ProfileSelectionListener(this@MainActivity, supportFragmentManager))
+            .withOnAccountHeaderListener(
+                ProfileSelectionListener(
+                    this@MainActivity,
+                    supportFragmentManager
+                )
+            )
             .build()
         if (profiles.size > 2) { // There's always the add and manage identity items
             accountHeader.setActiveProfile(profiles[0], true)
         }
 
         val drawerItems = ArrayList<IDrawerItem<*, *>>()
-        drawerItems.add(PrimaryDrawerItem()
-            .withIdentifier(LABEL_ARCHIVE.id as Long)
-            .withName(R.string.archive)
-            .withTag(LABEL_ARCHIVE)
-            .withIcon(CommunityMaterial.Icon.cmd_archive)
+        drawerItems.add(
+            PrimaryDrawerItem()
+                .withIdentifier(LABEL_ARCHIVE.id as Long)
+                .withName(R.string.archive)
+                .withTag(LABEL_ARCHIVE)
+                .withIcon(CommunityMaterial.Icon.cmd_archive)
         )
         drawerItems.add(DividerDrawerItem())
-        drawerItems.add(PrimaryDrawerItem()
-            .withName(R.string.contacts_and_subscriptions)
-            .withIcon(GoogleMaterial.Icon.gmd_contacts))
-        drawerItems.add(PrimaryDrawerItem()
-            .withName(R.string.settings)
-            .withIcon(GoogleMaterial.Icon.gmd_settings))
+        drawerItems.add(
+            PrimaryDrawerItem()
+                .withName(R.string.contacts_and_subscriptions)
+                .withIcon(GoogleMaterial.Icon.gmd_contacts)
+        )
+        drawerItems.add(
+            PrimaryDrawerItem()
+                .withName(R.string.settings)
+                .withIcon(GoogleMaterial.Icon.gmd_settings)
+        )
 
         nodeSwitch = SwitchDrawerItem()
             .withIdentifier(ID_NODE_SWITCH)
@@ -369,7 +386,8 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             // we know that there are 2 setting elements.
             // Set the new profile above them ;)
             accountHeader.addProfile(
-                newProfile, accountHeader.profiles.size - 2)
+                newProfile, accountHeader.profiles.size - 2
+            )
         } else {
             accountHeader.addProfiles(newProfile)
         }
@@ -435,14 +453,31 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
             // fragment transaction.
-            val arguments = Bundle()
-            arguments.putSerializable(MessageDetailFragment.ARG_ITEM, item)
             val fragment = when (item) {
-                is Plaintext -> MessageDetailFragment()
-                is BitmessageAddress -> AddressDetailFragment()
+                is Plaintext -> {
+                    if (item.labels.any { it.type == Label.Type.DRAFT }) {
+                        ComposeMessageFragment().apply {
+                            arguments = Bundle().apply {
+                                putSerializable(ComposeMessageActivity.EXTRA_DRAFT, item)
+                            }
+                        }
+                    } else {
+                        MessageDetailFragment().apply {
+                            arguments = Bundle().apply {
+                                putSerializable(MessageDetailFragment.ARG_ITEM, item)
+                            }
+                        }
+                    }
+                }
+                is BitmessageAddress -> {
+                    AddressDetailFragment().apply {
+                        arguments = Bundle().apply {
+                            putSerializable(AddressDetailFragment.ARG_ITEM, item)
+                        }
+                    }
+                }
                 else -> throw IllegalArgumentException("Plaintext or BitmessageAddress expected, but was ${item::class.simpleName}")
             }
-            fragment.arguments = arguments
             supportFragmentManager.beginTransaction()
                 .replace(R.id.message_detail_container, fragment)
                 .commit()
@@ -451,12 +486,21 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             // for the selected item ID.
             val detailIntent = when (item) {
                 is Plaintext -> {
-                    Intent(this, MessageDetailActivity::class.java)
+                    if (item.labels.any { it.type == Label.Type.DRAFT }) {
+                        Intent(this, ComposeMessageActivity::class.java).apply {
+                            putExtra(ComposeMessageActivity.EXTRA_DRAFT, item)
+                        }
+                    } else {
+                        Intent(this, MessageDetailActivity::class.java).apply {
+                            putExtra(MessageDetailFragment.ARG_ITEM, item)
+                        }
+                    }
                 }
-                is BitmessageAddress -> Intent(this, AddressDetailActivity::class.java)
+                is BitmessageAddress -> Intent(this, AddressDetailActivity::class.java).apply {
+                    putExtra(AddressDetailFragment.ARG_ITEM, item)
+                }
                 else -> throw IllegalArgumentException("Plaintext or BitmessageAddress expected, but was ${item::class.simpleName}")
             }
-            detailIntent.putExtra(MessageDetailFragment.ARG_ITEM, item)
             startActivity(detailIntent)
         }
     }
@@ -474,15 +518,15 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
     }
 
     companion object {
-        val EXTRA_SHOW_MESSAGE = "ch.dissem.abit.ShowMessage"
-        val EXTRA_SHOW_LABEL = "ch.dissem.abit.ShowLabel"
-        val EXTRA_REPLY_TO_MESSAGE = "ch.dissem.abit.ReplyToMessage"
-        val ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox"
+        const val EXTRA_SHOW_MESSAGE = "ch.dissem.abit.ShowMessage"
+        const val EXTRA_SHOW_LABEL = "ch.dissem.abit.ShowLabel"
+        const val EXTRA_REPLY_TO_MESSAGE = "ch.dissem.abit.ReplyToMessage"
+        const val ACTION_SHOW_INBOX = "ch.dissem.abit.ShowInbox"
 
-        val ADD_IDENTITY = 1
-        val MANAGE_IDENTITY = 2
+        const val ADD_IDENTITY = 1
+        const val MANAGE_IDENTITY = 2
 
-        private val ID_NODE_SWITCH: Long = 1
+        private const val ID_NODE_SWITCH: Long = 1
 
         private var instance: WeakReference<MainActivity>? = null
 
