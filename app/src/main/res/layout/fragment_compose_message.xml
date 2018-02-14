@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:labelFor="@id/sender_input"
+        android:padding="4dp"
+        android:text="@string/from"
+        android:textColor="#9b9b9b"
+        android:textSize="12sp" />
+
+    <Spinner
+        android:id="@+id/sender_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
@@ -15,7 +29,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/to"
             android:inputType="textNoSuggestions"
-            android:maxLines="1"/>
+            android:maxLines="1" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -29,7 +43,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/subject"
             android:inputType="textEmailSubject"
-            android:textAppearance="?android:attr/textAppearanceLarge"/>
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -41,6 +55,6 @@
         android:gravity="start|top"
         android:hint="@string/compose_body_hint"
         android:inputType="textMultiLine|textCapSentences"
-        android:scrollbars="vertical"/>
+        android:scrollbars="vertical" />
 
 </LinearLayout>

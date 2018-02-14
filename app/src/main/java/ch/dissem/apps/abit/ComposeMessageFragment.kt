@@ -101,9 +101,8 @@ class ComposeMessageFragment : Fragment() {
                     parent.inventoryVector?.let { parents.add(it) }
                 }
             }
-        } ?: {
-            throw IllegalStateException("No identity set for ComposeMessageFragment")
-        }.invoke()
+        } ?: throw IllegalStateException("No identity set for ComposeMessageFragment")
+
         setHasOptionsMenu(true)
     }
 
@@ -115,37 +114,50 @@ class ComposeMessageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (broadcast) {
-            recipient_input.visibility = View.GONE
-        } else {
-            val adapter = ContactAdapter(context!!)
-            recipient_input.setAdapter(adapter)
-            recipient_input.onItemClickListener =
-                AdapterView.OnItemClickListener { _, _, pos, _ -> adapter.getItem(pos) }
-            recipient_input.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>,
-                    view: View,
-                    position: Int,
-                    id: Long
-                ) {
-                    recipient = adapter.getItem(position)
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>) =
-                    Unit // leave current selection
+        context?.let { ctx ->
+            val identities = Singleton.getAddressRepository(ctx).getIdentities()
+            sender_input.adapter = ContactAdapter(ctx, identities, true)
+            val index = identities.indexOf(Singleton.getIdentity(ctx))
+            if (index >= 0) {
+                sender_input.setSelection(index)
             }
-            recipient?.let { recipient_input.setText(it.toString()) }
-        }
-        subject_input.setText(subject)
-        body_input.setText(content)
 
-        when {
-            recipient == null -> recipient_input.requestFocus()
-            subject.isEmpty() -> subject_input.requestFocus()
-            else -> {
-                body_input.requestFocus()
-                body_input.setSelection(0)
+            if (broadcast) {
+                recipient_input.visibility = View.GONE
+            } else {
+                val adapter = ContactAdapter(
+                    ctx,
+                    Singleton.getAddressRepository(ctx).getContacts()
+                )
+                recipient_input.setAdapter(adapter)
+                recipient_input.onItemClickListener =
+                    AdapterView.OnItemClickListener { _, _, pos, _ -> adapter.getItem(pos) }
+                recipient_input.onItemSelectedListener =
+                    object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(
+                            parent: AdapterView<*>,
+                            view: View,
+                            position: Int,
+                            id: Long
+                        ) {
+                            recipient = adapter.getItem(position)
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>) =
+                            Unit // leave current selection
+                    }
+                recipient?.let { recipient_input.setText(it.toString()) }
+            }
+            subject_input.setText(subject)
+            body_input.setText(content)
+
+            when {
+                recipient == null -> recipient_input.requestFocus()
+                subject.isEmpty() -> subject_input.requestFocus()
+                else -> {
+                    body_input.requestFocus()
+                    body_input.setSelection(0)
+                }
             }
         }
     }
@@ -184,7 +196,7 @@ class ComposeMessageFragment : Fragment() {
     private fun build(ctx: Context): Plaintext {
         val builder: Plaintext.Builder
         if (broadcast) {
-            builder = Plaintext.Builder(BROADCAST).from(identity)
+            builder = Plaintext.Builder(BROADCAST)
         } else {
             val inputString = recipient_input.text.toString()
             if (recipient == null || recipient?.toString() != inputString) {
@@ -203,9 +215,10 @@ class ComposeMessageFragment : Fragment() {
 
             }
             builder = Plaintext.Builder(MSG)
-                .from(identity)
                 .to(recipient)
         }
+        val sender = sender_input.selectedItem as? ch.dissem.bitmessage.entity.BitmessageAddress
+        sender?.let { builder.from(it) }
         if (!Preferences.requestAcknowledgements(ctx)) {
             builder.preventAck()
         }
