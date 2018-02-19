@@ -70,7 +70,11 @@ class MessageDetailFragment : Fragment() {
         setHasOptionsMenu(true)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View =
         inflater.inflate(R.layout.fragment_message_detail, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -84,6 +88,13 @@ class MessageDetailFragment : Fragment() {
             status.setImageResource(Assets.getStatusDrawable(item.status))
             status.contentDescription = getString(Assets.getStatusString(item.status))
             avatar.setImageDrawable(Identicon(item.from))
+            val senderClickListener: (View) -> Unit = {
+                MainActivity.apply {
+                    onItemSelected(item.from)
+                }
+            }
+            avatar.setOnClickListener(senderClickListener)
+            sender.setOnClickListener(senderClickListener)
             sender.text = item.from.toString()
             item.to?.let { to ->
                 recipient.text = to.toString()
@@ -124,7 +135,11 @@ class MessageDetailFragment : Fragment() {
         }
     }
 
-    private fun showRelatedMessages(ctx: Context, rootView: View, @IdRes id: Int, messages: List<Plaintext>) {
+    private fun showRelatedMessages(
+        ctx: Context,
+        rootView: View, @IdRes id: Int,
+        messages: List<Plaintext>
+    ) {
         val recyclerView = rootView.findViewById<RecyclerView>(id)
         val adapter = RelatedMessageAdapter(ctx, messages)
         recyclerView.adapter = adapter
@@ -136,8 +151,10 @@ class MessageDetailFragment : Fragment() {
         activity?.let { activity ->
             Drawables.addIcon(activity, menu, R.id.reply, GoogleMaterial.Icon.gmd_reply)
             Drawables.addIcon(activity, menu, R.id.delete, GoogleMaterial.Icon.gmd_delete)
-            Drawables.addIcon(activity, menu, R.id.mark_unread, GoogleMaterial.Icon
-                .gmd_markunread)
+            Drawables.addIcon(
+                activity, menu, R.id.mark_unread, GoogleMaterial.Icon
+                    .gmd_markunread
+            )
             Drawables.addIcon(activity, menu, R.id.archive, GoogleMaterial.Icon.gmd_archive)
         }
 
@@ -187,9 +204,15 @@ class MessageDetailFragment : Fragment() {
         return false
     }
 
-    private class RelatedMessageAdapter internal constructor(private val ctx: Context, private val messages: List<Plaintext>) : RecyclerView.Adapter<RelatedMessageAdapter.ViewHolder>() {
+    private class RelatedMessageAdapter internal constructor(
+        private val ctx: Context,
+        private val messages: List<Plaintext>
+    ) : RecyclerView.Adapter<RelatedMessageAdapter.ViewHolder>() {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RelatedMessageAdapter.ViewHolder {
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int
+        ): RelatedMessageAdapter.ViewHolder {
             val context = parent.context
             val inflater = LayoutInflater.from(context)
 
@@ -236,7 +259,8 @@ class MessageDetailFragment : Fragment() {
         }
     }
 
-    private class LabelAdapter internal constructor(private val ctx: Context, labels: Set<Label>) : RecyclerView.Adapter<LabelAdapter.ViewHolder>() {
+    private class LabelAdapter internal constructor(private val ctx: Context, labels: Set<Label>) :
+        RecyclerView.Adapter<LabelAdapter.ViewHolder>() {
 
         private val labels = labels.toMutableList()
 
