@@ -53,6 +53,7 @@ class ComposeMessageActivity : AppCompatActivity() {
     }
 
     companion object {
+        const val EXTRA_DRAFT = "ch.dissem.abit.Message.DRAFT"
         const val EXTRA_IDENTITY = "ch.dissem.abit.Message.SENDER"
         const val EXTRA_RECIPIENT = "ch.dissem.abit.Message.RECIPIENT"
         const val EXTRA_SUBJECT = "ch.dissem.abit.Message.SUBJECT"

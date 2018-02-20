@@ -17,7 +17,7 @@
 package ch.dissem.bitmessage.repository
 
 import android.os.Build
-import ch.dissem.apps.abit.BuildConfig
+import android.os.Build.VERSION_CODES.LOLLIPOP
 import ch.dissem.apps.abit.repository.AndroidInventory
 import ch.dissem.apps.abit.repository.SqlHelper
 import ch.dissem.bitmessage.entity.BitmessageAddress
@@ -40,7 +40,7 @@ import org.robolectric.annotation.Config
 import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP), packageName = "ch.dissem.apps.abit")
+@Config(sdk = [LOLLIPOP], packageName = "ch.dissem.apps.abit")
 class AndroidInventoryTest : TestBase() {
     private lateinit var inventory: Inventory
 
@@ -135,11 +135,12 @@ class AndroidInventoryTest : TestBase() {
     }
 
     private fun getObjectMessage(stream: Long, TTL: Long, payload: ObjectPayload) = ObjectMessage(
-            nonce = ByteArray(8),
-            expiresTime = now + TTL,
-            stream = stream,
-            payload = payload
+        nonce = ByteArray(8),
+        expiresTime = now + TTL,
+        stream = stream,
+        payload = payload
     )
 
-    private val getPubkey: GetPubkey = GetPubkey(BitmessageAddress("BM-2cW7cD5cDQJDNkE7ibmyTxfvGAmnPqa9Vt"))
+    private val getPubkey: GetPubkey =
+        GetPubkey(BitmessageAddress("BM-2cW7cD5cDQJDNkE7ibmyTxfvGAmnPqa9Vt"))
 }

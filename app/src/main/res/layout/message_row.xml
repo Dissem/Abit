@@ -26,6 +26,7 @@
         android:layout_height="match_parent"
         android:background="@drawable/bg_item_normal_state"
         android:clickable="true"
+        android:focusable="true"
         android:foreground="?attr/selectableItemBackground"
         tools:ignore="UselessParent">
 

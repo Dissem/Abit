@@ -25,7 +25,7 @@ class Observable<T>(value: T) {
      * To prevent memory leaks, the observer must be removed if it isn't used anymore.
      */
     fun addObserver(key: Any, observer: (T) -> Unit) {
-        observers.put(key, observer)
+        observers[key] = observer
     }
 
     /**

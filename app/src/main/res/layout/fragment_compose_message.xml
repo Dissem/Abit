@@ -1,46 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="4dp">
-
-        <AutoCompleteTextView
-            android:id="@+id/recipient_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/to"
-            android:inputType="textNoSuggestions"
-            android:maxLines="1"/>
-
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <EditText
-            android:id="@+id/subject_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/subject"
-            android:inputType="textEmailSubject"
-            android:textAppearance="?android:attr/textAppearanceLarge"/>
-
-    </android.support.design.widget.TextInputLayout>
-
-    <EditText
-        android:id="@+id/body_input"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="start|top"
-        android:hint="@string/compose_body_hint"
-        android:inputType="textMultiLine|textCapSentences"
-        android:scrollbars="vertical"/>
+        android:orientation="vertical">
 
-</LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:labelFor="@id/sender_input"
+            android:padding="4dp"
+            android:text="@string/from"
+            android:textColor="#9b9b9b"
+            android:textSize="12sp" />
+
+        <Spinner
+            android:id="@+id/sender_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="4dp">
+
+            <AutoCompleteTextView
+                android:id="@+id/recipient_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/to"
+                android:inputType="textNoSuggestions"
+                android:maxLines="1" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/subject_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/subject"
+                android:inputType="textEmailSubject"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <EditText
+            android:id="@+id/body_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="start|top"
+            android:hint="@string/compose_body_hint"
+            android:inputType="textMultiLine|textCapSentences"
+            android:scrollbars="none"
+            tools:ignore="InefficientWeight" />
+
+    </LinearLayout>
+</ScrollView>

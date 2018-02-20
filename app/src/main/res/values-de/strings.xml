@@ -127,4 +127,5 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="import_data">Import</string>
     <string name="import_data_summary">Nachrichten und Kontakte importieren (aber keine Identitäten)</string>
     <string name="select_encoding">Kodierung auswählen</string>
+    <string name="from">Von</string>
 </resources>

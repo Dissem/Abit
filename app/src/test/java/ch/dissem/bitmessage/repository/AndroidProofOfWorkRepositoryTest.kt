@@ -46,7 +46,7 @@ import kotlin.properties.Delegates
  * @author Christian Basler
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = intArrayOf(LOLLIPOP), packageName = "ch.dissem.apps.abit")
+@Config(sdk = [LOLLIPOP], packageName = "ch.dissem.apps.abit")
 class AndroidProofOfWorkRepositoryTest : TestBase() {
     private lateinit var repo: ProofOfWorkRepository
     private lateinit var addressRepo: AddressRepository

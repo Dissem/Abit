@@ -54,7 +54,7 @@ class AndroidInventory(private val sql: SqlHelper) : Inventory {
     private fun getCache(stream: Long): MutableMap<InventoryVector, Long> {
         fun addToCache(stream: Long): MutableMap<InventoryVector, Long> {
             val result: MutableMap<InventoryVector, Long> = ConcurrentHashMap()
-            cache.put(stream, result)
+            cache[stream] = result
 
             val projection = arrayOf(COLUMN_HASH, COLUMN_EXPIRES)
 
@@ -149,7 +149,7 @@ class AndroidInventory(private val sql: SqlHelper) : Inventory {
 
             sql.writableDatabase.insertOrThrow(TABLE_NAME, null, values)
 
-            getCache(objectMessage.stream).put(iv, objectMessage.expiresTime)
+            getCache(objectMessage.stream)[iv] = objectMessage.expiresTime
         } catch (e: SQLiteConstraintException) {
             LOG.trace(e.message, e)
         }

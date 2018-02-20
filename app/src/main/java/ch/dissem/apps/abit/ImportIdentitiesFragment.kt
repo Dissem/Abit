@@ -72,6 +72,6 @@ class ImportIdentitiesFragment : Fragment() {
     }
 
     companion object {
-        val WIF_DATA = "wif_data"
+        const val WIF_DATA = "wif_data"
     }
 }

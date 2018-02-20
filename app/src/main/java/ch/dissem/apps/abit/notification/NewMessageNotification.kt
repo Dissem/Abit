@@ -128,7 +128,7 @@ class NewMessageNotification(ctx: Context) : AbstractNotification(ctx) {
     override val notificationId = NEW_MESSAGE_NOTIFICATION_ID
 
     companion object {
-        private val NEW_MESSAGE_NOTIFICATION_ID = 1
+        private const val NEW_MESSAGE_NOTIFICATION_ID = 1
         private val SPAN_EMPHASIS = StyleSpan(Typeface.BOLD)
     }
 }
