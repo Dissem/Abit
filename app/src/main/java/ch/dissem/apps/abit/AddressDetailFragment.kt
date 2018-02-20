@@ -204,7 +204,7 @@ class AddressDetailFragment : Fragment() {
          * The fragment argument representing the item ID that this fragment
          * represents.
          */
-        val ARG_ITEM = "item"
-        val EXPORT_POSTFIX = ".keys.dat"
+        const val ARG_ITEM = "item"
+        const val EXPORT_POSTFIX = ".keys.dat"
     }
 }

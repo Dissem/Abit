@@ -37,11 +37,11 @@
         android:layout_alignTop="@+id/avatar"
         android:layout_toEndOf="@+id/avatar"
         android:ellipsize="end"
-        android:lines="1"
         android:paddingBottom="0dp"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
         android:paddingTop="0dp"
+        android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textStyle="bold"
         tools:text="Name" />
@@ -53,9 +53,9 @@
         android:layout_alignBottom="@+id/avatar"
         android:layout_toEndOf="@+id/avatar"
         android:ellipsize="marquee"
-        android:lines="1"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
+        android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceSmall"
         tools:text="BM-2cW0000000000000000000000000000000" />
 

@@ -92,7 +92,7 @@ class Identicon(input: BitmessageAddress) : Drawable() {
     override fun getOpacity() = PixelFormat.TRANSPARENT
 
     companion object {
-        private val SIZE = 9
-        private val CENTER_COLUMN = 5
+        private const val SIZE = 9
+        private const val CENTER_COLUMN = 5
     }
 }

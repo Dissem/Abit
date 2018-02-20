@@ -507,7 +507,8 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
 
     fun setDetailView(fragment: Fragment) {
         if (hasDetailPane) {
-            supportFragmentManager.beginTransaction()
+            supportFragmentManager
+                .beginTransaction()
                 .replace(R.id.message_detail_container, fragment)
                 .commit()
         }

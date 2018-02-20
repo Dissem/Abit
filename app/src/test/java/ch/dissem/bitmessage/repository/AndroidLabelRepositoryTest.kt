@@ -17,6 +17,7 @@
 package ch.dissem.bitmessage.repository
 
 import android.os.Build
+import android.os.Build.VERSION_CODES.LOLLIPOP
 import ch.dissem.apps.abit.repository.AndroidLabelRepository
 import ch.dissem.apps.abit.repository.SqlHelper
 import ch.dissem.bitmessage.entity.valueobject.Label
@@ -30,7 +31,7 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP), packageName = "ch.dissem.apps.abit")
+@Config(sdk = [LOLLIPOP], packageName = "ch.dissem.apps.abit")
 class AndroidLabelRepositoryTest : TestBase() {
 
     private lateinit var repo: LabelRepository

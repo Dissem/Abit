@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2016 Christian Basler
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +14,7 @@
   ~ limitations under the License.
   -->
 
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -34,13 +32,13 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_constraintLeft_creator="1"
-        tools:layout_constraintTop_creator="1"/>
+        tools:layout_constraintTop_creator="1" />
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/label_wrapper"
-        android:layout_marginTop="24dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@id/description">
 
@@ -48,7 +46,7 @@
             android:id="@+id/label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/label"/>
+            android:hint="@string/label" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -64,7 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/passphrase"
-            android:inputType="textMultiLine"/>
+            android:inputType="textMultiLine" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -82,7 +80,8 @@
             android:ems="10"
             android:hint="@string/number_of_identities"
             android:inputType="number"
-            android:text="1"/>
+            android:text="1"
+            tools:ignore="HardcodedText" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -92,7 +91,7 @@
         android:layout_height="wrap_content"
         android:text="@string/shorter"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/number_of_identities_wrapper"/>
+        app:layout_constraintTop_toBottomOf="@id/number_of_identities_wrapper" />
 
     <Button
         android:id="@+id/ok"
@@ -103,7 +102,7 @@
         android:text="@string/ok"
         android:textColor="@color/colorAccent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/shorter"/>
+        app:layout_constraintTop_toBottomOf="@id/shorter" />
 
     <Button
         android:id="@+id/dismiss"
@@ -113,6 +112,6 @@
         android:text="@string/cancel"
         android:textColor="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="@id/ok"
-        app:layout_constraintRight_toLeftOf="@id/ok"/>
+        app:layout_constraintRight_toLeftOf="@id/ok" />
 
 </android.support.constraint.ConstraintLayout>

@@ -125,13 +125,13 @@ class AndroidProofOfWorkRepository(private val sql: SqlHelper) : ProofOfWorkRepo
     companion object {
         private val LOG = LoggerFactory.getLogger(AndroidProofOfWorkRepository::class.java)
 
-        private val TABLE_NAME = "POW"
-        private val COLUMN_INITIAL_HASH = "initial_hash"
-        private val COLUMN_DATA = "data"
-        private val COLUMN_VERSION = "version"
-        private val COLUMN_NONCE_TRIALS_PER_BYTE = "nonce_trials_per_byte"
-        private val COLUMN_EXTRA_BYTES = "extra_bytes"
-        private val COLUMN_EXPIRATION_TIME = "expiration_time"
-        private val COLUMN_MESSAGE_ID = "message_id"
+        private const val TABLE_NAME = "POW"
+        private const val COLUMN_INITIAL_HASH = "initial_hash"
+        private const val COLUMN_DATA = "data"
+        private const val COLUMN_VERSION = "version"
+        private const val COLUMN_NONCE_TRIALS_PER_BYTE = "nonce_trials_per_byte"
+        private const val COLUMN_EXTRA_BYTES = "extra_bytes"
+        private const val COLUMN_EXPIRATION_TIME = "expiration_time"
+        private const val COLUMN_MESSAGE_ID = "message_id"
     }
 }

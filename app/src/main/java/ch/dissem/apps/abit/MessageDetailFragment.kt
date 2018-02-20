@@ -298,7 +298,7 @@ class MessageDetailFragment : Fragment() {
          * The fragment argument representing the item ID that this fragment
          * represents.
          */
-        val ARG_ITEM = "item"
+        const val ARG_ITEM = "item"
 
         fun isInTrash(item: Plaintext?) = item?.labels?.any { it.type == Label.Type.TRASH } == true
     }

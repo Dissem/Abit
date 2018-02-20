@@ -90,7 +90,7 @@ class SqlHelper(private val ctx: Context) : SQLiteOpenHelper(ctx, DATABASE_NAME,
 
     companion object {
         // If you change the database schema, you must increment the database version.
-        private val DATABASE_VERSION = 7
-        val DATABASE_NAME = "jabit.db"
+        private const val DATABASE_VERSION = 7
+        const val DATABASE_NAME = "jabit.db"
     }
 }
