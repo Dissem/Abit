@@ -47,11 +47,11 @@
     <string name="proof_of_work_title">Preuve de travail</string>
     <string name="proof_of_work_text_0">Faire du travail pour envoyer la message</string>
     <string name="proof_of_work_text_n" tools:ignore="PluralsCandidate">Faire du travail pour envoyer la message (%1$d en file d\'attente)</string>
-    <string name="error_invalid_sync_port">Port non valide dans les paramètres de synchronisation: %s</string>
+    <string name="error_invalid_sync_port">Port non valide dans les paramètres de synchronisation : %s</string>
     <string name="compose_body_hint">Écrire un message</string>
     <string name="contacts_and_subscriptions">Contacts</string>
     <string name="subscribed">Souscrit</string>
-    <string name="full_node_warning">L\'exécution d\'un nœud Bitmessage actif consomme beaucoup de trafic, ce qui peut coûter cher sur un réseau mobile. Êtes-vous sûr de vouloir démarrer un nœud actif?</string>
+    <string name="full_node_warning">L\'exécution d\'un nœud Bitmessage actif consomme beaucoup de trafic, ce qui peut coûter cher sur un réseau mobile. Êtes-vous sûr de vouloir démarrer un nœud actif ?</string>
     <string name="about">À propos d\'Abit</string>
     <string name="about_summary">Les dépendances Open Source.</string>
     <string name="title_activity_status">Déboguage</string>
@@ -61,8 +61,8 @@
     <string name="pubkey_available">Clé publique disponible</string>
     <string name="pubkey_not_available">Clé publique pas encore disponible</string>
     <string name="alt_qr_code">Code QR</string>
-    <string name="add_identity_warning">Avoir plus d\'identités exigera plus de ressources. Si vous êtes sûr de vouloir ajouter une identité, veuillez choisir la procédure:</string>
-    <string name="delete_identity_warning">Êtes-vous sûr de vouloir effacer cette identité? Les messages envoyés à cette adresse ne peuvent plus être reçus et il n\'est pas possible d\'annuler cette action.</string>
+    <string name="add_identity_warning">Avoir plus d\'identités exigera plus de ressources. Si vous êtes sûr de vouloir ajouter une identité, veuillez choisir la procédure :</string>
+    <string name="delete_identity_warning">Êtes-vous sûr de vouloir effacer cette identité ? Les messages envoyés à cette adresse ne peuvent plus être reçus et il n\'est pas possible d\'annuler cette action.</string>
     <string name="delete_contact_warning">Êtes-vous sûr de vouloir supprimer ce contact?</string>
     <string name="scan_qr_code">Scanner code QR</string>
     <string name="create_contact">Créer un contact</string>
@@ -70,7 +70,7 @@
     <string name="address">Adresse Bitmessage</string>
     <string name="error_illegal_address">C\'est peut-être une faute de frappe</string>
     <string name="export">Exportation</string>
-    <string name="confirm_export">Voulez-vous vraiment exporter votre identité? L\'exportation contiendra les clés privées non chiffrées.</string>
+    <string name="confirm_export">Voulez-vous vraiment exporter votre identité ? L\'exportation contiendra les clés privées non chiffrées.</string>
     <string name="passphrase">Phrase de passe</string>
     <string name="help_out">Soutenir le développement</string>
     <string name="help_out_summary">Apprenez comment soutenir le développement d\'Abit</string>
@@ -87,7 +87,7 @@
     <string name="open_file">Ouvrir un fichier</string>
     <string name="error_loading_data">Erreur lors du chargement des données</string>
     <string name="select_file_title">Sélectionnez un fichier</string>
-    <string name="select_identities_to_import">Veuillez sélectionner les identités à importer:</string>
+    <string name="select_identities_to_import">Veuillez sélectionner les identités à importer :</string>
     <string name="import_input_description">Vous pouvez simplement insérer le contenu d\'une exportation ou d\'un fichier \'keys.dat\'</string>
     <string name="full_node_stop">arrêter le nœud</string>
     <string name="full_node_restart">redémarrer le nœud</string>
