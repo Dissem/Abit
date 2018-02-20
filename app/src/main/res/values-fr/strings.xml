@@ -123,4 +123,6 @@
     <string name="request_acknowledgements_summary">Les accusés de réception permettent de s\'assurer qu\'un message a bien été reçu, mais il faut plus de temps pour l\'envoyer</string>
     <string name="got_it">J\'ai compris</string>
     <string name="select_encoding">Choix du codage</string>
+<string name="help_out_link">https://dissem.github.io/Abit/aider</string>
+    <string name="from">De</string>
 </resources>
