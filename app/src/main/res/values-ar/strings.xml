@@ -39,4 +39,10 @@
     <string name="connection_info_pending">يتصل…</string>
     <string name="proof_of_work_title">إثبات العمل</string>
     <string name="proof_of_work_text_0">جاري إثبات العمل لإرسال الرسالة</string>
-    </resources>
+    <string name="inbox">علبة الوارد</string>
+    <string name="draft">مسودات</string>
+    <string name="sent">تاريخ الإرسال</string>
+    <string name="unread">غير مقروء</string>
+    <string name="trash">مُهملات</string>
+    <string name="label">تسمية</string>
+</resources>

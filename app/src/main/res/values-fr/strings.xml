@@ -105,7 +105,6 @@
     <string name="status_draft">brouillon</string>
     <string name="status_sent">envoyé</string>
     <string name="status_received">reçu</string>
-    <string name="outbox">Boîte d\'envoi</string>
     <string name="error_unsupported_encoding">Encodage non supporté \'%s\', \'SIMPLE\' est utilisé.</string>
     <string name="select_encoding_warning">\'EXTENDED\' est un nouveau format de message qui ne fonctionne pas encore partout, mais qui a des avantages intéressants. Sélectionnez \'SIMPLE\' pour être sûr.</string>
     <string name="select_encoding_title">Sélectionner le codage des messages</string>
@@ -125,4 +124,12 @@
     <string name="select_encoding">Choix du codage</string>
 <string name="help_out_link">https://dissem.github.io/Abit/aider</string>
     <string name="from">De</string>
+    <string name="invalid_wif_file">Le fichier ne peut pas être traité</string>
+    <string name="inbox">Boîte de réception</string>
+    <string name="outbox">Boîte d\'envoi</string>
+    <string name="draft">Brouillons</string>
+    <string name="sent">Envoyé</string>
+    <string name="unread">Non lues</string>
+    <string name="trash">Corbeille</string>
+    <string name="broadcasts">Diffusions</string>
 </resources>
