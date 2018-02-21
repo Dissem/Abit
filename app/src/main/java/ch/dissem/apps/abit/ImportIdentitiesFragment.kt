@@ -57,7 +57,7 @@ class ImportIdentitiesFragment : Fragment() {
         } catch (e: InvalidFileFormatException) {
             longToast(R.string.invalid_wif_file)
             activity.finish()
-            return;
+            return
         }
 
         adapter = AddressSelectorAdapter(importer.getIdentities())
