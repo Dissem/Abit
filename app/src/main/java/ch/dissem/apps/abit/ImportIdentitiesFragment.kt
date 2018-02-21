@@ -25,12 +25,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-
-import com.h6ah4i.android.widget.advrecyclerview.decoration.SimpleListDividerDecorator
-
 import ch.dissem.apps.abit.adapter.AddressSelectorAdapter
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.bitmessage.wif.WifImporter
+import com.h6ah4i.android.widget.advrecyclerview.decoration.SimpleListDividerDecorator
+import org.ini4j.InvalidFileFormatException
+import org.jetbrains.anko.longToast
 
 /**
  * @author Christian Basler
@@ -39,8 +39,12 @@ class ImportIdentitiesFragment : Fragment() {
     private lateinit var adapter: AddressSelectorAdapter
     private lateinit var importer: WifImporter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-            inflater.inflate(R.layout.fragment_import_select_identities, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View =
+        inflater.inflate(R.layout.fragment_import_select_identities, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -48,17 +52,29 @@ class ImportIdentitiesFragment : Fragment() {
         val wifData = arguments.getString(WIF_DATA)
         val bmc = Singleton.getBitmessageContext(activity)
 
-        importer = WifImporter(bmc, wifData)
+        try {
+            importer = WifImporter(bmc, wifData)
+        } catch (e: InvalidFileFormatException) {
+            longToast(R.string.invalid_wif_file)
+            activity.finish()
+            return;
+        }
+
         adapter = AddressSelectorAdapter(importer.getIdentities())
-        val layoutManager = LinearLayoutManager(activity,
-                LinearLayoutManager.VERTICAL,
-                false)
+        val layoutManager = LinearLayoutManager(
+            activity,
+            LinearLayoutManager.VERTICAL,
+            false
+        )
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
-        recyclerView.addItemDecoration(SimpleListDividerDecorator(
-                ContextCompat.getDrawable(activity, R.drawable.list_divider_h), true))
+        recyclerView.addItemDecoration(
+            SimpleListDividerDecorator(
+                ContextCompat.getDrawable(activity, R.drawable.list_divider_h), true
+            )
+        )
 
         view.findViewById<Button>(R.id.finish).setOnClickListener {
             importer.importAll(adapter.selected)
