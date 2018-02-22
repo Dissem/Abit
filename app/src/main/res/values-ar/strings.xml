@@ -126,7 +126,7 @@
     <string name="import_data_summary">استيراد الرسائل وجهات الاتصال (الهويات غير مضمنة)</string>
     <string name="request_acknowledgements">اطلب التبليغ بوصول الرسائل</string>
     <string name="request_acknowledgements_summary">التبليغ يسمح بالتأكد من وصول الرسالة، لكن يحتاج المزيد من الوقت</string>
-    <string name="got_it">موافق</string>
+    <string name="got_it">فهمت</string>
     <string name="select_encoding">اختيار الترميز</string>
     <string name="from">من</string>
     <string name="invalid_wif_file">لم يتم معالجة الملف</string>
