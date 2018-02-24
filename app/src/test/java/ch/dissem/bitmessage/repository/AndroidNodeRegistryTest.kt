@@ -17,7 +17,7 @@
 package ch.dissem.bitmessage.repository
 
 import android.os.Build
-import ch.dissem.apps.abit.BuildConfig
+import android.os.Build.VERSION_CODES.LOLLIPOP
 import ch.dissem.apps.abit.repository.AndroidNodeRegistry
 import ch.dissem.apps.abit.repository.SqlHelper
 import ch.dissem.bitmessage.entity.valueobject.NetworkAddress
@@ -39,7 +39,7 @@ import java.util.*
  * as the initial nodes' IP addresses are determined by DNS lookup.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP), packageName = "ch.dissem.apps.abit")
+@Config(sdk = [LOLLIPOP], packageName = "ch.dissem.apps.abit")
 class AndroidNodeRegistryTest : TestBase() {
     private lateinit var registry: NodeRegistry
 

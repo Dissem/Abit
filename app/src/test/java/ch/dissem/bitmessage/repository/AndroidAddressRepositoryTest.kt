@@ -17,7 +17,7 @@
 package ch.dissem.bitmessage.repository
 
 import android.os.Build
-import ch.dissem.apps.abit.BuildConfig
+import android.os.Build.VERSION_CODES.LOLLIPOP
 import ch.dissem.apps.abit.repository.AndroidAddressRepository
 import ch.dissem.apps.abit.repository.SqlHelper
 import ch.dissem.bitmessage.entity.BitmessageAddress
@@ -32,7 +32,7 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP), packageName = "ch.dissem.apps.abit")
+@Config(sdk = [LOLLIPOP], packageName = "ch.dissem.apps.abit")
 class AndroidAddressRepositoryTest : TestBase() {
     private val contactA = "BM-2cW7cD5cDQJDNkE7ibmyTxfvGAmnPqa9Vt"
     private val contactB = "BM-2cTtkBnb4BUYDndTKun6D9PjtueP2h1bQj"

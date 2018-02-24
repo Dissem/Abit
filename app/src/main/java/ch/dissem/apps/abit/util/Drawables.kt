@@ -44,7 +44,7 @@ import java.io.ByteArrayOutputStream
 object Drawables {
     private val LOG = LoggerFactory.getLogger(Drawables::class.java)
 
-    private val QR_CODE_SIZE = 350
+    private const val QR_CODE_SIZE = 350
 
     fun addIcon(ctx: Context, menu: Menu, menuItem: Int, icon: IIcon): MenuItem {
         val item = menu.findItem(menuItem)

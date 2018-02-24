@@ -16,7 +16,7 @@
 
 package ch.dissem.bitmessage.repository
 
-import android.os.Build
+import android.os.Build.VERSION_CODES.LOLLIPOP
 import ch.dissem.apps.abit.repository.AndroidAddressRepository
 import ch.dissem.apps.abit.repository.AndroidLabelRepository
 import ch.dissem.apps.abit.repository.AndroidMessageRepository
@@ -31,7 +31,6 @@ import ch.dissem.bitmessage.entity.valueobject.ExtendedEncoding
 import ch.dissem.bitmessage.entity.valueobject.Label
 import ch.dissem.bitmessage.entity.valueobject.PrivateKey
 import ch.dissem.bitmessage.entity.valueobject.extended.Message
-import ch.dissem.bitmessage.ports.LabelRepository
 import ch.dissem.bitmessage.ports.MessageRepository
 import ch.dissem.bitmessage.utils.UnixTime
 import org.hamcrest.BaseMatcher
@@ -48,7 +47,7 @@ import org.robolectric.annotation.Config
 import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP), packageName = "ch.dissem.apps.abit")
+@Config(sdk = [LOLLIPOP], packageName = "ch.dissem.apps.abit")
 class AndroidMessageRepositoryTest : TestBase() {
     private lateinit var contactA: BitmessageAddress
     private lateinit var contactB: BitmessageAddress

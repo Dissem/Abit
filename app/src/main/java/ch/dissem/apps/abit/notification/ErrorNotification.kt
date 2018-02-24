@@ -55,6 +55,6 @@ class ErrorNotification(ctx: Context) : AbstractNotification(ctx) {
     override val notificationId = ERROR_NOTIFICATION_ID
 
     companion object {
-        val ERROR_NOTIFICATION_ID = 4
+        const val ERROR_NOTIFICATION_ID = 4
     }
 }

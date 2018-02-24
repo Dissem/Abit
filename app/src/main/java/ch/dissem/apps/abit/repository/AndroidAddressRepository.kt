@@ -68,15 +68,15 @@ class AndroidAddressRepository(private val sql: SqlHelper) : AddressRepository {
      * Returns the contacts in the following order:
      *
      *  * Subscribed addresses come first
-     *  * Addresses with Aliases (alphabetically)
-     *  * Addresses (alphabetically)
+     *  * Addresses with aliases (alphabetically)
+     *  * Addresses without aliases are omitted
      *
      *
      * @return the ordered list of ids (address strings)
      */
     fun getContactIds(): List<String> = findIds(
-        "private_key IS NULL OR chan = '1'",
-        "$COLUMN_SUBSCRIBED DESC, $COLUMN_ALIAS IS NULL, $COLUMN_ALIAS, $COLUMN_ADDRESS"
+        "($COLUMN_PRIVATE_KEY IS NULL OR $COLUMN_CHAN = '1') AND $COLUMN_ALIAS IS NOT NULL",
+        "$COLUMN_SUBSCRIBED DESC, $COLUMN_ALIAS, $COLUMN_ADDRESS"
     )
 
     private fun findIds(where: String, orderBy: String): List<String> {

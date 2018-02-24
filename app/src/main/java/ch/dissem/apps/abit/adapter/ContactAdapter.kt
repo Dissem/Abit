@@ -20,25 +20,22 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.Filter
-import android.widget.Filterable
-import android.widget.ImageView
-import android.widget.TextView
-
-import java.util.ArrayList
-
+import android.widget.*
 import ch.dissem.apps.abit.Identicon
 import ch.dissem.apps.abit.R
-import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.bitmessage.entity.BitmessageAddress
+import java.util.*
 
 /**
  * An adapter for contacts. Can be filtered by alias or address.
  */
-class ContactAdapter(ctx: Context) : BaseAdapter(), Filterable {
+class ContactAdapter(
+    ctx: Context,
+    private val originalData: List<BitmessageAddress>,
+    private val slim: Boolean = false
+) :
+    BaseAdapter(), Filterable {
     private val inflater = LayoutInflater.from(ctx)
-    private val originalData = Singleton.getAddressRepository(ctx).getContacts()
     private var data: List<BitmessageAddress> = originalData
 
     override fun getCount() = data.size
@@ -49,23 +46,33 @@ class ContactAdapter(ctx: Context) : BaseAdapter(), Filterable {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val viewHolder = if (convertView == null) {
-            ViewHolder(inflater.inflate(R.layout.contact_row, parent, false))
+            ViewHolder(
+                inflater.inflate(
+                    if (slim) {
+                        R.layout.contact_row_slim
+                    } else {
+                        R.layout.contact_row
+                    },
+                    parent, false
+                )
+            )
         } else {
             convertView.tag as ViewHolder
         }
         val item = getItem(position)
         viewHolder.avatar.setImageDrawable(Identicon(item))
         viewHolder.name.text = item.toString()
-        viewHolder.address.text = item.address
+        viewHolder.address?.text = item.address
+
         return viewHolder.view
     }
 
     override fun getFilter(): Filter = ContactFilter()
 
     private inner class ViewHolder(val view: View) {
-        val avatar = view.findViewById<ImageView>(R.id.avatar)!!
-        val name = view.findViewById<TextView>(R.id.name)!!
-        val address = view.findViewById<TextView>(R.id.address)!!
+        val avatar: ImageView = view.findViewById(R.id.avatar)
+        val name: TextView = view.findViewById(R.id.name)
+        val address: TextView? = view.findViewById(R.id.address)
 
         init {
             view.tag = this
@@ -83,27 +90,36 @@ class ContactAdapter(ctx: Context) : BaseAdapter(), Filterable {
                 val newValues = ArrayList<BitmessageAddress>()
 
                 originalData
-                        .forEach { value ->
-                            value.alias?.toLowerCase()?.let { alias ->
-                                if (alias.startsWith(prefixString)) {
-                                    newValues.add(value)
-                                } else {
-                                    val words = alias.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                    .forEach { value ->
+                        value.alias?.toLowerCase()?.let { alias ->
+                            if (alias.startsWith(prefixString)) {
+                                newValues.add(value)
+                            } else {
+                                val words =
+                                    alias.split(" ".toRegex()).dropLastWhile { it.isEmpty() }
+                                        .toTypedArray()
 
-                                    for (word in words) {
-                                        if (word.startsWith(prefixString)) {
-                                            newValues.add(value)
-                                            break
-                                        }
+                                for (word in words) {
+                                    if (word.startsWith(prefixString)) {
+                                        newValues.add(value)
+                                        break
                                     }
                                 }
-                            } ?: {
-                                val address = value.address.toLowerCase()
-                                if (address.contains(prefixString)) {
-                                    newValues.add(value)
-                                }
-                            }.invoke()
-                        }
+                            }
+                        } ?: {
+                            val address = value.address.toLowerCase()
+                            if (address.contains(prefixString)) {
+                                newValues.add(value)
+                            }
+                        }.invoke()
+                    }
+
+                if (newValues.isEmpty()) {
+                    try {
+                        newValues.add(BitmessageAddress(prefix.toString()))
+                    } catch (_: Exception) {
+                    }
+                }
 
                 results.values = newValues
                 results.count = newValues.size
@@ -125,4 +141,6 @@ class ContactAdapter(ctx: Context) : BaseAdapter(), Filterable {
             }
         }
     }
+
+    fun indexOf(element: BitmessageAddress) = originalData.indexOf(element)
 }

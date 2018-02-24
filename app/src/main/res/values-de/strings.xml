@@ -104,7 +104,6 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="title_chan_detail">Chan</string>
     <string name="title_contact_detail">Kontakt</string>
     <string name="title_identity_detail">Identität</string>
-    <string name="outbox">Postausgang</string>
     <string name="status_draft">Entwurf</string>
     <string name="status_public_key">öffentlicher Schlüssel angefordert</string>
     <string name="status_received">empfangen</string>
@@ -127,4 +126,13 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="import_data">Import</string>
     <string name="import_data_summary">Nachrichten und Kontakte importieren (aber keine Identitäten)</string>
     <string name="select_encoding">Kodierung auswählen</string>
+    <string name="from">Von</string>
+    <string name="invalid_wif_file">Die Datei kann nicht verarbeitet werden</string>
+    <string name="inbox">Posteingang</string>
+    <string name="outbox">Postausgang</string>
+    <string name="draft">Entwürfe</string>
+    <string name="sent">Gesendet</string>
+    <string name="unread">Ungelesen</string>
+    <string name="trash">Papierkorb</string>
+    <string name="broadcasts">Broadcasts</string>
 </resources>

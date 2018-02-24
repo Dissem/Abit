@@ -108,7 +108,6 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="status_draft">draft</string>
     <string name="status_sent">sent</string>
     <string name="status_received">received</string>
-    <string name="outbox">Outbox</string>
     <string name="error_unsupported_encoding">Unsupported encoding ‘%s’, using ‘SIMPLE’ instead.</string>
     <string name="select_encoding_warning">‘EXTENDED’ is a new message format that\'s not widely supported yet but has some interesting features. To stay on the save side, select ‘SIMPLE’.</string>
     <string name="select_encoding_title">Select Message Encoding</string>
@@ -126,4 +125,13 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="request_acknowledgements_summary">Acknowledges allow making sure a message was received, but require additional time to send</string>
     <string name="got_it">Got it</string>
     <string name="select_encoding">Select encoding</string>
+    <string name="from">From</string>
+    <string name="invalid_wif_file">The file could not be processed</string>
+    <string name="inbox">Inbox</string>
+    <string name="outbox">Outbox</string>
+    <string name="draft">Drafts</string>
+    <string name="sent">Sent</string>
+    <string name="unread">Unread</string>
+    <string name="trash">Trash</string>
+    <string name="broadcasts">Broadcasts</string>
 </resources>
