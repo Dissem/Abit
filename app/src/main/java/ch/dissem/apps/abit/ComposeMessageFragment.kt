@@ -63,6 +63,7 @@ class ComposeMessageFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        retainInstance = true
         arguments?.apply {
             val draft = getSerializable(EXTRA_DRAFT) as Plaintext?
             if (draft != null) {
@@ -264,6 +265,14 @@ class ComposeMessageFragment : Fragment() {
             } ?: throw IllegalStateException("Context is not available")
         }
         super.onPause()
+    }
+
+    override fun onDestroyView() {
+        identity = sender_input.selectedItem as BitmessageAddress
+        // recipient is set when one is selected
+        subject = subject_input.text?.toString() ?: ""
+        content = body_input.text?.toString() ?: ""
+        super.onDestroyView()
     }
 
     private fun send() {

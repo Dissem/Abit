@@ -43,13 +43,15 @@ class ComposeMessageActivity : AppCompatActivity() {
             setHomeButtonEnabled(false)
         }
 
-        // Display the fragment as the main content.
-        val fragment = ComposeMessageFragment()
-        fragment.arguments = intent.extras
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.content, fragment)
-            .commit()
+        if (supportFragmentManager.findFragmentById(R.id.content) == null) {
+            // Display the fragment as the main content.
+            val fragment = ComposeMessageFragment()
+            fragment.arguments = intent.extras
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.content, fragment)
+                .commit()
+        }
     }
 
     companion object {
@@ -63,10 +65,13 @@ class ComposeMessageActivity : AppCompatActivity() {
         const val EXTRA_PARENT = "ch.dissem.abit.Message.PARENT"
 
         fun launchReplyTo(fragment: Fragment, item: Plaintext) =
-            fragment.startActivity(getReplyIntent(
-                ctx = fragment.activity ?: throw IllegalStateException("Fragment not attached to an activity"),
-                item = item
-            ))
+            fragment.startActivity(
+                getReplyIntent(
+                    ctx = fragment.activity
+                        ?: throw IllegalStateException("Fragment not attached to an activity"),
+                    item = item
+                )
+            )
 
         fun launchReplyTo(activity: Activity, item: Plaintext) =
             activity.startActivity(getReplyIntent(activity, item))
@@ -90,15 +95,20 @@ class ComposeMessageActivity : AppCompatActivity() {
             }
             replyIntent.putExtra(EXTRA_PARENT, item)
             item.subject?.let { subject ->
-                val prefix: String = if (subject.length >= 3 && subject.substring(0, 3).equals("RE:", ignoreCase = true)) {
+                val prefix: String = if (subject.length >= 3 && subject.substring(0, 3).equals(
+                        "RE:",
+                        ignoreCase = true
+                    )) {
                     ""
                 } else {
                     "RE: "
                 }
                 replyIntent.putExtra(EXTRA_SUBJECT, prefix + subject)
             }
-            replyIntent.putExtra(EXTRA_CONTENT,
-                "\n\n------------------------------------------------------\n" + item.text!!)
+            replyIntent.putExtra(
+                EXTRA_CONTENT,
+                "\n\n------------------------------------------------------\n" + item.text!!
+            )
             return replyIntent
         }
     }

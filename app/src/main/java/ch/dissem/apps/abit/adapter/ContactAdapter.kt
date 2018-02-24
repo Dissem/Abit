@@ -114,6 +114,13 @@ class ContactAdapter(
                         }.invoke()
                     }
 
+                if (newValues.isEmpty()) {
+                    try {
+                        newValues.add(BitmessageAddress(prefix.toString()))
+                    } catch (_: Exception) {
+                    }
+                }
+
                 results.values = newValues
                 results.count = newValues.size
             } else {
@@ -134,4 +141,6 @@ class ContactAdapter(
             }
         }
     }
+
+    fun indexOf(element: BitmessageAddress) = originalData.indexOf(element)
 }
