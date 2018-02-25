@@ -20,7 +20,7 @@ android {
         applicationId "ch.dissem.apps.${appName.toLowerCase()}"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 22
+        versionCode 23
         versionName "1.0-rc1"
         multiDexEnabled true
     }

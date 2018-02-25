@@ -132,7 +132,8 @@ class ComposeMessageFragment : Fragment() {
                 )
                 recipient_input.setAdapter(adapter)
                 recipient_input.onItemClickListener =
-                    AdapterView.OnItemClickListener { _, _, pos, _ -> adapter.getItem(pos) }
+                    AdapterView.OnItemClickListener { _, _, pos, _ -> recipient = adapter.getItem(pos) }
+
                 recipient_input.onItemSelectedListener =
                     object : AdapterView.OnItemSelectedListener {
                         override fun onItemSelected(
