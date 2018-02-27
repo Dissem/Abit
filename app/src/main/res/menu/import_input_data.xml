@@ -18,7 +18,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/open_file"
         android:title="@string/open_file"
         android:icon="@drawable/ic_action_open_file"
         app:showAsAction="ifRoom"/>

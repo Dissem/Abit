@@ -16,13 +16,12 @@
 
 package ch.dissem.bitmessage.repository
 
-import android.os.Build
 import android.os.Build.VERSION_CODES.LOLLIPOP
 import ch.dissem.apps.abit.repository.AndroidLabelRepository
 import ch.dissem.apps.abit.repository.SqlHelper
 import ch.dissem.bitmessage.entity.valueobject.Label
 import ch.dissem.bitmessage.ports.LabelRepository
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

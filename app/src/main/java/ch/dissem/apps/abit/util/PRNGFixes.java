@@ -39,6 +39,7 @@ import java.security.Security;
  * @see <a href="http://android-developers.blogspot.ch/2013/08/some-securerandom-thoughts.html">
  * http://android-developers.blogspot.ch/2013/08/some-securerandom-thoughts.html</a>
  */
+@SuppressWarnings("WeakerAccess")
 public final class PRNGFixes {
 
     private static final int VERSION_CODE_JELLY_BEAN = 16;

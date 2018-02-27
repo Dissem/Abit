@@ -27,7 +27,7 @@ import ch.dissem.apps.abit.listener.ListSelectionListener
 /**
  * @author Christian Basler
  */
-abstract class AbstractItemListFragment<L, T> : ListFragment(), ListHolder<L> {
+abstract class AbstractItemListFragment<in L, T> : ListFragment(), ListHolder<L> {
     /**
      * The fragment's current callback object, which is notified of list item
      * clicks.

@@ -16,7 +16,6 @@
 
 package ch.dissem.bitmessage.repository
 
-import android.os.Build
 import android.os.Build.VERSION_CODES.LOLLIPOP
 import ch.dissem.apps.abit.repository.AndroidNodeRegistry
 import ch.dissem.apps.abit.repository.SqlHelper
