@@ -40,11 +40,12 @@ import java.util.*
  */
 class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepository() {
 
-    override fun findMessages(label: Label?, offset: Int, limit: Int) = if (label === LABEL_ARCHIVE) {
-        super.findMessages(null as Label?, offset, limit)
-    } else {
-        super.findMessages(label, offset, limit)
-    }
+    override fun findMessages(label: Label?, offset: Int, limit: Int) =
+        if (label === LABEL_ARCHIVE) {
+            super.findMessages(null as Label?, offset, limit)
+        } else {
+            super.findMessages(label, offset, limit)
+        }
 
     override fun countUnread(label: Label?) = when {
         label === LABEL_ARCHIVE -> 0
@@ -63,7 +64,7 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
         ).toInt()
     }
 
-    override fun findConversations(label: Label?): List<UUID> {
+    override fun findConversations(label: Label?, offset: Int, limit: Int): List<UUID> {
         val projection = arrayOf(COLUMN_CONVERSATION)
 
         val where = when {
@@ -74,8 +75,12 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
         val result = LinkedList<UUID>()
         sql.readableDatabase.query(
             true,
-            TABLE_NAME, projection, where,
-            null, null, null, null, null
+            TABLE_NAME,
+            projection,
+            where,
+            null, null, null,
+            "$COLUMN_RECEIVED DESC, $COLUMN_SENT DESC",
+            if (limit == 0) null else "$offset, $limit"
         ).use { c ->
             while (c.moveToNext()) {
                 val uuidBytes = c.getBlob(c.getColumnIndex(COLUMN_CONVERSATION))
@@ -133,7 +138,22 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
 
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
-        val projection = arrayOf(COLUMN_ID, COLUMN_IV, COLUMN_TYPE, COLUMN_SENDER, COLUMN_RECIPIENT, COLUMN_DATA, COLUMN_ACK_DATA, COLUMN_SENT, COLUMN_RECEIVED, COLUMN_STATUS, COLUMN_TTL, COLUMN_RETRIES, COLUMN_NEXT_TRY, COLUMN_CONVERSATION)
+        val projection = arrayOf(
+            COLUMN_ID,
+            COLUMN_IV,
+            COLUMN_TYPE,
+            COLUMN_SENDER,
+            COLUMN_RECIPIENT,
+            COLUMN_DATA,
+            COLUMN_ACK_DATA,
+            COLUMN_SENT,
+            COLUMN_RECEIVED,
+            COLUMN_STATUS,
+            COLUMN_TTL,
+            COLUMN_RETRIES,
+            COLUMN_NEXT_TRY,
+            COLUMN_CONVERSATION
+        )
 
         sql.readableDatabase.query(
             TABLE_NAME, projection,
@@ -174,7 +194,8 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
         labels = findLabels(id!!)
     }
 
-    private fun findLabels(msgId: Any) = (ctx.labelRepository as AndroidLabelRepository).findLabels(msgId)
+    private fun findLabels(msgId: Any) =
+        (ctx.labelRepository as AndroidLabelRepository).findLabels(msgId)
 
     override fun save(message: Plaintext) {
         saveContactIfNecessary(message.from)

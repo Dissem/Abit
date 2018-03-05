@@ -28,14 +28,15 @@ import android.view.*
 import android.widget.Toast
 import ch.dissem.apps.abit.ComposeMessageActivity.Companion.EXTRA_BROADCAST
 import ch.dissem.apps.abit.ComposeMessageActivity.Companion.EXTRA_IDENTITY
-import ch.dissem.apps.abit.adapter.SwipeableMessageAdapter
+import ch.dissem.apps.abit.adapter.SwipeableConversationAdapter
 import ch.dissem.apps.abit.listener.ListSelectionListener
 import ch.dissem.apps.abit.repository.AndroidMessageRepository
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.service.Singleton.currentLabel
 import ch.dissem.apps.abit.util.FabUtils
-import ch.dissem.bitmessage.entity.Plaintext
+import ch.dissem.bitmessage.entity.Conversation
 import ch.dissem.bitmessage.entity.valueobject.Label
+import ch.dissem.bitmessage.utils.ConversationService
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator
 import com.h6ah4i.android.widget.advrecyclerview.decoration.SimpleListDividerDecorator
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager
@@ -60,13 +61,13 @@ private const val PAGE_SIZE = 15
  * Activities containing this fragment MUST implement the [ListSelectionListener]
  * interface.
  */
-class MessageListFragment : Fragment(), ListHolder<Label> {
+class ConversationListFragment : Fragment(), ListHolder<Label> {
 
     private var isLoading = false
     private var isLastPage = false
 
     private var layoutManager: LinearLayoutManager? = null
-    private var swipeableMessageAdapter: SwipeableMessageAdapter? = null
+    private var swipeableConversationAdapter: SwipeableConversationAdapter? = null
     private var wrappedAdapter: RecyclerView.Adapter<*>? = null
     private var recyclerViewSwipeManager: RecyclerViewSwipeManager? = null
     private var recyclerViewTouchActionGuardManager: RecyclerViewTouchActionGuardManager? = null
@@ -90,20 +91,28 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
 
     private var emptyTrashMenuItem: MenuItem? = null
     private lateinit var messageRepo: AndroidMessageRepository
+    private lateinit var conversationService: ConversationService
     private var activateOnItemClick: Boolean = false
 
     private val backStack = Stack<Label>()
 
     fun loadMoreItems() {
         isLoading = true
-        swipeableMessageAdapter?.let { messageAdapter ->
+        swipeableConversationAdapter?.let { messageAdapter ->
             doAsync {
-                val messages = messageRepo.findMessages(currentLabel.value, messageAdapter.itemCount, PAGE_SIZE)
-                onUiThread {
-                    messageAdapter.addAll(messages)
-                    isLoading = false
-                    isLastPage = messages.size < PAGE_SIZE
+                val conversationIds = messageRepo.findConversations(
+                    currentLabel.value,
+                    messageAdapter.itemCount,
+                    PAGE_SIZE
+                )
+                conversationIds.forEach { conversationId ->
+                    val conversation = conversationService.getConversation(conversationId)
+                    onUiThread {
+                        messageAdapter.add(conversation)
+                    }
                 }
+                isLoading = false
+                isLastPage = conversationIds.size < PAGE_SIZE
             }
         }
     }
@@ -119,6 +128,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         val activity = activity as MainActivity
         initFab(activity)
         messageRepo = Singleton.getMessageRepository(activity)
+        conversationService = Singleton.getConversationService(activity)
 
         currentLabel.addObserver(this) { new -> doUpdateList(new) }
         doUpdateList(currentLabel.value)
@@ -131,10 +141,10 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
 
     private fun doUpdateList(label: Label?) {
         val mainActivity = activity as? MainActivity
-        swipeableMessageAdapter?.clear(label)
+        swipeableConversationAdapter?.clear(label)
         if (label == null) {
             mainActivity?.updateTitle(getString(R.string.app_name))
-            swipeableMessageAdapter?.notifyDataSetChanged()
+            swipeableConversationAdapter?.notifyDataSetChanged()
             return
         }
         emptyTrashMenuItem?.isVisible = label.type == Label.Type.TRASH
@@ -149,7 +159,11 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         loadMoreItems()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View =
         inflater.inflate(R.layout.fragment_message_list, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -169,31 +183,29 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         // swipe manager
         val swipeManager = RecyclerViewSwipeManager()
 
-        //swipeableMessageAdapter
-        val adapter = SwipeableMessageAdapter().apply {
+        //swipeableConversationAdapter
+        val adapter = SwipeableConversationAdapter().apply {
             setActivateOnItemClick(activateOnItemClick)
         }
-        adapter.eventListener = object : SwipeableMessageAdapter.EventListener {
-            override fun onItemDeleted(item: Plaintext) {
-                if (MessageDetailFragment.isInTrash(item)) {
-                    Singleton.labeler.delete(item)
-                    messageRepo.remove(item)
-                } else {
-                    Singleton.labeler.delete(item)
-                    messageRepo.save(item)
+        adapter.eventListener = object : SwipeableConversationAdapter.EventListener {
+            override fun onItemDeleted(item: Conversation) {
+                item.messages.forEach {
+                    Singleton.labeler.delete(it)
+                    messageRepo.save(it)
                 }
             }
 
-            override fun onItemArchived(item: Plaintext) {
-                Singleton.labeler.archive(item)
+            override fun onItemArchived(item: Conversation) {
+                item.messages.forEach { Singleton.labeler.archive(it) }
             }
 
             override fun onItemViewClicked(v: View?) {
                 val position = recycler_view.getChildAdapterPosition(v)
                 adapter.setSelectedPosition(position)
                 if (position != RecyclerView.NO_POSITION) {
-                    val item = adapter.getItem(position)
-                    MainActivity.apply { onItemSelected(item) }
+                    adapter.getItem(position).messages.firstOrNull()?.let {
+                        MainActivity.apply { onItemSelected(it) }
+                    }
                 }
             }
         }
@@ -209,12 +221,15 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         animator.supportsChangeAnimations = false
 
         recycler_view.layoutManager = layoutManager
-        recycler_view.adapter = wrappedAdapter  // requires *wrapped* swipeableMessageAdapter
+        recycler_view.adapter = wrappedAdapter  // requires *wrapped* swipeableConversationAdapter
         recycler_view.itemAnimator = animator
         recycler_view.addOnScrollListener(recyclerViewOnScrollListener)
 
-        recycler_view.addItemDecoration(SimpleListDividerDecorator(
-            ContextCompat.getDrawable(context, R.drawable.list_divider_h), true))
+        recycler_view.addItemDecoration(
+            SimpleListDividerDecorator(
+                ContextCompat.getDrawable(context, R.drawable.list_divider_h), true
+            )
+        )
 
         // NOTE:
         // The initialization order is very important! This order determines the priority of
@@ -226,9 +241,9 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
 
         recyclerViewTouchActionGuardManager = touchActionGuardManager
         recyclerViewSwipeManager = swipeManager
-        swipeableMessageAdapter = adapter
+        swipeableConversationAdapter = adapter
 
-        Singleton.updateMessageListAdapterInListener(adapter)
+//   FIXME     Singleton.updateMessageListAdapterInListener(adapter)
     }
 
     private fun initFab(context: MainActivity) {
@@ -239,8 +254,10 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
             .addOnMenuItemClickListener { _, _, itemId ->
                 val identity = Singleton.getIdentity(context)
                 if (identity == null) {
-                    Toast.makeText(activity, R.string.no_identity_warning,
-                        Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        activity, R.string.no_identity_warning,
+                        Toast.LENGTH_LONG
+                    ).show()
                 } else {
                     when (itemId) {
                         1 -> {
@@ -274,7 +291,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         wrappedAdapter?.let { WrapperAdapterUtils.releaseAll(it) }
         wrappedAdapter = null
 
-        swipeableMessageAdapter = null
+        swipeableConversationAdapter = null
         layoutManager = null
 
         super.onDestroyView()
@@ -311,7 +328,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
     }
 
     override fun setActivateOnItemClick(activateOnItemClick: Boolean) {
-        swipeableMessageAdapter?.setActivateOnItemClick(activateOnItemClick)
+        swipeableConversationAdapter?.setActivateOnItemClick(activateOnItemClick)
         this.activateOnItemClick = activateOnItemClick
     }
 

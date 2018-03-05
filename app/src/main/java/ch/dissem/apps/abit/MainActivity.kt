@@ -324,8 +324,14 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             val tag = item.tag
             if (tag is Label) {
                 currentLabel.value = tag
-                if (itemList !is MessageListFragment) {
-                    changeList(MessageListFragment())
+                if (tag.type == Label.Type.INBOX || tag == LABEL_ARCHIVE) {
+                    if (itemList !is ConversationListFragment) {
+                        changeList(ConversationListFragment())
+                    }
+                } else {
+                    if (itemList !is MessageListFragment) {
+                        changeList(MessageListFragment())
+                    }
                 }
                 return false
             } else if (item is Nameable<*>) {
