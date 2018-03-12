@@ -32,9 +32,7 @@ import ch.dissem.apps.abit.repository.AndroidLabelRepository.Companion.LABEL_ARC
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.service.Singleton.currentLabel
 import ch.dissem.apps.abit.synchronization.SyncAdapter
-import ch.dissem.apps.abit.util.Labels
-import ch.dissem.apps.abit.util.NetworkUtils
-import ch.dissem.apps.abit.util.Preferences
+import ch.dissem.apps.abit.util.*
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.Plaintext
@@ -404,8 +402,8 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             .withIdentifier(label.id as Long)
             .withName(label.toString())
             .withTag(label)
-            .withIcon(Labels.getIcon(label))
-            .withIconColor(Labels.getColor(label))
+            .withIcon(label.getIcon())
+            .withIconColor(label.getColor(0xFF000000.toInt()))
         drawer.addItemAtPosition(item, drawer.drawerItems.size - 3)
     }
 

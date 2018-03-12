@@ -29,6 +29,7 @@ import android.text.util.Linkify.WEB_URLS
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
+import ch.dissem.apps.abit.adapter.LabelAdapter
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.util.Assets
 import ch.dissem.apps.abit.util.Constants.BITMESSAGE_ADDRESS_PATTERN
@@ -256,40 +257,6 @@ class MessageDetailFragment : Fragment() {
                     }
                 }
             }
-        }
-    }
-
-    private class LabelAdapter internal constructor(private val ctx: Context, labels: Set<Label>) :
-        RecyclerView.Adapter<LabelAdapter.ViewHolder>() {
-
-        private val labels = labels.toMutableList()
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LabelAdapter.ViewHolder {
-            val context = parent.context
-            val inflater = LayoutInflater.from(context)
-
-            // Inflate the custom layout
-            val contactView = inflater.inflate(R.layout.item_label, parent, false)
-
-            // Return a new holder instance
-            return ViewHolder(contactView)
-        }
-
-        // Involves populating data into the item through holder
-        override fun onBindViewHolder(viewHolder: LabelAdapter.ViewHolder, position: Int) {
-            // Get the data model based on position
-            val label = labels[position]
-
-            viewHolder.icon.icon?.color(Labels.getColor(label))
-            viewHolder.icon.icon?.icon(Labels.getIcon(label))
-            viewHolder.label.text = Labels.getText(label, ctx)
-        }
-
-        override fun getItemCount() = labels.size
-
-        internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            var icon = itemView.findViewById<IconicsImageView>(R.id.icon)!!
-            var label = itemView.findViewById<TextView>(R.id.label)!!
         }
     }
 
