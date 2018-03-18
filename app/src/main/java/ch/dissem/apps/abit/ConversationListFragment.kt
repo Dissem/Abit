@@ -203,9 +203,7 @@ class ConversationListFragment : Fragment(), ListHolder<Label> {
                 val position = recycler_view.getChildAdapterPosition(v)
                 adapter.setSelectedPosition(position)
                 if (position != RecyclerView.NO_POSITION) {
-                    adapter.getItem(position).messages.firstOrNull()?.let {
-                        MainActivity.apply { onItemSelected(it) }
-                    }
+                    MainActivity.apply { onItemSelected(adapter.getItem(position)) }
                 }
             }
         }

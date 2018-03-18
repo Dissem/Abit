@@ -32,9 +32,13 @@ import ch.dissem.apps.abit.repository.AndroidLabelRepository.Companion.LABEL_ARC
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.service.Singleton.currentLabel
 import ch.dissem.apps.abit.synchronization.SyncAdapter
-import ch.dissem.apps.abit.util.*
+import ch.dissem.apps.abit.util.NetworkUtils
+import ch.dissem.apps.abit.util.Preferences
+import ch.dissem.apps.abit.util.getColor
+import ch.dissem.apps.abit.util.getIcon
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.entity.BitmessageAddress
+import ch.dissem.bitmessage.entity.Conversation
 import ch.dissem.bitmessage.entity.Plaintext
 import ch.dissem.bitmessage.entity.valueobject.Label
 import com.github.amlcurran.showcaseview.ShowcaseView
@@ -458,6 +462,13 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             // adding or replacing the detail fragment using a
             // fragment transaction.
             val fragment = when (item) {
+                is Conversation -> {
+                    ConversationDetailFragment().apply {
+                        arguments = Bundle().apply {
+                            putSerializable(ConversationDetailFragment.ARG_ITEM, item)
+                        }
+                    }
+                }
                 is Plaintext -> {
                     if (item.labels.any { it.type == Label.Type.DRAFT }) {
                         ComposeMessageFragment().apply {
@@ -489,6 +500,11 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             val detailIntent = when (item) {
+                is Conversation -> {
+                    Intent(this, MessageDetailActivity::class.java).apply {
+                        putExtra(ConversationDetailFragment.ARG_ITEM, item)
+                    }
+                }
                 is Plaintext -> {
                     if (item.labels.any { it.type == Label.Type.DRAFT }) {
                         Intent(this, ComposeMessageActivity::class.java).apply {

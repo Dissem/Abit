@@ -46,15 +46,14 @@ class LabelAdapter internal constructor(private val ctx: Context, labels: Collec
     override fun getItemCount() = labels.size
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val background = itemView
         var icon = itemView.findViewById<IconicsImageView>(R.id.icon)!!
         var label = itemView.findViewById<TextView>(R.id.label)!!
 
         fun setBackground(@ColorInt color: Int) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                background.backgroundTintList = ColorStateList.valueOf(color)
+                itemView.backgroundTintList = ColorStateList.valueOf(color)
             } else {
-                background.backgroundColor = color
+                itemView.backgroundColor = color
             }
         }
     }

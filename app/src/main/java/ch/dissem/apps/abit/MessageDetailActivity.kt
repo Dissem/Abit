@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.NavUtils
 import android.view.MenuItem
+import ch.dissem.bitmessage.entity.Conversation
 
 
 /**
@@ -33,13 +34,17 @@ class MessageDetailActivity : DetailActivity() {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             val arguments = Bundle()
-            arguments.putSerializable(MessageDetailFragment.ARG_ITEM,
-                    intent.getSerializableExtra(MessageDetailFragment.ARG_ITEM))
-            val fragment = MessageDetailFragment()
+            val item = intent.getSerializableExtra(MessageDetailFragment.ARG_ITEM)
+            arguments.putSerializable(MessageDetailFragment.ARG_ITEM, item)
+            val fragment = if (item is Conversation) {
+                ConversationDetailFragment()
+            } else {
+                MessageDetailFragment()
+            }
             fragment.arguments = arguments
             supportFragmentManager.beginTransaction()
-                    .add(R.id.content, fragment)
-                    .commit()
+                .add(R.id.content, fragment)
+                .commit()
         }
     }
 
