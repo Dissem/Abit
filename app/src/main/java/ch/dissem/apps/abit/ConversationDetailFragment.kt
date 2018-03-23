@@ -19,7 +19,6 @@ package ch.dissem.apps.abit
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.annotation.IdRes
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -28,9 +27,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import ch.dissem.apps.abit.adapter.ConversationAdapter
 import ch.dissem.apps.abit.service.Singleton
-import ch.dissem.apps.abit.util.Assets
 import ch.dissem.apps.abit.util.Drawables
 import ch.dissem.apps.abit.util.Strings.prepareMessageExtract
+import ch.dissem.apps.abit.util.getDrawable
 import ch.dissem.bitmessage.entity.Conversation
 import ch.dissem.bitmessage.entity.Plaintext
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
@@ -148,7 +147,7 @@ class ConversationDetailFragment : Fragment() {
             val message = messages[position]
 
             viewHolder.avatar.setImageDrawable(Identicon(message.from))
-            viewHolder.status.setImageResource(Assets.getStatusDrawable(message.status))
+            viewHolder.status.setImageResource(message.status.getDrawable())
             viewHolder.sender.text = message.from.toString()
             viewHolder.extract.text = prepareMessageExtract(message.text)
             viewHolder.item = message

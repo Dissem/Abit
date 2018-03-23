@@ -21,13 +21,14 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color.BLACK
 import android.graphics.Color.WHITE
+import android.graphics.drawable.Drawable
 import android.util.Base64
 import android.util.Base64.NO_WRAP
 import android.util.Base64.URL_SAFE
 import android.view.Menu
 import android.view.MenuItem
-import ch.dissem.apps.abit.Identicon
 import ch.dissem.apps.abit.R
+import ch.dissem.apps.abit.util.Drawables.QR_CODE_SIZE
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
@@ -42,61 +43,61 @@ import java.io.ByteArrayOutputStream
  * Some helper methods to work with drawables.
  */
 object Drawables {
-    private val LOG = LoggerFactory.getLogger(Drawables::class.java)
+    internal val LOG = LoggerFactory.getLogger(Drawables::class.java)
 
-    private const val QR_CODE_SIZE = 350
+    internal const val QR_CODE_SIZE = 350
 
     fun addIcon(ctx: Context, menu: Menu, menuItem: Int, icon: IIcon): MenuItem {
         val item = menu.findItem(menuItem)
         item.icon = IconicsDrawable(ctx, icon).colorRes(R.color.colorPrimaryDarkText).actionBar()
         return item
     }
+}
 
-    fun toBitmap(identicon: Identicon, width: Int, height: Int = width): Bitmap {
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        identicon.setBounds(0, 0, canvas.width, canvas.height)
-        identicon.draw(canvas)
-        return bitmap
+fun Drawable.toBitmap(width: Int, height: Int = width): Bitmap {
+    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    setBounds(0, 0, canvas.width, canvas.height)
+    draw(canvas)
+    return bitmap
+}
+
+fun BitmessageAddress.qrCode(): Bitmap? {
+    val link = StringBuilder()
+    link.append(Constants.BITMESSAGE_URL_SCHEMA)
+    link.append(address)
+    if (alias != null) {
+        link.append("?label=").append(alias)
+    }
+    pubkey?.apply {
+        link.append(if (alias == null) '?' else '&')
+        val pubkey = ByteArrayOutputStream()
+        writer().writeUnencrypted(pubkey)
+        link.append("pubkey=")
+            .append(Base64.encodeToString(pubkey.toByteArray(), URL_SAFE or NO_WRAP))
+
+    }
+    val result: BitMatrix
+    try {
+        result = MultiFormatWriter().encode(
+            link.toString(),
+            BarcodeFormat.QR_CODE, QR_CODE_SIZE, QR_CODE_SIZE, null
+        )
+    } catch (e: WriterException) {
+        Drawables.LOG.error(e.message, e)
+        return null
     }
 
-    fun qrCode(address: BitmessageAddress?): Bitmap? {
-        if (address == null) {
-            return null
+    val w = result.width
+    val h = result.height
+    val pixels = IntArray(w * h)
+    for (y in 0 until h) {
+        val offset = y * w
+        for (x in 0 until w) {
+            pixels[offset + x] = if (result.get(x, y)) BLACK else WHITE
         }
-        val link = StringBuilder()
-        link.append(Constants.BITMESSAGE_URL_SCHEMA)
-        link.append(address.address)
-        if (address.alias != null) {
-            link.append("?label=").append(address.alias)
-        }
-        address.pubkey?.apply {
-            link.append(if (address.alias == null) '?' else '&')
-            val pubkey = ByteArrayOutputStream()
-            writer().writeUnencrypted(pubkey)
-            link.append("pubkey=").append(Base64.encodeToString(pubkey.toByteArray(), URL_SAFE or NO_WRAP))
-
-        }
-        val result: BitMatrix
-        try {
-            result = MultiFormatWriter().encode(link.toString(),
-                    BarcodeFormat.QR_CODE, QR_CODE_SIZE, QR_CODE_SIZE, null)
-        } catch (e: WriterException) {
-            LOG.error(e.message, e)
-            return null
-        }
-
-        val w = result.width
-        val h = result.height
-        val pixels = IntArray(w * h)
-        for (y in 0 until h) {
-            val offset = y * w
-            for (x in 0 until w) {
-                pixels[offset + x] = if (result.get(x, y)) BLACK else WHITE
-            }
-        }
-        val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        bitmap.setPixels(pixels, 0, QR_CODE_SIZE, 0, 0, w, h)
-        return bitmap
     }
+    val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+    bitmap.setPixels(pixels, 0, QR_CODE_SIZE, 0, 0, w, h)
+    return bitmap
 }

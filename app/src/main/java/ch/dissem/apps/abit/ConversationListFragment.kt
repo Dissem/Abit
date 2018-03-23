@@ -33,7 +33,6 @@ import ch.dissem.apps.abit.listener.ListSelectionListener
 import ch.dissem.apps.abit.repository.AndroidMessageRepository
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.service.Singleton.currentLabel
-import ch.dissem.apps.abit.util.FabUtils
 import ch.dissem.bitmessage.entity.Conversation
 import ch.dissem.bitmessage.entity.valueobject.Label
 import ch.dissem.bitmessage.utils.ConversationService
@@ -248,7 +247,7 @@ class ConversationListFragment : Fragment(), ListHolder<Label> {
         val menu = FabSpeedDialMenu(context)
         menu.add(R.string.broadcast).setIcon(R.drawable.ic_action_broadcast)
         menu.add(R.string.personal_message).setIcon(R.drawable.ic_action_personal)
-        FabUtils.initFab(context, R.drawable.ic_action_compose_message, menu)
+        context.initFab(R.drawable.ic_action_compose_message, menu)
             .addOnMenuItemClickListener { _, _, itemId ->
                 val identity = Singleton.getIdentity(context)
                 if (identity == null) {

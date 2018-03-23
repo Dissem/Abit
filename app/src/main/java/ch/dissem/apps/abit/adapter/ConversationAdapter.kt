@@ -13,8 +13,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import ch.dissem.apps.abit.*
 import ch.dissem.apps.abit.service.Singleton
-import ch.dissem.apps.abit.util.Assets
 import ch.dissem.apps.abit.util.Constants
+import ch.dissem.apps.abit.util.getDrawable
 import ch.dissem.bitmessage.entity.Conversation
 import ch.dissem.bitmessage.entity.Plaintext
 import ch.dissem.bitmessage.entity.valueobject.Label
@@ -61,7 +61,7 @@ class ConversationAdapter internal constructor(
             sender.setOnClickListener(senderClickListener)
 
             recipient.text = message.to.toString()
-            status.setImageResource(Assets.getStatusDrawable(message.status))
+            status.setImageResource(message.status.getDrawable())
             text.text = message.text
 
             Linkify.addLinks(text, Linkify.WEB_URLS)

@@ -29,8 +29,9 @@ import android.widget.TextView
 import ch.dissem.apps.abit.Identicon
 import ch.dissem.apps.abit.R
 import ch.dissem.apps.abit.repository.AndroidLabelRepository.Companion.LABEL_ARCHIVE
-import ch.dissem.apps.abit.util.Assets
 import ch.dissem.apps.abit.util.Strings.prepareMessageExtract
+import ch.dissem.apps.abit.util.getDrawable
+import ch.dissem.apps.abit.util.getString
 import ch.dissem.bitmessage.entity.Plaintext
 import ch.dissem.bitmessage.entity.valueobject.Label
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter
@@ -48,7 +49,8 @@ import java.util.*
  * @author Christian Basler
  * @see [https://github.com/h6ah4i/android-advancedrecyclerview](https://github.com/h6ah4i/android-advancedrecyclerview)
  */
-class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.ViewHolder>(), SwipeableItemAdapter<SwipeableMessageAdapter.ViewHolder>, SwipeableItemConstants {
+class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.ViewHolder>(),
+    SwipeableItemAdapter<SwipeableMessageAdapter.ViewHolder>, SwipeableItemConstants {
 
     private val data = LinkedList<Plaintext>()
     var eventListener: EventListener? = null
@@ -84,7 +86,8 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
 
     init {
         itemViewOnClickListener = View.OnClickListener { view -> onItemViewClick(view) }
-        swipeableViewContainerOnClickListener = View.OnClickListener { view -> onSwipeableViewContainerClick(view) }
+        swipeableViewContainerOnClickListener =
+            View.OnClickListener { view -> onSwipeableViewContainerClick(view) }
 
         // SwipeableItemAdapter requires stable ID, and also
         // have to implement the getItemId() method appropriately.
@@ -134,7 +137,8 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
 
     private fun onSwipeableViewContainerClick(v: View) {
         eventListener?.onItemViewClicked(
-            RecyclerViewAdapterUtils.getParentViewHolderItemView(v))
+            RecyclerViewAdapterUtils.getParentViewHolderItemView(v)
+        )
     }
 
     fun getItem(position: Int) = data[position]
@@ -168,8 +172,8 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
 
             // set data
             avatar.setImageDrawable(Identicon(item.from))
-            status.setImageResource(Assets.getStatusDrawable(item.status))
-            status.contentDescription = holder.status.context.getString(Assets.getStatusString(item.status))
+            status.setImageResource(item.status.getDrawable())
+            status.contentDescription = holder.status.context.getString(item.status.getString())
             sender.text = item.from.toString()
             subject.text = prepareMessageExtract(item.subject)
             extract.text = prepareMessageExtract(item.text)
@@ -194,16 +198,18 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
 
     @SuppressLint("SwitchIntDef")
     override fun onSetSwipeBackground(holder: ViewHolder, position: Int, type: Int) =
-        holder.itemView.setBackgroundResource(when (type) {
-            DRAWABLE_SWIPE_NEUTRAL_BACKGROUND -> R.drawable.bg_swipe_item_neutral
-            DRAWABLE_SWIPE_LEFT_BACKGROUND -> R.drawable.bg_swipe_item_left
-            DRAWABLE_SWIPE_RIGHT_BACKGROUND -> if (label === LABEL_ARCHIVE || label?.type == Label.Type.TRASH) {
-                R.drawable.bg_swipe_item_neutral
-            } else {
-                R.drawable.bg_swipe_item_right
+        holder.itemView.setBackgroundResource(
+            when (type) {
+                DRAWABLE_SWIPE_NEUTRAL_BACKGROUND -> R.drawable.bg_swipe_item_neutral
+                DRAWABLE_SWIPE_LEFT_BACKGROUND -> R.drawable.bg_swipe_item_left
+                DRAWABLE_SWIPE_RIGHT_BACKGROUND -> if (label === LABEL_ARCHIVE || label?.type == Label.Type.TRASH) {
+                    R.drawable.bg_swipe_item_neutral
+                } else {
+                    R.drawable.bg_swipe_item_right
+                }
+                else -> R.drawable.bg_swipe_item_neutral
             }
-            else -> R.drawable.bg_swipe_item_neutral
-        })
+        )
 
     @SuppressLint("SwitchIntDef")
     override fun onSwipeItem(holder: ViewHolder, position: Int, result: Int) =
@@ -222,7 +228,10 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
         notifyItemChanged(selectedPosition)
     }
 
-    private class SwipeLeftResultAction internal constructor(adapter: SwipeableMessageAdapter, position: Int) : SwipeResultActionMoveToSwipedDirection() {
+    private class SwipeLeftResultAction internal constructor(
+        adapter: SwipeableMessageAdapter,
+        position: Int
+    ) : SwipeResultActionMoveToSwipedDirection() {
         private var adapter: SwipeableMessageAdapter? = adapter
         private val item = adapter.data[position]
 
@@ -235,7 +244,10 @@ class SwipeableMessageAdapter : RecyclerView.Adapter<SwipeableMessageAdapter.Vie
         }
     }
 
-    private class SwipeRightResultAction internal constructor(adapter: SwipeableMessageAdapter, position: Int) : SwipeResultActionRemoveItem() {
+    private class SwipeRightResultAction internal constructor(
+        adapter: SwipeableMessageAdapter,
+        position: Int
+    ) : SwipeResultActionRemoveItem() {
         private var adapter: SwipeableMessageAdapter? = adapter
         private val item = adapter.data[position]
 

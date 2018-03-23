@@ -43,28 +43,25 @@ object Assets {
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
-
     }
+}
 
-    @DrawableRes
-    fun getStatusDrawable(status: Plaintext.Status) = when (status) {
-        Plaintext.Status.RECEIVED -> 0
-        Plaintext.Status.DRAFT -> R.drawable.draft
-        Plaintext.Status.PUBKEY_REQUESTED -> R.drawable.public_key
-        Plaintext.Status.DOING_PROOF_OF_WORK -> R.drawable.ic_notification_proof_of_work
-        Plaintext.Status.SENT -> R.drawable.sent
-        Plaintext.Status.SENT_ACKNOWLEDGED -> R.drawable.sent_acknowledged
-        else -> 0
-    }
+fun Plaintext.Status.getDrawable() = when (this) {
+    Plaintext.Status.RECEIVED -> 0
+    Plaintext.Status.DRAFT -> R.drawable.draft
+    Plaintext.Status.PUBKEY_REQUESTED -> R.drawable.public_key
+    Plaintext.Status.DOING_PROOF_OF_WORK -> R.drawable.ic_notification_proof_of_work
+    Plaintext.Status.SENT -> R.drawable.sent
+    Plaintext.Status.SENT_ACKNOWLEDGED -> R.drawable.sent_acknowledged
+    else -> 0
+}
 
-    @StringRes
-    fun getStatusString(status: Plaintext.Status) = when (status) {
-        Plaintext.Status.RECEIVED -> R.string.status_received
-        Plaintext.Status.DRAFT -> R.string.status_draft
-        Plaintext.Status.PUBKEY_REQUESTED -> R.string.status_public_key
-        Plaintext.Status.DOING_PROOF_OF_WORK -> R.string.proof_of_work_title
-        Plaintext.Status.SENT -> R.string.status_sent
-        Plaintext.Status.SENT_ACKNOWLEDGED -> R.string.status_sent_acknowledged
-        else -> 0
-    }
+fun Plaintext.Status.getString() = when (this) {
+    Plaintext.Status.RECEIVED -> R.string.status_received
+    Plaintext.Status.DRAFT -> R.string.status_draft
+    Plaintext.Status.PUBKEY_REQUESTED -> R.string.status_public_key
+    Plaintext.Status.DOING_PROOF_OF_WORK -> R.string.proof_of_work_title
+    Plaintext.Status.SENT -> R.string.status_sent
+    Plaintext.Status.SENT_ACKNOWLEDGED -> R.string.status_sent_acknowledged
+    else -> 0
 }

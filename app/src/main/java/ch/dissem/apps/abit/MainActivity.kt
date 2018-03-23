@@ -19,6 +19,7 @@ package ch.dissem.apps.abit
 import android.content.Intent
 import android.graphics.Point
 import android.os.Bundle
+import android.support.annotation.DrawableRes
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
@@ -54,6 +55,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem
 import com.mikepenz.materialdrawer.model.interfaces.IProfile
 import com.mikepenz.materialdrawer.model.interfaces.Nameable
 import io.github.kobakei.materialfabspeeddial.FabSpeedDial
+import io.github.kobakei.materialfabspeeddial.FabSpeedDialMenu
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -536,6 +538,25 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
 
     fun updateTitle(title: CharSequence) {
         supportActionBar?.title = title
+    }
+
+    fun initFab(@DrawableRes drawableRes: Int, menu: FabSpeedDialMenu): FabSpeedDial {
+        val fab = floatingActionButton ?: throw IllegalStateException("Fab must not be null")
+        fab.removeAllOnMenuItemClickListeners()
+        fab.show()
+        fab.closeMenu()
+        val mainFab = fab.mainFab
+        mainFab.setImageResource(drawableRes)
+        fab.setMenu(menu)
+        fab.addOnStateChangeListener { isOpened: Boolean ->
+            if (isOpened) {
+                // It will be turned 45 degrees, which makes an x out of the +
+                mainFab.setImageResource(R.drawable.ic_action_add)
+            } else {
+                mainFab.setImageResource(drawableRes)
+            }
+        }
+        return fab
     }
 
     companion object {

@@ -31,16 +31,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import ch.dissem.apps.abit.adapter.LabelAdapter
 import ch.dissem.apps.abit.service.Singleton
-import ch.dissem.apps.abit.util.Assets
 import ch.dissem.apps.abit.util.Constants.BITMESSAGE_ADDRESS_PATTERN
 import ch.dissem.apps.abit.util.Constants.BITMESSAGE_URL_SCHEMA
 import ch.dissem.apps.abit.util.Drawables
-import ch.dissem.apps.abit.util.Labels
 import ch.dissem.apps.abit.util.Strings.prepareMessageExtract
+import ch.dissem.apps.abit.util.getDrawable
+import ch.dissem.apps.abit.util.getString
 import ch.dissem.bitmessage.entity.Plaintext
 import ch.dissem.bitmessage.entity.valueobject.Label
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
-import com.mikepenz.iconics.view.IconicsImageView
 import kotlinx.android.synthetic.main.fragment_message_detail.*
 import java.util.*
 
@@ -86,8 +85,8 @@ class MessageDetailFragment : Fragment() {
         // Show the dummy content as text in a TextView.
         item?.let { item ->
             subject.text = item.subject
-            status.setImageResource(Assets.getStatusDrawable(item.status))
-            status.contentDescription = getString(Assets.getStatusString(item.status))
+            status.setImageResource(item.status.getDrawable())
+            status.contentDescription = getString(item.status.getString())
             avatar.setImageDrawable(Identicon(item.from))
             val senderClickListener: (View) -> Unit = {
                 MainActivity.apply {
@@ -230,7 +229,7 @@ class MessageDetailFragment : Fragment() {
             val message = messages[position]
 
             viewHolder.avatar.setImageDrawable(Identicon(message.from))
-            viewHolder.status.setImageResource(Assets.getStatusDrawable(message.status))
+            viewHolder.status.setImageResource(message.status.getDrawable())
             viewHolder.sender.text = message.from.toString()
             viewHolder.extract.text = prepareMessageExtract(message.text)
             viewHolder.item = message

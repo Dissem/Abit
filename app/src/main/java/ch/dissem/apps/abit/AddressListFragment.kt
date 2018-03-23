@@ -27,7 +27,6 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import ch.dissem.apps.abit.service.Singleton
-import ch.dissem.apps.abit.util.FabUtils
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import com.google.zxing.integration.android.IntentIntegrator
 import io.github.kobakei.materialfabspeeddial.FabSpeedDialMenu
@@ -107,7 +106,7 @@ class AddressListFragment : AbstractItemListFragment<Void, BitmessageAddress>() 
         val menu = FabSpeedDialMenu(activity)
         menu.add(R.string.scan_qr_code).setIcon(R.drawable.ic_action_qr_code)
         menu.add(R.string.create_contact).setIcon(R.drawable.ic_action_create_contact)
-        FabUtils.initFab(activity, R.drawable.ic_action_add_contact, menu)
+        activity.initFab(R.drawable.ic_action_add_contact, menu)
             .addOnMenuItemClickListener { _, _, itemId ->
                 when (itemId) {
                     1 -> IntentIntegrator.forSupportFragment(this@AddressListFragment)

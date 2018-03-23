@@ -23,7 +23,7 @@ object PowStats {
                 powCount = preferences.getLong(PREFERENCE_POW_COUNT, 0L)
             }
         }
-        return (BigInteger.valueOf(averagePowUnitTime) * BigInteger(target) / TWO_POW_64).toLong()
+        return (averagePowUnitTime * BigInteger(target) / TWO_POW_64).toLong()
     }
 
     fun addPow(ctx: Context, time: Long, target: ByteArray) {
@@ -32,7 +32,7 @@ object PowStats {
         synchronized(this) {
             powCount++
             averagePowUnitTime = (
-                (BigInteger.valueOf(averagePowUnitTime) * powCountBefore + (BigInteger.valueOf(time) * TWO_POW_64 / targetBigInt)) / BigInteger.valueOf(powCount)
+                (averagePowUnitTime * powCountBefore + (time * TWO_POW_64 / targetBigInt)) / powCount
                 ).toLong()
 
             val preferences = PreferenceManager.getDefaultSharedPreferences(ctx)
@@ -42,4 +42,7 @@ object PowStats {
                 .apply()
         }
     }
+
+    private operator fun Long.times(other: BigInteger) = this.toBigInteger() * other
+    private operator fun BigInteger.div(other: Long) = this / other.toBigInteger()
 }

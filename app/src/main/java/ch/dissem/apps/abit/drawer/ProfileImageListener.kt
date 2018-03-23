@@ -10,7 +10,7 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import ch.dissem.apps.abit.service.Singleton
-import ch.dissem.apps.abit.util.Drawables
+import ch.dissem.apps.abit.util.qrCode
 import com.mikepenz.materialdrawer.AccountHeader
 import com.mikepenz.materialdrawer.model.interfaces.IProfile
 
@@ -23,7 +23,7 @@ class ProfileImageListener(private val ctx: Context) : AccountHeader.OnAccountHe
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
 
             val imageView = ImageView(ctx)
-            imageView.setImageBitmap(Drawables.qrCode(Singleton.getIdentity(ctx)))
+            imageView.setImageBitmap(Singleton.getIdentity(ctx)?.qrCode())
             imageView.setOnClickListener { dialog.dismiss() }
             dialog.addContentView(
                     imageView,
