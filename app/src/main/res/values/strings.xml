@@ -137,4 +137,6 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="encoding_simple">simple</string>
     <string name="encoding_extended">extended</string>
     <string name="context_menu">actions</string>
+    <string name="emulate_conversations">Guess conversations</string>
+    <string name="emulate_conversations_summary">Use subject to determine which messages belong together. The order will likely be wrong.</string>
 </resources>

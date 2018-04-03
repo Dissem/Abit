@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        val listFragment = MessageListFragment()
+        val listFragment = ConversationListFragment()
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.item_list, listFragment)
@@ -303,6 +303,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
                     currentLabel.value = intent.getSerializableExtra(EXTRA_SHOW_LABEL) as Label
                 } else if (currentLabel.value == null) {
                     currentLabel.value = labels[0]
+
                 }
                 for (label in labels) {
                     addLabelEntry(label)

@@ -7,6 +7,11 @@
         android:title="@string/wifi_only" />
     <android.support.v7.preference.SwitchPreferenceCompat
         android:defaultValue="true"
+        android:key="emulate_conversations"
+        android:summary="@string/emulate_conversations_summary"
+        android:title="@string/emulate_conversations" />
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:defaultValue="true"
         android:key="request_acknowledgements"
         android:summary="@string/request_acknowledgements_summary"
         android:title="@string/request_acknowledgements" />
