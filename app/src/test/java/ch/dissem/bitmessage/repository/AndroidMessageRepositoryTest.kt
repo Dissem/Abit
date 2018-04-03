@@ -21,7 +21,7 @@ import ch.dissem.apps.abit.repository.AndroidAddressRepository
 import ch.dissem.apps.abit.repository.AndroidLabelRepository
 import ch.dissem.apps.abit.repository.AndroidMessageRepository
 import ch.dissem.apps.abit.repository.SqlHelper
-import ch.dissem.bitmessage.cryptography.sc.SpongyCryptography
+import ch.dissem.bitmessage.cryptography.bc.BouncyCryptography
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.ObjectMessage
 import ch.dissem.bitmessage.entity.Plaintext
@@ -69,7 +69,7 @@ class AndroidMessageRepositoryTest : TestBase() {
         val labelRepo = AndroidLabelRepository(sqlHelper, RuntimeEnvironment.application)
         repo = AndroidMessageRepository(sqlHelper)
         mockedInternalContext(
-            cryptography = SpongyCryptography(),
+            cryptography = BouncyCryptography(),
             addressRepository = addressRepo,
             labelRepository = labelRepo,
             messageRepository = repo,

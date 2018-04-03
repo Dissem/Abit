@@ -14,8 +14,11 @@ if (project.hasProperty("project.configs")
 //noinspection GroovyMissingReturnStatement
 android {
     compileSdkVersion 27
-    buildToolsVersion "26.0.2"
+    buildToolsVersion "27.0.3"
 
+    signingConfigs {
+        release
+    }
     defaultConfig {
         applicationId "ch.dissem.apps.${appName.toLowerCase()}"
         minSdkVersion 19
@@ -69,10 +72,11 @@ dependencies {
 
     implementation "ch.dissem.jabit:jabit-core:$jabitVersion"
     implementation "ch.dissem.jabit:jabit-networking:$jabitVersion"
-    implementation "ch.dissem.jabit:jabit-cryptography-spongy:$jabitVersion"
     implementation "ch.dissem.jabit:jabit-extensions:$jabitVersion"
     implementation "ch.dissem.jabit:jabit-wif:$jabitVersion"
     implementation "ch.dissem.jabit:jabit-exports:$jabitVersion"
+    implementation "ch.dissem.jabit:jabit-cryptography-spongy:$jabitVersion"
+    testImplementation "ch.dissem.jabit:jabit-cryptography-bouncy:$jabitVersion"
 
     implementation 'org.slf4j:slf4j-android:1.7.25'
 
