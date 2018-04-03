@@ -115,7 +115,7 @@ class Identicon(input: BitmessageAddress) : Drawable() {
     }
 }
 
-class MultiIdenticon(input: List<BitmessageAddress>, @ColorInt val backgroundColor: Int = Color.WHITE) :
+class MultiIdenticon(input: List<BitmessageAddress>, @ColorInt private val backgroundColor: Int = 0xFFAEC2CC.toInt()) :
     Drawable() {
 
     private val paint = Paint().apply {
