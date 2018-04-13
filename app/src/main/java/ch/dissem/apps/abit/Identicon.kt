@@ -124,7 +124,7 @@ class MultiIdenticon(input: List<BitmessageAddress>, @ColorInt private val backg
         color = backgroundColor
     }
 
-    private val identicons = input.map { Identicon(it) }.take(4)
+    private val identicons = input.sortedBy { it.isChan }.map { Identicon(it) }.take(4)
 
     override fun draw(canvas: Canvas) {
         val width = canvas.width.toFloat()
@@ -145,17 +145,18 @@ class MultiIdenticon(input: List<BitmessageAddress>, @ColorInt private val backg
                 }
             }
             3 -> {
-                val scale = 1f / (1f + 2f * sqrt(3f))
+                val scale = 2f / (1f + 2f * sqrt(3f))
                 val w = width * scale
                 val h = height * scale
 
+                canvas.drawCircle(width / 2, height / 2, width / 2, paint)
                 identicons[0].draw(canvas, (width - w) / 2, 0f, w, h)
                 identicons[1].draw(canvas, (width - 2 * w) / 2, h * sqrt(3f) / 2, w, h)
                 identicons[2].draw(canvas, width / 2, h * sqrt(3f) / 2, w, h)
             }
             4 -> {
                 canvas.drawCircle(width / 2, height / 2, width / 2, paint)
-                val scale = 1f / (1f + sqrt(2f))
+                val scale = 2f / (1f + sqrt(2f))
                 val borderScale = 0.5f - scale
                 val w = width * scale
                 val h = height * scale
