@@ -32,12 +32,14 @@ import ch.dissem.apps.abit.util.Constants.PREFERENCE_SERVER_POW
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE
 import ch.dissem.apps.abit.util.Exports
 import ch.dissem.apps.abit.util.Preferences
+import ch.dissem.bitmessage.entity.Plaintext
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.LibsBuilder
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.support.v4.indeterminateProgressDialog
 import org.jetbrains.anko.support.v4.startActivity
 import org.jetbrains.anko.uiThread
+import java.util.*
 
 /**
  * @author Christian Basler
@@ -53,6 +55,9 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         findPreference("export")?.onPreferenceClickListener = exportClickListener()
         findPreference("import")?.onPreferenceClickListener = importClickListener()
         findPreference("status").onPreferenceClickListener = statusClickListener()
+        val conversationInit = findPreference("emulate_conversations_initialize")
+        conversationInit?.onPreferenceClickListener = conversationInitClickListener(conversationInit)
+        findPreference("emulate_conversations")?.onPreferenceChangeListener = emulateConversationChangeListener(conversationInit)
     }
 
     private fun aboutClickListener() = Preference.OnPreferenceClickListener {
@@ -73,7 +78,8 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     }
 
     private fun cleanupClickListener(cleanup: Preference) = Preference.OnPreferenceClickListener {
-        val ctx = activity?.applicationContext ?: throw IllegalStateException("Context not available")
+        val ctx = activity?.applicationContext
+            ?: throw IllegalStateException("Context not available")
         cleanup.isEnabled = false
         Toast.makeText(ctx, R.string.cleanup_notification_start, Toast.LENGTH_SHORT).show()
 
@@ -191,6 +197,49 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                 SyncAdapter.stopPowSync(ctx)
             }
         }
+    }
+
+    private fun conversationInitClickListener(conversationInit: Preference) = Preference.OnPreferenceClickListener {
+        val ctx = activity?.applicationContext
+            ?: throw IllegalStateException("Context not available")
+        conversationInit.isEnabled = false
+        Toast.makeText(ctx, R.string.emulate_conversations_summary, Toast.LENGTH_SHORT).show()
+
+        doAsync {
+            val messageRepo = Singleton.getMessageRepository(ctx)
+            val conversationService = Singleton.getConversationService(ctx)
+            do {
+                var previous: Plaintext? = null
+                val messages = messageRepo.findNextLegacyMessages(previous)
+                messages.forEach { msg ->
+                    if (msg.encoding == Plaintext.Encoding.SIMPLE) {
+                        conversationService.getSubject(listOf(msg))?.let { subject ->
+                            msg.conversationId = UUID.nameUUIDFromBytes(subject.toByteArray())
+                            messageRepo.save(msg)
+                            Thread.yield()
+                        }
+                    }
+                }
+                if (!messages.isEmpty()) {
+                    previous = messages.last()
+                }
+            } while (!messages.isEmpty())
+
+            uiThread {
+                Toast.makeText(
+                    ctx,
+                    R.string.cleanup_notification_end,
+                    Toast.LENGTH_LONG
+                ).show()
+                conversationInit.isEnabled = true
+            }
+        }
+        return@OnPreferenceClickListener true
+    }
+
+    private fun emulateConversationChangeListener(conversationInit: Preference?) = Preference.OnPreferenceChangeListener { preference, newValue ->
+        conversationInit?.isEnabled = newValue as Boolean
+        true
     }
 
     companion object {

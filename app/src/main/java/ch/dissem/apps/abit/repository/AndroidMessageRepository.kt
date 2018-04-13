@@ -254,6 +254,39 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
         sql.writableDatabase.delete(TABLE_NAME, "id = ?", arrayOf(message.id.toString()))
     }
 
+    fun findNextLegacyMessages(previous: Plaintext?, limit: Int = 10): List<Plaintext> {
+        val result = mutableListOf<Plaintext>()
+
+        val projection = arrayOf(
+            COLUMN_ID,
+            COLUMN_IV,
+            COLUMN_TYPE,
+            COLUMN_SENDER,
+            COLUMN_RECIPIENT,
+            COLUMN_DATA,
+            COLUMN_ACK_DATA,
+            COLUMN_SENT,
+            COLUMN_RECEIVED,
+            COLUMN_STATUS,
+            COLUMN_TTL,
+            COLUMN_RETRIES,
+            COLUMN_NEXT_TRY,
+            COLUMN_CONVERSATION
+        )
+
+        sql.readableDatabase.query(
+            TABLE_NAME, projection,
+            "$COLUMN_ID > ${previous?.id ?: Long.MIN_VALUE}", null, null, null,
+            "$COLUMN_ID ASC",
+            "$limit"
+        ).use { c ->
+            while (c.moveToNext()) {
+                result.add(getMessage(c))
+            }
+        }
+        return result
+    }
+
     companion object {
         private const val TABLE_NAME = "Message"
         private const val COLUMN_ID = "id"

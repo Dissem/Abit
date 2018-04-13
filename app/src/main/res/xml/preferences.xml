@@ -10,6 +10,11 @@
         android:key="emulate_conversations"
         android:summary="@string/emulate_conversations_summary"
         android:title="@string/emulate_conversations" />
+    <android.support.v7.preference.Preference
+        android:defaultValue="true"
+        android:key="emulate_conversations_initialize"
+        android:summary="@string/emulate_conversations_summary"
+        android:title="@string/emulate_conversations_initialize" />
     <android.support.v7.preference.SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="request_acknowledgements"
