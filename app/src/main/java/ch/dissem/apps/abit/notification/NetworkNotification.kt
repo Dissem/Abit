@@ -42,7 +42,7 @@ class NetworkNotification(ctx: Context) : AbstractNotification(ctx) {
         val showAppIntent = Intent(ctx, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(ctx, 1, showAppIntent, 0)
         builder
-            .setSmallIcon(R.drawable.ic_notification_full_node)
+            .setSmallIcon(R.drawable.ic_notification_full_node_connecting)
             .setContentTitle(ctx.getString(R.string.bitmessage_full_node))
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setShowWhen(false)
@@ -55,10 +55,13 @@ class NetworkNotification(ctx: Context) : AbstractNotification(ctx) {
         builder.setOngoing(running)
         val connections = BitmessageService.status.getProperty("network", "connections")
         if (!running) {
+            builder.setSmallIcon(R.drawable.ic_notification_full_node_disconnected)
             builder.setContentText(ctx.getString(R.string.connection_info_disconnected))
         } else if (connections == null || connections.properties.isEmpty()) {
+            builder.setSmallIcon(R.drawable.ic_notification_full_node_connecting)
             builder.setContentText(ctx.getString(R.string.connection_info_pending))
         } else {
+            builder.setSmallIcon(R.drawable.ic_notification_full_node)
             val info = StringBuilder()
             for (stream in connections.properties) {
                 val streamNumber = Integer.parseInt(stream.name.substring("stream ".length))
