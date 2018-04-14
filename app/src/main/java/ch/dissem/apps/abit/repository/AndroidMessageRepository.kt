@@ -47,6 +47,13 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
             super.findMessages(label, offset, limit)
         }
 
+    fun count() = DatabaseUtils.queryNumEntries(
+        sql.readableDatabase,
+        TABLE_NAME,
+        null,
+        null
+    ).toInt()
+
     override fun countUnread(label: Label?) = when {
         label === LABEL_ARCHIVE -> 0
         label == null -> DatabaseUtils.queryNumEntries(

@@ -17,15 +17,17 @@
 package ch.dissem.apps.abit
 
 import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.os.Bundle
+import android.os.IBinder
 import android.preference.PreferenceManager
 import android.support.v4.content.FileProvider.getUriForFile
 import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceFragmentCompat
+import android.support.v7.preference.SwitchPreferenceCompat
 import android.widget.Toast
+import ch.dissem.apps.abit.service.BatchProcessorService
+import ch.dissem.apps.abit.service.SimpleJob
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.synchronization.SyncAdapter
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_SERVER_POW
@@ -55,9 +57,12 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         findPreference("export")?.onPreferenceClickListener = exportClickListener()
         findPreference("import")?.onPreferenceClickListener = importClickListener()
         findPreference("status").onPreferenceClickListener = statusClickListener()
-        val conversationInit = findPreference("emulate_conversations_initialize")
-        conversationInit?.onPreferenceClickListener = conversationInitClickListener(conversationInit)
-        findPreference("emulate_conversations")?.onPreferenceChangeListener = emulateConversationChangeListener(conversationInit)
+        val conversationInit = findPreference("emulate_conversations_initialize") as? SwitchPreferenceCompat
+        conversationInit?.onPreferenceClickListener = conversationInitClickListener()
+        findPreference("emulate_conversations")?.apply {
+            onPreferenceChangeListener = emulateConversationChangeListener(conversationInit)
+            isEnabled = conversationInit?.isChecked ?: false
+        }
     }
 
     private fun aboutClickListener() = Preference.OnPreferenceClickListener {
@@ -199,45 +204,42 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         }
     }
 
-    private fun conversationInitClickListener(conversationInit: Preference) = Preference.OnPreferenceClickListener {
-        val ctx = activity?.applicationContext
-            ?: throw IllegalStateException("Context not available")
-        conversationInit.isEnabled = false
-        Toast.makeText(ctx, R.string.emulate_conversations_summary, Toast.LENGTH_SHORT).show()
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName, service: IBinder) {
+            if (service is BatchProcessorService.BatchBinder) {
+                val messageRepo = Singleton.getMessageRepository(service.service)
+                val conversationService = Singleton.getConversationService(service.service)
 
-        doAsync {
-            val messageRepo = Singleton.getMessageRepository(ctx)
-            val conversationService = Singleton.getConversationService(ctx)
-            do {
-                var previous: Plaintext? = null
-                val messages = messageRepo.findNextLegacyMessages(previous)
-                messages.forEach { msg ->
-                    if (msg.encoding == Plaintext.Encoding.SIMPLE) {
-                        conversationService.getSubject(listOf(msg))?.let { subject ->
-                            msg.conversationId = UUID.nameUUIDFromBytes(subject.toByteArray())
-                            messageRepo.save(msg)
-                            Thread.yield()
+                service.process(SimpleJob<Plaintext>(
+                    messageRepo.count(),
+                    { messageRepo.findNextLegacyMessages(it) },
+                    { msg ->
+                        if (msg.encoding == Plaintext.Encoding.SIMPLE) {
+                            conversationService.getSubject(listOf(msg))?.let { subject ->
+                                msg.conversationId = UUID.nameUUIDFromBytes(subject.toByteArray())
+                                messageRepo.save(msg)
+                                Thread.yield()
+                            }
                         }
-                    }
-                }
-                if (!messages.isEmpty()) {
-                    previous = messages.last()
-                }
-            } while (!messages.isEmpty())
-
-            uiThread {
-                Toast.makeText(
-                    ctx,
-                    R.string.cleanup_notification_end,
-                    Toast.LENGTH_LONG
-                ).show()
-                conversationInit.isEnabled = true
+                    },
+                    R.drawable.ic_notification_batch,
+                    R.string.emulate_conversations_batch
+                ))
             }
         }
-        return@OnPreferenceClickListener true
+
+        override fun onServiceDisconnected(name: ComponentName) {
+        }
     }
 
-    private fun emulateConversationChangeListener(conversationInit: Preference?) = Preference.OnPreferenceChangeListener { preference, newValue ->
+    private fun conversationInitClickListener() = Preference.OnPreferenceClickListener {
+        val ctx = activity?.applicationContext
+            ?: throw IllegalStateException("Context not available")
+        ctx.bindService(Intent(ctx, BatchProcessorService::class.java), connection, Context.BIND_AUTO_CREATE)
+        true
+    }
+
+    private fun emulateConversationChangeListener(conversationInit: Preference?) = Preference.OnPreferenceChangeListener { _, newValue ->
         conversationInit?.isEnabled = newValue as Boolean
         true
     }

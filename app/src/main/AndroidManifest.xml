@@ -198,6 +198,10 @@
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
+        <service
+            android:name=".service.BatchProcessorService"
+            android:exported="false" />
+
         <activity
             android:name=".StatusActivity"
             android:label="@string/title_activity_status"
