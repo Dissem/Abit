@@ -438,7 +438,9 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
                     } else {
                         (item as PrimaryDrawerItem).withBadge(null as String?)
                     }
-                    drawer.updateItem(item)
+                    runOnUiThread {
+                        drawer.updateItem(item)
+                    }
                 }
             }
         }
