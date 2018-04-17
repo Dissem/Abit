@@ -21,10 +21,14 @@ import android.content.*
 import android.os.Bundle
 import android.os.IBinder
 import android.preference.PreferenceManager
+import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
 import android.support.v4.content.FileProvider.getUriForFile
 import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceFragmentCompat
+import android.support.v7.preference.PreferenceScreen
 import android.support.v7.preference.SwitchPreferenceCompat
+import android.view.View
 import android.widget.Toast
 import ch.dissem.apps.abit.service.BatchProcessorService
 import ch.dissem.apps.abit.service.SimpleJob
@@ -46,23 +50,24 @@ import java.util.*
 /**
  * @author Christian Basler
  */
-class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
+class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener,
+    PreferenceFragmentCompat.OnPreferenceStartScreenCallback {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        addPreferencesFromResource(R.xml.preferences)
+        setPreferencesFromResource(R.xml.preferences, rootKey)
 
         findPreference("about")?.onPreferenceClickListener = aboutClickListener()
-        val cleanup = findPreference("cleanup")
-        cleanup?.onPreferenceClickListener = cleanupClickListener(cleanup)
+        findPreference("cleanup")?.let { it.onPreferenceClickListener = cleanupClickListener(it) }
         findPreference("export")?.onPreferenceClickListener = exportClickListener()
         findPreference("import")?.onPreferenceClickListener = importClickListener()
-        findPreference("status").onPreferenceClickListener = statusClickListener()
-        val conversationInit = findPreference("emulate_conversations_initialize") as? SwitchPreferenceCompat
+        findPreference("status")?.onPreferenceClickListener = statusClickListener()
+
+        val emulateConversations = findPreference("emulate_conversations") as? SwitchPreferenceCompat
+        val conversationInit = findPreference("emulate_conversations_initialize")
+
+        emulateConversations?.onPreferenceChangeListener = emulateConversationChangeListener(conversationInit)
         conversationInit?.onPreferenceClickListener = conversationInitClickListener()
-        findPreference("emulate_conversations")?.apply {
-            onPreferenceChangeListener = emulateConversationChangeListener(conversationInit)
-            isEnabled = conversationInit?.isChecked ?: false
-        }
+        conversationInit?.isEnabled = emulateConversations?.isChecked ?: false
     }
 
     private fun aboutClickListener() = Preference.OnPreferenceClickListener {
@@ -210,21 +215,23 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                 val messageRepo = Singleton.getMessageRepository(service.service)
                 val conversationService = Singleton.getConversationService(service.service)
 
-                service.process(SimpleJob<Plaintext>(
-                    messageRepo.count(),
-                    { messageRepo.findNextLegacyMessages(it) },
-                    { msg ->
-                        if (msg.encoding == Plaintext.Encoding.SIMPLE) {
-                            conversationService.getSubject(listOf(msg))?.let { subject ->
-                                msg.conversationId = UUID.nameUUIDFromBytes(subject.toByteArray())
-                                messageRepo.save(msg)
-                                Thread.yield()
+                service.process(
+                    SimpleJob<Plaintext>(
+                        messageRepo.count(),
+                        { messageRepo.findNextLegacyMessages(it) },
+                        { msg ->
+                            if (msg.encoding == Plaintext.Encoding.SIMPLE) {
+                                conversationService.getSubject(listOf(msg))?.let { subject ->
+                                    msg.conversationId = UUID.nameUUIDFromBytes(subject.toByteArray())
+                                    messageRepo.save(msg)
+                                    Thread.yield()
+                                }
                             }
-                        }
-                    },
-                    R.drawable.ic_notification_batch,
-                    R.string.emulate_conversations_batch
-                ))
+                        },
+                        R.drawable.ic_notification_batch,
+                        R.string.emulate_conversations_batch
+                    )
+                )
             }
         }
 
@@ -239,10 +246,38 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         true
     }
 
-    private fun emulateConversationChangeListener(conversationInit: Preference?) = Preference.OnPreferenceChangeListener { _, newValue ->
-        conversationInit?.isEnabled = newValue as Boolean
-        true
+    private fun emulateConversationChangeListener(conversationInit: Preference?) =
+        Preference.OnPreferenceChangeListener { _, newValue ->
+            conversationInit?.isEnabled = newValue as Boolean
+            true
+        }
+
+    // The why-is-it-so-damn-hard-to-group-preferences section
+    override fun getCallbackFragment(): Fragment = this
+
+    override fun onPreferenceStartScreen(
+        preferenceFragmentCompat: PreferenceFragmentCompat,
+        preferenceScreen: PreferenceScreen
+    ): Boolean {
+        fragmentManager?.beginTransaction()?.let { ft ->
+            val fragment = SettingsFragment()
+            fragment.arguments = Bundle().apply {
+                putString(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT, preferenceScreen.key)
+            }
+            ft.add(R.id.item_list, fragment, preferenceScreen.key)
+            ft.addToBackStack(preferenceScreen.key)
+            ft.commit()
+        }
+        return true
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        context?.let { ctx -> view.setBackgroundColor(ContextCompat.getColor(ctx, R.color.contentBackground)) }
+    }
+    // End of the why-is-it-so-damn-hard-to-group-preferences section
+    // Afterthought: here it looks so simple: https://developer.android.com/guide/topics/ui/settings.html
+    // Remind me, why do we need to use PreferenceFragmentCompat?
 
     companion object {
         const val WRITE_EXPORT_REQUEST_CODE = 1

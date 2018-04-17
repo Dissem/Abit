@@ -141,4 +141,12 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="emulate_conversations_summary">Use subject to determine which messages belong together. The order will likely be wrong.</string>
     <string name="emulate_conversations_initialize">Group existing messages by subject</string>
     <string name="emulate_conversations_batch">Grouping existing messages by subject</string>
+    <string name="preference_group_user_experience">Behaviour</string>
+    <string name="preference_group_user_experience_summary">Change how messages are displayed</string>
+    <string name="preference_group_network_and_performance">Network &amp; Performance</string>
+    <string name="preference_group_network_and_performance_summary">Tweak network usage and protocol details</string>
+    <string name="preference_group_advanced">Advanced</string>
+    <string name="preference_group_advanced_summary"></string>
+    <string name="preference_group_experimental">Experimental</string>
+    <string name="preference_group_experimental_summary">Only change if you know what you\'re doing</string>
 </resources>
