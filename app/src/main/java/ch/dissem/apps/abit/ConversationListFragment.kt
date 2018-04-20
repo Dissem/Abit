@@ -80,7 +80,8 @@ class ConversationListFragment : Fragment(), ListHolder<Label> {
 
                 if (!isLoading && !isLastPage) {
                     if (visibleItemCount + firstVisibleItemPosition >= totalItemCount - 5
-                        && firstVisibleItemPosition >= 0) {
+                        && firstVisibleItemPosition >= 0
+                    ) {
                         loadMoreItems()
                     }
                 }
@@ -183,7 +184,7 @@ class ConversationListFragment : Fragment(), ListHolder<Label> {
         val swipeManager = RecyclerViewSwipeManager()
 
         //swipeableConversationAdapter
-        val adapter = SwipeableConversationAdapter().apply {
+        val adapter = SwipeableConversationAdapter(context).apply {
             setActivateOnItemClick(activateOnItemClick)
         }
         adapter.eventListener = object : SwipeableConversationAdapter.EventListener {

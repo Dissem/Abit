@@ -18,6 +18,7 @@
 package ch.dissem.apps.abit.adapter
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Typeface
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -47,7 +48,7 @@ import java.util.*
  * @author Christian Basler
  * @see [https://github.com/h6ah4i/android-advancedrecyclerview](https://github.com/h6ah4i/android-advancedrecyclerview)
  */
-class SwipeableConversationAdapter :
+class SwipeableConversationAdapter(ctx: Context) :
     RecyclerView.Adapter<SwipeableConversationAdapter.ViewHolder>(),
     SwipeableItemAdapter<SwipeableConversationAdapter.ViewHolder>, SwipeableItemConstants {
 
@@ -59,6 +60,8 @@ class SwipeableConversationAdapter :
     private var label: Label? = null
     private var selectedPosition = -1
     private var activateOnItemClick: Boolean = false
+
+    private val labelUnknown = ctx.getString(R.string.unknown)
 
     fun setActivateOnItemClick(activateOnItemClick: Boolean) {
         this.activateOnItemClick = activateOnItemClick
@@ -172,7 +175,9 @@ class SwipeableConversationAdapter :
             // set data
             avatar.setImageDrawable(MultiIdenticon(item.participants))
 
-            sender.text = item.participants.mapNotNull { it.alias }.joinToString()
+            sender.text = item.participants.sortedBy {
+                (it.alias?.let { 0 } ?: 1) + if (it.isChan) 2 else 0
+            }.map { it.alias ?: labelUnknown }.distinct().joinToString()
             subject.text = prepareMessageExtract(item.subject)
             extract.text = prepareMessageExtract(item.extract)
             if (item.hasUnread()) {
