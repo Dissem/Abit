@@ -20,7 +20,6 @@ import android.app.Activity
 import android.content.*
 import android.os.Bundle
 import android.os.IBinder
-import android.preference.PreferenceManager
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.FileProvider.getUriForFile
@@ -173,11 +172,12 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
     override fun onAttach(ctx: Context?) {
         super.onAttach(ctx)
-        (ctx as? MainActivity)?.floatingActionButton?.hide()
-        PreferenceManager.getDefaultSharedPreferences(ctx)
-            .registerOnSharedPreferenceChangeListener(this)
-
-        (ctx as? MainActivity)?.updateTitle(getString(R.string.settings))
+        ctx?.let {
+            if (it is MainActivity) {
+                it.floatingActionButton?.hide()
+                it.updateTitle(getString(R.string.settings))
+            }
+        }
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {

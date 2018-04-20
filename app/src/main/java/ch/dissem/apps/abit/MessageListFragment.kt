@@ -79,7 +79,8 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
 
                 if (!isLoading && !isLastPage) {
                     if (visibleItemCount + firstVisibleItemPosition >= totalItemCount - 5
-                        && firstVisibleItemPosition >= 0) {
+                        && firstVisibleItemPosition >= 0
+                    ) {
                         loadMoreItems()
                     }
                 }

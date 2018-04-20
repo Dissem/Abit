@@ -98,7 +98,8 @@ class ComposeMessageActivity : AppCompatActivity() {
                 val prefix: String = if (subject.length >= 3 && subject.substring(0, 3).equals(
                         "RE:",
                         ignoreCase = true
-                    )) {
+                    )
+                ) {
                     ""
                 } else {
                     "RE: "
@@ -107,7 +108,7 @@ class ComposeMessageActivity : AppCompatActivity() {
             }
             replyIntent.putExtra(
                 EXTRA_CONTENT,
-                "\n\n------------------------------------------------------\n" + item.text!!
+                "\n\n------------------------------------------------------\n${item.text ?: ""}"
             )
             return replyIntent
         }

@@ -1,105 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <android.support.v7.preference.PreferenceScreen
+    <PreferenceScreen
         android:key="preference_ux"
         android:title="@string/preference_group_user_experience"
         android:summary="@string/preference_group_user_experience_summary"
         android:persistent="false">
 
-        <android.support.v7.preference.SwitchPreferenceCompat
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="emulate_conversations"
             android:summary="@string/emulate_conversations_summary"
             android:title="@string/emulate_conversations" />
-        <android.support.v7.preference.Preference
+        <Preference
             android:defaultValue="true"
             android:key="emulate_conversations_initialize"
             android:summary="@string/emulate_conversations_summary"
             android:title="@string/emulate_conversations_initialize" />
 
-    </android.support.v7.preference.PreferenceScreen>
+    </PreferenceScreen>
 
-    <android.support.v7.preference.PreferenceScreen
+    <PreferenceScreen
         android:key="preference_network_and_performance"
         android:title="@string/preference_group_network_and_performance"
         android:summary="@string/preference_group_network_and_performance_summary"
         android:persistent="false">
 
-        <android.support.v7.preference.SwitchPreferenceCompat
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="wifi_only"
             android:summary="@string/wifi_only_summary"
             android:title="@string/wifi_only" />
-        <android.support.v7.preference.SwitchPreferenceCompat
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="request_acknowledgements"
             android:summary="@string/request_acknowledgements_summary"
             android:title="@string/request_acknowledgements" />
 
-    </android.support.v7.preference.PreferenceScreen>
+    </PreferenceScreen>
 
-    <android.support.v7.preference.PreferenceScreen
+    <PreferenceScreen
         android:key="preference_advanced"
         android:title="@string/preference_group_advanced"
         android:summary="@string/preference_group_advanced_summary"
         android:persistent="false">
 
-        <android.support.v7.preference.Preference
+        <Preference
             android:key="cleanup"
             android:summary="@string/cleanup_summary"
             android:title="@string/cleanup" />
-        <android.support.v7.preference.Preference
+        <Preference
             android:key="export"
             android:summary="@string/export_data_summary"
             android:title="@string/export_data" />
-        <android.support.v7.preference.Preference
+        <Preference
             android:key="import"
             android:summary="@string/import_data_summary"
             android:title="@string/import_data" />
 
-        <android.support.v7.preference.PreferenceScreen
+        <PreferenceScreen
             android:key="preference_experimental"
             android:title="@string/preference_group_experimental"
             android:summary="@string/preference_group_experimental_summary"
             android:persistent="false">
 
-            <android.support.v7.preference.EditTextPreference
+            <EditTextPreference
                 android:inputType="textUri"
                 android:key="trusted_node"
                 android:summary="@string/trusted_node_summary"
                 android:title="@string/trusted_node" />
-            <android.support.v7.preference.EditTextPreference
+            <EditTextPreference
                 android:defaultValue="120"
                 android:inputType="number"
                 android:key="sync_timeout"
                 android:summary="@string/sync_timeout_summary"
                 android:title="@string/sync_timeout" />
-            <android.support.v7.preference.SwitchPreferenceCompat
+            <SwitchPreferenceCompat
                 android:defaultValue="false"
                 android:dependency="trusted_node"
                 android:key="server_pow"
                 android:summary="@string/server_pow_summary"
                 android:title="@string/server_pow" />
-            <android.support.v7.preference.Preference
+            <Preference
                 android:key="status"
                 android:summary="@string/status_summary"
                 android:title="@string/status" />
 
-        </android.support.v7.preference.PreferenceScreen>
+        </PreferenceScreen>
 
-    </android.support.v7.preference.PreferenceScreen>
+    </PreferenceScreen>
 
-    <android.support.v7.preference.Preference
+    <Preference
         android:key="about"
         android:summary="@string/about_summary"
         android:title="@string/about" />
-    <android.support.v7.preference.Preference
+    <Preference
         android:key="help_out"
         android:summary="@string/help_out_summary"
         android:title="@string/help_out">
         <intent
             android:action="android.intent.action.VIEW"
             android:data="@string/help_out_link" />
-    </android.support.v7.preference.Preference>
-</android.support.v7.preference.PreferenceScreen>
+    </Preference>
+</PreferenceScreen>
