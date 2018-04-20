@@ -95,7 +95,7 @@ class Identicon(input: BitmessageAddress) : Drawable() {
         }
         if (isChan) {
             textPaint.textSize = 2 * cellHeight
-            canvas.drawText("[isChan]", offsetX + width / 2, offsetY + 6.7f * cellHeight, textPaint)
+            canvas.drawText("[ chan ]", offsetX + width / 2, offsetY + 6.7f * cellHeight, textPaint)
         }
     }
 
@@ -156,7 +156,7 @@ class MultiIdenticon(input: List<BitmessageAddress>, @ColorInt private val backg
             }
             4 -> {
                 canvas.drawCircle(width / 2, height / 2, width / 2, paint)
-                val scale = 2f / (1f + sqrt(2f))
+                val scale = 1f / (1f + sqrt(2f))
                 val borderScale = 0.5f - scale
                 val w = width * scale
                 val h = height * scale
