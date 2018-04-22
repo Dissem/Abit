@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2015 Christian Basler
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:background="@drawable/bg_swipe_item_neutral">
+
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_item_normal_state"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        tools:ignore="UselessParent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/avatar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_margin="16dp"
+                android:src="@color/colorPrimaryDark"
+                tools:ignore="ContentDescription" />
+
+            <TextView
+                android:id="@+id/sender"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignTop="@id/avatar"
+                android:layout_marginTop="-5dp"
+                android:layout_toEndOf="@id/avatar"
+                android:ellipsize="end"
+                android:lines="1"
+                android:paddingBottom="0dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="0dp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textStyle="bold"
+                tools:text="Sender" />
+
+            <TextView
+                android:id="@+id/subject"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@id/count"
+                android:layout_below="@id/sender"
+                android:layout_toEndOf="@id/avatar"
+                android:ellipsize="end"
+                android:lines="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                tools:text="Subject" />
+
+            <TextView
+                android:id="@+id/text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@id/subject"
+                android:layout_toEndOf="@id/avatar"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:lines="1"
+                android:paddingBottom="8dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                tools:text="Text" />
+
+            <ImageView
+                android:id="@+id/status"
+                android:layout_width="24dp"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/avatar"
+                android:layout_alignEnd="@id/avatar"
+                android:layout_marginBottom="-8dp"
+                android:layout_marginEnd="-8dp"
+                android:tint="@color/colorAccent"
+                tools:ignore="ContentDescription"
+                tools:src="@drawable/ic_notification_proof_of_work" />
+
+            <TextView
+                android:id="@+id/count"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_alignBottom="@id/subject"
+                android:layout_alignParentEnd="true"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textAlignment="center"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/md_blue_grey_500"
+                tools:text="0" />
+
+        </RelativeLayout>
+
+    </FrameLayout>
+
+</FrameLayout>

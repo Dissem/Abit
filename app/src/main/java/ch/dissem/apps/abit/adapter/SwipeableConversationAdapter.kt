@@ -82,6 +82,7 @@ class SwipeableConversationAdapter(ctx: Context) :
         val sender = v.findViewById<TextView>(R.id.sender)!!
         val subject = v.findViewById<TextView>(R.id.subject)!!
         val extract = v.findViewById<TextView>(R.id.text)!!
+        val count = v.findViewById<TextView>(R.id.count)!!
 
         override fun getSwipeableContainerView() = container
     }
@@ -149,7 +150,7 @@ class SwipeableConversationAdapter(ctx: Context) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val v = inflater.inflate(R.layout.message_row, parent, false)
+        val v = inflater.inflate(R.layout.conversation_row, parent, false)
         return ViewHolder(v)
     }
 
@@ -180,6 +181,13 @@ class SwipeableConversationAdapter(ctx: Context) :
             }.map { it.alias ?: labelUnknown }.distinct().joinToString()
             subject.text = prepareMessageExtract(item.subject)
             extract.text = prepareMessageExtract(item.extract)
+            item.messages.size.let { size ->
+                if (size <= 1) {
+                    count.text = ""
+                } else {
+                    count.text = size.toString()
+                }
+            }
             if (item.hasUnread()) {
                 sender.typeface = Typeface.DEFAULT_BOLD
                 subject.typeface = Typeface.DEFAULT_BOLD
