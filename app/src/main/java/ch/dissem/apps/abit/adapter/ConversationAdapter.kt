@@ -24,10 +24,13 @@ import ch.dissem.bitmessage.ports.MessageRepository
 class ConversationAdapter internal constructor(
     ctx: Context,
     private val parent: Fragment,
-    private val conversation: Conversation
+    conversation: Conversation,
+    private val label: Label?
 ) : RecyclerView.Adapter<ConversationAdapter.ViewHolder>() {
 
     private val messageRepo = Singleton.getMessageRepository(ctx)
+
+    private var filteredMessages = conversation.messages.filter { label == null || it.labels.any { it == label } }
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -46,7 +49,7 @@ class ConversationAdapter internal constructor(
     // Involves populating data into the item through holder
     override fun onBindViewHolder(viewHolder: ConversationAdapter.ViewHolder, position: Int) {
         // Get the data model based on position
-        val message = conversation.messages[position]
+        val message = filteredMessages[position]
 
         viewHolder.apply {
             item = message
@@ -83,9 +86,9 @@ class ConversationAdapter internal constructor(
         }
     }
 
-    override fun getItemCount() = conversation.messages.size
+    override fun getItemCount() = filteredMessages.size
 
-    class ViewHolder(
+    inner class ViewHolder(
         itemView: View,
         parent: Fragment,
         messageRepo: MessageRepository
@@ -114,9 +117,12 @@ class ConversationAdapter internal constructor(
                                     Singleton.labeler.delete(item)
                                     messageRepo.save(item)
                                 }
+                                filteredMessages.indexOf(item).let { i ->
+                                    filteredMessages -= item
+                                    notifyItemRemoved(i)
+                                }
                                 MainActivity.apply {
                                     updateUnread()
-                                    onBackPressed()
                                 }
                                 true
                             }

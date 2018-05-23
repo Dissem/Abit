@@ -17,15 +17,14 @@
 package ch.dissem.apps.abit
 
 import android.content.Intent
-import android.graphics.Point
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.os.Bundle
 import android.support.annotation.DrawableRes
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.View
-import android.view.ViewGroup
-import android.widget.RelativeLayout
 import ch.dissem.apps.abit.drawer.ProfileImageListener
 import ch.dissem.apps.abit.drawer.ProfileSelectionListener
 import ch.dissem.apps.abit.listener.ListSelectionListener
@@ -42,7 +41,6 @@ import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.Conversation
 import ch.dissem.bitmessage.entity.Plaintext
 import ch.dissem.bitmessage.entity.valueobject.Label
-import com.github.amlcurran.showcaseview.ShowcaseView
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
@@ -59,6 +57,9 @@ import io.github.kobakei.materialfabspeeddial.FabSpeedDialMenu
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
+import uk.co.deanwild.materialshowcaseview.shape.Shape
+import uk.co.deanwild.materialshowcaseview.target.Target
 import java.io.Serializable
 import java.lang.ref.WeakReference
 import java.util.*
@@ -150,33 +151,33 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             SyncAdapter.stopSync(this)
         }
         if (drawer.isDrawerOpen) {
-            val lps = RelativeLayout.LayoutParams(
-                ViewGroup
-                    .LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-                addRule(RelativeLayout.ALIGN_PARENT_LEFT)
-                val margin = ((resources.displayMetrics.density * 12) as Number).toInt()
-                setMargins(margin, margin, margin, margin)
-            }
-
-            ShowcaseView.Builder(this)
-                .withMaterialShowcase()
-                .setStyle(R.style.CustomShowcaseTheme)
-                .setContentTitle(R.string.full_node)
+            MaterialShowcaseView.Builder(this)
+                .setMaskColour(R.color.colorPrimary)
+                .setTitleText(R.string.full_node)
                 .setContentText(R.string.full_node_description)
-                .setTarget {
-                    val view = drawer.stickyFooter
-                    val location = IntArray(2)
-                    view.getLocationInWindow(location)
-                    val x = location[0] + 7 * view.width / 8
-                    val y = location[1] + view.height / 2
-                    Point(x, y)
-                }
-                .replaceEndButton(R.layout.showcase_button)
-                .hideOnTouchOutside()
-                .build()
-                .setButtonPosition(lps)
+                .setDismissOnTouch(true)
+                .setDismissText(R.string.got_it)
+                .setShape(object : Shape {
+                    var w = 0
+                    var h = 0
+
+                    override fun updateTarget(target: Target) {
+                        w = target.bounds.width()
+                        h = target.bounds.height()
+                    }
+
+                    override fun getHeight() = h
+
+                    override fun draw(canvas: Canvas, paint: Paint, x: Int, y: Int, padding: Int) {
+                        val r = h.toFloat() / 2
+                        canvas.drawCircle(x + w / 2 - r * 1.8f, y.toFloat(), r, paint)
+                    }
+
+                    override fun getWidth() = w
+                })
+                .setTarget(drawer.stickyFooter)
+                .setDelay(1000)
+                .show()
         }
     }
 

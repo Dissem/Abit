@@ -181,7 +181,7 @@ class SwipeableConversationAdapter(ctx: Context) :
             }.map { it.alias ?: labelUnknown }.distinct().joinToString()
             subject.text = prepareMessageExtract(item.subject)
             extract.text = prepareMessageExtract(item.extract)
-            item.messages.size.let { size ->
+            item.messages.count { it.labels.contains(label) }.let { size ->
                 if (size <= 1) {
                     count.text = ""
                 } else {
