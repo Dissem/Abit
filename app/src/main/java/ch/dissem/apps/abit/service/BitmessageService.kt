@@ -28,6 +28,7 @@ import ch.dissem.apps.abit.notification.NetworkNotification.Companion.NETWORK_NO
 import ch.dissem.apps.abit.util.Preferences
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.utils.Property
+import org.jetbrains.anko.doAsync
 
 /**
  * Define a Service that returns an IBinder for the
@@ -87,7 +88,9 @@ class BitmessageService : Service() {
         running = false
         notification.showShutdown()
         cleanupHandler.removeCallbacks(cleanupTask)
-        bmc.cleanup()
+        doAsync {
+            bmc.cleanup()
+        }
         unregisterReceiver(connectivityReceiver)
         stopSelf()
     }
