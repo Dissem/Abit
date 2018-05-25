@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v4.app.NavUtils
 import android.view.MenuItem
 import ch.dissem.bitmessage.entity.Conversation
+import ch.dissem.bitmessage.entity.Plaintext
 
 
 /**
@@ -36,10 +37,12 @@ class MessageDetailActivity : DetailActivity() {
             val arguments = Bundle()
             val item = intent.getSerializableExtra(MessageDetailFragment.ARG_ITEM)
             arguments.putSerializable(MessageDetailFragment.ARG_ITEM, item)
-            val fragment = if (item is Conversation) {
-                ConversationDetailFragment()
-            } else {
+            val itemId = intent.getSerializableExtra(ConversationDetailFragment.ARG_ITEM_ID)
+            arguments.putSerializable(ConversationDetailFragment.ARG_ITEM_ID, itemId)
+            val fragment = if (item is Plaintext) {
                 MessageDetailFragment()
+            } else {
+                ConversationDetailFragment()
             }
             fragment.arguments = arguments
             supportFragmentManager.beginTransaction()

@@ -471,7 +471,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
                 is Conversation -> {
                     ConversationDetailFragment().apply {
                         arguments = Bundle().apply {
-                            putSerializable(ConversationDetailFragment.ARG_ITEM, item)
+                            putSerializable(ConversationDetailFragment.ARG_ITEM_ID, item.id)
                         }
                     }
                 }
@@ -508,7 +508,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             val detailIntent = when (item) {
                 is Conversation -> {
                     Intent(this, MessageDetailActivity::class.java).apply {
-                        putExtra(ConversationDetailFragment.ARG_ITEM, item)
+                        putExtra(ConversationDetailFragment.ARG_ITEM_ID, item.id)
                     }
                 }
                 is Plaintext -> {

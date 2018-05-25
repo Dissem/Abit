@@ -26,6 +26,7 @@ import ch.dissem.apps.abit.util.Drawables
 import ch.dissem.bitmessage.entity.Conversation
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import kotlinx.android.synthetic.main.fragment_conversation_detail.*
+import java.util.*
 
 /**
  * A fragment representing a single Message detail screen.
@@ -38,17 +39,18 @@ class ConversationDetailFragment : Fragment() {
     /**
      * The content this fragment is presenting.
      */
+    private var itemId: UUID? = null
     private var item: Conversation? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         arguments?.let { arguments ->
-            if (arguments.containsKey(ARG_ITEM)) {
+            if (arguments.containsKey(ARG_ITEM_ID)) {
                 // Load the dummy content specified by the fragment
                 // arguments. In a real-world scenario, use a Loader
                 // to load content from a content provider.
-                item = arguments.getSerializable(ARG_ITEM) as Conversation
+                itemId = arguments.getSerializable(ARG_ITEM_ID) as UUID
             }
         }
         setHasOptionsMenu(true)
@@ -65,6 +67,8 @@ class ConversationDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val ctx = activity ?: throw IllegalStateException("Fragment is not attached to an activity")
+
+        item = itemId?.let { Singleton.getConversationService(ctx).getConversation(it) }
 
         // Show the dummy content as text in a TextView.
         item?.let { item ->
@@ -104,7 +108,6 @@ class ConversationDetailFragment : Fragment() {
                     item.messages.forEach {
                         Singleton.labeler.archive(it)
                         messageRepo.save(it)
-
                     }
                     MainActivity.apply { updateUnread() }
                     return true
@@ -120,6 +123,6 @@ class ConversationDetailFragment : Fragment() {
          * The fragment argument representing the item ID that this fragment
          * represents.
          */
-        const val ARG_ITEM = "item"
+        const val ARG_ITEM_ID = "item_id"
     }
 }
