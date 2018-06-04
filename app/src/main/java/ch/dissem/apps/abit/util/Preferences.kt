@@ -22,6 +22,7 @@ import ch.dissem.apps.abit.notification.ErrorNotification
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_EMULATE_CONVERSATIONS
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_FULL_NODE
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_REQUEST_ACK
+import ch.dissem.apps.abit.util.Constants.PREFERENCE_REQUIRE_CHARGING
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_SYNC_TIMEOUT
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_WIFI_ONLY
@@ -78,21 +79,25 @@ object Preferences {
         return 8444
     }
 
-    fun getTimeoutInSeconds(ctx: Context): Long =
-        getPreference(ctx, PREFERENCE_SYNC_TIMEOUT)?.toLong() ?: 120
+    fun getTimeoutInSeconds(ctx: Context): Long = getPreference(ctx, PREFERENCE_SYNC_TIMEOUT)?.toLong() ?: 120
 
-    private fun getPreference(ctx: Context, name: String): String? =
-        ctx.defaultSharedPreferences.getString(name, null)
+    private fun getPreference(ctx: Context, name: String): String? = ctx.defaultSharedPreferences.getString(name, null)
 
-    fun isConnectionAllowed(ctx: Context) =
-        !isWifiOnly(ctx) || !ctx.connectivityManager.isActiveNetworkMetered
+    fun isConnectionAllowed(ctx: Context) = !isWifiOnly(ctx) || !ctx.connectivityManager.isActiveNetworkMetered
 
-    fun isWifiOnly(ctx: Context) =
-        ctx.defaultSharedPreferences.getBoolean(PREFERENCE_WIFI_ONLY, true)
+    fun isWifiOnly(ctx: Context) = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_WIFI_ONLY, true)
 
     fun setWifiOnly(ctx: Context, status: Boolean) {
         ctx.defaultSharedPreferences.edit()
             .putBoolean(PREFERENCE_WIFI_ONLY, status)
+            .apply()
+    }
+
+    fun requireCharging(ctx: Context) = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_REQUIRE_CHARGING, true)
+
+    fun setRequireCharging(ctx: Context, status: Boolean) {
+        ctx.defaultSharedPreferences.edit()
+            .putBoolean(PREFERENCE_REQUIRE_CHARGING, status)
             .apply()
     }
 
@@ -111,8 +116,7 @@ object Preferences {
 
     fun getExportDirectory(ctx: Context) = File(ctx.filesDir, "exports")
 
-    fun requestAcknowledgements(ctx: Context) =
-        ctx.defaultSharedPreferences.getBoolean(PREFERENCE_REQUEST_ACK, true)
+    fun requestAcknowledgements(ctx: Context) = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_REQUEST_ACK, true)
 
     fun cleanupExportDirectory(ctx: Context) {
         val exportDirectory = getExportDirectory(ctx)

@@ -23,6 +23,7 @@ import java.util.regex.Pattern
  */
 object Constants {
     const val PREFERENCE_WIFI_ONLY = "wifi_only"
+    const val PREFERENCE_REQUIRE_CHARGING = "require_charging"
     const val PREFERENCE_EMULATE_CONVERSATIONS = "emulate_conversations"
     const val PREFERENCE_TRUSTED_NODE = "trusted_node"
     const val PREFERENCE_SYNC_TIMEOUT = "sync_timeout"

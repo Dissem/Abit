@@ -32,6 +32,12 @@
             android:summary="@string/wifi_only_summary"
             android:title="@string/wifi_only" />
         <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="require_charging"
+            android:enabled="@bool/is_post_api_21"
+            android:summary="@string/require_charging_summary"
+            android:title="@string/require_charging" />
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="request_acknowledgements"
             android:summary="@string/request_acknowledgements_summary"

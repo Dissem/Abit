@@ -149,6 +149,8 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="preference_group_advanced_summary"></string>
     <string name="preference_group_experimental">Experimental</string>
     <string name="preference_group_experimental_summary">Only change if you know what you\'re doing</string>
+    <string name="require_charging">Require charging</string>
+    <string name="require_charging_summary">Only connect when device is plugged in</string>
     <string name="unknown">Unknown</string>
     <string name="ok">OK</string>
 </resources>
