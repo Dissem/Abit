@@ -22,12 +22,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.os.BatteryManager
 import android.os.Handler
 import ch.dissem.apps.abit.notification.NetworkNotification
 import ch.dissem.apps.abit.notification.NetworkNotification.Companion.NETWORK_NOTIFICATION_ID
 import ch.dissem.apps.abit.util.Preferences
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.utils.Property
+import org.jetbrains.anko.doAsync
 
 /**
  * Define a Service that returns an IBinder for the
@@ -60,7 +62,10 @@ class BitmessageService : Service() {
     override fun onCreate() {
         registerReceiver(
             connectivityReceiver,
-            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+            IntentFilter().apply {
+                addAction(ConnectivityManager.CONNECTIVITY_ACTION)
+                addAction(Intent.ACTION_BATTERY_CHANGED)
+            }
         )
         notification = NetworkNotification(this)
         running = false
@@ -87,7 +92,9 @@ class BitmessageService : Service() {
         running = false
         notification.showShutdown()
         cleanupHandler.removeCallbacks(cleanupTask)
-        bmc.cleanup()
+        doAsync {
+            bmc.cleanup()
+        }
         unregisterReceiver(connectivityReceiver)
         stopSelf()
     }

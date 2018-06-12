@@ -17,6 +17,7 @@
 package ch.dissem.apps.abit.notification
 
 import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
@@ -27,18 +28,15 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.StyleSpan
-
 import ch.dissem.apps.abit.Identicon
 import ch.dissem.apps.abit.MainActivity
-import ch.dissem.apps.abit.R
-import ch.dissem.apps.abit.service.BitmessageIntentService
-import ch.dissem.bitmessage.entity.Plaintext
-
-import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import ch.dissem.apps.abit.MainActivity.Companion.EXTRA_REPLY_TO_MESSAGE
 import ch.dissem.apps.abit.MainActivity.Companion.EXTRA_SHOW_MESSAGE
+import ch.dissem.apps.abit.R
+import ch.dissem.apps.abit.service.BitmessageIntentService
 import ch.dissem.apps.abit.service.BitmessageIntentService.Companion.EXTRA_DELETE_MESSAGE
-import ch.dissem.apps.abit.util.Drawables.toBitmap
+import ch.dissem.apps.abit.util.toBitmap
+import ch.dissem.bitmessage.entity.Plaintext
 
 class NewMessageNotification(ctx: Context) : AbstractNotification(ctx) {
 
@@ -53,7 +51,7 @@ class NewMessageNotification(ctx: Context) : AbstractNotification(ctx) {
             bigText.setSpan(SPAN_EMPHASIS, 0, subject.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
         }
         builder.setSmallIcon(R.drawable.ic_notification_new_message)
-            .setLargeIcon(toBitmap(Identicon(plaintext.from), 192))
+            .setLargeIcon(Identicon(plaintext.from).toBitmap(192))
             .setContentTitle(plaintext.from.toString())
             .setContentText(plaintext.subject)
             .setStyle(BigTextStyle().bigText(bigText))

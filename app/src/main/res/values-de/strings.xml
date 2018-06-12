@@ -137,4 +137,6 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="broadcasts">Broadcasts</string>
     <string name="encoding_simple">einfach</string>
     <string name="encoding_extended">erweitert</string>
+    <string name="emulate_conversations">Konversation erraten</string>
+    <string name="emulate_conversations_summary">Benutze Betreff um zu erraten welche Nachrichten zusammengehören. Die Reihenfolge stimmt häufig nicht.</string>
 </resources>

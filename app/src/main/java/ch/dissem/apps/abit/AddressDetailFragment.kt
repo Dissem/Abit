@@ -26,6 +26,7 @@ import android.view.*
 import android.widget.Toast
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.util.Drawables
+import ch.dissem.apps.abit.util.qrCode
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.wif.WifExporter
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
@@ -185,7 +186,7 @@ class AddressDetailFragment : Fragment() {
             }
 
             // QR code
-            qr_code.setImageBitmap(Drawables.qrCode(item))
+            qr_code.setImageBitmap(item.qrCode())
         }
     }
 

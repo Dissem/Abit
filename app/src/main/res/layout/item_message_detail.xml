@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginStart="8dp"
+              android:layout_marginEnd="8dp"
+              android:fitsSystemWindows="true"
+              android:focusableInTouchMode="true"
+              android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="8dp"
+            android:src="@color/colorAccent"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/sender"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_alignTop="@+id/avatar"
+            android:layout_toEndOf="@+id/avatar"
+            android:layout_toStartOf="@+id/status"
+            android:gravity="center_vertical"
+            android:paddingEnd="0dp"
+            android:paddingStart="8dp"
+            android:textStyle="bold"
+            tools:text="Sender" />
+
+        <TextView
+            android:id="@+id/recipient"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_alignBottom="@+id/avatar"
+            android:layout_toEndOf="@+id/avatar"
+            android:layout_toStartOf="@+id/status"
+            android:gravity="center_vertical"
+            android:paddingEnd="0dp"
+            android:paddingStart="8dp"
+            tools:text="Recipient" />
+
+        <ImageView
+            android:id="@+id/status"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/menu"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp"
+            android:tint="@color/colorAccent"
+            tools:ignore="ContentDescription"
+            tools:src="@drawable/ic_notification_proof_of_work" />
+
+        <ImageView
+            android:id="@+id/menu"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/context_menu"
+            android:padding="8dp"
+            android:src="@drawable/ic_menu" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="16dp"
+            android:textIsSelectable="true"
+            tools:text="Message Body" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/labels"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp" />
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="fill_parent"
+        android:layout_height="2dip"
+        android:background="@color/divider" />
+
+</LinearLayout>

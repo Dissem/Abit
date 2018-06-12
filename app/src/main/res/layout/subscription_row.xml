@@ -70,7 +70,7 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_marginEnd="16dp"
-        app:ico_color="@android:color/black"
-        app:ico_icon="cmd-rss"/>
+        app:iiv_color="@android:color/black"
+        app:iiv_icon="cmd-rss"/>
 
 </RelativeLayout>

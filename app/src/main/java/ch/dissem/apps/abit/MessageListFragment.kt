@@ -33,7 +33,6 @@ import ch.dissem.apps.abit.listener.ListSelectionListener
 import ch.dissem.apps.abit.repository.AndroidMessageRepository
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.service.Singleton.currentLabel
-import ch.dissem.apps.abit.util.FabUtils
 import ch.dissem.bitmessage.entity.Plaintext
 import ch.dissem.bitmessage.entity.valueobject.Label
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator
@@ -80,7 +79,8 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
 
                 if (!isLoading && !isLastPage) {
                     if (visibleItemCount + firstVisibleItemPosition >= totalItemCount - 5
-                        && firstVisibleItemPosition >= 0) {
+                        && firstVisibleItemPosition >= 0
+                    ) {
                         loadMoreItems()
                     }
                 }
@@ -98,7 +98,11 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         isLoading = true
         swipeableMessageAdapter?.let { messageAdapter ->
             doAsync {
-                val messages = messageRepo.findMessages(currentLabel.value, messageAdapter.itemCount, PAGE_SIZE)
+                val messages = messageRepo.findMessages(
+                    currentLabel.value,
+                    messageAdapter.itemCount,
+                    PAGE_SIZE
+                )
                 onUiThread {
                     messageAdapter.addAll(messages)
                     isLoading = false
@@ -149,7 +153,11 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         loadMoreItems()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View =
         inflater.inflate(R.layout.fragment_message_list, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -193,7 +201,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
                 adapter.setSelectedPosition(position)
                 if (position != RecyclerView.NO_POSITION) {
                     val item = adapter.getItem(position)
-                    (activity as MainActivity).onItemSelected(item)
+                    MainActivity.apply { onItemSelected(item) }
                 }
             }
         }
@@ -213,8 +221,11 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         recycler_view.itemAnimator = animator
         recycler_view.addOnScrollListener(recyclerViewOnScrollListener)
 
-        recycler_view.addItemDecoration(SimpleListDividerDecorator(
-            ContextCompat.getDrawable(context, R.drawable.list_divider_h), true))
+        recycler_view.addItemDecoration(
+            SimpleListDividerDecorator(
+                ContextCompat.getDrawable(context, R.drawable.list_divider_h), true
+            )
+        )
 
         // NOTE:
         // The initialization order is very important! This order determines the priority of
@@ -226,7 +237,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
 
         recyclerViewTouchActionGuardManager = touchActionGuardManager
         recyclerViewSwipeManager = swipeManager
-        this.swipeableMessageAdapter = adapter
+        swipeableMessageAdapter = adapter
 
         Singleton.updateMessageListAdapterInListener(adapter)
     }
@@ -235,12 +246,14 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
         val menu = FabSpeedDialMenu(context)
         menu.add(R.string.broadcast).setIcon(R.drawable.ic_action_broadcast)
         menu.add(R.string.personal_message).setIcon(R.drawable.ic_action_personal)
-        FabUtils.initFab(context, R.drawable.ic_action_compose_message, menu)
+        context.initFab(R.drawable.ic_action_compose_message, menu)
             .addOnMenuItemClickListener { _, _, itemId ->
                 val identity = Singleton.getIdentity(context)
                 if (identity == null) {
-                    Toast.makeText(activity, R.string.no_identity_warning,
-                        Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        activity, R.string.no_identity_warning,
+                        Toast.LENGTH_LONG
+                    ).show()
                 } else {
                     when (itemId) {
                         1 -> {

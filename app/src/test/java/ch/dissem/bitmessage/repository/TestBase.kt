@@ -19,7 +19,7 @@ package ch.dissem.bitmessage.repository
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.InternalContext
 import ch.dissem.bitmessage.Preferences
-import ch.dissem.bitmessage.cryptography.sc.SpongyCryptography
+import ch.dissem.bitmessage.cryptography.bc.BouncyCryptography
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.ObjectMessage
 import ch.dissem.bitmessage.entity.payload.V4Pubkey
@@ -41,7 +41,7 @@ open class TestBase {
         @JvmStatic
         fun init() {
             mockedInternalContext(
-                cryptography = SpongyCryptography(),
+                cryptography = BouncyCryptography(),
                 proofOfWorkEngine = MultiThreadedPOWEngine()
             )
         }

@@ -17,14 +17,14 @@
 package ch.dissem.apps.abit
 
 import android.content.Intent
-import android.graphics.Point
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.os.Bundle
+import android.support.annotation.DrawableRes
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.View
-import android.view.ViewGroup
-import android.widget.RelativeLayout
 import ch.dissem.apps.abit.drawer.ProfileImageListener
 import ch.dissem.apps.abit.drawer.ProfileSelectionListener
 import ch.dissem.apps.abit.listener.ListSelectionListener
@@ -32,14 +32,15 @@ import ch.dissem.apps.abit.repository.AndroidLabelRepository.Companion.LABEL_ARC
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.service.Singleton.currentLabel
 import ch.dissem.apps.abit.synchronization.SyncAdapter
-import ch.dissem.apps.abit.util.Labels
 import ch.dissem.apps.abit.util.NetworkUtils
 import ch.dissem.apps.abit.util.Preferences
+import ch.dissem.apps.abit.util.getColor
+import ch.dissem.apps.abit.util.getIcon
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.entity.BitmessageAddress
+import ch.dissem.bitmessage.entity.Conversation
 import ch.dissem.bitmessage.entity.Plaintext
 import ch.dissem.bitmessage.entity.valueobject.Label
-import com.github.amlcurran.showcaseview.ShowcaseView
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.IconicsDrawable
@@ -52,9 +53,13 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem
 import com.mikepenz.materialdrawer.model.interfaces.IProfile
 import com.mikepenz.materialdrawer.model.interfaces.Nameable
 import io.github.kobakei.materialfabspeeddial.FabSpeedDial
+import io.github.kobakei.materialfabspeeddial.FabSpeedDialMenu
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
+import uk.co.deanwild.materialshowcaseview.shape.Shape
+import uk.co.deanwild.materialshowcaseview.target.Target
 import java.io.Serializable
 import java.lang.ref.WeakReference
 import java.util.*
@@ -110,7 +115,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        val listFragment = MessageListFragment()
+        val listFragment = ConversationListFragment()
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.item_list, listFragment)
@@ -146,33 +151,33 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             SyncAdapter.stopSync(this)
         }
         if (drawer.isDrawerOpen) {
-            val lps = RelativeLayout.LayoutParams(
-                ViewGroup
-                    .LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
-            ).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-                addRule(RelativeLayout.ALIGN_PARENT_LEFT)
-                val margin = ((resources.displayMetrics.density * 12) as Number).toInt()
-                setMargins(margin, margin, margin, margin)
-            }
-
-            ShowcaseView.Builder(this)
-                .withMaterialShowcase()
-                .setStyle(R.style.CustomShowcaseTheme)
-                .setContentTitle(R.string.full_node)
+            MaterialShowcaseView.Builder(this)
+                .setMaskColour(R.color.colorPrimary)
+                .setTitleText(R.string.full_node)
                 .setContentText(R.string.full_node_description)
-                .setTarget {
-                    val view = drawer.stickyFooter
-                    val location = IntArray(2)
-                    view.getLocationInWindow(location)
-                    val x = location[0] + 7 * view.width / 8
-                    val y = location[1] + view.height / 2
-                    Point(x, y)
-                }
-                .replaceEndButton(R.layout.showcase_button)
-                .hideOnTouchOutside()
-                .build()
-                .setButtonPosition(lps)
+                .setDismissOnTouch(true)
+                .setDismissText(R.string.got_it)
+                .setShape(object : Shape {
+                    var w = 0
+                    var h = 0
+
+                    override fun updateTarget(target: Target) {
+                        w = target.bounds.width()
+                        h = target.bounds.height()
+                    }
+
+                    override fun getHeight() = h
+
+                    override fun draw(canvas: Canvas, paint: Paint, x: Int, y: Int, padding: Int) {
+                        val r = h.toFloat() / 2
+                        canvas.drawCircle(x + w / 2 - r * 1.8f, y.toFloat(), r, paint)
+                    }
+
+                    override fun getWidth() = w
+                })
+                .setTarget(drawer.stickyFooter)
+                .setDelay(1000)
+                .show()
         }
     }
 
@@ -299,6 +304,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
                     currentLabel.value = intent.getSerializableExtra(EXTRA_SHOW_LABEL) as Label
                 } else if (currentLabel.value == null) {
                     currentLabel.value = labels[0]
+
                 }
                 for (label in labels) {
                     addLabelEntry(label)
@@ -324,8 +330,14 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             val tag = item.tag
             if (tag is Label) {
                 currentLabel.value = tag
-                if (itemList !is MessageListFragment) {
-                    changeList(MessageListFragment())
+                if (tag.type == Label.Type.INBOX || tag == LABEL_ARCHIVE) {
+                    if (itemList !is ConversationListFragment) {
+                        changeList(ConversationListFragment())
+                    }
+                } else {
+                    if (itemList !is MessageListFragment) {
+                        changeList(MessageListFragment())
+                    }
                 }
                 return false
             } else if (item is Nameable<*>) {
@@ -398,8 +410,8 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             .withIdentifier(label.id as Long)
             .withName(label.toString())
             .withTag(label)
-            .withIcon(Labels.getIcon(label))
-            .withIconColor(Labels.getColor(label))
+            .withIcon(label.getIcon())
+            .withIconColor(label.getColor(0xFF000000.toInt()))
         drawer.addItemAtPosition(item, drawer.drawerItems.size - 3)
     }
 
@@ -456,6 +468,13 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             // adding or replacing the detail fragment using a
             // fragment transaction.
             val fragment = when (item) {
+                is Conversation -> {
+                    ConversationDetailFragment().apply {
+                        arguments = Bundle().apply {
+                            putSerializable(ConversationDetailFragment.ARG_ITEM_ID, item.id)
+                        }
+                    }
+                }
                 is Plaintext -> {
                     if (item.labels.any { it.type == Label.Type.DRAFT }) {
                         ComposeMessageFragment().apply {
@@ -487,6 +506,11 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             val detailIntent = when (item) {
+                is Conversation -> {
+                    Intent(this, MessageDetailActivity::class.java).apply {
+                        putExtra(ConversationDetailFragment.ARG_ITEM_ID, item.id)
+                    }
+                }
                 is Plaintext -> {
                     if (item.labels.any { it.type == Label.Type.DRAFT }) {
                         Intent(this, ComposeMessageActivity::class.java).apply {
@@ -518,6 +542,25 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
 
     fun updateTitle(title: CharSequence) {
         supportActionBar?.title = title
+    }
+
+    fun initFab(@DrawableRes drawableRes: Int, menu: FabSpeedDialMenu): FabSpeedDial {
+        val fab = floatingActionButton ?: throw IllegalStateException("Fab must not be null")
+        fab.removeAllOnMenuItemClickListeners()
+        fab.show()
+        fab.closeMenu()
+        val mainFab = fab.mainFab
+        mainFab.setImageResource(drawableRes)
+        fab.setMenu(menu)
+        fab.addOnStateChangeListener { isOpened: Boolean ->
+            if (isOpened) {
+                // It will be turned 45 degrees, which makes an x out of the +
+                mainFab.setImageResource(R.drawable.ic_action_add)
+            } else {
+                mainFab.setImageResource(drawableRes)
+            }
+        }
+        return fab
     }
 
     companion object {

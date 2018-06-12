@@ -2,27 +2,32 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/bg_label"
     android:gravity="center_vertical"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:padding="2dp">
 
     <com.mikepenz.iconics.view.IconicsImageView
         android:id="@+id/icon"
+        android:layout_margin="1dp"
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        app:ico_color="@android:color/black"
-        app:ico_icon="cmd-label" />
+        app:iiv_color="@color/colorPrimaryDarkText"
+        app:iiv_icon="cmd-label" />
 
     <TextView
         android:id="@+id/label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingStart="8dp"
-        android:paddingEnd="24dp"
-        tools:text="Label"
         android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/icon" />
+        android:layout_toEndOf="@+id/icon"
+        android:paddingEnd="24dp"
+        android:paddingStart="8dp"
+        android:textColor="@color/colorPrimaryDarkText"
+        tools:text="Label" />
+
 </RelativeLayout>

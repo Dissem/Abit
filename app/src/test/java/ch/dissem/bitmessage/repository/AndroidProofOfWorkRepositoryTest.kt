@@ -59,7 +59,6 @@ class AndroidProofOfWorkRepositoryTest : TestBase() {
     fun setUp() {
         RuntimeEnvironment.application.deleteDatabase(SqlHelper.DATABASE_NAME)
         val sqlHelper = SqlHelper(RuntimeEnvironment.application)
-
         addressRepo = AndroidAddressRepository(sqlHelper)
         messageRepo = AndroidMessageRepository(sqlHelper)
         repo = AndroidProofOfWorkRepository(sqlHelper)
@@ -94,12 +93,14 @@ class AndroidProofOfWorkRepositoryTest : TestBase() {
         messageRepo.save(plaintext)
         plaintext.ackMessage!!.let { ackMessage ->
             initialHash2 = cryptography().getInitialHash(ackMessage)
-            repo.putObject(ProofOfWorkRepository.Item(
-                objectMessage = ackMessage,
-                nonceTrialsPerByte = 1000, extraBytes = 1000,
-                expirationTime = UnixTime.now + 10 * UnixTime.MINUTE,
-                message = plaintext
-            ))
+            repo.putObject(
+                ProofOfWorkRepository.Item(
+                    objectMessage = ackMessage,
+                    nonceTrialsPerByte = 1000, extraBytes = 1000,
+                    expirationTime = UnixTime.now + 10 * UnixTime.MINUTE,
+                    message = plaintext
+                )
+            )
         }
     }
 
@@ -132,13 +133,15 @@ class AndroidProofOfWorkRepositoryTest : TestBase() {
             .build()
         messageRepo.save(plaintext)
         plaintext.ackMessage!!.let { ackMessage ->
-            repo.putObject(ProofOfWorkRepository.Item(
-                objectMessage = ackMessage,
-                nonceTrialsPerByte = 1000,
-                extraBytes = 1000,
-                expirationTime = UnixTime.now + 10 * UnixTime.MINUTE,
-                message = plaintext
-            ))
+            repo.putObject(
+                ProofOfWorkRepository.Item(
+                    objectMessage = ackMessage,
+                    nonceTrialsPerByte = 1000,
+                    extraBytes = 1000,
+                    expirationTime = UnixTime.now + 10 * UnixTime.MINUTE,
+                    message = plaintext
+                )
+            )
         }
         assertThat(repo.getItems().size, `is`(sizeBefore + 1))
     }
@@ -147,7 +150,10 @@ class AndroidProofOfWorkRepositoryTest : TestBase() {
     fun `ensure item can be retrieved`() {
         val item = repo.getItem(initialHash1)
         assertThat(item, notNullValue())
-        assertThat<ObjectPayload>(item.objectMessage.payload, instanceOf<ObjectPayload>(GetPubkey::class.java))
+        assertThat<ObjectPayload>(
+            item.objectMessage.payload,
+            instanceOf<ObjectPayload>(GetPubkey::class.java)
+        )
         assertThat(item.nonceTrialsPerByte, `is`(1000L))
         assertThat(item.extraBytes, `is`(1000L))
     }
@@ -156,7 +162,10 @@ class AndroidProofOfWorkRepositoryTest : TestBase() {
     fun `ensure ack item can be retrieved`() {
         val item = repo.getItem(initialHash2)
         assertThat(item, notNullValue())
-        assertThat<ObjectPayload>(item.objectMessage.payload, instanceOf<ObjectPayload>(GenericPayload::class.java))
+        assertThat<ObjectPayload>(
+            item.objectMessage.payload,
+            instanceOf<ObjectPayload>(GenericPayload::class.java)
+        )
         assertThat(item.nonceTrialsPerByte, `is`(1000L))
         assertThat(item.extraBytes, `is`(1000L))
         assertThat(item.expirationTime, not<Number>(0))

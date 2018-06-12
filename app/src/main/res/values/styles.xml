@@ -8,18 +8,6 @@
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     </style>
 
-    <style name="CustomShowcaseTheme" parent="ShowcaseView">
-        <item name="sv_backgroundColor">#eeffc107</item>
-        <item name="sv_showcaseColor">#ffc107</item>
-        <item name="sv_buttonText">Hide</item>
-        <item name="sv_tintButtonColor">false</item>
-        <item name="sv_titleTextAppearance">@style/CustomTitle</item>
-    </style>
-
-    <style name="CustomTitle" parent="TextAppearance.ShowcaseView.Title">
-        <item name="android:textColor">@color/colorAccent</item>
-    </style>
-
     <style name="FixedDialog" parent="Theme.AppCompat.Light.Dialog.MinWidth">
         <item name="windowNoTitle">false</item>
     </style>

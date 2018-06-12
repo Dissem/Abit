@@ -20,7 +20,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.database.DatabaseUtils
-import ch.dissem.apps.abit.util.Labels
+import ch.dissem.apps.abit.util.getText
 import ch.dissem.bitmessage.entity.valueobject.Label
 import ch.dissem.bitmessage.ports.AbstractLabelRepository
 import ch.dissem.bitmessage.ports.MessageRepository
@@ -30,7 +30,8 @@ import java.util.*
 /**
  * [MessageRepository] implementation using the Android SQL API.
  */
-class AndroidLabelRepository(private val sql: SqlHelper, private val context: Context) : AbstractLabelRepository() {
+class AndroidLabelRepository(private val sql: SqlHelper, private val context: Context) :
+    AbstractLabelRepository() {
 
     override fun find(where: String): List<Label> {
         val result = LinkedList<Label>()
@@ -62,7 +63,12 @@ class AndroidLabelRepository(private val sql: SqlHelper, private val context: Co
             db.update(TABLE_NAME, values, "id=?", arrayOf(label.id.toString()))
         } else {
             db.transaction {
-                val exists = DatabaseUtils.queryNumEntries(db, TABLE_NAME, "label=?", arrayOf(label.toString())) > 0
+                val exists = DatabaseUtils.queryNumEntries(
+                    db,
+                    TABLE_NAME,
+                    "label=?",
+                    arrayOf(label.toString())
+                ) > 0
 
                 if (exists) {
                     val values = ContentValues()
@@ -82,7 +88,8 @@ class AndroidLabelRepository(private val sql: SqlHelper, private val context: Co
         }
     }
 
-    internal fun findLabels(msgId: Any) = find("id IN (SELECT label_id FROM Message_Label WHERE message_id=$msgId)")
+    internal fun findLabels(msgId: Any) =
+        find("id IN (SELECT label_id FROM Message_Label WHERE message_id=$msgId)")
 
     companion object {
         val LABEL_ARCHIVE = Label("archive", null, 0).apply { id = Long.MAX_VALUE }
@@ -97,11 +104,12 @@ class AndroidLabelRepository(private val sql: SqlHelper, private val context: Co
         internal fun getLabel(c: Cursor, context: Context): Label {
             val typeName = c.getString(c.getColumnIndex(COLUMN_TYPE))
             val type = if (typeName == null) null else Label.Type.valueOf(typeName)
-            val text: String? = Labels.getText(type, null, context)
+            val text: String? = type?.getText(null, context)
             val label = Label(
                 text ?: c.getString(c.getColumnIndex(COLUMN_LABEL)),
                 type,
-                c.getInt(c.getColumnIndex(COLUMN_COLOR)))
+                c.getInt(c.getColumnIndex(COLUMN_COLOR))
+            )
             label.id = c.getLong(c.getColumnIndex(COLUMN_ID))
             return label
         }

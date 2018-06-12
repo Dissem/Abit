@@ -19,8 +19,11 @@ package ch.dissem.apps.abit.listener
 import android.content.Context
 import ch.dissem.apps.abit.MainActivity
 import ch.dissem.apps.abit.notification.NewMessageNotification
+import ch.dissem.apps.abit.util.Preferences
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.entity.Plaintext
+import ch.dissem.bitmessage.ports.MessageRepository
+import ch.dissem.bitmessage.utils.ConversationService
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -33,14 +36,26 @@ import java.util.concurrent.Executors
  * notifications should be combined.
  *
  */
-class MessageListener(ctx: Context) : BitmessageContext.Listener {
+class MessageListener(ctx: Context) : BitmessageContext.Listener.WithContext {
+    override fun setContext(ctx: BitmessageContext) {
+        messageRepo = ctx.messages
+        conversationService = ConversationService(messageRepo)
+    }
+
     private val unacknowledged = LinkedList<Plaintext>()
     private var numberOfUnacknowledgedMessages = 0
     private val notification = NewMessageNotification(ctx)
     private val pool = Executors.newSingleThreadExecutor()
+    private lateinit var messageRepo: MessageRepository
+    private lateinit var conversationService: ConversationService
+
+    init {
+        emulateConversations = Preferences.isEmulateConversations(ctx)
+    }
 
     override fun receive(plaintext: Plaintext) {
         pool.submit {
+            updateConversation(plaintext)
             unacknowledged.addFirst(plaintext)
             numberOfUnacknowledgedMessages++
             if (unacknowledged.size > 5) {
@@ -64,5 +79,18 @@ class MessageListener(ctx: Context) : BitmessageContext.Listener {
             unacknowledged.clear()
             numberOfUnacknowledgedMessages = 0
         }
+    }
+
+    fun updateConversation(plaintext: Plaintext) {
+        if (emulateConversations && plaintext.encoding != Plaintext.Encoding.EXTENDED) {
+            conversationService.getSubject(listOf(plaintext))?.let { subject ->
+                plaintext.conversationId = UUID.nameUUIDFromBytes(subject.toByteArray())
+                messageRepo.save(plaintext)
+            }
+        }
+    }
+
+    companion object {
+        private var emulateConversations = false
     }
 }
