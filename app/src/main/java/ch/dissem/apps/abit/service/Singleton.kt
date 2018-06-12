@@ -32,6 +32,7 @@ import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.payload.Pubkey
 import ch.dissem.bitmessage.entity.valueobject.Label
+import ch.dissem.bitmessage.factory.BufferPool
 import ch.dissem.bitmessage.networking.nio.NioNetworkHandler
 import ch.dissem.bitmessage.ports.DefaultLabeler
 import ch.dissem.bitmessage.utils.ConversationService
@@ -101,6 +102,7 @@ object Singleton {
 
     fun getBitmessageContext(context: Context): BitmessageContext =
         init({ bitmessageContext }, { bitmessageContext = it }) {
+            BufferPool.setLimit(4)
             BitmessageContext.build {
                 TTL.pubkey = 2 * DAY
                 val ctx = context.applicationContext
@@ -117,7 +119,7 @@ object Singleton {
                 labelRepo = AndroidLabelRepository(sqlHelper, ctx)
                 messageRepo = AndroidMessageRepository(sqlHelper)
                 proofOfWorkRepo = AndroidProofOfWorkRepository(sqlHelper).also { powRepo = it }
-                networkHandler = NioNetworkHandler()
+                networkHandler = NioNetworkHandler(4)
                 listener = getMessageListener(ctx)
                 labeler = Singleton.labeler
                 preferences.sendPubkeyOnIdentityCreation = false
