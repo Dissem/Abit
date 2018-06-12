@@ -61,6 +61,7 @@ object NetworkUtils {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun scheduleNodeStart(ctx: Context) {
+        val jobScheduler = ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
         val serviceComponent = ComponentName(ctx, StartupNodeOnWifiService::class.java)
         val builder = JobInfo.Builder(0, serviceComponent)
         if (Preferences.isWifiOnly(ctx)) {
@@ -71,7 +72,6 @@ object NetworkUtils {
         }
         builder.setBackoffCriteria(0L, JobInfo.BACKOFF_POLICY_LINEAR)
         builder.setPersisted(true)
-        val jobScheduler = ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
         jobScheduler.schedule(builder.build())
     }
 }

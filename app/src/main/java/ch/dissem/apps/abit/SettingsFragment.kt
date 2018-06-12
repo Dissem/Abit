@@ -18,12 +18,15 @@ package ch.dissem.apps.abit
 
 import android.app.Activity
 import android.content.*
+import android.os.Build
+import android.os.Build.VERSION_CODES.LOLLIPOP
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.FileProvider.getUriForFile
 import android.support.v7.preference.Preference
+import android.support.v7.preference.Preference.OnPreferenceChangeListener
 import android.support.v7.preference.PreferenceFragmentCompat
 import android.support.v7.preference.PreferenceScreen
 import android.support.v7.preference.SwitchPreferenceCompat
@@ -36,6 +39,7 @@ import ch.dissem.apps.abit.synchronization.SyncAdapter
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_SERVER_POW
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE
 import ch.dissem.apps.abit.util.Exports
+import ch.dissem.apps.abit.util.NetworkUtils
 import ch.dissem.apps.abit.util.Preferences
 import ch.dissem.bitmessage.entity.Plaintext
 import com.mikepenz.aboutlibraries.Libs
@@ -60,6 +64,11 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         findPreference("export")?.onPreferenceClickListener = exportClickListener()
         findPreference("import")?.onPreferenceClickListener = importClickListener()
         findPreference("status")?.onPreferenceClickListener = statusClickListener()
+
+        connectivityChangeListener().let {
+            findPreference("wifi_only")?.onPreferenceChangeListener = it
+            findPreference("require_charging")?.onPreferenceChangeListener = it
+        }
 
         val emulateConversations = findPreference("emulate_conversations") as? SwitchPreferenceCompat
         val conversationInit = findPreference("emulate_conversations_initialize")
@@ -247,8 +256,17 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     }
 
     private fun emulateConversationChangeListener(conversationInit: Preference?) =
-        Preference.OnPreferenceChangeListener { _, newValue ->
+        OnPreferenceChangeListener { _, newValue ->
             conversationInit?.isEnabled = newValue as Boolean
+            true
+        }
+
+    private fun connectivityChangeListener() =
+        OnPreferenceChangeListener { preference, newValue ->
+            val ctx = context
+            if (ctx != null && Build.VERSION.SDK_INT >= LOLLIPOP && Preferences.isFullNodeActive(ctx)) {
+                NetworkUtils.scheduleNodeStart(ctx)
+            }
             true
         }
 

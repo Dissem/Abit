@@ -26,12 +26,18 @@ import ch.dissem.apps.abit.util.Constants.PREFERENCE_REQUIRE_CHARGING
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_SYNC_TIMEOUT
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_WIFI_ONLY
+import org.jetbrains.anko.batteryManager
 import org.jetbrains.anko.connectivityManager
 import org.jetbrains.anko.defaultSharedPreferences
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
 import java.net.InetAddress
+import android.os.BatteryManager
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
+
 
 /**
  * @author Christian Basler
@@ -83,7 +89,19 @@ object Preferences {
 
     private fun getPreference(ctx: Context, name: String): String? = ctx.defaultSharedPreferences.getString(name, null)
 
-    fun isConnectionAllowed(ctx: Context) = !isWifiOnly(ctx) || !ctx.connectivityManager.isActiveNetworkMetered
+    fun isConnectionAllowed(ctx: Context) = isAllowedForWiFi(ctx) && isAllowedForCharging(ctx)
+
+    private fun isAllowedForWiFi(ctx: Context) = !isWifiOnly(ctx) || !ctx.connectivityManager.isActiveNetworkMetered
+
+    private fun isAllowedForCharging(ctx: Context) = !requireCharging(ctx) || isCharging(ctx)
+
+    private fun isCharging(ctx: Context) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        ctx.batteryManager.isCharging
+    } else {
+        val intent = ctx.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+        status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
+    }
 
     fun isWifiOnly(ctx: Context) = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_WIFI_ONLY, true)
 

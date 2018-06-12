@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.os.BatteryManager
 import android.os.Handler
 import ch.dissem.apps.abit.notification.NetworkNotification
 import ch.dissem.apps.abit.notification.NetworkNotification.Companion.NETWORK_NOTIFICATION_ID
@@ -61,7 +62,10 @@ class BitmessageService : Service() {
     override fun onCreate() {
         registerReceiver(
             connectivityReceiver,
-            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+            IntentFilter().apply {
+                addAction(ConnectivityManager.CONNECTIVITY_ACTION)
+                addAction(Intent.ACTION_BATTERY_CHANGED)
+            }
         )
         notification = NetworkNotification(this)
         running = false
