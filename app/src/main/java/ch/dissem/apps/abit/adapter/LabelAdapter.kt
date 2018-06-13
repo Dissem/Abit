@@ -2,7 +2,6 @@ package ch.dissem.apps.abit.adapter
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.os.Build
 import android.support.annotation.ColorInt
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -15,7 +14,6 @@ import ch.dissem.apps.abit.util.getIcon
 import ch.dissem.apps.abit.util.getText
 import ch.dissem.bitmessage.entity.valueobject.Label
 import com.mikepenz.iconics.view.IconicsImageView
-import org.jetbrains.anko.backgroundColor
 
 class LabelAdapter internal constructor(private val ctx: Context, labels: Collection<Label>) :
     RecyclerView.Adapter<LabelAdapter.ViewHolder>() {
@@ -50,11 +48,7 @@ class LabelAdapter internal constructor(private val ctx: Context, labels: Collec
         var label = itemView.findViewById<TextView>(R.id.label)!!
 
         fun setBackground(@ColorInt color: Int) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                itemView.backgroundTintList = ColorStateList.valueOf(color)
-            } else {
-                itemView.backgroundColor = color
-            }
+            itemView.backgroundTintList = ColorStateList.valueOf(color)
         }
     }
 }

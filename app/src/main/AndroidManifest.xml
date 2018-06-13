@@ -175,20 +175,7 @@
 
         <!-- Receive Wi-Fi connection state changes -->
         <receiver
-            android:name=".listener.WifiReceiver"
-            android:enabled="@bool/is_pre_api_21">
-            <intent-filter>
-                <!-- This is bad for battery life, but needed on older devices to check
-                     if WiFi is available. Let's be honest, the whole app is bad for
-                     battery life. -->
-                <action
-                    android:name="android.net.conn.CONNECTIVITY_CHANGE"
-                    tools:ignore="BatteryLife" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".service.StartServiceReceiver"
-            android:enabled="@bool/is_post_api_21">
+            android:name=".service.StartServiceReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

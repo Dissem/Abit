@@ -21,7 +21,7 @@ android {
     }
     defaultConfig {
         applicationId "ch.dissem.apps.${appName.toLowerCase()}"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 27
         versionCode 23
         versionName "1.0-rc1"

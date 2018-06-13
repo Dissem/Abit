@@ -18,8 +18,6 @@ package ch.dissem.apps.abit
 
 import android.app.Activity
 import android.content.*
-import android.os.Build
-import android.os.Build.VERSION_CODES.LOLLIPOP
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.app.Fragment
@@ -264,7 +262,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     private fun connectivityChangeListener() =
         OnPreferenceChangeListener { _, _ ->
             context?.let { ctx ->
-                if (Build.VERSION.SDK_INT >= LOLLIPOP && Preferences.isFullNodeActive(ctx)) {
+                if (Preferences.isFullNodeActive(ctx)) {
                     NetworkUtils.scheduleNodeStart(ctx)
                 }
             }

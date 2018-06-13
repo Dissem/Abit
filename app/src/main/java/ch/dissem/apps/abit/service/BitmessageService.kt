@@ -22,7 +22,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
-import android.os.BatteryManager
 import android.os.Handler
 import ch.dissem.apps.abit.notification.NetworkNotification
 import ch.dissem.apps.abit.notification.NetworkNotification.Companion.NETWORK_NOTIFICATION_ID

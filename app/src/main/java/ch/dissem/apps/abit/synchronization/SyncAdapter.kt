@@ -24,6 +24,7 @@ import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.synchronization.Authenticator.Companion.ACCOUNT_POW
 import ch.dissem.apps.abit.synchronization.Authenticator.Companion.ACCOUNT_SYNC
 import ch.dissem.apps.abit.synchronization.StubProvider.Companion.AUTHORITY
+import ch.dissem.apps.abit.util.NetworkUtils
 import ch.dissem.apps.abit.util.Preferences
 import ch.dissem.bitmessage.exception.DecryptionFailedException
 import ch.dissem.bitmessage.extensions.CryptoCustomMessage
@@ -43,11 +44,11 @@ class SyncAdapter(context: Context, autoInitialize: Boolean) : AbstractThreadedS
     private val bmc = Singleton.getBitmessageContext(context)
 
     override fun onPerformSync(
-            account: Account,
-            extras: Bundle,
-            authority: String,
-            provider: ContentProviderClient,
-            syncResult: SyncResult
+        account: Account,
+        extras: Bundle,
+        authority: String,
+        provider: ContentProviderClient,
+        syncResult: SyncResult
     ) {
         try {
             if (account == ACCOUNT_SYNC) {
@@ -75,16 +76,15 @@ class SyncAdapter(context: Context, autoInitialize: Boolean) : AbstractThreadedS
         }
         val trustedNode = Preferences.getTrustedNode(context)
         if (trustedNode == null) {
-            LOG.info("Trusted node not available, disabling synchronization")
-            stopSync(context)
+            NetworkUtils.scheduleNodeStart(context)
             return
         }
         LOG.info("Synchronization started")
         bmc.synchronize(
-                trustedNode,
-                Preferences.getTrustedNodePort(context),
-                Preferences.getTimeoutInSeconds(context),
-                true
+            trustedNode,
+            Preferences.getTrustedNodePort(context),
+            Preferences.getTimeoutInSeconds(context),
+            true
         )
         LOG.info("Synchronization finished")
     }
@@ -104,7 +104,8 @@ class SyncAdapter(context: Context, autoInitialize: Boolean) : AbstractThreadedS
         // If the Bitmessage context acts as a full node, synchronization isn't necessary
         LOG.info("Looking for completed POW")
 
-        val privateKey = identity.privateKey?.privateEncryptionKey ?: throw IllegalStateException("Identity without private key")
+        val privateKey =
+            identity.privateKey?.privateEncryptionKey ?: throw IllegalStateException("Identity without private key")
         val signingKey = cryptography().createPublicKey(identity.publicDecryptionKey)
         val reader = ProofOfWorkRequest.Reader(identity)
         val powRepo = Singleton.getProofOfWorkRepository(context)
@@ -113,12 +114,13 @@ class SyncAdapter(context: Context, autoInitialize: Boolean) : AbstractThreadedS
             val (objectMessage, nonceTrialsPerByte, extraBytes) = powRepo.getItem(initialHash)
             val target = cryptography().getProofOfWorkTarget(objectMessage, nonceTrialsPerByte, extraBytes)
             val cryptoMsg = CryptoCustomMessage(
-                    ProofOfWorkRequest(identity, initialHash, CALCULATE, target))
+                ProofOfWorkRequest(identity, initialHash, CALCULATE, target)
+            )
             cryptoMsg.signAndEncrypt(identity, signingKey)
             val response = bmc.send(
-                    trustedNode,
-                    Preferences.getTrustedNodePort(context),
-                    cryptoMsg
+                trustedNode,
+                Preferences.getTrustedNodePort(context),
+                cryptoMsg
             )
             if (response.isError) {
                 LOG.error("Server responded with error: ${String(response.getData())}")

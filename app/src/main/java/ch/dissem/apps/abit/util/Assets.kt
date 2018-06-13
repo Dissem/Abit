@@ -17,8 +17,6 @@
 package ch.dissem.apps.abit.util
 
 import android.content.Context
-import android.support.annotation.DrawableRes
-import android.support.annotation.StringRes
 import ch.dissem.apps.abit.R
 import ch.dissem.bitmessage.entity.Plaintext
 import java.io.IOException

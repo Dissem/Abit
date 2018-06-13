@@ -149,7 +149,7 @@ class ConversationAdapter internal constructor(
             linksClickable = true
             setTextIsSelectable(true)
         }
-        val labelAdapter = LabelAdapter(itemView.context, emptySet<Label>())
+        val labelAdapter = LabelAdapter(itemView.context, emptySet())
         val labels = itemView.findViewById<RecyclerView>(R.id.labels)!!.apply {
             adapter = labelAdapter
             layoutManager = GridLayoutManager(itemView.context, 2)

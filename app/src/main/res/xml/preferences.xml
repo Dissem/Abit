@@ -34,7 +34,6 @@
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="require_charging"
-            android:enabled="@bool/is_post_api_21"
             android:summary="@string/require_charging_summary"
             android:title="@string/require_charging" />
         <SwitchPreferenceCompat

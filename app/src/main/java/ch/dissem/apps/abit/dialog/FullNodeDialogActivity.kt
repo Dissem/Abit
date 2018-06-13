@@ -17,7 +17,6 @@
 package ch.dissem.apps.abit.dialog
 
 import android.app.Activity
-import android.os.Build
 import android.os.Bundle
 import ch.dissem.apps.abit.R
 import ch.dissem.apps.abit.util.NetworkUtils
@@ -37,9 +36,7 @@ class FullNodeDialogActivity : Activity() {
             finish()
         }
         dismiss.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                NetworkUtils.scheduleNodeStart(applicationContext)
-            }
+            NetworkUtils.scheduleNodeStart(applicationContext)
             finish()
         }
     }

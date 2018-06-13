@@ -18,9 +18,8 @@
     <item>
         <color android:color="@color/bg_swipe_item_trash"/>
     </item>
-    <item android:right="16dp">
-        <bitmap
-            android:gravity="right|center_vertical"
-            android:src="@drawable/ic_item_swipe_trash"/>
-    </item>
+    <item
+        android:drawable="@drawable/ic_item_swipe_trash"
+        android:gravity="right|center_vertical"
+        android:right="16dp"/>
 </layer-list>
