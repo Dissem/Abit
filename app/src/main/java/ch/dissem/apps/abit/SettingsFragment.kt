@@ -262,10 +262,11 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         }
 
     private fun connectivityChangeListener() =
-        OnPreferenceChangeListener { preference, newValue ->
-            val ctx = context
-            if (ctx != null && Build.VERSION.SDK_INT >= LOLLIPOP && Preferences.isFullNodeActive(ctx)) {
-                NetworkUtils.scheduleNodeStart(ctx)
+        OnPreferenceChangeListener { _, _ ->
+            context?.let { ctx ->
+                if (Build.VERSION.SDK_INT >= LOLLIPOP && Preferences.isFullNodeActive(ctx)) {
+                    NetworkUtils.scheduleNodeStart(ctx)
+                }
             }
             true
         }
