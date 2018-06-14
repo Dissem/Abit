@@ -20,7 +20,6 @@ import android.content.Context
 import android.widget.Toast
 import ch.dissem.apps.abit.MainActivity
 import ch.dissem.apps.abit.R
-import ch.dissem.apps.abit.adapter.AndroidCryptography
 import ch.dissem.apps.abit.adapter.SwipeableMessageAdapter
 import ch.dissem.apps.abit.adapter.SwitchingProofOfWorkEngine
 import ch.dissem.apps.abit.listener.MessageListener
@@ -29,6 +28,7 @@ import ch.dissem.apps.abit.repository.*
 import ch.dissem.apps.abit.util.Constants
 import ch.dissem.apps.abit.util.Observable
 import ch.dissem.bitmessage.BitmessageContext
+import ch.dissem.bitmessage.cryptography.sc.SpongyCryptography
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.payload.Pubkey
 import ch.dissem.bitmessage.entity.valueobject.Label
@@ -112,7 +112,7 @@ object Singleton {
                     ServerPowEngine(ctx),
                     ServicePowEngine(ctx)
                 )
-                cryptography = AndroidCryptography()
+                cryptography = SpongyCryptography()
                 nodeRegistry = AndroidNodeRegistry(sqlHelper)
                 inventory = AndroidInventory(sqlHelper)
                 addressRepo = AndroidAddressRepository(sqlHelper)
