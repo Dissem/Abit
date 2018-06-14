@@ -76,6 +76,7 @@ class SyncAdapter(context: Context, autoInitialize: Boolean) : AbstractThreadedS
         }
         val trustedNode = Preferences.getTrustedNode(context)
         if (trustedNode == null) {
+            // As Abit tends to get killed by the system, let's leverage the sync mechanism to start it again:
             NetworkUtils.scheduleNodeStart(context)
             return
         }

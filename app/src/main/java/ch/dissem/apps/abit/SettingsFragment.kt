@@ -189,18 +189,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         when (key) {
-            PREFERENCE_TRUSTED_NODE -> toggleSyncTrustedNode(sharedPreferences)
             PREFERENCE_SERVER_POW -> toggleSyncServerPOW(sharedPreferences)
-        }
-    }
-
-    private fun toggleSyncTrustedNode(sharedPreferences: SharedPreferences) {
-        val node = sharedPreferences.getString(PREFERENCE_TRUSTED_NODE, null)
-        val ctx = context ?: throw IllegalStateException("No context available")
-        if (node != null) {
-            SyncAdapter.startSync(ctx)
-        } else {
-            SyncAdapter.stopSync(ctx)
         }
     }
 

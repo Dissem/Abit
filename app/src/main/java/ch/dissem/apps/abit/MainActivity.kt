@@ -179,6 +179,8 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
                 .setDelay(1000)
                 .show()
         }
+
+        SyncAdapter.startSync(this)
     }
 
     private fun <F> changeList(listFragment: F) where F : Fragment, F : ListHolder<*> {
