@@ -134,23 +134,27 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
     }
 
     private fun doUpdateList(label: Label?) {
-        val mainActivity = activity as? MainActivity
-        swipeableMessageAdapter?.clear(label)
-        if (label == null) {
-            mainActivity?.updateTitle(getString(R.string.app_name))
-            swipeableMessageAdapter?.notifyDataSetChanged()
-            return
-        }
-        emptyTrashMenuItem?.isVisible = label.type == Label.Type.TRASH
-        mainActivity?.apply {
-            if ("archive" == label.toString()) {
-                updateTitle(getString(R.string.archive))
-            } else {
-                updateTitle(label.toString())
+        // If the menu item isn't available yet, we should wait - the method will be called again once it's
+        // initialized.
+        emptyTrashMenuItem?.let { menuItem ->
+            val mainActivity = activity as? MainActivity
+            swipeableMessageAdapter?.clear(label)
+            if (label == null) {
+                mainActivity?.updateTitle(getString(R.string.app_name))
+                swipeableMessageAdapter?.notifyDataSetChanged()
+                return
             }
-        }
+            menuItem.isVisible = label.type == Label.Type.TRASH
+            mainActivity?.apply {
+                if ("archive" == label.toString()) {
+                    updateTitle(getString(R.string.archive))
+                } else {
+                    updateTitle(label.toString())
+                }
+            }
 
-        loadMoreItems()
+            loadMoreItems()
+        }
     }
 
     override fun onCreateView(
@@ -296,6 +300,7 @@ class MessageListFragment : Fragment(), ListHolder<Label> {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.message_list, menu)
         emptyTrashMenuItem = menu.findItem(R.id.empty_trash)
+        currentLabel.value?.let { doUpdateList(it) }
         super.onCreateOptionsMenu(menu, inflater)
     }
 

@@ -2,8 +2,6 @@ package ch.dissem.apps.abit.service
 
 import android.app.job.JobParameters
 import android.app.job.JobService
-import android.os.Build
-import android.support.annotation.RequiresApi
 import ch.dissem.apps.abit.util.NetworkUtils
 import ch.dissem.apps.abit.util.Preferences
 
@@ -14,11 +12,11 @@ import ch.dissem.apps.abit.util.Preferences
  *
  * And stops it when the preconditions for the job (unmetered network) aren't met anymore.
  */
-class StartupNodeOnWifiService : JobService() {
+class NodeStartupService : JobService() {
 
     override fun onStartJob(params: JobParameters?): Boolean {
         val bmc = Singleton.getBitmessageContext(this)
-        if (Preferences.isFullNodeActive(this) && !bmc.isRunning()) {
+        if (Preferences.isOnline(this) && !bmc.isRunning()) {
             NetworkUtils.doStartBitmessageService(applicationContext)
         }
         return true
@@ -28,6 +26,6 @@ class StartupNodeOnWifiService : JobService() {
      * Don't actually stop the service, otherwise it will be stopped after 1 or 10 minutes
      * depending on Android version.
      */
-    override fun onStopJob(params: JobParameters?) = Preferences.isFullNodeActive(this)
+    override fun onStopJob(params: JobParameters?) = false
 
 }

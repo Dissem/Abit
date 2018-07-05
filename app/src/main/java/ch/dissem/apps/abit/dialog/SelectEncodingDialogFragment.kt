@@ -49,7 +49,7 @@ class SelectEncodingDialogFragment : AppCompatDialogFragment() {
         when (encoding) {
             SIMPLE -> radioGroup.check(R.id.simple)
             EXTENDED -> radioGroup.check(R.id.extended)
-            else -> LOG.warn("Unexpected encoding: " + encoding)
+            else -> LOG.warn("Unexpected encoding: $encoding")
         }
         ok.setOnClickListener(View.OnClickListener {
             encoding = when (radioGroup.checkedRadioButtonId) {

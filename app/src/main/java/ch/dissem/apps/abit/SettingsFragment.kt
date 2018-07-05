@@ -33,9 +33,6 @@ import android.widget.Toast
 import ch.dissem.apps.abit.service.BatchProcessorService
 import ch.dissem.apps.abit.service.SimpleJob
 import ch.dissem.apps.abit.service.Singleton
-import ch.dissem.apps.abit.synchronization.SyncAdapter
-import ch.dissem.apps.abit.util.Constants.PREFERENCE_SERVER_POW
-import ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE
 import ch.dissem.apps.abit.util.Exports
 import ch.dissem.apps.abit.util.NetworkUtils
 import ch.dissem.apps.abit.util.Preferences
@@ -51,8 +48,7 @@ import java.util.*
 /**
  * @author Christian Basler
  */
-class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener,
-    PreferenceFragmentCompat.OnPreferenceStartScreenCallback {
+class SettingsFragment : PreferenceFragmentCompat(), PreferenceFragmentCompat.OnPreferenceStartScreenCallback {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
@@ -187,24 +183,6 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         }
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        when (key) {
-            PREFERENCE_SERVER_POW -> toggleSyncServerPOW(sharedPreferences)
-        }
-    }
-
-    private fun toggleSyncServerPOW(sharedPreferences: SharedPreferences) {
-        val node = sharedPreferences.getString(PREFERENCE_TRUSTED_NODE, null)
-        if (node != null) {
-            val ctx = context ?: throw IllegalStateException("No context available")
-            if (sharedPreferences.getBoolean(PREFERENCE_SERVER_POW, false)) {
-                SyncAdapter.startPowSync(ctx)
-            } else {
-                SyncAdapter.stopPowSync(ctx)
-            }
-        }
-    }
-
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             if (service is BatchProcessorService.BatchBinder) {
@@ -250,11 +228,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
     private fun connectivityChangeListener() =
         OnPreferenceChangeListener { _, _ ->
-            context?.let { ctx ->
-                if (Preferences.isFullNodeActive(ctx)) {
-                    NetworkUtils.scheduleNodeStart(ctx)
-                }
-            }
+            context?.let { ctx -> NetworkUtils.scheduleNodeStart(ctx) }
             true
         }
 

@@ -36,9 +36,6 @@
     <string name="mark_unread">Marquer non lu</string>
     <string name="archive">Archive</string>
     <string name="stream_number">"Flux  nº%d"</string>
-    <string name="trusted_node">Nœud de confiance</string>
-    <string name="trusted_node_summary">Cette adresse est utilisée pour la synchronisation</string>
-    <string name="sync_timeout">Limitation du temps de synchronisation</string>
     <string name="write_message">Écrire un message</string>
     <string name="full_node">Nœud actif</string>
     <string name="send">Transmission</string>
@@ -47,7 +44,6 @@
     <string name="proof_of_work_title">Preuve de travail</string>
     <string name="proof_of_work_text_0">Faire du travail pour envoyer la message</string>
     <string name="proof_of_work_text_n" tools:ignore="PluralsCandidate">Faire du travail pour envoyer la message (%1$d en file d\'attente)</string>
-    <string name="error_invalid_sync_port">Port non valide dans les paramètres de synchronisation : %s</string>
     <string name="compose_body_hint">Écrire un message</string>
     <string name="contacts_and_subscriptions">Contacts</string>
     <string name="subscribed">Souscrit</string>
@@ -94,9 +90,6 @@
     <string name="use_mobile_network">Utiliser le réseau mobile</string>
     <string name="personal_message">Message</string>
     <string name="empty_trash">Vider les ordures</string>
-    <string name="sync_timeout_summary">Délai d\'expiration en secondes</string>
-    <string name="server_pow">POW sur le serveur</string>
-    <string name="server_pow_summary">Le nœud de confiance fait la preuve de travail</string>
     <string name="share">Partager</string>
     <string name="compose_message">Composer</string>
     <string name="no_identity_warning">Veuillez réessayer dès qu\'une identité est disponible.</string>
@@ -134,4 +127,9 @@
     <string name="broadcasts">Diffusions</string>
     <string name="encoding_simple">simple</string>
     <string name="encoding_extended">étendu</string>
+    <string name="online">En ligne</string>
+    <string name="unknown">Inconnue</string>
+    <string name="require_charging">Exigence d\'une charge</string>
+    <string name="require_charging_summary">Connecter uniquement lorsque l\'appareil est branché.</string>
+    <string name="bitmessage_service_description">Garde la connexion au réseau bitmessage.</string>
 </resources>

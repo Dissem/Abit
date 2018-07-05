@@ -81,7 +81,7 @@ class MessageListener(ctx: Context) : BitmessageContext.Listener.WithContext {
         }
     }
 
-    fun updateConversation(plaintext: Plaintext) {
+    private fun updateConversation(plaintext: Plaintext) {
         if (emulateConversations && plaintext.encoding != Plaintext.Encoding.EXTENDED) {
             conversationService.getSubject(listOf(plaintext))?.let { subject ->
                 plaintext.conversationId = UUID.nameUUIDFromBytes(subject.toByteArray())

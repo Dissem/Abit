@@ -110,7 +110,7 @@ open class TestBase {
         }
 
         fun loadIdentity(address: String): BitmessageAddress {
-            val privateKey = PrivateKey.read(getResource(address + ".privkey"))
+            val privateKey = PrivateKey.read(getResource("$address.privkey"))
             val identity = BitmessageAddress(privateKey)
             Assert.assertEquals(address, identity.address)
             return identity

@@ -35,10 +35,6 @@
     <string name="archive">Archiv</string>
     <string name="empty_trash">Papierkorb leeren</string>
     <string name="stream_number">Stream %d</string>
-    <string name="trusted_node">Vertrauenswürdiger Knoten</string>
-    <string name="trusted_node_summary">Diese Adresse wird für die Synchronisation verwendet</string>
-    <string name="sync_timeout">Zeitbeschränkung der Synchronisierung</string>
-    <string name="sync_timeout_summary">Timeout in Sekunden</string>
     <string name="write_message">Schreiben</string>
     <string name="full_node">Aktiver Knoten</string>
     <string name="send">Senden</string>
@@ -47,12 +43,9 @@
     <string name="proof_of_work_title">Proof of Work</string>
     <string name="proof_of_work_text_0">Arbeite am Versenden</string>
     <string name="proof_of_work_text_n">Arbeite am Versenden (%1$d in Warteschlange)</string>
-    <string name="error_invalid_sync_port">Ungültiger Port in den Synchronisationseinstellungen: %s</string>
     <string name="compose_body_hint">Nachricht schreiben</string>
     <string name="contacts_and_subscriptions">Kontakte</string>
     <string name="subscribed">Abonniert</string>
-    <string name="server_pow">Server POW</string>
-    <string name="server_pow_summary">Der vertrauenswürdige Knoten macht den Proof of Work</string>
     <string name="full_node_warning">Ein aktiver Bitmessage-Knoten muss viel hoch- und herunterladen, was auf einem mobilen Netzwerk teuer sein kann. Soll tatsächlich ein aktiver Knoten gestartet werden?</string>
     <string name="about">Über Abit</string>
     <string name="about_summary">Opensource Abhängigkeiten.</string>
@@ -139,4 +132,17 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="encoding_extended">erweitert</string>
     <string name="emulate_conversations">Konversation erraten</string>
     <string name="emulate_conversations_summary">Benutze Betreff um zu erraten welche Nachrichten zusammengehören. Die Reihenfolge stimmt häufig nicht.</string>
+    <string name="online">Online</string>
+    <string name="ok">OK</string>
+    <string name="unknown">Unbekannt</string>
+    <string name="require_charging_summary">Nur verbinden wenn das Gerät geladen wird.</string>
+    <string name="require_charging">Laden erforderlich</string>
+    <string name="emulate_conversations_batch">Bestehende Nachrichten werden nach Betreff gruppiert</string>
+    <string name="emulate_conversations_initialize">Bestehende Nachrichten nach Betreff gruppieren</string>
+    <string name="preference_group_advanced">Erweitert</string>
+    <string name="preference_group_network_and_performance">Netzwerk &amp; Performanz</string>
+    <string name="preference_group_network_and_performance_summary">Feineinstellungen für Netzwerk und Protokoll-Details</string>
+    <string name="preference_group_user_experience">Verhalten</string>
+    <string name="preference_group_user_experience_summary">Ändern, wie Nachrichten dargestellt werden</string>
+    <string name="bitmessage_service_description">Hält die Verbindung zum Bitmessage-Netzwerk.</string>
 </resources>

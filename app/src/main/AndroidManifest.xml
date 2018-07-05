@@ -11,8 +11,6 @@
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 
     <application
         android:name="android.support.multidex.MultiDexApplication"
@@ -122,17 +120,11 @@
 
         <service
             android:name=".service.BitmessageService"
+            android:description="@string/bitmessage_service_description"
             android:exported="false" />
         <service
             android:name=".service.ProofOfWorkService"
             android:exported="false" />
-
-        <!-- Synchronization -->
-        <provider
-            android:name=".synchronization.StubProvider"
-            android:authorities="ch.dissem.apps.abit.provider"
-            android:exported="false"
-            android:syncable="true" />
 
         <!-- Exports -->
         <provider
@@ -146,30 +138,6 @@
         </provider>
 
         <service
-            android:name=".synchronization.AuthenticatorService"
-            android:exported="true"
-            tools:ignore="ExportedService">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator" />
-        </service>
-        <service
-            android:name=".synchronization.SyncService"
-            android:exported="true"
-            tools:ignore="ExportedService">
-            <intent-filter>
-                <action android:name="android.content.SyncAdapter" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.content.SyncAdapter"
-                android:resource="@xml/syncadapter" />
-        </service>
-        <service
             android:name=".service.BitmessageIntentService"
             android:exported="false" />
 
@@ -182,7 +150,7 @@
         </receiver>
 
         <service
-            android:name=".service.StartupNodeOnWifiService"
+            android:name=".service.NodeStartupService"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 

@@ -21,11 +21,8 @@ import android.widget.Toast
 import ch.dissem.apps.abit.MainActivity
 import ch.dissem.apps.abit.R
 import ch.dissem.apps.abit.adapter.SwipeableMessageAdapter
-import ch.dissem.apps.abit.adapter.SwitchingProofOfWorkEngine
 import ch.dissem.apps.abit.listener.MessageListener
-import ch.dissem.apps.abit.pow.ServerPowEngine
 import ch.dissem.apps.abit.repository.*
-import ch.dissem.apps.abit.util.Constants
 import ch.dissem.apps.abit.util.Observable
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.cryptography.sc.SpongyCryptography
@@ -107,11 +104,7 @@ object Singleton {
                 TTL.pubkey = 2 * DAY
                 val ctx = context.applicationContext
                 val sqlHelper = SqlHelper(ctx)
-                proofOfWorkEngine = SwitchingProofOfWorkEngine(
-                    ctx, Constants.PREFERENCE_SERVER_POW,
-                    ServerPowEngine(ctx),
-                    ServicePowEngine(ctx)
-                )
+                proofOfWorkEngine = ServicePowEngine(ctx)
                 cryptography = SpongyCryptography()
                 nodeRegistry = AndroidNodeRegistry(sqlHelper)
                 inventory = AndroidInventory(sqlHelper)
@@ -137,8 +130,6 @@ object Singleton {
     fun getMessageRepository(ctx: Context) = getBitmessageContext(ctx).messages as AndroidMessageRepository
 
     fun getAddressRepository(ctx: Context) = getBitmessageContext(ctx).addresses as AndroidAddressRepository
-
-    fun getProofOfWorkRepository(ctx: Context) = powRepo ?: getBitmessageContext(ctx).internals.proofOfWorkRepository
 
     fun getIdentity(ctx: Context): BitmessageAddress? =
         init<BitmessageAddress?>(ctx, { identity }, { identity = it }) { bmc ->

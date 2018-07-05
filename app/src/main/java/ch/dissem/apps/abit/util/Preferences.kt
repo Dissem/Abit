@@ -17,26 +17,20 @@
 package ch.dissem.apps.abit.util
 
 import android.content.Context
-import ch.dissem.apps.abit.R
-import ch.dissem.apps.abit.notification.ErrorNotification
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.BatteryManager
+import android.os.Build
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_EMULATE_CONVERSATIONS
-import ch.dissem.apps.abit.util.Constants.PREFERENCE_FULL_NODE
+import ch.dissem.apps.abit.util.Constants.PREFERENCE_ONLINE
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_REQUEST_ACK
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_REQUIRE_CHARGING
-import ch.dissem.apps.abit.util.Constants.PREFERENCE_SYNC_TIMEOUT
-import ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_WIFI_ONLY
 import org.jetbrains.anko.batteryManager
 import org.jetbrains.anko.connectivityManager
 import org.jetbrains.anko.defaultSharedPreferences
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.io.IOException
-import java.net.InetAddress
-import android.os.BatteryManager
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.Build
 
 
 /**
@@ -44,50 +38,6 @@ import android.os.Build
  */
 object Preferences {
     private val LOG = LoggerFactory.getLogger(Preferences::class.java)
-
-    fun useTrustedNode(ctx: Context): Boolean {
-        val trustedNode = getPreference(ctx, PREFERENCE_TRUSTED_NODE) ?: return false
-        return trustedNode.trim { it <= ' ' }.isNotEmpty()
-    }
-
-    /**
-     * Warning, this method might do a network call and therefore can't be called from
-     * the UI thread.
-     */
-    @Throws(IOException::class)
-    fun getTrustedNode(ctx: Context): InetAddress? {
-        var trustedNode: String = getPreference(ctx, PREFERENCE_TRUSTED_NODE) ?: return null
-        trustedNode = trustedNode.trim { it <= ' ' }
-        if (trustedNode.isEmpty()) return null
-
-        if (trustedNode.matches("^(?![0-9a-fA-F]*:[0-9a-fA-F]*:).*(:[0-9]+)$".toRegex())) {
-            val index = trustedNode.lastIndexOf(':')
-            trustedNode = trustedNode.substring(0, index)
-        }
-        return InetAddress.getByName(trustedNode)
-    }
-
-    fun getTrustedNodePort(ctx: Context): Int {
-        var trustedNode: String = getPreference(ctx, PREFERENCE_TRUSTED_NODE) ?: return 8444
-        trustedNode = trustedNode.trim { it <= ' ' }
-
-        if (trustedNode.matches("^(?![0-9a-fA-F]*:[0-9a-fA-F]*:).*(:[0-9]+)$".toRegex())) {
-            val index = trustedNode.lastIndexOf(':')
-            val portString = trustedNode.substring(index + 1)
-            try {
-                return Integer.parseInt(portString)
-            } catch (e: NumberFormatException) {
-                ErrorNotification(ctx)
-                    .setError(R.string.error_invalid_sync_port, portString)
-                    .show()
-            }
-        }
-        return 8444
-    }
-
-    fun getTimeoutInSeconds(ctx: Context): Long = getPreference(ctx, PREFERENCE_SYNC_TIMEOUT)?.toLong() ?: 120
-
-    private fun getPreference(ctx: Context, name: String): String? = ctx.defaultSharedPreferences.getString(name, null)
 
     fun isConnectionAllowed(ctx: Context) = isAllowedForWiFi(ctx) && isAllowedForCharging(ctx)
 
@@ -113,24 +63,8 @@ object Preferences {
 
     fun requireCharging(ctx: Context) = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_REQUIRE_CHARGING, true)
 
-    fun setRequireCharging(ctx: Context, status: Boolean) {
-        ctx.defaultSharedPreferences.edit()
-            .putBoolean(PREFERENCE_REQUIRE_CHARGING, status)
-            .apply()
-    }
-
     fun isEmulateConversations(ctx: Context) =
         ctx.defaultSharedPreferences.getBoolean(PREFERENCE_EMULATE_CONVERSATIONS, true)
-
-
-    fun isFullNodeActive(ctx: Context) =
-        ctx.defaultSharedPreferences.getBoolean(PREFERENCE_FULL_NODE, false)
-
-    fun setFullNodeActive(ctx: Context, status: Boolean) {
-        ctx.defaultSharedPreferences.edit()
-            .putBoolean(PREFERENCE_FULL_NODE, status)
-            .apply()
-    }
 
     fun getExportDirectory(ctx: Context) = File(ctx.filesDir, "exports")
 
@@ -150,4 +84,18 @@ object Preferences {
             }
         }
     }
+
+    fun isOnline(ctx: Context) = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_ONLINE, true)
+
+    fun setOnline(ctx: Context, status: Boolean) {
+        ctx.defaultSharedPreferences.edit()
+            .putBoolean(PREFERENCE_ONLINE, status)
+            .apply()
+        if (status) {
+            NetworkUtils.enableNode(ctx, true)
+        } else {
+            NetworkUtils.disableNode(ctx)
+        }
+    }
+
 }

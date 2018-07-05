@@ -76,7 +76,7 @@ class ComposeMessageFragment : Fragment() {
                 parents.addAll(draft.parents)
             } else {
                 var id = getSerializable(EXTRA_IDENTITY) as? BitmessageAddress
-                if (context != null && (id == null || id.privateKey == null)) {
+                if (context != null && id?.privateKey == null) {
                     id = Singleton.getIdentity(context!!)
                 }
                 if (id?.privateKey != null) {

@@ -23,8 +23,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Handler
+import ch.dissem.apps.abit.R
+import ch.dissem.apps.abit.notification.ErrorNotification
 import ch.dissem.apps.abit.notification.NetworkNotification
-import ch.dissem.apps.abit.notification.NetworkNotification.Companion.NETWORK_NOTIFICATION_ID
 import ch.dissem.apps.abit.util.Preferences
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.utils.Property
@@ -74,7 +75,6 @@ class BitmessageService : Service() {
         if (!isRunning) {
             running = true
             notification.connecting()
-            startForeground(NETWORK_NOTIFICATION_ID, notification.notification)
             if (!bmc.isRunning()) {
                 bmc.startup()
             }
