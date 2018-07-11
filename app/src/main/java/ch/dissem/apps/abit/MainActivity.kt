@@ -31,10 +31,7 @@ import ch.dissem.apps.abit.listener.ListSelectionListener
 import ch.dissem.apps.abit.repository.AndroidLabelRepository.Companion.LABEL_ARCHIVE
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.service.Singleton.currentLabel
-import ch.dissem.apps.abit.util.NetworkUtils
-import ch.dissem.apps.abit.util.Preferences
-import ch.dissem.apps.abit.util.getColor
-import ch.dissem.apps.abit.util.getIcon
+import ch.dissem.apps.abit.util.*
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.Conversation
@@ -253,11 +250,11 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             .withIdentifier(ID_NODE_SWITCH)
             .withName(R.string.online)
             .withIcon(CommunityMaterial.Icon.cmd_cloud_outline)
-            .withChecked(Preferences.isOnline(this))
+            .withChecked(preferences.online)
             .withOnCheckedChangeListener { _, _, isChecked ->
-                Preferences.setOnline(this, isChecked)
+                preferences.online = isChecked
                 if (isChecked) {
-                    NetworkUtils.enableNode(this, true)
+                    network.enableNode(true)
                 }
             }
 
@@ -360,7 +357,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
     }
 
     override fun onResume() {
-        NetworkUtils.enableNode(this, false)
+        network.enableNode(false)
         updateUnread()
         Singleton.getMessageListener(this).resetNotification()
         currentLabel.addObserver(this) { label ->

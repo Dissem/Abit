@@ -23,10 +23,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Handler
-import ch.dissem.apps.abit.R
-import ch.dissem.apps.abit.notification.ErrorNotification
 import ch.dissem.apps.abit.notification.NetworkNotification
-import ch.dissem.apps.abit.util.Preferences
+import ch.dissem.apps.abit.util.preferences
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.utils.Property
 import org.jetbrains.anko.doAsync
@@ -43,7 +41,7 @@ class BitmessageService : Service() {
 
     private val connectivityReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
-            if (bmc.isRunning() && !Preferences.isConnectionAllowed(this@BitmessageService)) {
+            if (bmc.isRunning() && !preferences.connectionAllowed) {
                 bmc.shutdown()
             }
         }

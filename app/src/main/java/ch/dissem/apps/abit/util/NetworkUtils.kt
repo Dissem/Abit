@@ -10,14 +10,14 @@ import android.os.Build
 import ch.dissem.apps.abit.dialog.FullNodeDialogActivity
 import ch.dissem.apps.abit.service.BitmessageService
 import ch.dissem.apps.abit.service.NodeStartupService
+import java.lang.ref.WeakReference
 
+val Context.network get() = NetworkUtils.getInstance(this)
 
-object NetworkUtils {
+class NetworkUtils internal constructor(private val ctx: Context) {
 
-    fun enableNode(ctx: Context, ask: Boolean = true) {
-        if (Preferences.isConnectionAllowed(ctx) || !ask) {
-            scheduleNodeStart(ctx)
-        } else {
+    fun enableNode(ask: Boolean = true) {
+        if (ask && !ctx.preferences.connectionAllowed) {
             // Ask for connection
             val dialogIntent = Intent(ctx, FullNodeDialogActivity::class.java)
             if (ctx !is Activity) {
@@ -25,34 +25,42 @@ object NetworkUtils {
                 ctx.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
             }
             ctx.startActivity(dialogIntent)
+        } else {
+            scheduleNodeStart()
         }
     }
 
-    fun doStartBitmessageService(ctx: Context) {
-        ctx.startService(Intent(ctx, BitmessageService::class.java))
-    }
-
-    fun disableNode(ctx: Context) {
+    fun disableNode() {
         ctx.stopService(Intent(ctx, BitmessageService::class.java))
     }
 
-    fun scheduleNodeStart(ctx: Context) {
+    fun scheduleNodeStart() {
         val jobScheduler = ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
         val serviceComponent = ComponentName(ctx, NodeStartupService::class.java)
         val builder = JobInfo.Builder(0, serviceComponent)
         when {
-            Preferences.isWifiOnly(ctx) ->
+            ctx.preferences.wifiOnly ->
                 builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ->
                 builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_NOT_ROAMING)
             else ->
                 builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
         }
-        if (Preferences.requireCharging(ctx)) {
-            builder.setRequiresCharging(true)
-        }
-        builder.setPeriodic(15 * 60 * 1000L)
+        builder.setRequiresCharging(ctx.preferences.requireCharging)
         builder.setPersisted(true)
         jobScheduler.schedule(builder.build())
+    }
+
+    companion object {
+        private var instance: WeakReference<NetworkUtils>? = null
+
+        internal fun getInstance(ctx: Context): NetworkUtils {
+            var networkUtils = instance?.get()
+            if (networkUtils == null) {
+                networkUtils = NetworkUtils(ctx.applicationContext)
+                instance = WeakReference(networkUtils)
+            }
+            return networkUtils
+        }
     }
 }

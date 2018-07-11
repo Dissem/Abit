@@ -17,7 +17,10 @@
 package ch.dissem.apps.abit
 
 import android.app.Activity
-import android.content.*
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.app.Fragment
@@ -34,8 +37,8 @@ import ch.dissem.apps.abit.service.BatchProcessorService
 import ch.dissem.apps.abit.service.SimpleJob
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.util.Exports
-import ch.dissem.apps.abit.util.NetworkUtils
-import ch.dissem.apps.abit.util.Preferences
+import ch.dissem.apps.abit.util.network
+import ch.dissem.apps.abit.util.preferences
 import ch.dissem.bitmessage.entity.Plaintext
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.LibsBuilder
@@ -99,7 +102,7 @@ class SettingsFragment : PreferenceFragmentCompat(), PreferenceFragmentCompat.On
             val bmc = Singleton.getBitmessageContext(ctx)
             bmc.internals.nodeRegistry.clear()
             bmc.cleanup()
-            Preferences.cleanupExportDirectory(ctx)
+            ctx.preferences.cleanupExportDirectory()
 
             uiThread {
                 Toast.makeText(
@@ -118,7 +121,7 @@ class SettingsFragment : PreferenceFragmentCompat(), PreferenceFragmentCompat.On
 
         indeterminateProgressDialog(R.string.export_data_summary, R.string.export_data).apply {
             doAsync {
-                val exportDirectory = Preferences.getExportDirectory(ctx)
+                val exportDirectory = ctx.preferences.exportDirectory
                 exportDirectory.mkdirs()
                 val file = Exports.exportData(exportDirectory, ctx)
                 val contentUri = getUriForFile(ctx, "ch.dissem.apps.abit.fileprovider", file)
@@ -157,7 +160,7 @@ class SettingsFragment : PreferenceFragmentCompat(), PreferenceFragmentCompat.On
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val ctx = context ?: throw IllegalStateException("No context available")
         when (requestCode) {
-            WRITE_EXPORT_REQUEST_CODE -> Preferences.cleanupExportDirectory(ctx)
+            WRITE_EXPORT_REQUEST_CODE -> ctx.preferences.cleanupExportDirectory()
             READ_IMPORT_REQUEST_CODE -> {
                 if (resultCode == Activity.RESULT_OK && data?.data != null) {
                     indeterminateProgressDialog(R.string.import_data_summary, R.string.import_data).apply {
@@ -228,7 +231,7 @@ class SettingsFragment : PreferenceFragmentCompat(), PreferenceFragmentCompat.On
 
     private fun connectivityChangeListener() =
         OnPreferenceChangeListener { _, _ ->
-            context?.let { ctx -> NetworkUtils.scheduleNodeStart(ctx) }
+            context?.network?.scheduleNodeStart()
             true
         }
 

@@ -31,47 +31,49 @@ import org.jetbrains.anko.connectivityManager
 import org.jetbrains.anko.defaultSharedPreferences
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.lang.ref.WeakReference
 
+
+val Context.preferences get() = Preferences.getInstance(this)
 
 /**
  * @author Christian Basler
  */
-object Preferences {
+class Preferences internal constructor(private val ctx: Context) {
     private val LOG = LoggerFactory.getLogger(Preferences::class.java)
 
-    fun isConnectionAllowed(ctx: Context) = isAllowedForWiFi(ctx) && isAllowedForCharging(ctx)
+    val connectionAllowed get() = isAllowedForWiFi && isAllowedForCharging
 
-    private fun isAllowedForWiFi(ctx: Context) = !isWifiOnly(ctx) || !ctx.connectivityManager.isActiveNetworkMetered
+    private val isAllowedForWiFi get() = !wifiOnly || !ctx.connectivityManager.isActiveNetworkMetered
 
-    private fun isAllowedForCharging(ctx: Context) = !requireCharging(ctx) || isCharging(ctx)
+    private val isAllowedForCharging get() = !requireCharging || isCharging
 
-    private fun isCharging(ctx: Context) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        ctx.batteryManager.isCharging
-    } else {
-        val intent = ctx.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-        val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
-        status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
-    }
+    private val isCharging
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ctx.batteryManager.isCharging
+        } else {
+            val intent = ctx.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+            val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+            status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
+        }
 
-    fun isWifiOnly(ctx: Context) = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_WIFI_ONLY, true)
+    var wifiOnly
+        get() = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_WIFI_ONLY, true)
+        set(value) {
+            ctx.defaultSharedPreferences.edit()
+                .putBoolean(PREFERENCE_WIFI_ONLY, value)
+                .apply()
+        }
 
-    fun setWifiOnly(ctx: Context, status: Boolean) {
-        ctx.defaultSharedPreferences.edit()
-            .putBoolean(PREFERENCE_WIFI_ONLY, status)
-            .apply()
-    }
+    val requireCharging get() = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_REQUIRE_CHARGING, true)
 
-    fun requireCharging(ctx: Context) = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_REQUIRE_CHARGING, true)
+    val emulateConversations get() = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_EMULATE_CONVERSATIONS, true)
 
-    fun isEmulateConversations(ctx: Context) =
-        ctx.defaultSharedPreferences.getBoolean(PREFERENCE_EMULATE_CONVERSATIONS, true)
+    val exportDirectory by lazy { File(ctx.filesDir, "exports") }
 
-    fun getExportDirectory(ctx: Context) = File(ctx.filesDir, "exports")
+    val requestAcknowledgements = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_REQUEST_ACK, true)
 
-    fun requestAcknowledgements(ctx: Context) = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_REQUEST_ACK, true)
-
-    fun cleanupExportDirectory(ctx: Context) {
-        val exportDirectory = getExportDirectory(ctx)
+    fun cleanupExportDirectory() {
         if (exportDirectory.exists()) {
             exportDirectory.listFiles().forEach { file ->
                 try {
@@ -85,17 +87,29 @@ object Preferences {
         }
     }
 
-    fun isOnline(ctx: Context) = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_ONLINE, true)
+    var online
+        get() = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_ONLINE, true)
+        set(value) {
+            ctx.defaultSharedPreferences.edit()
+                .putBoolean(PREFERENCE_ONLINE, value)
+                .apply()
+            if (value) {
+                ctx.network.enableNode(true)
+            } else {
+                ctx.network.disableNode()
+            }
+        }
 
-    fun setOnline(ctx: Context, status: Boolean) {
-        ctx.defaultSharedPreferences.edit()
-            .putBoolean(PREFERENCE_ONLINE, status)
-            .apply()
-        if (status) {
-            NetworkUtils.enableNode(ctx, true)
-        } else {
-            NetworkUtils.disableNode(ctx)
+    companion object {
+        private var instance: WeakReference<Preferences>? = null
+
+        internal fun getInstance(ctx: Context): Preferences {
+            var prefs = instance?.get()
+            if (prefs == null) {
+                prefs = Preferences(ctx.applicationContext)
+                instance = WeakReference(prefs)
+            }
+            return prefs
         }
     }
-
 }
