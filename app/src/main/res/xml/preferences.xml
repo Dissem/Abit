@@ -63,35 +63,10 @@
             android:summary="@string/import_data_summary"
             android:title="@string/import_data" />
 
-        <PreferenceScreen
-            android:key="preference_experimental"
-            android:title="@string/preference_group_experimental"
-            android:summary="@string/preference_group_experimental_summary"
-            android:persistent="false">
-
-            <EditTextPreference
-                android:inputType="textUri"
-                android:key="trusted_node"
-                android:summary="@string/trusted_node_summary"
-                android:title="@string/trusted_node" />
-            <EditTextPreference
-                android:defaultValue="120"
-                android:inputType="number"
-                android:key="sync_timeout"
-                android:summary="@string/sync_timeout_summary"
-                android:title="@string/sync_timeout" />
-            <SwitchPreferenceCompat
-                android:defaultValue="false"
-                android:dependency="trusted_node"
-                android:key="server_pow"
-                android:summary="@string/server_pow_summary"
-                android:title="@string/server_pow" />
-            <Preference
-                android:key="status"
-                android:summary="@string/status_summary"
-                android:title="@string/status" />
-
-        </PreferenceScreen>
+        <Preference
+            android:key="status"
+            android:summary="@string/status_summary"
+            android:title="@string/status" />
 
     </PreferenceScreen>
 

@@ -17,7 +17,10 @@
 package ch.dissem.apps.abit
 
 import android.app.Activity
-import android.content.*
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.app.Fragment
@@ -33,12 +36,9 @@ import android.widget.Toast
 import ch.dissem.apps.abit.service.BatchProcessorService
 import ch.dissem.apps.abit.service.SimpleJob
 import ch.dissem.apps.abit.service.Singleton
-import ch.dissem.apps.abit.synchronization.SyncAdapter
-import ch.dissem.apps.abit.util.Constants.PREFERENCE_SERVER_POW
-import ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE
 import ch.dissem.apps.abit.util.Exports
-import ch.dissem.apps.abit.util.NetworkUtils
-import ch.dissem.apps.abit.util.Preferences
+import ch.dissem.apps.abit.util.network
+import ch.dissem.apps.abit.util.preferences
 import ch.dissem.bitmessage.entity.Plaintext
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.LibsBuilder
@@ -51,8 +51,7 @@ import java.util.*
 /**
  * @author Christian Basler
  */
-class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener,
-    PreferenceFragmentCompat.OnPreferenceStartScreenCallback {
+class SettingsFragment : PreferenceFragmentCompat(), PreferenceFragmentCompat.OnPreferenceStartScreenCallback {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
@@ -103,7 +102,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             val bmc = Singleton.getBitmessageContext(ctx)
             bmc.internals.nodeRegistry.clear()
             bmc.cleanup()
-            Preferences.cleanupExportDirectory(ctx)
+            ctx.preferences.cleanupExportDirectory()
 
             uiThread {
                 Toast.makeText(
@@ -122,7 +121,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
         indeterminateProgressDialog(R.string.export_data_summary, R.string.export_data).apply {
             doAsync {
-                val exportDirectory = Preferences.getExportDirectory(ctx)
+                val exportDirectory = ctx.preferences.exportDirectory
                 exportDirectory.mkdirs()
                 val file = Exports.exportData(exportDirectory, ctx)
                 val contentUri = getUriForFile(ctx, "ch.dissem.apps.abit.fileprovider", file)
@@ -161,7 +160,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val ctx = context ?: throw IllegalStateException("No context available")
         when (requestCode) {
-            WRITE_EXPORT_REQUEST_CODE -> Preferences.cleanupExportDirectory(ctx)
+            WRITE_EXPORT_REQUEST_CODE -> ctx.preferences.cleanupExportDirectory()
             READ_IMPORT_REQUEST_CODE -> {
                 if (resultCode == Activity.RESULT_OK && data?.data != null) {
                     indeterminateProgressDialog(R.string.import_data_summary, R.string.import_data).apply {
@@ -183,24 +182,6 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             if (it is MainActivity) {
                 it.floatingActionButton?.hide()
                 it.updateTitle(getString(R.string.settings))
-            }
-        }
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        when (key) {
-            PREFERENCE_SERVER_POW -> toggleSyncServerPOW(sharedPreferences)
-        }
-    }
-
-    private fun toggleSyncServerPOW(sharedPreferences: SharedPreferences) {
-        val node = sharedPreferences.getString(PREFERENCE_TRUSTED_NODE, null)
-        if (node != null) {
-            val ctx = context ?: throw IllegalStateException("No context available")
-            if (sharedPreferences.getBoolean(PREFERENCE_SERVER_POW, false)) {
-                SyncAdapter.startPowSync(ctx)
-            } else {
-                SyncAdapter.stopPowSync(ctx)
             }
         }
     }
@@ -250,11 +231,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
     private fun connectivityChangeListener() =
         OnPreferenceChangeListener { _, _ ->
-            context?.let { ctx ->
-                if (Preferences.isFullNodeActive(ctx)) {
-                    NetworkUtils.scheduleNodeStart(ctx)
-                }
-            }
+            context?.network?.scheduleNodeStart()
             true
         }
 

@@ -25,7 +25,7 @@ import android.support.v4.app.NotificationCompat
 import ch.dissem.apps.abit.MainActivity
 import ch.dissem.apps.abit.R
 import ch.dissem.apps.abit.service.BitmessageIntentService
-import ch.dissem.apps.abit.service.BitmessageService
+import ch.dissem.apps.abit.service.NodeStartupService
 import java.util.*
 import kotlin.concurrent.fixedRateTimer
 
@@ -51,9 +51,9 @@ class NetworkNotification(ctx: Context) : AbstractNotification(ctx) {
 
     @SuppressLint("StringFormatMatches")
     private fun update(): Boolean {
-        val running = BitmessageService.isRunning
+        val running = NodeStartupService.isRunning
         builder.setOngoing(running)
-        val connections = BitmessageService.status.getProperty("network", "connections")
+        val connections = NodeStartupService.status.getProperty("network", "connections")
         if (!running) {
             builder.setSmallIcon(R.drawable.ic_notification_full_node_disconnected)
             builder.setContentText(ctx.getString(R.string.connection_info_disconnected))
@@ -112,7 +112,6 @@ class NetworkNotification(ctx: Context) : AbstractNotification(ctx) {
         timer = fixedRateTimer(initialDelay = 10000, period = 10000) {
             if (!update()) {
                 cancel()
-                ctx.stopService(Intent(ctx, BitmessageService::class.java))
             }
             super@NetworkNotification.show()
         }

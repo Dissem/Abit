@@ -8,11 +8,11 @@ import kotlin.properties.Delegates
 class Observable<T>(value: T) {
     private val observers = mutableMapOf<Any, (T) -> Unit>()
 
-    var value: T by Delegates.observable(value, { _, old, new ->
+    var value: T by Delegates.observable(value) { _, old, new ->
         if (old != new) {
             observers.values.forEach { it.invoke(new) }
         }
-    })
+    }
 
     /**
      * The key will make sure the observer can easily be removed. Usually the key should be either

@@ -19,7 +19,7 @@ package ch.dissem.apps.abit.listener
 import android.content.Context
 import ch.dissem.apps.abit.MainActivity
 import ch.dissem.apps.abit.notification.NewMessageNotification
-import ch.dissem.apps.abit.util.Preferences
+import ch.dissem.apps.abit.util.preferences
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.entity.Plaintext
 import ch.dissem.bitmessage.ports.MessageRepository
@@ -50,7 +50,7 @@ class MessageListener(ctx: Context) : BitmessageContext.Listener.WithContext {
     private lateinit var conversationService: ConversationService
 
     init {
-        emulateConversations = Preferences.isEmulateConversations(ctx)
+        emulateConversations = ctx.preferences.emulateConversations
     }
 
     override fun receive(plaintext: Plaintext) {
@@ -81,7 +81,7 @@ class MessageListener(ctx: Context) : BitmessageContext.Listener.WithContext {
         }
     }
 
-    fun updateConversation(plaintext: Plaintext) {
+    private fun updateConversation(plaintext: Plaintext) {
         if (emulateConversations && plaintext.encoding != Plaintext.Encoding.EXTENDED) {
             conversationService.getSubject(listOf(plaintext))?.let { subject ->
                 plaintext.conversationId = UUID.nameUUIDFromBytes(subject.toByteArray())

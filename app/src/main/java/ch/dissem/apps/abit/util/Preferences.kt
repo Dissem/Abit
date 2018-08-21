@@ -17,127 +17,63 @@
 package ch.dissem.apps.abit.util
 
 import android.content.Context
-import ch.dissem.apps.abit.R
-import ch.dissem.apps.abit.notification.ErrorNotification
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.BatteryManager
+import android.os.Build
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_EMULATE_CONVERSATIONS
-import ch.dissem.apps.abit.util.Constants.PREFERENCE_FULL_NODE
+import ch.dissem.apps.abit.util.Constants.PREFERENCE_ONLINE
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_REQUEST_ACK
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_REQUIRE_CHARGING
-import ch.dissem.apps.abit.util.Constants.PREFERENCE_SYNC_TIMEOUT
-import ch.dissem.apps.abit.util.Constants.PREFERENCE_TRUSTED_NODE
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_WIFI_ONLY
 import org.jetbrains.anko.batteryManager
 import org.jetbrains.anko.connectivityManager
 import org.jetbrains.anko.defaultSharedPreferences
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.io.IOException
-import java.net.InetAddress
-import android.os.BatteryManager
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.Build
+import java.lang.ref.WeakReference
 
+
+val Context.preferences get() = Preferences.getInstance(this)
 
 /**
  * @author Christian Basler
  */
-object Preferences {
+class Preferences internal constructor(private val ctx: Context) {
     private val LOG = LoggerFactory.getLogger(Preferences::class.java)
 
-    fun useTrustedNode(ctx: Context): Boolean {
-        val trustedNode = getPreference(ctx, PREFERENCE_TRUSTED_NODE) ?: return false
-        return trustedNode.trim { it <= ' ' }.isNotEmpty()
-    }
+    val connectionAllowed get() = isAllowedForWiFi && isAllowedForCharging
 
-    /**
-     * Warning, this method might do a network call and therefore can't be called from
-     * the UI thread.
-     */
-    @Throws(IOException::class)
-    fun getTrustedNode(ctx: Context): InetAddress? {
-        var trustedNode: String = getPreference(ctx, PREFERENCE_TRUSTED_NODE) ?: return null
-        trustedNode = trustedNode.trim { it <= ' ' }
-        if (trustedNode.isEmpty()) return null
+    private val isAllowedForWiFi get() = !wifiOnly || !ctx.connectivityManager.isActiveNetworkMetered
 
-        if (trustedNode.matches("^(?![0-9a-fA-F]*:[0-9a-fA-F]*:).*(:[0-9]+)$".toRegex())) {
-            val index = trustedNode.lastIndexOf(':')
-            trustedNode = trustedNode.substring(0, index)
+    private val isAllowedForCharging get() = !requireCharging || isCharging
+
+    private val isCharging
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ctx.batteryManager.isCharging
+        } else {
+            val intent = ctx.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+            val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+            status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
         }
-        return InetAddress.getByName(trustedNode)
-    }
 
-    fun getTrustedNodePort(ctx: Context): Int {
-        var trustedNode: String = getPreference(ctx, PREFERENCE_TRUSTED_NODE) ?: return 8444
-        trustedNode = trustedNode.trim { it <= ' ' }
-
-        if (trustedNode.matches("^(?![0-9a-fA-F]*:[0-9a-fA-F]*:).*(:[0-9]+)$".toRegex())) {
-            val index = trustedNode.lastIndexOf(':')
-            val portString = trustedNode.substring(index + 1)
-            try {
-                return Integer.parseInt(portString)
-            } catch (e: NumberFormatException) {
-                ErrorNotification(ctx)
-                    .setError(R.string.error_invalid_sync_port, portString)
-                    .show()
-            }
+    var wifiOnly
+        get() = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_WIFI_ONLY, true)
+        set(value) {
+            ctx.defaultSharedPreferences.edit()
+                .putBoolean(PREFERENCE_WIFI_ONLY, value)
+                .apply()
         }
-        return 8444
-    }
 
-    fun getTimeoutInSeconds(ctx: Context): Long = getPreference(ctx, PREFERENCE_SYNC_TIMEOUT)?.toLong() ?: 120
+    val requireCharging get() = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_REQUIRE_CHARGING, true)
 
-    private fun getPreference(ctx: Context, name: String): String? = ctx.defaultSharedPreferences.getString(name, null)
+    val emulateConversations get() = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_EMULATE_CONVERSATIONS, true)
 
-    fun isConnectionAllowed(ctx: Context) = isAllowedForWiFi(ctx) && isAllowedForCharging(ctx)
+    val exportDirectory by lazy { File(ctx.filesDir, "exports") }
 
-    private fun isAllowedForWiFi(ctx: Context) = !isWifiOnly(ctx) || !ctx.connectivityManager.isActiveNetworkMetered
+    val requestAcknowledgements = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_REQUEST_ACK, true)
 
-    private fun isAllowedForCharging(ctx: Context) = !requireCharging(ctx) || isCharging(ctx)
-
-    private fun isCharging(ctx: Context) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        ctx.batteryManager.isCharging
-    } else {
-        val intent = ctx.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-        val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
-        status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
-    }
-
-    fun isWifiOnly(ctx: Context) = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_WIFI_ONLY, true)
-
-    fun setWifiOnly(ctx: Context, status: Boolean) {
-        ctx.defaultSharedPreferences.edit()
-            .putBoolean(PREFERENCE_WIFI_ONLY, status)
-            .apply()
-    }
-
-    fun requireCharging(ctx: Context) = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_REQUIRE_CHARGING, true)
-
-    fun setRequireCharging(ctx: Context, status: Boolean) {
-        ctx.defaultSharedPreferences.edit()
-            .putBoolean(PREFERENCE_REQUIRE_CHARGING, status)
-            .apply()
-    }
-
-    fun isEmulateConversations(ctx: Context) =
-        ctx.defaultSharedPreferences.getBoolean(PREFERENCE_EMULATE_CONVERSATIONS, true)
-
-
-    fun isFullNodeActive(ctx: Context) =
-        ctx.defaultSharedPreferences.getBoolean(PREFERENCE_FULL_NODE, false)
-
-    fun setFullNodeActive(ctx: Context, status: Boolean) {
-        ctx.defaultSharedPreferences.edit()
-            .putBoolean(PREFERENCE_FULL_NODE, status)
-            .apply()
-    }
-
-    fun getExportDirectory(ctx: Context) = File(ctx.filesDir, "exports")
-
-    fun requestAcknowledgements(ctx: Context) = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_REQUEST_ACK, true)
-
-    fun cleanupExportDirectory(ctx: Context) {
-        val exportDirectory = getExportDirectory(ctx)
+    fun cleanupExportDirectory() {
         if (exportDirectory.exists()) {
             exportDirectory.listFiles().forEach { file ->
                 try {
@@ -148,6 +84,32 @@ object Preferences {
                     LOG.debug(e.message, e)
                 }
             }
+        }
+    }
+
+    var online
+        get() = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_ONLINE, true)
+        set(value) {
+            ctx.defaultSharedPreferences.edit()
+                .putBoolean(PREFERENCE_ONLINE, value)
+                .apply()
+            if (value) {
+                ctx.network.enableNode(true)
+            } else {
+                ctx.network.disableNode()
+            }
+        }
+
+    companion object {
+        private var instance: WeakReference<Preferences>? = null
+
+        internal fun getInstance(ctx: Context): Preferences {
+            var prefs = instance?.get()
+            if (prefs == null) {
+                prefs = Preferences(ctx.applicationContext)
+                instance = WeakReference(prefs)
+            }
+            return prefs
         }
     }
 }

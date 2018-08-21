@@ -35,7 +35,7 @@ import ch.dissem.apps.abit.ComposeMessageActivity.Companion.EXTRA_SUBJECT
 import ch.dissem.apps.abit.adapter.ContactAdapter
 import ch.dissem.apps.abit.dialog.SelectEncodingDialogFragment
 import ch.dissem.apps.abit.service.Singleton
-import ch.dissem.apps.abit.util.Preferences
+import ch.dissem.apps.abit.util.preferences
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.Plaintext
 import ch.dissem.bitmessage.entity.Plaintext.Type.BROADCAST
@@ -76,7 +76,7 @@ class ComposeMessageFragment : Fragment() {
                 parents.addAll(draft.parents)
             } else {
                 var id = getSerializable(EXTRA_IDENTITY) as? BitmessageAddress
-                if (context != null && (id == null || id.privateKey == null)) {
+                if (context != null && id?.privateKey == null) {
                     id = Singleton.getIdentity(context!!)
                 }
                 if (id?.privateKey != null) {
@@ -94,8 +94,7 @@ class ComposeMessageFragment : Fragment() {
                 if (containsKey(EXTRA_CONTENT)) {
                     content = getString(EXTRA_CONTENT)
                 }
-                encoding = getSerializable(EXTRA_ENCODING) as? Plaintext.Encoding ?:
-                    Plaintext.Encoding.SIMPLE
+                encoding = getSerializable(EXTRA_ENCODING) as? Plaintext.Encoding ?: Plaintext.Encoding.SIMPLE
 
                 if (containsKey(EXTRA_PARENT)) {
                     val parent = getSerializable(EXTRA_PARENT) as Plaintext
@@ -221,7 +220,7 @@ class ComposeMessageFragment : Fragment() {
         }
         val sender = sender_input.selectedItem as? ch.dissem.bitmessage.entity.BitmessageAddress
         sender?.let { builder.from(it) }
-        if (!Preferences.requestAcknowledgements(ctx)) {
+        if (!ctx.preferences.requestAcknowledgements) {
             builder.preventAck()
         }
         when (encoding) {

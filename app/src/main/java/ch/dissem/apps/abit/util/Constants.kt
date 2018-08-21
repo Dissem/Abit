@@ -22,13 +22,10 @@ import java.util.regex.Pattern
  * @author Christian Basler
  */
 object Constants {
+    const val PREFERENCE_ONLINE = "online"
     const val PREFERENCE_WIFI_ONLY = "wifi_only"
     const val PREFERENCE_REQUIRE_CHARGING = "require_charging"
     const val PREFERENCE_EMULATE_CONVERSATIONS = "emulate_conversations"
-    const val PREFERENCE_TRUSTED_NODE = "trusted_node"
-    const val PREFERENCE_SYNC_TIMEOUT = "sync_timeout"
-    const val PREFERENCE_SERVER_POW = "server_pow"
-    const val PREFERENCE_FULL_NODE = "full_node"
     const val PREFERENCE_REQUEST_ACK = "request_acknowledgments"
     const val PREFERENCE_POW_AVERAGE = "average_pow_time_ms"
     const val PREFERENCE_POW_COUNT = "pow_count"

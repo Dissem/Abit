@@ -30,8 +30,6 @@
     <string name="reply">رد</string>
     <string name="delete">حذف</string>
     <string name="empty_trash">أفرغ المهملات</string>
-    <string name="trusted_node">عقدة موثوقة</string>
-    <string name="trusted_node_summary">استخدام العقدة في التزامن</string>
     <string name="write_message">كتابة رسالة</string>
     <string name="full_node">عقدة كاملة</string>
     <string name="send">إرسال</string>
@@ -51,15 +49,10 @@
     <string name="mark_unread">حدد كمقروء</string>
     <string name="archive">أرشيف</string>
     <string name="stream_number">بث #%d</string>
-    <string name="sync_timeout">انتهاء مهلة التزامن</string>
-    <string name="sync_timeout_summary">مهلة الإتصال بالثواني</string>
     <string name="proof_of_work_text_n" tools:ignore="PluralsCandidate">جاري إثبات العمل لإرسال الرسالة (%1$d في قائمة الانتظار)</string>
-    <string name="error_invalid_sync_port">إعدادات منفذ التزامن غير صالحة</string>
     <string name="compose_body_hint">كتابة رسالة</string>
     <string name="contacts_and_subscriptions">جهات اتصال</string>
     <string name="subscribed">تم الاشتراك</string>
-    <string name="server_pow">خادم إثبات العمل</string>
-    <string name="server_pow_summary">عقدة موثوقة تقوم بإثبات العمل</string>
     <string name="full_node_warning">تشغيل عقدة Bitmessage كاملة يستهلك الكثير من البيانات، مما قد يكون مكلفًا لبيانات الهاتف، هل أنت متأكد أنك تريد تشغيل عقدة كاملة؟</string>
     <string name="about">عن Abit</string>
     <string name="about_summary">التبعيات مفتوحة المصدر.</string>

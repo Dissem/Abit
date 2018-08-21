@@ -19,8 +19,8 @@ package ch.dissem.apps.abit.dialog
 import android.app.Activity
 import android.os.Bundle
 import ch.dissem.apps.abit.R
-import ch.dissem.apps.abit.util.NetworkUtils
-import ch.dissem.apps.abit.util.Preferences
+import ch.dissem.apps.abit.util.network
+import ch.dissem.apps.abit.util.preferences
 import kotlinx.android.synthetic.main.dialog_full_node.*
 
 /**
@@ -31,12 +31,12 @@ class FullNodeDialogActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.dialog_full_node)
         ok.setOnClickListener {
-            Preferences.setWifiOnly(this@FullNodeDialogActivity, false)
-            NetworkUtils.enableNode(applicationContext)
+            preferences.wifiOnly = false
+            network.enableNode()
             finish()
         }
         dismiss.setOnClickListener {
-            NetworkUtils.scheduleNodeStart(applicationContext)
+            network.scheduleNodeStart()
             finish()
         }
     }

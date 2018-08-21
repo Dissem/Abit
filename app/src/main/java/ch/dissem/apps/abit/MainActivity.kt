@@ -31,11 +31,7 @@ import ch.dissem.apps.abit.listener.ListSelectionListener
 import ch.dissem.apps.abit.repository.AndroidLabelRepository.Companion.LABEL_ARCHIVE
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.service.Singleton.currentLabel
-import ch.dissem.apps.abit.synchronization.SyncAdapter
-import ch.dissem.apps.abit.util.NetworkUtils
-import ch.dissem.apps.abit.util.Preferences
-import ch.dissem.apps.abit.util.getColor
-import ch.dissem.apps.abit.util.getIcon
+import ch.dissem.apps.abit.util.*
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.entity.BitmessageAddress
 import ch.dissem.bitmessage.entity.Conversation
@@ -145,11 +141,6 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             ComposeMessageActivity.launchReplyTo(this, item)
         }
 
-        if (Preferences.useTrustedNode(this)) {
-            SyncAdapter.startSync(this)
-        } else {
-            SyncAdapter.stopSync(this)
-        }
         if (drawer.isDrawerOpen) {
             MaterialShowcaseView.Builder(this)
                 .setMaskColour(R.color.colorPrimary)
@@ -179,8 +170,6 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
                 .setDelay(1000)
                 .show()
         }
-
-        SyncAdapter.startSync(this)
     }
 
     private fun <F> changeList(listFragment: F) where F : Fragment, F : ListHolder<*> {
@@ -259,14 +248,13 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
 
         nodeSwitch = SwitchDrawerItem()
             .withIdentifier(ID_NODE_SWITCH)
-            .withName(R.string.full_node)
+            .withName(R.string.online)
             .withIcon(CommunityMaterial.Icon.cmd_cloud_outline)
-            .withChecked(Preferences.isFullNodeActive(this))
+            .withChecked(preferences.online)
             .withOnCheckedChangeListener { _, _, isChecked ->
+                preferences.online = isChecked
                 if (isChecked) {
-                    NetworkUtils.enableNode(this@MainActivity)
-                } else {
-                    NetworkUtils.disableNode(this@MainActivity)
+                    network.enableNode(true)
                 }
             }
 
@@ -369,10 +357,8 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
     }
 
     override fun onResume() {
+        network.enableNode(false)
         updateUnread()
-        if (Preferences.isFullNodeActive(this) && Preferences.isConnectionAllowed(this@MainActivity)) {
-            NetworkUtils.enableNode(this, false)
-        }
         Singleton.getMessageListener(this).resetNotification()
         currentLabel.addObserver(this) { label ->
             if (label != null && label.id is Long) {
@@ -577,15 +563,6 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
         private const val ID_NODE_SWITCH: Long = 1
 
         private var instance: WeakReference<MainActivity>? = null
-
-        fun updateNodeSwitch() {
-            apply {
-                runOnUiThread {
-                    nodeSwitch.withChecked(Preferences.isFullNodeActive(this))
-                    drawer.updateStickyFooterItem(nodeSwitch)
-                }
-            }
-        }
 
         /**
          * Runs the given code in the main activity context, if it currently exists. Otherwise,

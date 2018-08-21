@@ -18,7 +18,7 @@ package ch.dissem.apps.abit.service
 
 import android.app.IntentService
 import android.content.Intent
-import ch.dissem.apps.abit.util.NetworkUtils
+import ch.dissem.apps.abit.util.network
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.entity.Plaintext
 
@@ -44,10 +44,10 @@ class BitmessageIntentService : IntentService("BitmessageIntentService") {
                 Singleton.getMessageListener(this).resetNotification()
             }
             if (it.hasExtra(EXTRA_STARTUP_NODE)) {
-                NetworkUtils.enableNode(this)
+                network.enableNode()
             }
             if (it.hasExtra(EXTRA_SHUTDOWN_NODE)) {
-                NetworkUtils.disableNode(this)
+                network.disableNode()
             }
         }
     }
