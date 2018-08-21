@@ -119,10 +119,6 @@
         </activity>
 
         <service
-            android:name=".service.BitmessageService"
-            android:description="@string/bitmessage_service_description"
-            android:exported="false" />
-        <service
             android:name=".service.ProofOfWorkService"
             android:exported="false" />
 
@@ -151,6 +147,11 @@
 
         <service
             android:name=".service.NodeStartupService"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <service
+            android:name=".service.CleanupService"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
