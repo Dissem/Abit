@@ -5,20 +5,14 @@ import android.content.Intent
 import android.support.v4.app.FragmentManager
 import android.view.View
 import android.widget.Toast
-
-import com.mikepenz.materialdrawer.AccountHeader
-import com.mikepenz.materialdrawer.model.ProfileDrawerItem
-import com.mikepenz.materialdrawer.model.interfaces.IProfile
-
-import ch.dissem.apps.abit.AddressDetailActivity
-import ch.dissem.apps.abit.AddressDetailFragment
-import ch.dissem.apps.abit.MainActivity
-import ch.dissem.apps.abit.R
+import android.widget.Toast.LENGTH_LONG
+import ch.dissem.apps.abit.*
 import ch.dissem.apps.abit.dialog.AddIdentityDialogFragment
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.bitmessage.entity.BitmessageAddress
-
-import android.widget.Toast.LENGTH_LONG
+import com.mikepenz.materialdrawer.AccountHeader
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem
+import com.mikepenz.materialdrawer.model.interfaces.IProfile
 
 class ProfileSelectionListener(
     private val ctx: Context,

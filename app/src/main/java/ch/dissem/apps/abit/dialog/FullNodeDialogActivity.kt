@@ -32,7 +32,7 @@ class FullNodeDialogActivity : Activity() {
         setContentView(R.layout.dialog_full_node)
         ok.setOnClickListener {
             preferences.wifiOnly = false
-            network.enableNode()
+            network.scheduleNodeStart()
             finish()
         }
         dismiss.setOnClickListener {

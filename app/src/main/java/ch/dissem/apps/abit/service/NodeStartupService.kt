@@ -34,6 +34,11 @@ class NodeStartupService : JobService() {
         }
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        notification = NetworkNotification(this)
+    }
+
     override fun onStartJob(params: JobParameters?): Boolean {
         if (preferences.online) {
             registerReceiver(
@@ -43,7 +48,6 @@ class NodeStartupService : JobService() {
                     addAction(Intent.ACTION_BATTERY_CHANGED)
                 }
             )
-            notification = NetworkNotification(this)
             NodeStartupService.running = false
 
             if (!isRunning) {
@@ -67,7 +71,12 @@ class NodeStartupService : JobService() {
         doAsync {
             bmc.cleanup()
         }
-        unregisterReceiver(connectivityReceiver)
+        try {
+            unregisterReceiver(connectivityReceiver)
+        } catch (_: IllegalArgumentException) {
+            // For some reason, onStartJob wasn't called so the receiver isn't registered.
+            // Let's just ignore this.
+        }
         stopSelf()
     }
 

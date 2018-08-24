@@ -24,6 +24,7 @@ import ch.dissem.apps.abit.adapter.SwipeableMessageAdapter
 import ch.dissem.apps.abit.listener.MessageListener
 import ch.dissem.apps.abit.repository.*
 import ch.dissem.apps.abit.util.Observable
+import ch.dissem.apps.abit.util.preferences
 import ch.dissem.bitmessage.BitmessageContext
 import ch.dissem.bitmessage.cryptography.sc.SpongyCryptography
 import ch.dissem.bitmessage.entity.BitmessageAddress
