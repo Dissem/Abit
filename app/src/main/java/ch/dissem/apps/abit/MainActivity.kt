@@ -29,6 +29,7 @@ import ch.dissem.apps.abit.drawer.ProfileImageListener
 import ch.dissem.apps.abit.drawer.ProfileSelectionListener
 import ch.dissem.apps.abit.listener.ListSelectionListener
 import ch.dissem.apps.abit.repository.AndroidLabelRepository.Companion.LABEL_ARCHIVE
+import ch.dissem.apps.abit.repository.AndroidMessageRepository
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.service.Singleton.currentLabel
 import ch.dissem.apps.abit.util.*
@@ -92,6 +93,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
         private set
 
     private lateinit var bmc: BitmessageContext
+    private lateinit var messageRepo: AndroidMessageRepository
     private lateinit var accountHeader: AccountHeader
 
     private lateinit var drawer: Drawer
@@ -104,6 +106,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
         super.onCreate(savedInstanceState)
         instance = WeakReference(this)
         bmc = Singleton.getBitmessageContext(this)
+        messageRepo = Singleton.getMessageRepository(this)
 
         setContentView(R.layout.activity_main)
         fab.hide()
@@ -299,8 +302,8 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
                 for (label in labels) {
                     addLabelEntry(label)
                 }
-                currentLabel.value?.let {
-                    drawer.setSelection(it.id as Long)
+                currentLabel.value?.let { label ->
+                    drawer.setSelection(label.id as Long)
                 }
                 updateUnread()
             }
@@ -334,7 +337,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
                 when (item.name.textRes) {
                     R.string.contacts_and_subscriptions -> {
                         if (itemList is AddressListFragment) {
-                            itemList.updateList()
+                            itemList.reloadList()
                         } else {
                             changeList(AddressListFragment())
                         }
@@ -432,7 +435,7 @@ class MainActivity : AppCompatActivity(), ListSelectionListener<Serializable> {
             if (item.tag is Label) {
                 val label = item.tag as Label
                 if (label !== LABEL_ARCHIVE) {
-                    val unread = bmc.messages.countUnread(label)
+                    val unread = messageRepo.countUnread(label, preferences.separateIdentities)
                     if (unread > 0) {
                         (item as PrimaryDrawerItem).withBadge(unread.toString())
                     } else {

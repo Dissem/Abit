@@ -85,10 +85,10 @@ class AddressListFragment : AbstractItemListFragment<Void, BitmessageAddress>() 
         super.onResume()
 
         initFab(activity as MainActivity)
-        updateList()
+        reloadList()
     }
 
-    fun updateList() {
+    override fun reloadList() {
         adapter.clear()
         context?.let { context ->
             val addressRepo = Singleton.getAddressRepository(context)
@@ -138,7 +138,7 @@ class AddressListFragment : AbstractItemListFragment<Void, BitmessageAddress>() 
         }
     }
 
-    override fun updateList(label: Void) = updateList()
+    override fun updateList(label: Void) = reloadList()
 
     private data class ViewHolder(
         val ctx: Context,

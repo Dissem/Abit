@@ -21,6 +21,7 @@ import android.database.Cursor
 import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import ch.dissem.apps.abit.repository.AndroidLabelRepository.Companion.LABEL_ARCHIVE
+import ch.dissem.apps.abit.util.Preferences
 import ch.dissem.apps.abit.util.UuidUtils
 import ch.dissem.apps.abit.util.UuidUtils.asUuid
 import ch.dissem.bitmessage.entity.BitmessageAddress
@@ -38,7 +39,14 @@ import java.util.*
 /**
  * [MessageRepository] implementation using the Android SQL API.
  */
-class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepository() {
+class AndroidMessageRepository(private val sql: SqlHelper, private val prefs: Preferences) : AbstractMessageRepository() {
+
+    fun findMessages(label: Label?, offset: Int, limit: Int, separateIdentities: Boolean) =
+        if (label === LABEL_ARCHIVE || label === null) {
+            find("id NOT IN (SELECT message_id FROM Message_Label)", offset, limit, separateIdentities)
+        } else {
+            find("id IN (SELECT message_id FROM Message_Label WHERE label_id=" + label.id + ")", offset, limit, separateIdentities)
+        }
 
     override fun findMessages(label: Label?, offset: Int, limit: Int) =
         if (label === LABEL_ARCHIVE) {
@@ -54,30 +62,56 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
         null
     ).toInt()
 
-    override fun countUnread(label: Label?) = when {
-        label === LABEL_ARCHIVE -> 0
-        label == null -> DatabaseUtils.queryNumEntries(
-            sql.readableDatabase,
-            TABLE_NAME,
-            "id IN (SELECT message_id FROM Message_Label WHERE label_id IN (SELECT id FROM Label WHERE type=?))",
-            arrayOf(Label.Type.UNREAD.name)
-        ).toInt()
-        else -> DatabaseUtils.queryNumEntries(
-            sql.readableDatabase,
-            TABLE_NAME,
-            "        id IN (SELECT message_id FROM Message_Label WHERE label_id=?) " +
-                "AND id IN (SELECT message_id FROM Message_Label WHERE label_id IN (SELECT id FROM Label WHERE type=?))",
-            arrayOf(label.id.toString(), Label.Type.UNREAD.name)
-        ).toInt()
+    private fun getSelectIdentity(separateIdentities: Boolean): Pair<String, Array<String>> {
+        if (separateIdentities) {
+            val identity = prefs.currentIdentity
+            return if (prefs.separateIdentities && identity != null) {
+                "AND (type = 'BROADCAST' OR recipient=? OR sender=?)" to arrayOf(identity.address, identity.address)
+            } else {
+                "" to emptyArray()
+            }
+        } else {
+            return "" to emptyArray()
+        }
     }
 
-    override fun findConversations(label: Label?, offset: Int, limit: Int): List<UUID> {
+    override fun countUnread(label: Label?) = countUnread(label, false)
+
+    fun countUnread(label: Label?, separateIdentities: Boolean) = getSelectIdentity(separateIdentities).let { (selectIdentityQuery, selectIdentityArgs) ->
+        when {
+            label === LABEL_ARCHIVE -> 0
+            label == null -> DatabaseUtils.queryNumEntries(
+                sql.readableDatabase,
+                TABLE_NAME,
+                "id IN (SELECT message_id FROM Message_Label WHERE label_id IN (SELECT id FROM Label WHERE type=?)) " +
+                    selectIdentityQuery,
+                arrayOf(Label.Type.UNREAD.name, *selectIdentityArgs)
+            ).toInt()
+            else -> DatabaseUtils.queryNumEntries(
+                sql.readableDatabase,
+                TABLE_NAME,
+                "id IN (SELECT message_id FROM Message_Label WHERE label_id=?) " +
+                    "AND id IN (SELECT message_id FROM Message_Label WHERE label_id IN (SELECT id FROM Label WHERE type=?)) " +
+                    selectIdentityQuery,
+                arrayOf(label.id.toString(), Label.Type.UNREAD.name, *selectIdentityArgs)
+            ).toInt()
+        }
+    }
+
+    override fun findConversations(label: Label?, offset: Int, limit: Int): List<UUID> = findConversations(label, offset, limit, false)
+
+    fun findConversations(label: Label?, offset: Int, limit: Int, separateIdentities: Boolean): List<UUID> {
         val projection = arrayOf(COLUMN_CONVERSATION)
+        val (selectIdentityQuery, selectIdentityArgs) = getSelectIdentity(separateIdentities)
 
         val where = when {
-            label === LABEL_ARCHIVE -> "id NOT IN (SELECT message_id FROM Message_Label)"
-            label == null -> null
-            else -> "id IN (SELECT message_id FROM Message_Label WHERE label_id=${label.id})"
+            label === LABEL_ARCHIVE -> "id NOT IN (SELECT message_id FROM Message_Label) $selectIdentityQuery"
+            label == null -> if (selectIdentityQuery.isNotBlank()) {
+                "type = 'BROADCAST' OR recipient=? OR sender=?"
+            } else {
+                null
+            }
+            else -> "id IN (SELECT message_id FROM Message_Label WHERE label_id=${label.id}) $selectIdentityQuery"
         }
         val result = LinkedList<UUID>()
         sql.readableDatabase.query(
@@ -85,7 +119,7 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
             TABLE_NAME,
             projection,
             where,
-            null, null, null,
+            selectIdentityArgs, null, null,
             "$COLUMN_RECEIVED DESC, $COLUMN_SENT DESC",
             if (limit == 0) null else "$offset, $limit"
         ).use { c ->
@@ -140,8 +174,11 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
         db.update(PARENTS_TABLE_NAME, values, where, null)
     }
 
-    override fun find(where: String, offset: Int, limit: Int): List<Plaintext> {
+    override fun find(where: String, offset: Int, limit: Int) = find(where, offset, limit, false)
+
+    fun find(where: String, offset: Int, limit: Int, separateIdentities: Boolean): List<Plaintext> {
         val result = LinkedList<Plaintext>()
+        val (selectIdentityQuery, selectIdentityArgs) = getSelectIdentity(separateIdentities)
 
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
@@ -164,7 +201,7 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
 
         sql.readableDatabase.query(
             TABLE_NAME, projection,
-            where, null, null, null,
+            "$where $selectIdentityQuery", selectIdentityArgs, null, null,
             "$COLUMN_RECEIVED DESC, $COLUMN_SENT DESC",
             if (limit == 0) null else "$offset, $limit"
         ).use { c ->
@@ -318,4 +355,5 @@ class AndroidMessageRepository(private val sql: SqlHelper) : AbstractMessageRepo
         private const val JT_COLUMN_MESSAGE = "message_id"
         private const val JT_COLUMN_LABEL = "label_id"
     }
+
 }

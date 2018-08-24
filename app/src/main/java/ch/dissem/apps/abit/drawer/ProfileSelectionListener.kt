@@ -21,8 +21,8 @@ import ch.dissem.bitmessage.entity.BitmessageAddress
 import android.widget.Toast.LENGTH_LONG
 
 class ProfileSelectionListener(
-        private val ctx: Context,
-        private val fragmentManager: FragmentManager
+    private val ctx: Context,
+    private val fragmentManager: FragmentManager
 ) : AccountHeader.OnAccountHeaderListener {
 
     override fun onProfileChanged(view: View, profile: IProfile<*>, current: Boolean): Boolean {
@@ -42,6 +42,13 @@ class ProfileSelectionListener(
                 val tag = profile.tag
                 if (tag is BitmessageAddress) {
                     Singleton.setIdentity(tag)
+                    MainActivity.apply {
+                        updateUnread()
+                        val itemList = supportFragmentManager.findFragmentById(R.id.item_list)
+                        if (itemList is ListHolder<*>) {
+                            itemList.reloadList()
+                        }
+                    }
                 }
             }
         }

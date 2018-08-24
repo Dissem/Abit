@@ -145,4 +145,5 @@ Als Alternative kann in den Einstellungen ein vertrauenswürdiger Knoten konfigu
     <string name="preference_group_user_experience">Verhalten</string>
     <string name="preference_group_user_experience_summary">Ändern, wie Nachrichten dargestellt werden</string>
     <string name="bitmessage_service_description">Hält die Verbindung zum Bitmessage-Netzwerk.</string>
+    <string name="preference_port">Port</string>
 </resources>

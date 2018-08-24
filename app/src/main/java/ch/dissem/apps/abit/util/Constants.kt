@@ -29,6 +29,7 @@ object Constants {
     const val PREFERENCE_REQUEST_ACK = "request_acknowledgments"
     const val PREFERENCE_POW_AVERAGE = "average_pow_time_ms"
     const val PREFERENCE_POW_COUNT = "pow_count"
+    const val PREFERENCE_SEPARATE_IDENTITIES = "separate_identities"
 
     const val BITMESSAGE_URL_SCHEMA = "bitmessage:"
 

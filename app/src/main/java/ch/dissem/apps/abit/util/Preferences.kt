@@ -21,10 +21,12 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
 import android.os.Build
+import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_EMULATE_CONVERSATIONS
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_ONLINE
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_REQUEST_ACK
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_REQUIRE_CHARGING
+import ch.dissem.apps.abit.util.Constants.PREFERENCE_SEPARATE_IDENTITIES
 import ch.dissem.apps.abit.util.Constants.PREFERENCE_WIFI_ONLY
 import org.jetbrains.anko.batteryManager
 import org.jetbrains.anko.connectivityManager
@@ -48,6 +50,8 @@ class Preferences internal constructor(private val ctx: Context) {
 
     private val isAllowedForCharging get() = !requireCharging || isCharging
 
+    private val sharedPreferences = ctx.defaultSharedPreferences
+
     private val isCharging
         get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ctx.batteryManager.isCharging
@@ -58,20 +62,20 @@ class Preferences internal constructor(private val ctx: Context) {
         }
 
     var wifiOnly
-        get() = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_WIFI_ONLY, true)
+        get() = sharedPreferences.getBoolean(PREFERENCE_WIFI_ONLY, true)
         set(value) {
-            ctx.defaultSharedPreferences.edit()
+            sharedPreferences.edit()
                 .putBoolean(PREFERENCE_WIFI_ONLY, value)
                 .apply()
         }
 
-    val requireCharging get() = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_REQUIRE_CHARGING, true)
+    val requireCharging get() = sharedPreferences.getBoolean(PREFERENCE_REQUIRE_CHARGING, true)
 
-    val emulateConversations get() = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_EMULATE_CONVERSATIONS, true)
+    val emulateConversations get() = sharedPreferences.getBoolean(PREFERENCE_EMULATE_CONVERSATIONS, true)
 
     val exportDirectory by lazy { File(ctx.filesDir, "exports") }
 
-    val requestAcknowledgements = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_REQUEST_ACK, true)
+    val requestAcknowledgements = sharedPreferences.getBoolean(PREFERENCE_REQUEST_ACK, true)
 
     fun cleanupExportDirectory() {
         if (exportDirectory.exists()) {
@@ -88,9 +92,9 @@ class Preferences internal constructor(private val ctx: Context) {
     }
 
     var online
-        get() = ctx.defaultSharedPreferences.getBoolean(PREFERENCE_ONLINE, true)
+        get() = sharedPreferences.getBoolean(PREFERENCE_ONLINE, true)
         set(value) {
-            ctx.defaultSharedPreferences.edit()
+            sharedPreferences.edit()
                 .putBoolean(PREFERENCE_ONLINE, value)
                 .apply()
             if (value) {
@@ -99,6 +103,16 @@ class Preferences internal constructor(private val ctx: Context) {
                 ctx.network.disableNode()
             }
         }
+
+    val separateIdentities
+        get() = sharedPreferences.getBoolean(PREFERENCE_SEPARATE_IDENTITIES, false)
+
+    val currentIdentity
+        get() = Singleton.getIdentity(ctx)
+
+    val listeningPort
+        get() = sharedPreferences.getString("listening_port", null)?.toIntOrNull()
+            ?: 8444
 
     companion object {
         private var instance: WeakReference<Preferences>? = null

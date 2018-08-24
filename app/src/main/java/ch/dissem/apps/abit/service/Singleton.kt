@@ -64,7 +64,7 @@ object Singleton {
                                     // work-around for messages that are deleted from unread, which already have the unread label removed
                                     swipeableMessageAdapter.remove(message)
                                 }
-                                label == AndroidLabelRepository.LABEL_ARCHIVE  && !added.isEmpty() -> {
+                                label == AndroidLabelRepository.LABEL_ARCHIVE && !added.isEmpty() -> {
                                     // work-around for messages in archive, which isn't an actual label but an absence of labels
                                     swipeableMessageAdapter.remove(message)
                                 }
@@ -110,12 +110,13 @@ object Singleton {
                 inventory = AndroidInventory(sqlHelper)
                 addressRepo = AndroidAddressRepository(sqlHelper)
                 labelRepo = AndroidLabelRepository(sqlHelper, ctx)
-                messageRepo = AndroidMessageRepository(sqlHelper)
+                messageRepo = AndroidMessageRepository(sqlHelper, ctx.preferences)
                 proofOfWorkRepo = AndroidProofOfWorkRepository(sqlHelper).also { powRepo = it }
                 networkHandler = NioNetworkHandler(4)
                 listener = getMessageListener(ctx)
                 labeler = Singleton.labeler
                 preferences.sendPubkeyOnIdentityCreation = false
+                preferences.port = context.preferences.listeningPort
             }
         }
 

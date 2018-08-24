@@ -156,4 +156,10 @@ As an alternative you could configure a trusted node in the settings, but as of 
     <string name="online">Online</string>
     <string name="warning_low_memory">Low memory!</string>
     <string name="bitmessage_service_description">Keeps the connection to the bitmessage network.</string>
+    <string name="preference_port">Port</string>
+    <string name="preference_port_summary">Listen on this port for incoming connections. You might need to shortly go offline before the new port is used.</string>
+    <string name="preference_separate_identities_summary">Show messages for selected identity only</string>
+    <string name="preference_separate_identities">Filter messages by identity</string>
+    <string name="delete_all_messages_in_list">Delete all</string>
+    <string name="delete_all_messages_in_list_ask">Delete all messages in list?</string>
 </resources>

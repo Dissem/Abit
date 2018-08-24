@@ -33,6 +33,7 @@ import ch.dissem.apps.abit.listener.ListSelectionListener
 import ch.dissem.apps.abit.repository.AndroidMessageRepository
 import ch.dissem.apps.abit.service.Singleton
 import ch.dissem.apps.abit.service.Singleton.currentLabel
+import ch.dissem.apps.abit.util.preferences
 import ch.dissem.bitmessage.entity.Conversation
 import ch.dissem.bitmessage.entity.valueobject.Label
 import ch.dissem.bitmessage.utils.ConversationService
@@ -43,7 +44,9 @@ import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchAct
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils
 import io.github.kobakei.materialfabspeeddial.FabSpeedDialMenu
 import kotlinx.android.synthetic.main.fragment_message_list.*
+import org.jetbrains.anko.cancelButton
 import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.onUiThread
 import org.jetbrains.anko.uiThread
 import java.util.*
@@ -90,6 +93,7 @@ class ConversationListFragment : Fragment(), ListHolder<Label> {
     }
 
     private var emptyTrashMenuItem: MenuItem? = null
+    private var deleteAllMenuItem: MenuItem? = null
     private lateinit var messageRepo: AndroidMessageRepository
     private lateinit var conversationService: ConversationService
     private var activateOnItemClick: Boolean = false
@@ -103,7 +107,8 @@ class ConversationListFragment : Fragment(), ListHolder<Label> {
                 val conversationIds = messageRepo.findConversations(
                     currentLabel.value,
                     messageAdapter.itemCount,
-                    PAGE_SIZE
+                    PAGE_SIZE,
+                    context?.preferences?.separateIdentities == true
                 )
                 conversationIds.forEach { conversationId ->
                     val conversation = conversationService.getConversation(conversationId)
@@ -139,6 +144,8 @@ class ConversationListFragment : Fragment(), ListHolder<Label> {
         super.onPause()
     }
 
+    override fun reloadList() = doUpdateList(currentLabel.value)
+
     private fun doUpdateList(label: Label?) {
         val mainActivity = activity as? MainActivity
         swipeableConversationAdapter?.clear(label)
@@ -148,6 +155,9 @@ class ConversationListFragment : Fragment(), ListHolder<Label> {
             return
         }
         emptyTrashMenuItem?.isVisible = label.type == Label.Type.TRASH
+        // I'm not yet sure if it's a good idea in conversation views, so it's off for now
+        deleteAllMenuItem?.isVisible = false
+
         mainActivity?.apply {
             if ("archive" == label.toString()) {
                 updateTitle(getString(R.string.archive))
@@ -298,6 +308,7 @@ class ConversationListFragment : Fragment(), ListHolder<Label> {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.message_list, menu)
         emptyTrashMenuItem = menu.findItem(R.id.empty_trash)
+        deleteAllMenuItem = menu.findItem(R.id.delete_all)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -307,17 +318,35 @@ class ConversationListFragment : Fragment(), ListHolder<Label> {
                 currentLabel.value?.let { label ->
                     if (label.type != Label.Type.TRASH) return true
 
-                    doAsync {
-                        for (message in messageRepo.findMessages(label)) {
-                            messageRepo.remove(message)
+                    deleteAllMessages(label)
+                }
+                return true
+            }
+            R.id.delete_all -> {
+                currentLabel.value?.let { label ->
+                    alert(
+                        title = R.string.delete_all_messages_in_list,
+                        message = R.string.delete_all_messages_in_list_ask
+                    ) {
+                        positiveButton(R.string.delete) {
+                            deleteAllMessages(label)
                         }
-
-                        uiThread { doUpdateList(label) }
-                    }
+                        cancelButton { }
+                    }.show()
                 }
                 return true
             }
             else -> return false
+        }
+    }
+
+    private fun deleteAllMessages(label: Label) {
+        doAsync {
+            for (message in messageRepo.findMessages(label, 0, 0, context?.preferences?.separateIdentities == true)) {
+                messageRepo.remove(message)
+            }
+
+            uiThread { doUpdateList(label) }
         }
     }
 

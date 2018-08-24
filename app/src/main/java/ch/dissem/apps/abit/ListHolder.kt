@@ -20,6 +20,8 @@ package ch.dissem.apps.abit
  * @author Christian Basler
  */
 interface ListHolder<in L> {
+    fun reloadList()
+
     fun updateList(label: L)
 
     fun setActivateOnItemClick(activateOnItemClick: Boolean)

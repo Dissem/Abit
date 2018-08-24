@@ -3,10 +3,15 @@
 
     <PreferenceScreen
         android:key="preference_ux"
-        android:title="@string/preference_group_user_experience"
+        android:persistent="false"
         android:summary="@string/preference_group_user_experience_summary"
-        android:persistent="false">
+        android:title="@string/preference_group_user_experience">
 
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="separate_identities"
+            android:summary="@string/preference_separate_identities_summary"
+            android:title="@string/preference_separate_identities" />
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="emulate_conversations"
@@ -22,9 +27,9 @@
 
     <PreferenceScreen
         android:key="preference_network_and_performance"
-        android:title="@string/preference_group_network_and_performance"
+        android:persistent="false"
         android:summary="@string/preference_group_network_and_performance_summary"
-        android:persistent="false">
+        android:title="@string/preference_group_network_and_performance">
 
         <SwitchPreferenceCompat
             android:defaultValue="true"
@@ -46,9 +51,9 @@
 
     <PreferenceScreen
         android:key="preference_advanced"
-        android:title="@string/preference_group_advanced"
+        android:persistent="false"
         android:summary="@string/preference_group_advanced_summary"
-        android:persistent="false">
+        android:title="@string/preference_group_advanced">
 
         <Preference
             android:key="cleanup"
@@ -67,6 +72,13 @@
             android:key="status"
             android:summary="@string/status_summary"
             android:title="@string/status" />
+
+        <EditTextPreference
+            android:defaultValue="8444"
+            android:key="listening_port"
+            android:summary="@string/preference_port_summary"
+            android:title="@string/preference_port"
+            android:numeric="integer"/>
 
     </PreferenceScreen>
 
