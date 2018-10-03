@@ -32,8 +32,8 @@ Nicht alle können programmieren, und manche Ideen sind einfach quatsch. Willst 
 Bitcoin: [1FR3YnHHkoos3icKTrEpAvCvrDXuX3ZyGc](bitcoin:1FR3YnHHkoos3icKTrEpAvCvrDXuX3ZyGc)
 ![QR Code]({{site.baseurl}}/assets/images/abit-donations-bitcoin.png)
 
-Nano: [xrb_1ep5wsf78n4t1kpdxdj9eg9bjgtdquaacrcjwq5cdjbfmrdaadog7o356q9g](https://www.nanode.co/account/xrb_1ep5wsf78n4t1kpdxdj9eg9bjgtdquaacrcjwq5cdjbfmrdaadog7o356q9g)
-![QR Code]({{site.baseurl}}/assets/images/abit-donations-nano.png)
+Nano: [xrb_3m6jy7tywa4g574qq3758zwjuxquaabsktyhb35jr53mi3dzfubkxptbca3m](https://www.nanode.co/account/xrb_3m6jy7tywa4g574qq3758zwjuxquaabsktyhb35jr53mi3dzfubkxptbca3m)
+![QR Code]({{site.baseurl}}/assets/images/abit-donations-nano.svg)
 
 Byteball: [HMWR4P7C672DSSDELI7BCKK4GRQOOLF6](byteball:HMWR4P7C672DSSDELI7BCKK4GRQOOLF6)
 ![QR Code]({{site.baseurl}}/assets/images/abit-donations-byteball.png)
