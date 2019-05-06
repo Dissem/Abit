@@ -7,6 +7,8 @@ order: 1
 
 ## Contribuer
 
+Honnêtement, je ne suis plus si intéressé au Bitmessage et à cette application, et quand quelqu'un s'intéressait au code, cela ne menait nulle part productif. Si vous êtes intéressé et que vous voulez prendre la relève, je vous en prie.
+
 ### Code
 
 Vous voulez vraiment une fonctionnalité? Et vous savez comment faire? S'il vous plaît, servez-vous! Je serai très heureux de votre requête de tirage, mais ne soyez pas offensé si je veux d'abord changer quelque chose.
@@ -30,11 +32,14 @@ Gardez cependant à l'esprit que je suis un grand fan du design matériel, et l'
 Tout le monde ne sait pas coder, et certaines idées craignent. Vous voulez plutôt me donner de l'argent?
 
 
-Bitcoin: [1FR3YnHHkoos3icKTrEpAvCvrDXuX3ZyGc](bitcoin:1FR3YnHHkoos3icKTrEpAvCvrDXuX3ZyGc)
-![QR Code]({{site.baseurl}}/assets/images/abit-donations-bitcoin.png)
+Banano: [ban_3n8pkqa4y3ybjuh8h87qpon13wi4w67ph8575tuy6eo3dcs3ugh6mxwx1xjn](ban:ban_3n8pkqa4y3ybjuh8h87qpon13wi4w67ph8575tuy6eo3dcs3ugh6mxwx1xjn)
+![QR Code]({{site.baseurl}}/assets/images/abit-donations-banano.svg)
 
 Nano: [xrb_3m6jy7tywa4g574qq3758zwjuxquaabsktyhb35jr53mi3dzfubkxptbca3m](https://www.nanode.co/account/xrb_3m6jy7tywa4g574qq3758zwjuxquaabsktyhb35jr53mi3dzfubkxptbca3m)
 ![QR Code]({{site.baseurl}}/assets/images/abit-donations-nano.svg)
+
+Bitcoin: [1FR3YnHHkoos3icKTrEpAvCvrDXuX3ZyGc](bitcoin:1FR3YnHHkoos3icKTrEpAvCvrDXuX3ZyGc)
+![QR Code]({{site.baseurl}}/assets/images/abit-donations-bitcoin.png)
 
 Byteball: [HMWR4P7C672DSSDELI7BCKK4GRQOOLF6](byteball:HMWR4P7C672DSSDELI7BCKK4GRQOOLF6)
 ![QR Code]({{site.baseurl}}/assets/images/abit-donations-byteball.png)
